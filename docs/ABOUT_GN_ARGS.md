@@ -6,7 +6,7 @@ __google_api_key__ "" &#35; Set Google API Key. Unset in public Thorium reposito
 
 __google_default_client_id__ "" &#35; Set the Client ID. Unset in public Thorium repository.
 
-__google_default_client_secret__ "" &#35; Set the Client Secret. All three must be set to use Google Sync, Translate, etc. Unset in public Thorium repository. You can make and set your own by following https://www.chromium.org/developers/how-tos/api-keys/. &#35; NOTE: Thorium contributers, contact me for access to the private API_KEYS repo.
+__google_default_client_secret__ "" &#35; Set the Client Secret. All three must be set to use Google Sync, Translate, etc. Unset in public Thorium repository. You can make and set your own by following https://www.chromium.org/developers/how-tos/api-keys/. &#35; NOTE: Thorium contributors, contact me for access to the private API_KEYS repo.
 
 ## __Experimental__
 
@@ -86,7 +86,7 @@ __v8_enable_turbofan__ &#35;  Enable the TurboFan optimizing JS compiler compone
 
 __v8_enable_wasm_simd256_revec__ &#35; Whether WebAssembly is compiled with 256-bit long SIMD code. Set to true in Thorium for performance.
 
-__use_v8_context_snapshot__ &#35; Build a seperate .bin file with V8's function templates and V8 contexts. Enabled in Thorium.
+__use_v8_context_snapshot__ &#35; Build a separate .bin file with V8's function templates and V8 contexts. Enabled in Thorium.
 
 __blink_symbol_level__ &#35; Set the symbol level for Blink (Chromium's rendering engine.), regardless of symbol_level value. Options are: 0, 1, and 2. Set to 0 for performance.
 
@@ -132,8 +132,6 @@ __enable_hangout_services_extension__ &#35; Enables building the Hangouts compon
 
 __rtc_use_h264__ &#35; Enable WebRTC (Real-Time Communication) to use H.264 for transmission/demuxing. Must be used with proprietary_codecs = true and ffmpeg_branding set to "Chrome" or "Chromeos". Enabled in Thorium for useability.
 
-__rtc_include_ilbc__ &#35; Set whether to enable Google's Internet Low Bitrate Codec in WebRTC. Enabled in Thorium for performance and useability.
-
 __rtc_build_with_neon__ &#35; Set whether to use ARM NEON SIMD instructions when building RTC code. Only applicable for ARM/ARM64. Enabled in Thorium for performance.
 
 __rtc_build_examples__ &#35; Set whether to build example RTC data. Useful for debugging. Disabled in Thorium for size.
@@ -159,8 +157,6 @@ __enable_platform_dts_audio__ &#35; Enable experimental MPEG H audio. Enabled in
 __enable_mse_mpeg2ts_stream_parser__ &#35; Enable experimental MPEG-TS media stream parsing/demuxing. Doesn't seem to work on non CrOS platforms. Enabled anyway in Thorium for all platforms for useability.
 
 __enable_rust__ &#35; Whether to enable the Rust toolchain during compilation. Set to true for all platforms except MacOS.
-
-__enable_all_rust_features__ &#35; Whether to enable all Rust features during compilation. Set to false for all platforms except Linux.
 
 ## __Optimizations__
 
