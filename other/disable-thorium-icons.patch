@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/browser_actions.cc b/chrome/browser/ui/browser_actions.cc
-index 812961aed273a..2010f6bc8fa53 100644
+index bf0f15a54ecfe..7c8286257d0ee 100644
 --- a/chrome/browser/ui/browser_actions.cc
 +++ b/chrome/browser/ui/browser_actions.cc
 @@ -12,6 +12,7 @@
@@ -10,7 +10,7 @@ index 812961aed273a..2010f6bc8fa53 100644
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
  #include "base/metrics/user_metrics.h"
-@@ -905,6 +906,9 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -906,6 +907,9 @@ void BrowserActions::InitializeChromeMenuActions() {
    TabStripModel* const tab_strip_model = bwi_->GetTabStripModel();
    BrowserWindowInterface* const bwi = base::to_address(bwi_);
    const bool is_guest_session = profile->IsGuestSession();
@@ -20,7 +20,7 @@ index 812961aed273a..2010f6bc8fa53 100644
  
    root_action_item_->AddChild(
        ChromeMenuAction(
-@@ -917,8 +921,12 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -918,8 +922,12 @@ void BrowserActions::InitializeChromeMenuActions() {
                profile),
            kActionNewIncognitoWindow, IDS_NEW_INCOGNITO_WINDOW,
            IDS_NEW_INCOGNITO_WINDOW,
@@ -35,7 +35,7 @@ index 812961aed273a..2010f6bc8fa53 100644
            .SetEnabled(IncognitoModePrefs::IsIncognitoAllowed(profile))
            .Build());
  
-@@ -1076,8 +1084,10 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -1077,8 +1085,10 @@ void BrowserActions::InitializeChromeMenuActions() {
                bwi, is_incognito),
            kActionClearBrowsingData, IDS_CLEAR_BROWSING_DATA,
            IDS_CLEAR_BROWSING_DATA,
@@ -48,7 +48,7 @@ index 812961aed273a..2010f6bc8fa53 100644
            .SetEnabled(is_incognito ||
                        (!is_guest_session && !profile->IsSystemProfile()))
            .Build());
-@@ -1292,9 +1302,10 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -1293,9 +1303,10 @@ void BrowserActions::InitializeChromeMenuActions() {
                  },
                  bwi),
              kActionShowChromeLabs, IDS_CHROMELABS, IDS_CHROMELABS,

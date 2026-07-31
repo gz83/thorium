@@ -713,9 +713,18 @@ index ad5523311d2d2..3519444004d52 100644
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON" file="google_chrome/webstore_icon.png" />
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON_16" file="google_chrome/webstore_icon_16.png" />
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 0d8c587b6922f..d2875864e918a 100644
+index 0d8c587b6922f..09430a0f496f4 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
+@@ -1360,7 +1360,7 @@ source_set("core") {
+     ]
+   }
+ 
+-  if (!is_android || is_desktop_android) {
++  if (!is_android || is_desktop_android_thorium) {
+     deps += [ "//chrome/browser/ui/webui/discards" ]
+   }
+ 
 @@ -4470,7 +4470,7 @@ source_set("browser") {
  
    # TODO(https://crbug.com/356905053): Add more dependencies here and merge this
@@ -1962,6 +1971,28 @@ index ec4d76a98b844..3db716af03954 100644
      public_deps += [
        "discards:resources",
        "management:resources",
+diff --git a/chrome/browser/resources/contextual_tasks/app.ts b/chrome/browser/resources/contextual_tasks/app.ts
+index 2a72465ef32a7..fd6b4a0d7ed80 100644
+--- a/chrome/browser/resources/contextual_tasks/app.ts
++++ b/chrome/browser/resources/contextual_tasks/app.ts
+@@ -812,7 +812,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+           }
+         });
+ 
+-    // <if expr="is_android and not is_desktop_android">
++    // <if expr="is_android and not is_desktop_android_thorium">
+     this.isDomContentLoaded_ = true;
+     if (this.isInitialFrameLoad_ && this.isZeroState_) {
+       this.playZeroStateAnimations_();
+@@ -1002,7 +1002,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+     this.updateBasicModeAfterNavigation();
+     this.maybeOnThreadFrameTopLevelNavigation(ev.url);
+ 
+-    // <if expr="is_android and not is_desktop_android">
++    // <if expr="is_android and not is_desktop_android_thorium">
+     // On standard mobile Android phones, since guest-to-host script
+     // communication is not supported, must set isDomContentLoaded_ on
+     // loadcommit rather than waiting for a domContentLoaded message.
 diff --git a/chrome/browser/resources/discards/BUILD.gn b/chrome/browser/resources/discards/BUILD.gn
 index d3f6092e823cc..8725dffbb9dbb 100644
 --- a/chrome/browser/resources/discards/BUILD.gn
@@ -2192,10 +2223,10 @@ index 056c9e71a2871..bad0b1d0b306d 100644
  #endif  // BUILDFLAG(IS_ANDROID)
  
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index d1936281cbee8..0f25cb6651a15 100644
+index 08196bad95695..f8432832ec37c 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -999,7 +999,7 @@ static_library("ui") {
+@@ -1000,7 +1000,7 @@ static_library("ui") {
    ]
  
    # Desktop-Android-only dependencies.
@@ -2204,7 +2235,16 @@ index d1936281cbee8..0f25cb6651a15 100644
      deps += [ "//chrome/browser/ui/android/extensions/windowing/internal" ]
    }
  
-@@ -3247,7 +3247,8 @@ static_library("ui") {
+@@ -1109,7 +1109,7 @@ static_library("ui") {
+     ]
+   }
+ 
+-  if (is_desktop_android) {
++  if (is_desktop_android_thorium) {
+     allow_circular_includes_from += [
+       # management includes headers from //chrome/browser/ui (e.g. managed_ui.h)
+       # that can't be split out yet.
+@@ -3248,7 +3248,8 @@ static_library("ui") {
      allow_circular_includes_from += [ "//chrome/browser/ui/wallet" ]
    }
  
@@ -2868,6 +2908,20 @@ index 87dc1b8b9a63e..6df97cd6c2323 100644
    RegisterFontFamilyPrefs(registry, fonts_with_defaults);
  
    registry->RegisterIntegerPref(prefs::kWebKitDefaultFontSize, 16);
+diff --git a/chrome/browser/ui/webui/BUILD.gn b/chrome/browser/ui/webui/BUILD.gn
+index da9e3425e1a15..0690161453037 100644
+--- a/chrome/browser/ui/webui/BUILD.gn
++++ b/chrome/browser/ui/webui/BUILD.gn
+@@ -275,7 +275,8 @@ source_set("configs") {
+     ]
+   }
+ 
+-  if (is_win || is_mac || is_linux || is_chromeos || is_desktop_android) {
++  if (is_win || is_mac || is_linux || is_chromeos ||
++      is_desktop_android_thorium) {
+     deps += [
+       "//chrome/browser/ui/webui/discards",
+       "//chrome/browser/ui/webui/management",
 diff --git a/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 index 2413a9d29d6f1..4f0939965b24b 100644
 --- a/chrome/browser/ui/webui/chrome_web_ui_configs.cc
@@ -2904,6 +2958,19 @@ index 70f983e5c683e..0e9f8468ef43e 100644
  #endif
      case version_info::Channel::UNKNOWN:
        return IDR_PRODUCT_LOGO_32;
+diff --git a/chrome/browser/ui/webui/discards/BUILD.gn b/chrome/browser/ui/webui/discards/BUILD.gn
+index 63a09f47f502c..1211ffe40eb5d 100644
+--- a/chrome/browser/ui/webui/discards/BUILD.gn
++++ b/chrome/browser/ui/webui/discards/BUILD.gn
+@@ -19,7 +19,7 @@ mojom("mojo_bindings") {
+   webui_module_path = "/"
+ }
+ 
+-if (!is_android || is_desktop_android) {
++if (!is_android || is_desktop_android_thorium) {
+   source_set("discards") {
+     sources = [
+       "discards_ui.cc",
 diff --git a/chrome/browser/ui/webui/discards/discards_ui.cc b/chrome/browser/ui/webui/discards/discards_ui.cc
 index 85e35dd43ccc2..500a0f0814ba8 100644
 --- a/chrome/browser/ui/webui/discards/discards_ui.cc
@@ -2944,6 +3011,32 @@ index 85e35dd43ccc2..500a0f0814ba8 100644
    demoModeEnabled = base::FeatureList::IsEnabled(
        performance_manager::features::kPerformanceInterventionDemoMode);
  #endif  // !BUILDFLAG(IS_DESKTOP_ANDROID)
+diff --git a/chrome/browser/ui/webui/favicon_source.cc b/chrome/browser/ui/webui/favicon_source.cc
+index 53ef420dd57a9..658fedc5ab278 100644
+--- a/chrome/browser/ui/webui/favicon_source.cc
++++ b/chrome/browser/ui/webui/favicon_source.cc
+@@ -317,7 +317,7 @@ void FaviconSource::SendDefaultResponse(
+ 
+   int resource_id;
+   switch (size_in_dip) {
+-#if !BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_DESKTOP_ANDROID)
++#if !BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_DESKTOP_ANDROID_THORIUM)
+     case 64:
+       resource_id =
+           dark_mode ? IDR_DEFAULT_FAVICON_DARK_64 : IDR_DEFAULT_FAVICON_64;
+diff --git a/chrome/browser/ui/webui/management/BUILD.gn b/chrome/browser/ui/webui/management/BUILD.gn
+index 61dda19ec28c8..c2eba24dde879 100644
+--- a/chrome/browser/ui/webui/management/BUILD.gn
++++ b/chrome/browser/ui/webui/management/BUILD.gn
+@@ -4,7 +4,7 @@
+ 
+ import("//build/config/chrome_build.gni")
+ 
+-if (!is_android || is_desktop_android) {
++if (!is_android || is_desktop_android_thorium) {
+   source_set("management") {
+     sources = [
+       "management_ui.cc",
 diff --git a/chrome/chrome_paks.gni b/chrome/chrome_paks.gni
 index 2bd694fc07dfd..2791da4042f52 100644
 --- a/chrome/chrome_paks.gni
@@ -3074,7 +3167,7 @@ index dbb546b6ddc2b..b1be720c2dc7e 100644
  
  #endif  // CHROME_RENDERER_SANDBOX_STATUS_EXTENSION_ANDROID_H_
 diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
-index 9e2dc913343f7..06b1becd6868f 100644
+index 9e2dc913343f7..033dbd686c24d 100644
 --- a/chrome/test/BUILD.gn
 +++ b/chrome/test/BUILD.gn
 @@ -1494,7 +1494,7 @@ source_set("platform_browser_tests") {
@@ -3113,6 +3206,15 @@ index 9e2dc913343f7..06b1becd6868f 100644
        data = [ "//third_party/crossbench-web-tests" ]
      }
  
+@@ -7072,7 +7072,7 @@ test("unit_tests") {
+     # TODO(crbug.com/504739401): Remove this dependency.
+     deps += [ "//chrome/browser/keyboard_accessory/android:impl" ]
+ 
+-    if (is_desktop_android) {
++    if (is_desktop_android_thorium) {
+       deps += [
+         # Unit test targets for //chrome/browser/ui/browser_window/internal.
+         #
 @@ -8306,7 +8306,7 @@ test("unit_tests") {
      ]
    }
@@ -3122,6 +3224,69 @@ index 9e2dc913343f7..06b1becd6868f 100644
      sources +=
          [ "../browser/policy/developer_tools_policy_handler_unittest.cc" ]
    }
+@@ -8537,7 +8537,8 @@ test("unit_tests") {
+     }
+   }
+ 
+-  if (is_win || is_mac || is_linux || is_chromeos || is_desktop_android) {
++  if (is_win || is_mac || is_linux || is_chromeos ||
++      is_desktop_android_thorium) {
+     deps += [ "//chrome/browser/ui/webui/management:unit_tests" ]
+   }
+ 
+diff --git a/chrome/test/data/webui/BUILD.gn b/chrome/test/data/webui/BUILD.gn
+index ef919d8f975db..545fc0e07a51f 100644
+--- a/chrome/test/data/webui/BUILD.gn
++++ b/chrome/test/data/webui/BUILD.gn
+@@ -127,7 +127,7 @@ source_set("browser_tests") {
+     }
+   }
+ 
+-  if (!is_android || is_desktop_android) {
++  if (!is_android || is_desktop_android_thorium) {
+     sources += [ "cr_components/cr_components_browsertest.cc" ]
+     deps += [
+       "//components/contextual_tasks/public:feature_list",
+@@ -738,7 +738,7 @@ generate_grd("build_grd") {
+     }
+   }
+ 
+-  if (!is_android || is_desktop_android) {
++  if (!is_android || is_desktop_android_thorium) {
+     deps += [
+       "cr_components:build_grdp",
+       "cr_components/composebox:build_grdp",
+diff --git a/chrome/test/data/webui/contextual_tasks/BUILD.gn b/chrome/test/data/webui/contextual_tasks/BUILD.gn
+index dd7aa8a1d5c3b..e86af2fce355e 100644
+--- a/chrome/test/data/webui/contextual_tasks/BUILD.gn
++++ b/chrome/test/data/webui/contextual_tasks/BUILD.gn
+@@ -22,7 +22,7 @@ build_webui_tests("build") {
+     "utils/clip_path_test.ts",
+   ]
+ 
+-  if (!is_android || is_desktop_android) {
++  if (!is_android || is_desktop_android_thorium) {
+     files += [
+       "app_composebox_basic_mode_test.ts",
+       "composebox_test.ts",
+@@ -50,7 +50,7 @@ build_webui_tests("build") {
+             "$root_gen_dir/chrome/browser/resources/contextual_tasks/tsc/*",
+             target_gen_dir) ]
+ 
+-  if (!is_android || is_desktop_android) {
++  if (!is_android || is_desktop_android_thorium) {
+     ts_path_mappings += [ "chrome://webui-test/cr_components/searchbox/*|" + rebase_path(
+                               "$root_gen_dir/chrome/test/data/webui/cr_components/searchbox/tsc/*",
+                               target_gen_dir) ]
+@@ -69,7 +69,7 @@ build_webui_tests("build") {
+     "//ui/webui/resources/mojo:build_ts",
+   ]
+ 
+-  if (!is_android || is_desktop_android) {
++  if (!is_android || is_desktop_android_thorium) {
+     ts_deps += [ "//chrome/test/data/webui/cr_components/searchbox:build_ts" ]
+   }
+   ts_definitions = [
 diff --git a/chrome/test/data/webui/cr_components/BUILD.gn b/chrome/test/data/webui/cr_components/BUILD.gn
 index bfc4a0ba29d7d..8f29a47781466 100644
 --- a/chrome/test/data/webui/cr_components/BUILD.gn
@@ -3135,6 +3300,19 @@ index bfc4a0ba29d7d..8f29a47781466 100644
  
  build_webui_tests("build") {
    cc_test_files = [
+diff --git a/chrome/test/data/webui/cr_components/searchbox/BUILD.gn b/chrome/test/data/webui/cr_components/searchbox/BUILD.gn
+index 303df383664b1..7a8e34e2eccf7 100644
+--- a/chrome/test/data/webui/cr_components/searchbox/BUILD.gn
++++ b/chrome/test/data/webui/cr_components/searchbox/BUILD.gn
+@@ -5,7 +5,7 @@
+ import("//chrome/test/data/webui/build_webui_tests.gni")
+ 
+ # TODO(crbug.com/513275771): Enable for Android.
+-assert(!is_android || is_desktop_android)
++assert(!is_android || is_desktop_android_thorium)
+ assert(!is_ios)
+ 
+ build_webui_tests("build") {
 diff --git a/chrome/version.gni b/chrome/version.gni
 index 934e5d9ea8136..4d9f061be910d 100644
 --- a/chrome/version.gni
@@ -3174,6 +3352,24 @@ index f4fa453a0ee4e..f6cb79617cbf7 100644
    const auto* registry =
        content_settings::WebsiteSettingsRegistry::GetInstance();
    for (const auto* info : *registry) {
+diff --git a/components/download/public/common/download_features.cc b/components/download/public/common/download_features.cc
+index 5e904cb698e02..247bdb33d027f 100644
+--- a/components/download/public/common/download_features.cc
++++ b/components/download/public/common/download_features.cc
+@@ -80,11 +80,11 @@ BASE_FEATURE(kEnableSavePackageForOffTheRecord,
+              base::FEATURE_ENABLED_BY_DEFAULT);
+ 
+ BASE_FEATURE(kOpenDownloadInFilesAppIfNoHandlerFound,
+-#if BUILDFLAG(IS_DESKTOP_ANDROID)
++#if BUILDFLAG(IS_DESKTOP_ANDROID_FALSE)
+              base::FEATURE_ENABLED_BY_DEFAULT
+ #else
+              base::FEATURE_DISABLED_BY_DEFAULT
+-#endif  // BUILDFLAG(IS_DESKTOP_ANDROID)
++#endif  // BUILDFLAG(IS_DESKTOP_ANDROID_FALSE)
+ );
+ #endif  // BUILDFLAG(IS_ANDROID)
+ 
 diff --git a/components/embedder_support/android/java/src/org/chromium/components/embedder_support/view/ContentView.java b/components/embedder_support/android/java/src/org/chromium/components/embedder_support/view/ContentView.java
 index 189380c227007..15da1e72d9aac 100644
 --- a/components/embedder_support/android/java/src/org/chromium/components/embedder_support/view/ContentView.java
@@ -3315,6 +3511,58 @@ index 6e9922af171d7..f9bebfe07fdc1 100644
    // Returns a pointer to a controller host that sends media commands related to
    // mirroring within a route.
    virtual MirroringMediaControllerHost* GetMirroringMediaControllerHost(
+diff --git a/components/omnibox/browser/autocomplete_controller.cc b/components/omnibox/browser/autocomplete_controller.cc
+index 22af8003c7e09..ea96402e7a29a 100644
+--- a/components/omnibox/browser/autocomplete_controller.cc
++++ b/components/omnibox/browser/autocomplete_controller.cc
+@@ -125,7 +125,7 @@ using ProviderType = AutocompleteProvider::Type;
+ 
+ constexpr bool kIsDesktop =
+     !(BUILDFLAG(IS_IOS) ||
+-      (BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_DESKTOP_ANDROID)));
++      (BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_DESKTOP_ANDROID_FALSE)));
+ constexpr bool is_android = !!BUILDFLAG(IS_ANDROID);
+ 
+ void RecordMlScoreCoverage(size_t matches_with_non_null_scores,
+diff --git a/components/omnibox/browser/autocomplete_match.cc b/components/omnibox/browser/autocomplete_match.cc
+index e7f30b541b6d9..bc40966ad0e9c 100644
+--- a/components/omnibox/browser/autocomplete_match.cc
++++ b/components/omnibox/browser/autocomplete_match.cc
+@@ -67,7 +67,7 @@
+ #endif
+ 
+ constexpr bool kIsAndroid = BUILDFLAG(IS_ANDROID);
+-constexpr bool kIsDesktopAndroid = BUILDFLAG(IS_DESKTOP_ANDROID);
++constexpr bool kIsDesktopAndroid = BUILDFLAG(IS_DESKTOP_ANDROID_FALSE);
+ constexpr bool kIsDesktop =
+     (!BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_IOS)) || kIsDesktopAndroid;
+ 
+diff --git a/components/omnibox/browser/autocomplete_result.cc b/components/omnibox/browser/autocomplete_result.cc
+index 330f154c82046..da8163a0c4f55 100644
+--- a/components/omnibox/browser/autocomplete_result.cc
++++ b/components/omnibox/browser/autocomplete_result.cc
+@@ -79,7 +79,7 @@ typedef AutocompleteMatchType ACMatchType;
+ namespace {
+ 
+ constexpr bool is_android_any = !!BUILDFLAG(IS_ANDROID);
+-constexpr bool is_android_desktop = !!BUILDFLAG(IS_DESKTOP_ANDROID);
++constexpr bool is_android_desktop = !!BUILDFLAG(IS_DESKTOP_ANDROID_FALSE);
+ constexpr bool is_android_mobile = is_android_any && !is_android_desktop;
+ constexpr bool is_ios = !!BUILDFLAG(IS_IOS);
+ constexpr bool is_desktop = !(is_android_mobile || is_ios);
+diff --git a/components/omnibox/browser/zero_suggest_verbatim_match_provider.cc b/components/omnibox/browser/zero_suggest_verbatim_match_provider.cc
+index 69cfb055fc782..61d2edb4f34bb 100644
+--- a/components/omnibox/browser/zero_suggest_verbatim_match_provider.cc
++++ b/components/omnibox/browser/zero_suggest_verbatim_match_provider.cc
+@@ -28,7 +28,7 @@
+ 
+ namespace {
+ constexpr bool is_android = !!BUILDFLAG(IS_ANDROID);
+-constexpr bool is_desktop_android = !!BUILDFLAG(IS_DESKTOP_ANDROID);
++constexpr bool is_desktop_android = !!BUILDFLAG(IS_DESKTOP_ANDROID_FALSE);
+ 
+ // Returns whether specific context is eligible for a verbatim match.
+ // Offers verbatim match for:
 diff --git a/components/omnibox/common/android/java/src/org/chromium/components/omnibox/OmniboxCapabilities.java b/components/omnibox/common/android/java/src/org/chromium/components/omnibox/OmniboxCapabilities.java
 index 3d9a79fb3e1bd..1c9eec1f18cf7 100644
 --- a/components/omnibox/common/android/java/src/org/chromium/components/omnibox/OmniboxCapabilities.java

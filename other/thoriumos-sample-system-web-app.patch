@@ -255,10 +255,10 @@ index 0e3e1cfd7bd05..819f8567dfa5d 100644
  
  }  // namespace chrome::internal
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index d8509bc62e70c..d1936281cbee8 100644
+index 15ab6991cac12..08196bad95695 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -3206,9 +3206,7 @@ static_library("ui") {
+@@ -3207,9 +3207,7 @@ static_library("ui") {
        ]
      }
  

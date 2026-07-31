@@ -168,7 +168,7 @@ overlay-derived, or still need separate provenance review.
 - [`views-menu-delay.patch`](../other/views-menu-delay.patch)
 - [`new-tab-to-left-context-menu.patch`](../other/new-tab-to-left-context-menu.patch)
 - [`status-bubble-instant-expand.patch`](../other/status-bubble-instant-expand.patch)
-- [`enable-sharing-hub-page-action.patch`](../other/enable-sharing-hub-page-action.patch) - Registers the existing Sharing Hub page action in the location bar independently of Thorium 2024 UI styling.
+- [`enable-sharing-hub-page-action.patch`](../other/enable-sharing-hub-page-action.patch) - Makes the Sharing Hub address-bar action visible by default in eligible normal windows using Chromium's current Page Action framework, while preserving policy, profile, window-mode, platform-icon, metrics, and bubble-anchor behavior.
 - [`thorium-2024-ui-core.patch`](../other/thorium-2024-ui-core.patch) - Defines the optional Thorium 2024 feature and its native UI dimensions, colors, shapes, and flag-gated Settings WebUI styling. Sharing Hub enablement, menu interactions, and standalone command-line styles remain in dedicated patches.
 - [`thorium-2024-menu-interactions.patch`](../other/thorium-2024-menu-interactions.patch) - Preserves the Th24-gated macOS menu navigation/accelerator behavior and Windows mnemonic visibility outside the core styling patch.
 - [`custom-tab-width.patch`](../other/custom-tab-width.patch)

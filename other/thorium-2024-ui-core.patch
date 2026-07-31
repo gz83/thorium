@@ -935,7 +935,7 @@ index 4a92fd22a44b2..e4e690f02864f 100644
    // are disabled.  If |restored| is true, acts as if the window is restored
    // regardless of the real mode.
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index d0e2f9ba5136e..714c12b19f859 100644
+index 0353e3f0aeec9..6df138710641f 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
 @@ -208,9 +208,11 @@ int IncrementalMinimumWidth(const views::View* view) {
@@ -1034,7 +1034,7 @@ index d0e2f9ba5136e..714c12b19f859 100644
    const page_actions::PageActionViewParams page_action_params{
        .icon_size =
            GetLayoutConstant(LayoutConstant::kLocationBarTrailingIconSize),
-@@ -861,7 +876,7 @@ void LocationBarView::Layout(PassKey) {
+@@ -857,7 +872,7 @@ void LocationBarView::Layout(PassKey) {
    // e.g. the page info icon, the google G icon, the selected suggestion icon.
    int icon_left = 5;
    // The padding between the LHS icon and the text.
@@ -1043,7 +1043,7 @@ index d0e2f9ba5136e..714c12b19f859 100644
  
    // Apply indentation to align the omnibox input icon and the text with those
    // of the suggestions in the popup. However, there are two exceptions where
-@@ -880,22 +895,22 @@ void LocationBarView::Layout(PassKey) {
+@@ -876,22 +891,22 @@ void LocationBarView::Layout(PassKey) {
                               !location_icon_view_->ShouldShowLabel() &&
                               !ShouldShowKeywordBubble();
    if (should_indent) {
@@ -1070,7 +1070,7 @@ index d0e2f9ba5136e..714c12b19f859 100644
    }
  
    LocationBarLayout leading_decorations(LocationBarLayout::Position::kLeftEdge,
-@@ -927,7 +942,10 @@ void LocationBarView::Layout(PassKey) {
+@@ -923,7 +938,10 @@ void LocationBarView::Layout(PassKey) {
                  !ShouldShowKeywordBubble()
            : chip_controller_->chip()->GetVisible() &&
                  !ShouldShowKeywordBubble();
@@ -1081,7 +1081,7 @@ index d0e2f9ba5136e..714c12b19f859 100644
      if (base::FeatureList::IsEnabled(
              content_settings::features::kLeftHandSideActivityIndicators)) {
        leading_decorations.AddDecoration(vertical_padding, location_height,
-@@ -1001,13 +1019,17 @@ void LocationBarView::Layout(PassKey) {
+@@ -997,13 +1015,17 @@ void LocationBarView::Layout(PassKey) {
    add_trailing_decoration(ai_mode_hint_label_, /*intra_item_padding=*/0,
                            /*edge_padding=*/trailing_decorations_edge_padding);
    for (ContentSettingImageView* view : base::Reversed(content_setting_views_)) {
@@ -1101,7 +1101,7 @@ index d0e2f9ba5136e..714c12b19f859 100644
      add_trailing_decoration(intent_chip_, intra_item_padding,
                              /*edge_padding=*/trailing_decorations_edge_padding);
    }
-@@ -1288,13 +1310,21 @@ SkColor LocationBarView::GetIconLabelBubbleSurroundingForegroundColor() const {
+@@ -1284,13 +1306,21 @@ SkColor LocationBarView::GetIconLabelBubbleSurroundingForegroundColor() const {
    // fall back to the usual omnibox text color to ensure UI consistency.
    // In either case, all IconLabelBubbleViews situated within the location bar
    // will inherit the selected "surrounding foreground color".
@@ -1126,7 +1126,7 @@ index d0e2f9ba5136e..714c12b19f859 100644
    return 0xFF;
  }
  
-@@ -1559,7 +1589,7 @@ void LocationBarView::RefreshBackground() {
+@@ -1555,7 +1585,7 @@ void LocationBarView::RefreshBackground() {
      // focused.
      background_color_ =
          color_provider->GetColor(kColorOmniboxResultsBackground);
@@ -1135,7 +1135,7 @@ index d0e2f9ba5136e..714c12b19f859 100644
      // Under CR23 guidelines, if the Omnibox is unfocused, but still contains
      // in-progress user input, the background color matches the popup (unless
      // high-contrast mode is enabled).
-@@ -1569,6 +1599,16 @@ void LocationBarView::RefreshBackground() {
+@@ -1565,6 +1595,16 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;

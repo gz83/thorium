@@ -29,7 +29,7 @@ index 8eb294114e009..23c0474eadb9c 100644
        return 16;
      case LayoutConstant::kLocationBarChipPadding:
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 714c12b19f859..94955523d1a6a 100644
+index 6df138710641f..f5fc1d4ea5732 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
 @@ -11,6 +11,7 @@
@@ -53,7 +53,7 @@ index 714c12b19f859..94955523d1a6a 100644
  
  #if BUILDFLAG(OS_LEVEL_GEOLOCATION_PERMISSION_SUPPORTED)
      if (features::IsOsLevelGeolocationPermissionSupportEnabled()) {
-@@ -641,6 +646,11 @@ bool LocationBarView::IsInitialized() const {
+@@ -637,6 +642,11 @@ bool LocationBarView::IsInitialized() const {
  }
  
  int LocationBarView::GetBorderRadius() const {
@@ -65,7 +65,7 @@ index 714c12b19f859..94955523d1a6a 100644
    return ComputeBorderRadius(size());
  }
  
-@@ -1599,6 +1609,12 @@ void LocationBarView::RefreshBackground() {
+@@ -1595,6 +1605,12 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;

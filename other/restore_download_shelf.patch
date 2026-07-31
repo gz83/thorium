@@ -482,7 +482,7 @@ index 0000000000000..572f5522d8955
 +
 +#endif  // CHROME_BROWSER_DOWNLOAD_DOWNLOAD_SHELF_H_
 diff --git a/chrome/browser/download/download_ui_controller.cc b/chrome/browser/download/download_ui_controller.cc
-index fa41c5a267ca5..9192b1646c474 100644
+index fa41c5a267ca5..8217788ac8ca7 100644
 --- a/chrome/browser/download/download_ui_controller.cc
 +++ b/chrome/browser/download/download_ui_controller.cc
 @@ -1,4 +1,4 @@
@@ -496,9 +496,9 @@ index fa41c5a267ca5..9192b1646c474 100644
  #else
  #include "chrome/browser/profiles/profile.h"
 +#include "chrome/browser/ui/browser.h"
-+#include "chrome/browser/ui/browser_finder.h"
  #include "chrome/browser/ui/browser_tabstrip.h"
  #include "chrome/browser/ui/browser_window.h"
++#include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
  #include "chrome/browser/ui/browser_window/public/browser_window_interface_iterator.h"
  #include "chrome/browser/ui/browser_window/public/global_browser_collection.h"
 +#include "chrome/browser/ui/browser_window/public/profile_browser_collection.h"
@@ -524,7 +524,7 @@ index fa41c5a267ca5..9192b1646c474 100644
  #if BUILDFLAG(IS_ANDROID)
  
  class AndroidUIControllerDelegate : public DownloadUIController::Delegate {
-@@ -87,6 +94,76 @@ void InitializeDownloadBubbleUpdateService(Profile* profile,
+@@ -87,6 +94,80 @@ void InitializeDownloadBubbleUpdateService(Profile* profile,
    download_bubble_update_service->Initialize(manager);
  }
  
@@ -575,8 +575,12 @@ index fa41c5a267ca5..9192b1646c474 100644
 +    }
 +  }
 +
++  BrowserWindowInterface* browser_window =
++      web_contents ? GlobalBrowserCollection::GetInstance()->FindBrowserWithTab(
++                         web_contents)
++                   : nullptr;
 +  Browser* browser =
-+      web_contents ? chrome::FindBrowserWithTab(web_contents) : nullptr;
++      browser_window ? browser_window->GetBrowserForMigrationOnly() : nullptr;
 +
 +  // As a last resort, use the last active browser for this profile. Not ideal,
 +  // but better than not showing the download at all.
@@ -601,7 +605,7 @@ index fa41c5a267ca5..9192b1646c474 100644
  class DownloadBubbleUIControllerDelegate
      : public DownloadUIController::Delegate {
   public:
-@@ -173,8 +250,12 @@ DownloadUIController::DownloadUIController(content::DownloadManager* manager,
+@@ -173,8 +254,12 @@ DownloadUIController::DownloadUIController(content::DownloadManager* manager,
  #if BUILDFLAG(IS_CHROMEOS)
      delegate_ = std::make_unique<DownloadNotificationManager>(profile);
  #else
@@ -756,10 +760,10 @@ index 15a71156c3d23..d9449b5fb2734 100644
   public:
    DECLARE_EXTENSION_FUNCTION("downloads.setShelfEnabled",
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 017a8c3ff755f..d8509bc62e70c 100644
+index 3f6081db94b3b..15ab6991cac12 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -4403,8 +4403,12 @@ static_library("ui") {
+@@ -4404,8 +4404,12 @@ static_library("ui") {
        "views/record_replay/save_recording_bubble_view.h",
        "views/sad_tab_view.cc",
        "views/sad_tab_view.h",

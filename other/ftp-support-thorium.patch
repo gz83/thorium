@@ -2058,10 +2058,10 @@ index 0000000000000..d33c149e876ae
 +#endif  // NET_FTP_FTP_NETWORK_SESSION_H_
 diff --git a/net/ftp/ftp_network_transaction.cc b/net/ftp/ftp_network_transaction.cc
 new file mode 100644
-index 0000000000000..fc6d64f4fbd83
+index 0000000000000..5203b4b45cbae
 --- /dev/null
 +++ b/net/ftp/ftp_network_transaction.cc
-@@ -0,0 +1,1298 @@
+@@ -0,0 +1,1300 @@
 +// Copyright (c) 2012 The Chromium Authors
 +// Use of this source code is governed by a BSD-style license that can be
 +// found in the LICENSE file.
@@ -2085,6 +2085,7 @@ index 0000000000000..fc6d64f4fbd83
 +#include "net/base/completion_once_callback.h"
 +#include "net/base/ip_endpoint.h"
 +#include "net/base/net_errors.h"
++#include "net/base/network_handle.h"
 +#include "net/base/network_isolation_key.h"
 +#include "net/base/parse_number.h"
 +#include "net/base/port_util.h"
@@ -2726,9 +2727,9 @@ index 0000000000000..fc6d64f4fbd83
 +int FtpNetworkTransaction::DoCtrlResolveHost() {
 +  next_state_ = STATE_CTRL_RESOLVE_HOST_COMPLETE;
 +
-+  resolve_request_ =
-+      resolver_->CreateRequest(url::SchemeHostPort(request_->url),
-+                               NetworkAnonymizationKey(), net_log_, std::nullopt);
++  resolve_request_ = resolver_->CreateRequest(
++      url::SchemeHostPort(request_->url), NetworkAnonymizationKey(),
++      handles::kInvalidNetworkHandle, net_log_, std::nullopt);
 +  return resolve_request_->Start(base::BindOnce(
 +      &FtpNetworkTransaction::OnIOComplete, base::Unretained(this)));
 +}
@@ -2748,8 +2749,9 @@ index 0000000000000..fc6d64f4fbd83
 +  DCHECK(!resolve_request_->GetAddressResults().empty());
 +
 +  ctrl_socket_ = socket_factory_->CreateTransportClientSocket(
-+    resolve_request_->GetAddressResults(), nullptr,
-+    network_quality_estimator, net_log_.net_log(), net_log_.source());
++      resolve_request_->GetAddressResults(), handles::kInvalidNetworkHandle,
++      nullptr, network_quality_estimator, net_log_.net_log(),
++      net_log_.source());
 +  net_log_.AddEventReferencingSource(NetLogEventType::FTP_CONTROL_CONNECTION,
 +                                     ctrl_socket_->NetLog().source());
 +  return ctrl_socket_->Connect(io_callback_);
@@ -3304,8 +3306,8 @@ index 0000000000000..fc6d64f4fbd83
 +  NetworkQualityEstimator* network_quality_estimator = nullptr;
 +
 +  data_socket_ = socket_factory_->CreateTransportClientSocket(
-+      data_address, nullptr, network_quality_estimator, net_log_.net_log(),
-+      net_log_.source());
++      data_address, handles::kInvalidNetworkHandle, nullptr,
++      network_quality_estimator, net_log_.net_log(), net_log_.source());
 +  net_log_.AddEventReferencingSource(NetLogEventType::FTP_DATA_CONNECTION,
 +                                     data_socket_->NetLog().source());
 +  return data_socket_->Connect(io_callback_);
@@ -5341,7 +5343,7 @@ index a9d5281da7d26..0bac6e059a633 100644
      "mixed_content.cc",
 diff --git a/third_party/blink/renderer/platform/loader/ftp_directory_listing.cc b/third_party/blink/renderer/platform/loader/ftp_directory_listing.cc
 new file mode 100644
-index 0000000000000..ae34f43abd764
+index 0000000000000..b4f0298928737
 --- /dev/null
 +++ b/third_party/blink/renderer/platform/loader/ftp_directory_listing.cc
 @@ -0,0 +1,110 @@
@@ -5362,7 +5364,7 @@ index 0000000000000..ae34f43abd764
 +#include "base/strings/sys_string_conversions.h"
 +#include "base/strings/utf_string_conversions.h"
 +#include "base/time/time.h"
-+#include "net/base/directory_listing.h"
++#include "net/base/module/directory_listing.h"
 +#include "net/base/net_errors.h"
 +#include "net/ftp/ftp_directory_listing_parser.h"
 +#include "net/net_buildflags.h"
