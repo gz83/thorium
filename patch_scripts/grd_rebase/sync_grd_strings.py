@@ -86,6 +86,14 @@ PREFERRED_CONVERGED_OLD_TRANSLATION_IDS = {
     # product names (notably Basque).
     "8208549821385074251": "4534145890176164066",
 }
+PREFERRED_CONVERGED_OLD_TRANSLATION_IDS_BY_LOCALE = {
+    # Basque appends -ek, rather than Chrome's -k, to consonant-ending
+    # product names such as Thorium. Keep this preference locale-specific so
+    # unrelated translations in the same converged-ID group are unaffected.
+    ("1510422777984914550", "eu"): "4050599136622776556",
+    ("3175036493293309560", "eu"): "1021753677514347426",
+    ("8803989344032574189", "eu"): "7432774160230062882",
+}
 PRODUCT_TEXT_REPLACEMENTS_BEFORE_CHROME = (
     ("Chromebook Recovery Utility", "ThoriumOS Recovery Utility"),
     ("Chromebook Plus", "ThoriumOS Plus device"),
@@ -1028,8 +1036,14 @@ def insert_new_translations(
             continue
         if existing.new_block != insertion.new_block:
             preferred_old_translation_id = (
-                PREFERRED_CONVERGED_OLD_TRANSLATION_IDS.get(
-                    insertion.new_translation_id
+                PREFERRED_CONVERGED_OLD_TRANSLATION_IDS_BY_LOCALE.get(
+                    (
+                        insertion.new_translation_id,
+                        xtb_locale_from_path(insertion.chromium_path),
+                    ),
+                    PREFERRED_CONVERGED_OLD_TRANSLATION_IDS.get(
+                        insertion.new_translation_id
+                    ),
                 )
             )
             if preferred_old_translation_id is not None:

@@ -197,18 +197,21 @@ GRIT parser output before enabling them.
 `sync_grd_strings.py` can write compact audit reports:
 
 - `--xtb-conflict-report`: summarized converged new-ID conflicts where multiple
-  old translations map to the same new ID. The script deterministically keeps
-  the first candidate and reports grouped review buckets instead of every
-  locale row.
+  old translations map to the same new ID. Reviewed global or locale-specific
+  preferences select the appropriate old translation where required. For
+  remaining conflicts, the script deterministically keeps the first candidate
+  and reports grouped review buckets instead of every locale row.
 - `--xtb-missing-report`: summarized mapped XTB lookups where the old Chromium
   translation ID was not found. Missing translations are reported but do not
   block the run.
 
 Current dry-runs may report converged XTB conflicts. Review the grouped conflict
-report before accepting the deterministically selected candidates. The missing
-report is expected to contain only its header. Any data row means that a new ID
-did not receive an upstream translation and must be resolved in
-`xtb_additions.tsv` before release.
+report before accepting the deterministically selected candidates. A reviewed
+locale-specific preference affects only that locale; other locales in the same
+converged-ID group retain their normal selection and remain visible in the
+report when they still conflict. The missing report is expected to contain only
+its header. Any data row means that a new ID did not receive an upstream
+translation and must be resolved in `xtb_additions.tsv` before release.
 
 ## Validation
 
