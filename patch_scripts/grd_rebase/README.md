@@ -35,17 +35,23 @@ The files in `config/` are reviewed inputs, not generated setup output:
   by the overlay replacement workflow. Pass a non-default ownership file to
   `sync_grd_strings.py` with `--feature-message-ownership`.
 - `xtb_additions.tsv`: canonical reviewed translation additions; currently
-  3888 translation rows across 324 XTB files. They form 48 owner/bundle/message
-  groups, each covering all 81 supported locales. Rows are grouped by the
-  explicit `owner` column, then by bundle, translation ID, and locale. An owner
-  may be a feature patch path or a stable GRD rebase workflow identifier, such
-  as `grd_rebase:branding:IDS_VERSION_UI_LICENSE`; translations produced by
+  4293 translation rows across 486 XTB files. They form 53 owner/bundle/message
+  groups, each covering all 81 supported translation targets. Chromium bundles
+  may use different locale aliases for the same language, such as `he` or
+  `iw` for Hebrew. Rows are grouped by the explicit `owner` column, then by
+  bundle, translation ID, and locale. An owner may be a feature patch path or
+  a stable GRD rebase workflow identifier, such as
+  `grd_rebase:branding:IDS_VERSION_UI_LICENSE`; translations produced by
   branding synchronization do not need a synthetic or historical patch owner.
   `source_path` separately records where each translation was recovered or
   reviewed. It is audit provenance only and may use a stable reviewed source
   identifier instead of a historical Git commit; it does not restrict which
-  Chromium checkout receives the translation. Pass an alternate reviewed
-  inventory to `merge_thorium_xtb.py` with `--inventory`.
+  Chromium checkout receives the translation. The `chromium-upstream:` prefix
+  identifies translations recovered from Chromium-owned XTB data without
+  binding them to a particular Chromium milestone. The following path and
+  message or translation ID retain the concrete audit source. No runtime tool
+  parses this prefix or uses it to select translations. Pass an alternate
+  reviewed inventory to `merge_thorium_xtb.py` with `--inventory`.
 
 `update_config_from_patches.py` may rewrite
 `config/feature_patch_message_ownership.csv` and
@@ -92,6 +98,8 @@ python3 patch_scripts/grd_rebase/update_config_from_patches.py --dry-run
 Dry-run the overlay string sync and write compact audit summaries:
 
 ```shell
+mkdir -p out/grd_rebase
+
 python3 patch_scripts/grd_rebase/sync_grd_strings.py \
   /path/to/chromium/src \
   --file-allowlist patch_scripts/grd_rebase/config/file_allowlist.csv \
@@ -114,7 +122,7 @@ The summary always reports the validated inventory size and then classifies
 each row according to the supplied Chromium worktree, for example:
 
 ```text
-validated 3888 Thorium translations across 324 XTB files: <inserted> inserted, <refreshed> refreshed, <already-present> already present, <changed-files> files changed
+validated 4293 Thorium translations across 486 XTB files: <inserted> inserted, <refreshed> refreshed, <already-present> already present, <changed-files> files changed
 ```
 
 Only the first two counts are inventory invariants. The inserted, refreshed,
@@ -124,6 +132,8 @@ the current state of its worktree.
 Equivalent PowerShell form:
 
 ```powershell
+New-Item -ItemType Directory -Force out/grd_rebase | Out-Null
+
 py -3.11 patch_scripts/grd_rebase/sync_grd_strings.py `
   C:\src\chromium\src `
   --file-allowlist patch_scripts/grd_rebase/config/file_allowlist.csv `
@@ -194,8 +204,11 @@ GRIT parser output before enabling them.
   translation ID was not found. Missing translations are reported but do not
   block the run.
 
-Current dry-runs may print warnings for converged XTB conflicts and missing old
-IDs. Those warnings are expected when their TSV reports are reviewed.
+Current dry-runs may report converged XTB conflicts. Review the grouped conflict
+report before accepting the deterministically selected candidates. The missing
+report is expected to contain only its header. Any data row means that a new ID
+did not receive an upstream translation and must be resolved in
+`xtb_additions.tsv` before release.
 
 ## Validation
 
@@ -212,7 +225,9 @@ Behavior validation should run the dry-run command and inspect the compact
 reports:
 
 - conflict summary should be grouped into a small number of review buckets;
-- missing summary should group all missing locales per message.
+- missing summary should contain only its header; if it contains data rows,
+  each row should group all missing locales for one message and must be
+  resolved before release.
 
 The full dry-run TSV is useful for script refactors and spot checks, but it is
 not intended to be reviewed line by line.

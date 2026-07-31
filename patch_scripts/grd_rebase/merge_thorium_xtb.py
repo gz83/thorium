@@ -29,19 +29,44 @@ WEB_STORE_BRAND_TRANSLATION_IDS = frozenset(
         "73786666777299047",
     }
 )
+PRODUCT_TEXT_REPLACEMENTS_BEFORE_CHROME = (
+    ("Chromebook Recovery Utility", "ThoriumOS Recovery Utility"),
+    ("Chromebook Plus", "ThoriumOS Plus device"),
+    ("Chromebook experience", "ThoriumOS experience"),
+    ("Chromebook community", "ThoriumOS community"),
+    ("Chromebook help forum", "ThoriumOS help forum"),
+    ("Chromebook questions", "ThoriumOS questions"),
+    ("features of Chromebook", "features of ThoriumOS"),
+    ("Chromebooks", "ThoriumOS devices"),
+    ("Chromebook", "ThoriumOS device"),
+    ("Chromium", "Thorium"),
+)
+PRODUCT_TEXT_REPLACEMENTS_AFTER_CHROME = (
+    ("Google Thorium", "Thorium"),
+    ("Google recommends Thorium", "Alex313031 recommends Thorium"),
+    ("ThoriumOS Flex", "ThoriumOS"),
+    ("made possible by Thorium", "made possible by Chromium"),
+)
+
+
+def _apply_product_text_replacements(
+    text: str,
+    *,
+    replace_chrome: bool,
+) -> str:
+    """Apply product replacements while optionally preserving Chrome names."""
+    for old, new in PRODUCT_TEXT_REPLACEMENTS_BEFORE_CHROME:
+        text = text.replace(old, new)
+    if replace_chrome:
+        text = text.replace("Chrome", "Thorium")
+    for old, new in PRODUCT_TEXT_REPLACEMENTS_AFTER_CHROME:
+        text = text.replace(old, new)
+    return text
 
 
 def apply_ordered_replacements(text: str) -> str:
     """Apply reviewed Thorium replacements in their required order."""
-    for old, new in (
-        ("Chromium", "Thorium"),
-        ("Chrome", "Thorium"),
-        ("Google Thorium", "Thorium"),
-        ("Google recommends Thorium", "Alex313031 recommends Thorium"),
-        ("ThoriumOS Flex", "ThoriumOS"),
-        ("made possible by Thorium", "made possible by Chromium"),
-    ):
-        text = text.replace(old, new)
+    text = _apply_product_text_replacements(text, replace_chrome=True)
     text = re.sub(r"(?<!Thorium )Experiments", "Thorium Experiments", text)
     text = text.replace(
         "Aw, Snap!", "Aw, #@%!, this tab's process has gone bye bye..."
@@ -54,14 +79,7 @@ def apply_ordered_replacements(text: str) -> str:
 
 def apply_replacements_preserving_chrome(text: str) -> str:
     """Apply product replacements while preserving Chrome-owned service names."""
-    for old, new in (
-        ("Chromium", "Thorium"),
-        ("Google Thorium", "Thorium"),
-        ("Google recommends Thorium", "Alex313031 recommends Thorium"),
-        ("ThoriumOS Flex", "ThoriumOS"),
-        ("made possible by Thorium", "made possible by Chromium"),
-    ):
-        text = text.replace(old, new)
+    text = _apply_product_text_replacements(text, replace_chrome=False)
     text = re.sub(r"(?<!Thorium )Experiments", "Thorium Experiments", text)
     text = text.replace(
         "Aw, Snap!", "Aw, #@%!, this tab's process has gone bye bye..."

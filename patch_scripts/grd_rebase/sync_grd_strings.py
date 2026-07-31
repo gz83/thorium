@@ -33,21 +33,31 @@ DINO_SOURCE_TEXT_REPLACEMENTS = {
         ("Start slower", "Start slower&#63;"),
     ),
 }
-ENGLISH_FALLBACK_MESSAGE_IDS = frozenset(
+EXTERNAL_ADDITION_MESSAGE_IDS = frozenset(
     {
-        "IDS_ACCESSIBLE_TEXT_CHROMELABS_BUTTON_ADDED_BY_ENTERPRISE_POLICY",
-        "IDS_ACCESSIBLE_TEXT_CHROMELABS_BUTTON_REMOVED_BY_ENTERPRISE_POLICY",
-        "IDS_TOOLTIP_CHROMELABS_BUTTON",
-        "IDS_SAD_TAB_TITLE",
-        "IDS_ERRORPAGES_GAME_INSTRUCTIONS",
-        "IDS_ERRORPAGE_DINO_ARIA_LABEL",
-        "IDS_ERRORPAGE_DINO_SLOW_SPEED_TOGGLE",
-        "IDS_CHROME_REENGAGEMENT_NOTIFICATION_3_TITLE",
-        "IDS_VERSION_UI_LICENSE_CHROMIUM",
-        "IDS_VERSION_UI_LICENSE_OTHER",
+        "IDS_CHROMIUM_SHORCUT_DESCRIPTION",
+        "IDS_EXTENSIONS_SETTINGS_API_SECOND_LINE_START_AND_SEARCH",
+        "IDS_EXTENSIONS_SETTINGS_API_SECOND_LINE_START_PAGES",
+        "IDS_MODULE_INSTALL_FAILURE_TEXT",
+        "IDS_MODULE_INSTALL_START_TEXT",
+        "IDS_SETTINGS_SKILLS_SETTING_LABEL",
+        "IDS_TRAFFIC_COUNTERS_DATA_USAGE_DIFFERENT_FROM_PROVIDER_LABEL",
+        "IDS_VERSION_UI_LICENSE",
     }
 )
-EXTERNAL_ADDITION_MESSAGE_IDS = frozenset({"IDS_VERSION_UI_LICENSE"})
+EXTERNAL_ADDITION_TRANSLATION_IDS = frozenset(
+    {
+        # Chrome Labs enterprise-policy accessibility announcements.
+        "2338932653846229367",
+        "3828357573682778203",
+        # "Press Space or the Up Arrow to Play"
+        "8670107939381467459",
+        # "Dino game, press space or the up arrow to play"
+        "4188259053923371929",
+        # Thorium's custom Sad Tab title.
+        "7032843997772175977",
+    }
+)
 EXPERIMENT_TITLE_MESSAGE_IDS = frozenset(
     {
         "IDS_ACCNAME_CHROMELABS_BUTTON",
@@ -65,19 +75,55 @@ WEB_STORE_BRAND_MESSAGE_IDS = frozenset(
         "IDS_EXTENSIONS_SC_POLICY_VIOLATION_ON",
     }
 )
+# Resolve known cases where distinct Chromium messages converge to one
+# Thorium-branded source string but one translation source is clearly better.
+PREFERRED_CONVERGED_OLD_TRANSLATION_IDS = {
+    # Prefer the localized ChromeOS Flex device names over the untranslated
+    # Chromebook product names when both converge to ThoriumOS device labels.
+    "2001630232173796020": "6755827872271341378",
+    "6465856910027769799": "7402503521691663770",
+    # The Chromium Autofill AI variant preserves grammar for consonant-ending
+    # product names (notably Basque).
+    "8208549821385074251": "4534145890176164066",
+}
+PRODUCT_TEXT_REPLACEMENTS_BEFORE_CHROME = (
+    ("Chromebook Recovery Utility", "ThoriumOS Recovery Utility"),
+    ("Chromebook Plus", "ThoriumOS Plus device"),
+    ("Chromebook experience", "ThoriumOS experience"),
+    ("Chromebook community", "ThoriumOS community"),
+    ("Chromebook help forum", "ThoriumOS help forum"),
+    ("Chromebook questions", "ThoriumOS questions"),
+    ("features of Chromebook", "features of ThoriumOS"),
+    ("Chromebooks", "ThoriumOS devices"),
+    ("Chromebook", "ThoriumOS device"),
+    ("Chromium", "Thorium"),
+)
+PRODUCT_TEXT_REPLACEMENTS_AFTER_CHROME = (
+    ("Google Thorium", "Thorium"),
+    ("Google recommends Thorium", "Alex313031 recommends Thorium"),
+    ("ThoriumOS Flex", "ThoriumOS"),
+    ("made possible by Thorium", "made possible by Chromium"),
+)
+
+
+def _apply_product_text_replacements(
+    text: str,
+    *,
+    replace_chrome: bool,
+) -> str:
+    """Apply product replacements while optionally preserving Chrome names."""
+    for old, new in PRODUCT_TEXT_REPLACEMENTS_BEFORE_CHROME:
+        text = text.replace(old, new)
+    if replace_chrome:
+        text = text.replace("Chrome", "Thorium")
+    for old, new in PRODUCT_TEXT_REPLACEMENTS_AFTER_CHROME:
+        text = text.replace(old, new)
+    return text
 
 
 def apply_ordered_replacements(text: str) -> str:
     """Apply reviewed Thorium replacements in their required order."""
-    for old, new in (
-        ("Chromium", "Thorium"),
-        ("Chrome", "Thorium"),
-        ("Google Thorium", "Thorium"),
-        ("Google recommends Thorium", "Alex313031 recommends Thorium"),
-        ("ThoriumOS Flex", "ThoriumOS"),
-        ("made possible by Thorium", "made possible by Chromium"),
-    ):
-        text = text.replace(old, new)
+    text = _apply_product_text_replacements(text, replace_chrome=True)
     text = re.sub(r"(?<!Thorium )Experiments", "Thorium Experiments", text)
     for old, new in (
         ("Aw, Snap!", "Aw, #@%!, this tab's process has gone bye bye..."),
@@ -91,14 +137,7 @@ def apply_ordered_replacements(text: str) -> str:
 
 def apply_replacements_preserving_chrome(text: str) -> str:
     """Apply product replacements while preserving Chrome-owned service names."""
-    for old, new in (
-        ("Chromium", "Thorium"),
-        ("Google Thorium", "Thorium"),
-        ("Google recommends Thorium", "Alex313031 recommends Thorium"),
-        ("ThoriumOS Flex", "ThoriumOS"),
-        ("made possible by Thorium", "made possible by Chromium"),
-    ):
-        text = text.replace(old, new)
+    text = _apply_product_text_replacements(text, replace_chrome=False)
     text = re.sub(r"(?<!Thorium )Experiments", "Thorium Experiments", text)
     text = text.replace(
         "Aw, Snap!", "Aw, #@%!, this tab's process has gone bye bye..."
@@ -221,10 +260,15 @@ def build_grd_xtb_mapping(
     return mappings
 
 
+# GRD descriptions can contain a literal ">" (for example, "Settings > AI").
+# Match quoted attribute values as units so that such characters do not end the
+# opening tag and become part of the translatable message body.
 MESSAGE_RE = re.compile(
-    r"<message\b(?=[^>]*\bname=\"([^\"]+)\")([^>]*)>(.*?)</message>",
+    r"<message\b((?:[^>\"']+|\"[^\"]*\"|'[^']*')*)>"
+    r"(.*?)</message>",
     re.DOTALL,
 )
+MESSAGE_NAME_RE = re.compile(r"\bname\s*=\s*\"([^\"]+)\"")
 MEANING_RE = re.compile(r"\bmeaning=\"([^\"]*)\"")
 GRIT_USE_NAME_FOR_ID_RE = re.compile(r'\buse_name_for_id="true"')
 GRIT_PH_BLOCK_RE = re.compile(
@@ -259,13 +303,22 @@ def message_block_to_id(message_block: str) -> str:
     match = MESSAGE_RE.fullmatch(message_block.strip())
     if not match:
         raise ValueError("not a complete GRD/GRDP <message> block")
-    message_name, attrs, body = match.groups()
+    attrs, body = match.groups()
+    name_match = MESSAGE_NAME_RE.search(attrs)
+    if not name_match:
+        raise ValueError("GRD/GRDP <message> block has no name attribute")
+    message_name = name_match.group(1)
     if GRIT_USE_NAME_FOR_ID_RE.search(attrs):
         return message_name
-    body = GRIT_PH_BLOCK_RE.sub(lambda item: item.group(1), body)
-    body = GRIT_PH_SELF_CLOSING_RE.sub(lambda item: item.group(1), body)
+    body = GRIT_PH_BLOCK_RE.sub(lambda item: item.group(1).upper(), body)
+    body = GRIT_PH_SELF_CLOSING_RE.sub(
+        lambda item: item.group(1).upper(),
+        body,
+    )
     body = GRIT_EX_BLOCK_RE.sub("", body)
     body = html.unescape(MARKUP_TAG_RE.sub("", body)).strip()
+    if body.startswith("'''") and body.endswith("'''"):
+        body = body[3:-3].strip()
     value = _grit_fingerprint(body)
     meaning_match = MEANING_RE.search(attrs)
     if meaning_match:
@@ -667,14 +720,20 @@ def discover_auto_branding_message_keys(
     message_keys: set[tuple[str, str]] = set()
     for chromium_path, contents in source_contents.items():
         for match in MESSAGE_RE.finditer(contents):
-            message_id = match.group(1)
+            attrs, body = match.groups()
+            name_match = MESSAGE_NAME_RE.search(attrs)
+            if not name_match:
+                raise ValueError(
+                    f"message in {chromium_path} has no name attribute"
+                )
+            message_id = name_match.group(1)
             key = (chromium_path, message_id)
             if key in feature_message_keys:
                 continue
             new_block = build_branding_replacement_block(
                 message_id,
-                match.group(2),
-                match.group(3),
+                attrs,
+                body,
                 apply_source_overrides=False,
             )
             if new_block != match.group(0):
@@ -700,9 +759,10 @@ def xtb_translation_strategy(change: MessageChange) -> str:
         return "not_translateable"
     if change.old_translation_id == change.new_translation_id:
         return "id_unchanged"
-    if change.message_id in ENGLISH_FALLBACK_MESSAGE_IDS:
-        return "english_source_fallback"
-    if change.message_id in EXTERNAL_ADDITION_MESSAGE_IDS:
+    if (
+        change.message_id in EXTERNAL_ADDITION_MESSAGE_IDS
+        or change.new_translation_id in EXTERNAL_ADDITION_TRANSLATION_IDS
+    ):
         return "external_xtb_addition"
     return "copy_old_translation"
 
@@ -721,11 +781,15 @@ def apply_message_replacements(
             continue
 
         def replace_match(match: re.Match[str]) -> str:
-            message_id = match.group(1)
+            attrs, body = match.groups()
+            name_match = MESSAGE_NAME_RE.search(attrs)
+            if not name_match:
+                raise ValueError(
+                    f"message in {chromium_path} has no name attribute"
+                )
+            message_id = name_match.group(1)
             if message_id not in allowed_ids:
                 return match.group(0)
-            attrs = match.group(2)
-            body = match.group(3)
             new_block = build_branding_replacement_block(
                 message_id,
                 attrs,
@@ -963,6 +1027,17 @@ def insert_new_translations(
             unique_insertions[key] = insertion
             continue
         if existing.new_block != insertion.new_block:
+            preferred_old_translation_id = (
+                PREFERRED_CONVERGED_OLD_TRANSLATION_IDS.get(
+                    insertion.new_translation_id
+                )
+            )
+            if preferred_old_translation_id is not None:
+                if existing.old_translation_id == preferred_old_translation_id:
+                    continue
+                if insertion.old_translation_id == preferred_old_translation_id:
+                    unique_insertions[key] = insertion
+                    continue
             conflicts.append(
                 XtbTranslationConflict(
                     chromium_path=insertion.chromium_path,
