@@ -84,7 +84,6 @@ overlay-derived, or still need separate provenance review.
 - [`ffmpeg-branding.patch`](../other/ffmpeg-branding.patch) (apply root: `third_party/ffmpeg`)
 - [`widevine-cdm-support.patch`](../other/widevine-cdm-support.patch) (apply root: `third_party/widevine`)
 - [`thorium-search-engines-data.patch`](../other/thorium-search-engines-data.patch) (apply root: `third_party/search_engines_data/resources`)
-- [`abseil-bmi2-include-immintrin.patch`](../other/abseil-bmi2-include-immintrin.patch) (apply root: `third_party/abseil-cpp`)
 - [`zstd-clang-cl-bmi2-detection.patch`](../other/zstd-clang-cl-bmi2-detection.patch) (apply root: `third_party/zstd/src`) - Keeps clang-cl AVX2 builds on zstd's runtime BMI2 dispatch unless `-mbmi2` is explicitly enabled.
 - [`v8-remove-local-sse2-override.patch`](../other/v8-remove-local-sse2-override.patch) (apply root: `v8`)
 - [`angle-lockfree.patch`](../other/SSE2/angle-lockfree.patch) (apply root: `third_party/angle/src`; condition: `sse2`)
@@ -112,13 +111,12 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-app-metadata-branding.patch`](../other/thorium-app-metadata-branding.patch)
 - [`thorium-theme-resources.patch`](../other/thorium-theme-resources.patch)
 - [`thorium-app-vector-icons.patch`](../other/thorium-app-vector-icons.patch)
-- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Registers classic uBlock Origin in Chromium's first-profile preinstall provider without packaged `default_apps` data; locale restrictions remain limited to Chromium's own preinstalled apps.
+- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Registers classic uBlock Origin in Chromium's first-profile preinstalled-extension provider without packaged `default_apps` data; locale restrictions remain limited to Chromium's own preinstalled extensions.
 - [`bookmark-default-prefs.patch`](../other/bookmark-default-prefs.patch)
 - [`bookmark-dialog-default-folder.patch`](../other/bookmark-dialog-default-folder.patch)
 - [`increase-bookmark-open-prompt-threshold.patch`](../other/increase-bookmark-open-prompt-threshold.patch)
 - [`thorium-browser-ui-default-prefs.patch`](../other/thorium-browser-ui-default-prefs.patch)
-- [`tab-search-button-position.patch`](../other/tab-search-button-position.patch) — Keeps standalone Tab Search on the physical right by default and provides a Thorium flag for left alignment without changing the optional combo button.
-- [`tab-search-button-pinning.patch`](../other/tab-search-button-pinning.patch) — Restores Pin/Unpin Tab Search in the tab-strip context menu and applies the pin preference to standalone left- or right-aligned Tab Search buttons as well as the optional combo button.
+- [`tab-strip-combo-button-position.patch`](../other/tab-strip-combo-button-position.patch) — Keeps Chromium's unified horizontal tab-strip combo button on the physical right by default and provides a Thorium flag for physical-left alignment, including in RTL layouts.
 - [`dom-distiller-reader-mode.patch`](../other/dom-distiller-reader-mode.patch)
 
 ### 30 - Build graph, toolchain, and platform build behavior.

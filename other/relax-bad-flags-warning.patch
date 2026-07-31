@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/startup/bad_flags_prompt.cc b/chrome/browser/ui/startup/bad_flags_prompt.cc
-index 0deb93f45504c..dd8f4567cb5ce 100644
+index 3eae2d1bd26b3..7d8c5fd012e90 100644
 --- a/chrome/browser/ui/startup/bad_flags_prompt.cc
 +++ b/chrome/browser/ui/startup/bad_flags_prompt.cc
 @@ -1,4 +1,4 @@
@@ -8,32 +8,33 @@ index 0deb93f45504c..dd8f4567cb5ce 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -111,7 +111,7 @@ const char* const kBadFlags[] = {
+@@ -112,7 +112,8 @@ const char* const kBadFlags[] = {
  #if BUILDFLAG(ENABLE_EXTENSIONS)
      // These flags enable extensions running scripts on chrome:// and
      // chrome-extension:// URLs.
 -    extensions::switches::kExtensionsOnChromeURLs,
-+    // extensions::switches::kExtensionsOnChromeURLs, (Disabled by Alex313031)
++    // Thorium permits extensions on chrome:// URLs without showing this
++    // warning.
      extensions::switches::kExtensionsOnExtensionURLs,
- #endif
  
-@@ -123,8 +123,8 @@ const char* const kBadFlags[] = {
+     // This flag gives the specified extension(s) access to restricted extension
+@@ -128,8 +129,8 @@ const char* const kBadFlags[] = {
  
      // These flags control Blink feature state, which is not supported and is
      // intended only for use by Chromium developers.
 -    switches::kDisableBlinkFeatures,
 -    switches::kEnableBlinkFeatures,
-+    // switches::kDisableBlinkFeatures, (Disabled by Alex313031)
-+    // switches::kEnableBlinkFeatures, (Disabled by Alex313031)
++    // Thorium permits explicit Blink feature overrides without showing this
++    // warning.
  
      // This flag allows people to allowlist certain origins as secure, even
      // if they are not.
-@@ -148,7 +148,7 @@ const char* const kBadFlags[] = {
+@@ -153,7 +154,7 @@ const char* const kBadFlags[] = {
  
      // GPU sanboxing isn't implemented for the Web GPU API yet meaning it would
      // be possible to read GPU data for other Chromium processes.
 -    switches::kEnableUnsafeWebGPU,
-+    // switches::kEnableUnsafeWebGPU, (Disabled by Alex313031)
++    // Thorium permits unsafe WebGPU without showing this warning.
  
  #if BUILDFLAG(IS_WIN)
      // These flags allow loading libraries from specified paths, which may

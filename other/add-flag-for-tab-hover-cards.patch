@@ -1,8 +1,104 @@
+diff --git a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
+index 28fac81220aa6..f160408e8868e 100644
+--- a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
++++ b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
+@@ -4,6 +4,7 @@
+ 
+ #include "chrome/browser/ui/views/tabs/common/tab_group_header_view.h"
+ 
++#include "base/command_line.h"
+ #include "base/task/single_thread_task_runner.h"
+ #include "build/build_config.h"
+ #include "build/buildflag.h"
+@@ -508,7 +509,10 @@ void TabGroupHeaderView::OnDataChanged(
+   UpdateIsCollapsed();
+   UpdateAccessibleName();
+ 
+-  if (features::IsTabGroupHoverCardsEnabled()) {
++  const bool tab_hover_cards_tooltip =
++      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
++          "tab-hover-cards") == "tooltip";
++  if (features::IsTabGroupHoverCardsEnabled() && !tab_hover_cards_tooltip) {
+     SetHoverCardDataFrom(tab_group_data);
+   } else {
+     UpdateTooltipText();
+diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
+index 42c551b09d331..4d38bf1467a79 100644
+--- a/chrome/browser/ui/views/tabs/common/tab_view.cc
++++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
+@@ -47,6 +47,7 @@
+ #include "chrome/browser/ui/views/tabs/tab/alert_indicator_button.h"
+ #include "chrome/browser/ui/views/tabs/tab/glow_hover_controller.h"
+ #include "chrome/browser/ui/views/tabs/tab/tab_accessibility.h"
++#include "chrome/browser/ui/views/tabs/tab.h"
+ #include "chrome/browser/ui/views/tabs/tab/tab_close_button.h"
+ #include "chrome/browser/ui/views/tabs/tab/tab_icon.h"
+ #include "chrome/browser/ui/views/tabs/tab/tab_title.h"
+@@ -596,6 +597,16 @@ void TabView::OnGestureEvent(ui::GestureEvent* event) {
+   }
+ }
+ 
++std::u16string TabView::GetRenderedTooltipText(const gfx::Point& p) const {
++  const bool tab_hover_cards_tooltip =
++      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
++          "tab-hover-cards") == "tooltip";
++  if (tab_hover_cards_tooltip) {
++    return Tab::GetTooltipText(tab_data_.title, tab_data_.alert_state);
++  }
++  return std::u16string();
++}
++
+ void TabView::OnPaint(gfx::Canvas* canvas) {
+   // Split pinned tabs have a merged background that is rendered in
+   // `SplitTabView`.
+diff --git a/chrome/browser/ui/views/tabs/common/tab_view.h b/chrome/browser/ui/views/tabs/common/tab_view.h
+index 9a923fe60b3f7..7dcd662f24700 100644
+--- a/chrome/browser/ui/views/tabs/common/tab_view.h
++++ b/chrome/browser/ui/views/tabs/common/tab_view.h
+@@ -6,6 +6,7 @@
+ #define CHROME_BROWSER_UI_VIEWS_TABS_COMMON_TAB_VIEW_H_
+ 
+ #include <optional>
++#include <string>
+ #include <vector>
+ 
+ #include "base/callback_list.h"
+@@ -24,6 +25,7 @@
+ #include "third_party/skia/include/core/SkScalar.h"
+ #include "ui/base/metadata/metadata_header_macros.h"
+ #include "ui/gfx/canvas.h"
++#include "ui/gfx/geometry/point.h"
+ #include "ui/views/context_menu_controller.h"
+ #include "ui/views/layout/delegating_layout_manager.h"
+ #include "ui/views/layout/flex_layout.h"
+@@ -107,6 +109,7 @@ class TabView : public views::View,
+   void OnMouseExited(const ui::MouseEvent& event) override;
+   bool OnMouseDragged(const ui::MouseEvent& event) override;
+   void OnGestureEvent(ui::GestureEvent* event) override;
++  std::u16string GetRenderedTooltipText(const gfx::Point& p) const override;
+   void OnPaint(gfx::Canvas* canvas) override;
+   void AddedToWidget() override;
+   void RemovedFromWidget() override;
+diff --git a/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc b/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
+index 9933d79ae0afd..0acbe4cb0048f 100644
+--- a/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
++++ b/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
+@@ -305,6 +305,10 @@ bool TabHoverCardController::IsHoverCardShowingForTab(
+ void TabHoverCardController::UpdateHoverCard(
+     HoverCardAnchorTarget* anchor_target,
+     TabSlotController::HoverCardUpdateType update_type) {
++  if (base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards")) {
++    return;
++  }
++
+   if (hide_hover_card_lock_count_ > 0) {
+     anchor_target = nullptr;
+     update_type = TabSlotController::HoverCardUpdateType::kAnimating;
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index c8b98d66b6200..f5fe26246cee4 100644
+index a3eb789db93ef..733f55f44dca8 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -1090,6 +1090,16 @@ void Tab::HideHover(TabStyle::HideHoverStyle style) {
+@@ -1063,6 +1063,16 @@ void Tab::HideHover(TabStyle::HideHoverStyle style) {
    DeprecatedLayoutImmediately();
  }
  
@@ -31,253 +127,3 @@ index 4eee7407d9cad..9505948a4b8dc 100644
    gfx::Size CalculatePreferredSize(
        const views::SizeBounds& available_size) const override;
    void PaintChildren(const views::PaintInfo& info) override;
-diff --git a/chrome/browser/ui/views/tabs/tab_strip.cc b/chrome/browser/ui/views/tabs/tab_strip.cc
-index a1a4cea1b573a..4d7a6f403b16f 100644
---- a/chrome/browser/ui/views/tabs/tab_strip.cc
-+++ b/chrome/browser/ui/views/tabs/tab_strip.cc
-@@ -1,4 +1,4 @@
--// Copyright 2017 The Chromium Authors
-+// Copyright 2026 The Chromium Authors and Alex313031
- // Use of this source code is governed by a BSD-style license that can be
- // found in the LICENSE file.
- 
-@@ -18,6 +18,7 @@
- #include <vector>
- 
- #include "base/check.h"
-+#include "base/command_line.h"
- #include "base/compiler_specific.h"
- #include "base/containers/adapters.h"
- #include "base/containers/flat_map.h"
-@@ -1997,6 +1998,11 @@ void TabStrip::OnGroupContentsChanged(const tab_groups::TabGroupId& group) {
- 
- void TabStrip::UpdateHoverCard(HoverCardAnchorTarget* anchor_target,
-                                HoverCardUpdateType update_type) {
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+  if (disable_hover_cards) {
-+    return;
-+  }
-   if (tab_container_) {
-     tab_container_->UpdateHoverCard(anchor_target, update_type);
-   }
-diff --git a/chrome/browser/ui/views/tabs/vertical/vertical_split_tab_view.cc b/chrome/browser/ui/views/tabs/vertical/vertical_split_tab_view.cc
-index 1970367feaccf..1b535b5e82f6f 100644
---- a/chrome/browser/ui/views/tabs/vertical/vertical_split_tab_view.cc
-+++ b/chrome/browser/ui/views/tabs/vertical/vertical_split_tab_view.cc
-@@ -7,6 +7,7 @@
- #include <numeric>
- #include <vector>
- 
-+#include "base/command_line.h"
- #include "base/time/time.h"
- #include "chrome/browser/ui/color/chrome_color_id.h"
- #include "chrome/browser/ui/layout_constants.h"
-@@ -219,9 +220,11 @@ double VerticalSplitTabView::GetHoverAnimationValue() const {
- 
- void VerticalSplitTabView::ResetCollectionNode() {
-   CHECK(collection_node_);
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-   TabHoverCardController* hover_card_controller =
-       collection_node_->GetController()->GetHoverCardController();
--  if (hover_card_controller) {
-+  if (!disable_hover_cards && hover_card_controller) {
-     hover_card_controller->UpdateHoverCard(
-         nullptr, TabSlotController::HoverCardUpdateType::kTabRemoved);
-   }
-diff --git a/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_header_view.cc b/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_header_view.cc
-index afcfdc886261e..ea9e866762408 100644
---- a/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_header_view.cc
-+++ b/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_header_view.cc
-@@ -6,6 +6,7 @@
- 
- #include <numeric>
- 
-+#include "base/command_line.h"
- #include "base/task/single_thread_task_runner.h"
- #include "build/build_config.h"
- #include "build/buildflag.h"
-@@ -509,7 +510,10 @@ void VerticalTabGroupHeaderView::OnDataChanged(
-   UpdateIsCollapsed();
-   UpdateAccessibleName();
- 
--  if (features::IsTabGroupHoverCardsEnabled()) {
-+  const bool tab_hover_cards_tooltip =
-+      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
-+          "tab-hover-cards") == "tooltip";
-+  if (features::IsTabGroupHoverCardsEnabled() && !tab_hover_cards_tooltip) {
-     SetHoverCardDataFrom(tab_group_data);
-   } else {
-     UpdateTooltipText();
-diff --git a/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_view.cc b/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_view.cc
-index 368347c0fbbec..4dc37c0c37a53 100644
---- a/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_view.cc
-+++ b/chrome/browser/ui/views/tabs/vertical/vertical_tab_group_view.cc
-@@ -6,6 +6,7 @@
- 
- #include <numeric>
- 
-+#include "base/command_line.h"
- #include "chrome/browser/ui/browser_window/public/browser_window_features.h"
- #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
- #include "chrome/browser/ui/layout_constants.h"
-@@ -475,6 +476,11 @@ void VerticalTabGroupView::UpdateHoverCard(int update_type) const {
-     return;
-   }
- 
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+  if (disable_hover_cards) {
-+    return;
-+  }
-   if (TabHoverCardController* hover_card_controller =
-           collection_node_->GetController()->GetHoverCardController()) {
-     hover_card_controller->UpdateHoverCard(
-@@ -487,6 +493,11 @@ void VerticalTabGroupView::HideHoverCard(int update_type) const {
-   if (!collection_node_) {
-     return;
-   }
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+  if (disable_hover_cards) {
-+    return;
-+  }
- 
-   if (TabHoverCardController* hover_card_controller =
-           collection_node_->GetController()->GetHoverCardController()) {
-diff --git a/chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_view.cc b/chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_view.cc
-index d09396a6077ef..744a34fe1fc8b 100644
---- a/chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_view.cc
-+++ b/chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_view.cc
-@@ -5,6 +5,7 @@
- #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_view.h"
- 
- #include "base/callback_list.h"
-+#include "base/command_line.h"
- #include "base/functional/bind.h"
- #include "base/metrics/histogram_macros.h"
- #include "chrome/browser/ui/browser_element_identifiers.h"
-@@ -261,6 +262,11 @@ void VerticalTabStripView::OnMouseExited(const ui::MouseEvent& event) {
-   if (!collection_node_) {
-     return;
-   }
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+  if (disable_hover_cards) {
-+    return;
-+  }
- 
-   if (TabHoverCardController* hover_card_controller =
-           collection_node_->GetController()->GetHoverCardController()) {
-@@ -271,6 +277,11 @@ void VerticalTabStripView::OnMouseExited(const ui::MouseEvent& event) {
- 
- void VerticalTabStripView::OnWidgetActivationChanged(views::Widget* widget,
-                                                      bool active) {
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+  if (disable_hover_cards) {
-+    return;
-+  }
-   if (TabHoverCardController* hover_card_controller =
-           collection_node_->GetController()->GetHoverCardController();
-       hover_card_controller) {
-@@ -603,6 +614,12 @@ void VerticalTabStripView::HideHoverCardOnScroll() {
-     return;
-   }
- 
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+  if (disable_hover_cards) {
-+    return;
-+  }
-+
-   if (TabHoverCardController* hover_card_controller =
-           collection_node_->GetController()->GetHoverCardController();
-       hover_card_controller && hover_card_controller->IsHoverCardVisible()) {
-diff --git a/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.cc b/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.cc
-index 0aeab1dcd4717..45115c1db1d03 100644
---- a/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.cc
-+++ b/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.cc
-@@ -44,6 +44,7 @@
- #include "chrome/browser/ui/views/tabs/tab/tab_accessibility.h"
- #include "chrome/browser/ui/views/tabs/tab/tab_close_button.h"
- #include "chrome/browser/ui/views/tabs/tab/tab_icon.h"
-+#include "chrome/browser/ui/views/tabs/tab.h"
- #include "chrome/browser/ui/views/tabs/tab/tab_title.h"
- #include "chrome/browser/ui/views/tabs/vertical/tab_collection_node.h"
- #include "chrome/browser/ui/views/tabs/vertical/vertical_split_tab_view.h"
-@@ -593,6 +594,17 @@ void VerticalTabView::OnGestureEvent(ui::GestureEvent* event) {
-   }
- }
- 
-+std::u16string VerticalTabView::GetRenderedTooltipText(
-+    const gfx::Point& p) const {
-+  const bool tab_hover_cards_tooltip =
-+      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
-+          "tab-hover-cards") == "tooltip";
-+  if (tab_hover_cards_tooltip) {
-+    return Tab::GetTooltipText(tab_data_.title, tab_data_.alert_state);
-+  }
-+  return std::u16string();
-+}
-+
- void VerticalTabView::OnPaint(gfx::Canvas* canvas) {
-   // Split pinned tabs have a merged background that is rendered in
-   // `VerticalSplitTabView`.
-@@ -999,9 +1011,13 @@ views::BubbleAnchor VerticalTabView::GetAnchor() {
- void VerticalTabView::ResetCollectionNode() {
-   CHECK(collection_node_);
- 
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+
-   TabHoverCardController* hover_card_controller =
-       collection_node_->GetController()->GetHoverCardController();
--  if (hover_card_controller && hover_card_controller->target_tab() == this) {
-+  if (!disable_hover_cards && hover_card_controller &&
-+      hover_card_controller->target_tab() == this) {
-     hover_card_controller->UpdateHoverCard(
-         nullptr, TabSlotController::HoverCardUpdateType::kTabRemoved);
-   }
-@@ -1305,6 +1321,12 @@ void VerticalTabView::UpdateHoverCard(HoverCardAnchorTarget* target,
-                                       int hover_card_update_type) {
-   CHECK(collection_node_);
- 
-+  static const bool disable_hover_cards =
-+      base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards");
-+  if (disable_hover_cards) {
-+    return;
-+  }
-+
-   if (TabHoverCardController* hover_card_controller =
-           collection_node_->GetController()->GetHoverCardController()) {
-     hover_card_controller->UpdateHoverCard(
-diff --git a/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.h b/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.h
-index faee8d0bd85c2..8df510214866d 100644
---- a/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.h
-+++ b/chrome/browser/ui/views/tabs/vertical/vertical_tab_view.h
-@@ -6,6 +6,7 @@
- #define CHROME_BROWSER_UI_VIEWS_TABS_VERTICAL_VERTICAL_TAB_VIEW_H_
- 
- #include <optional>
-+#include <string>
- #include <vector>
- 
- #include "base/callback_list.h"
-@@ -23,6 +24,7 @@
- #include "components/tabs/public/tab_interface.h"
- #include "third_party/skia/include/core/SkScalar.h"
- #include "ui/base/metadata/metadata_header_macros.h"
-+#include "ui/gfx/geometry/point.h"
- #include "ui/gfx/canvas.h"
- #include "ui/views/context_menu_controller.h"
- #include "ui/views/layout/delegating_layout_manager.h"
-@@ -106,6 +108,7 @@ class VerticalTabView : public views::View,
-   void OnMouseExited(const ui::MouseEvent& event) override;
-   bool OnMouseDragged(const ui::MouseEvent& event) override;
-   void OnGestureEvent(ui::GestureEvent* event) override;
-+  std::u16string GetRenderedTooltipText(const gfx::Point& p) const override;
-   void OnPaint(gfx::Canvas* canvas) override;
-   void AddedToWidget() override;
-   void RemovedFromWidget() override;

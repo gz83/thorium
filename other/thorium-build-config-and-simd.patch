@@ -1,5 +1,5 @@
 diff --git a/build/config/BUILDCONFIG.gn b/build/config/BUILDCONFIG.gn
-index 12595c1e36678..5e798349ee982 100644
+index f44478e5f9621..26802f8caa82c 100644
 --- a/build/config/BUILDCONFIG.gn
 +++ b/build/config/BUILDCONFIG.gn
 @@ -1,4 +1,4 @@
@@ -8,8 +8,8 @@ index 12595c1e36678..5e798349ee982 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -171,6 +171,11 @@ declare_args() {
-       is_debug && current_os != "ios" && current_os != "watchos"
+@@ -172,6 +172,11 @@ declare_args() {
+                        current_os != "ios" && current_os != "watchos"
  }
  
 +declare_args() {
@@ -20,7 +20,7 @@ index 12595c1e36678..5e798349ee982 100644
  assert(!(is_debug && is_official_build), "Can't do official debug builds")
  assert(!(current_os == "ios" && is_component_build),
         "Can't use component build on iOS")
-@@ -432,6 +437,9 @@ if (current_os == "zos") {
+@@ -433,6 +438,9 @@ if (current_os == "zos") {
    default_compiler_configs += [ "//build/config/zos:compiler" ]
  }
  
@@ -31,7 +31,7 @@ index 12595c1e36678..5e798349ee982 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index e1da11405c1f6..796deaad89b33 100644
+index 7df3e18c4c93a..93d903bceab4e 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -48,7 +48,7 @@ index e1da11405c1f6..796deaad89b33 100644
  import("//build/config/coverage/coverage.gni")
  import("//build/config/cronet/config.gni")
  import("//build/config/dcheck_always_on.gni")
-@@ -650,7 +651,10 @@ config("compiler") {
+@@ -652,7 +653,10 @@ config("compiler") {
      }
  
      # TODO(crbug.com/40192287): Investigate why/if this should be needed.
@@ -60,7 +60,7 @@ index e1da11405c1f6..796deaad89b33 100644
        cflags += [ "/clang:-ffp-contract=off" ]
      } else {
        cflags += [ "-ffp-contract=off" ]
-@@ -803,6 +807,10 @@ config("compiler") {
+@@ -805,6 +809,10 @@ config("compiler") {
      # [1]: https://pinpoint-dot-chromeperf.appspot.com/job/11984a18be0000
      # [2]: https://ci.chromium.org/ui/p/chromium/builders/try/android-binary-size/1848442
      import_instr_limit = 30
@@ -71,7 +71,7 @@ index e1da11405c1f6..796deaad89b33 100644
  
      if (is_win) {
        ldflags += [
-@@ -1256,14 +1264,39 @@ config("disallow_unstable_features") {
+@@ -1262,14 +1270,39 @@ config("disallow_unstable_features") {
    rustflags = [ "-Zallow-features=" ]
  }
  
@@ -113,7 +113,7 @@ index e1da11405c1f6..796deaad89b33 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1296,9 +1329,46 @@ config("thinlto_optimize_max") {
+@@ -1302,9 +1335,46 @@ config("thinlto_optimize_max") {
      } else {
        lto_opt_level = 0
      }
@@ -160,7 +160,7 @@ index e1da11405c1f6..796deaad89b33 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1335,7 +1405,10 @@ config("compiler_cpu_abi") {
+@@ -1341,7 +1411,10 @@ config("compiler_cpu_abi") {
  # for particular Chromium code or for working around particular
  # compiler bugs (or the combination of the two).
  config("compiler_codegen") {
@@ -172,7 +172,7 @@ index e1da11405c1f6..796deaad89b33 100644
    cflags = []
    ldflags = []
  
-@@ -2403,6 +2476,31 @@ config("no_incompatible_pointer_warnings") {
+@@ -2424,6 +2497,31 @@ config("no_incompatible_pointer_warnings") {
    }
  }
  
@@ -204,7 +204,7 @@ index e1da11405c1f6..796deaad89b33 100644
  # Optimization -----------------------------------------------------------------
  #
  # The BUILDCONFIG file sets the "default_optimization" config on targets by
-@@ -2641,9 +2739,18 @@ config("optimize_max") {
+@@ -2660,9 +2758,18 @@ config("optimize_max") {
    if (is_win) {
      # Favor speed over size, /O2 must be before the common flags.
      # /O2 implies /Ot, /Oi, and /GF.
@@ -482,7 +482,7 @@ index 0000000000000..59cc302488e85
 +  }
 +}
 diff --git a/build/config/win/BUILD.gn b/build/config/win/BUILD.gn
-index 101c2339697ca..e2f1dd657b7af 100644
+index 069432bbae2ff..f287524c4cc50 100644
 --- a/build/config/win/BUILD.gn
 +++ b/build/config/win/BUILD.gn
 @@ -1,4 +1,4 @@

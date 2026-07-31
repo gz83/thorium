@@ -1,65 +1,69 @@
-diff --git a/chrome/browser/extensions/preinstalled_apps.cc b/chrome/browser/extensions/preinstalled_apps.cc
-index da2b8bd7c63cc..4f76c7d60f136 100644
---- a/chrome/browser/extensions/preinstalled_apps.cc
-+++ b/chrome/browser/extensions/preinstalled_apps.cc
-@@ -38,6 +38,9 @@ namespace {
+diff --git a/chrome/browser/extensions/preinstalled_extensions.cc b/chrome/browser/extensions/preinstalled_extensions.cc
+index 0d681e3a260a1..ea6f84d8c2ff3 100644
+--- a/chrome/browser/extensions/preinstalled_extensions.cc
++++ b/chrome/browser/extensions/preinstalled_extensions.cc
+@@ -38,6 +38,9 @@ static_assert(BUILDFLAG(ENABLE_EXTENSIONS_CORE));
  
- using extensions::mojom::ManifestLocation;
+ namespace {
  
 +constexpr char kUBlockOriginExtensionId[] =
 +    "cjpalhdlnbpafiamejdnhcphjbkeiagm";
 +
+ using extensions::mojom::ManifestLocation;
+ 
  #if BUILDFLAG(ENABLE_PLATFORM_APPS)
- // Returns true if the app was a pre-installed app in Chrome 22
- bool IsOldPreinstalledApp(const std::string& extension_id) {
-@@ -83,15 +86,14 @@ bool Provider::DidPerformNewInstallationForProfile(Profile* profile) {
+@@ -105,16 +108,16 @@ bool Provider::DidPerformNewInstallationForProfile(Profile* profile) {
  void Provider::InitProfileState() {
-   // We decide to install or not install pre-installed apps based on the
+   // We decide to install or not install pre-installed extensions based on the
    // following criteria, from highest priority to lowest priority:
 -  //
--  // - If the locale is not compatible with the pre-installed apps, don't
--  // install them.
-   // - The kPreinstalledApps preferences value in the profile.  This value is
-   //   usually set in the master_preferences file.
+-  // - If the locale is not compatible with the pre-installed extensions, don't
+-  //   install them.
+   // - The kPreinstalledExtensions preferences value in the profile.  This
+   //   value is usually set in the master_preferences file.
    // - If they have already been installed, don't reinstall them.
 +  //
-+  // Locale compatibility is applied to Chromium's pre-installed apps in
++  // Locale compatibility is applied to Chromium's pre-installed extensions in
 +  // SetPrefs(). Thorium's uBlock Origin pre-install supports every locale.
  
-   preinstalled_apps_enabled_ =
--      IsLocaleSupported() &&
-       profile_->GetPrefs()->GetString(prefs::kPreinstalledApps) == "install";
+   preinstalled_extensions_enabled_ =
+-      IsLocaleSupported() && profile_->GetPrefs()->GetString(
+-                                 prefs::kPreinstalledExtensions) == "install";
++      profile_->GetPrefs()->GetString(prefs::kPreinstalledExtensions) ==
++      "install";
    DCHECK(!perform_new_installation_);
  
-@@ -177,13 +179,19 @@ void Provider::VisitRegisteredExtension() {
+   InstallState state =
+@@ -199,12 +202,19 @@ void Provider::VisitRegisteredExtension() {
  void Provider::SetPrefs(base::DictValue prefs) {
-   DCHECK(preinstalled_apps_enabled_);
+   DCHECK(preinstalled_extensions_enabled_);
  
-+  // Chromium's pre-installed apps are not available in every locale. Apply
-+  // that restriction only to the loaded list; Thorium's uBlock Origin entry
-+  // is added separately below and remains available in every locale.
-+  if (!IsLocaleSupported())
++  // Chromium's pre-installed extensions are not available in every locale.
++  // Apply that restriction only to Chromium's entries; Thorium's uBlock
++  // Origin entry is added separately below and remains available everywhere.
++  if (!IsLocaleSupported()) {
 +    prefs.clear();
++  }
 +
-   // TODO(crbug.com/517655721): Use this mechanism on Win/Mac/Linux as well.
- #if BUILDFLAG(IS_ANDROID)
    // Load a hard-coded list of external extensions. These are not component
    // extensions; they are installed from the webstore and don't get access to
    // component only APIs. Must be used with ManifestLocation::kInternal to allow
    // CWS to download certain extensions.
+ #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
 -  if (perform_new_installation_) {
 +  if (perform_new_installation_ && IsLocaleSupported()) {
- #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
      AddExtension(extension_misc::kDocsOfflineExtensionId, prefs);
+   }
  #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
-@@ -251,6 +259,11 @@ void Provider::SetPrefs(base::DictValue prefs) {
+@@ -274,6 +284,12 @@ void Provider::SetPrefs(base::DictValue prefs) {
    }
  #endif  // BUILDFLAG(ENABLE_PLATFORM_APPS)
  
 +  // Install uBlock Origin only with a newly created profile. The external
 +  // provider retains Chromium's normal user-uninstall acknowledgement.
-+  if (perform_new_installation_)
++  if (perform_new_installation_) {
 +    AddExtension(kUBlockOriginExtensionId, prefs);
++  }
 +
    ExternalProviderImpl::SetPrefs(std::move(prefs));
  }

@@ -1,5 +1,5 @@
 diff --git a/chrome/common/chrome_paths.cc b/chrome/common/chrome_paths.cc
-index af46f59fc2691..15767088c9a6d 100644
+index 8e80b183a7622..a62900ea14288 100644
 --- a/chrome/common/chrome_paths.cc
 +++ b/chrome/common/chrome_paths.cc
 @@ -308,6 +308,11 @@ bool PathProvider(int key, base::FilePath* result) {

@@ -1,11 +1,11 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 5de1dce2f4ec8..90cda8a5b0cc3 100644
+index e7c8cc09dd4eb..9c5899c45a7fd 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -45,7 +45,7 @@ BASE_FEATURE(kCreateNewTabGroupAppMenuTopLevel,
+@@ -46,7 +46,7 @@ BASE_FEATURE(kCompositorLoadingThrobber, base::FEATURE_DISABLED_BY_DEFAULT);
+ BASE_FEATURE(kCreateNewTabGroupAppMenuTopLevel,
+              base::FEATURE_DISABLED_BY_DEFAULT);
  
- BASE_FEATURE(kEnableExtensionsMenuTeardownFix,
-              base::FEATURE_ENABLED_BY_DEFAULT);
 -BASE_FEATURE(kCtrlTabMru, base::FEATURE_DISABLED_BY_DEFAULT);
 +BASE_FEATURE(kCtrlTabMru, base::FEATURE_ENABLED_BY_DEFAULT);
  

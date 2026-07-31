@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/resources/BUILD.gn b/chrome/browser/resources/BUILD.gn
-index 66dcefc524411..368d6b766dcf5 100644
+index 11c3e254f558b..ec4d76a98b844 100644
 --- a/chrome/browser/resources/BUILD.gn
 +++ b/chrome/browser/resources/BUILD.gn
-@@ -128,7 +128,6 @@ group("resources") {
+@@ -133,7 +133,6 @@ group("resources") {
      public_deps += [
        "unexportable_keys_internals:resources",
        "//chrome/browser/resources/media/mei_preload:component",
@@ -110,7 +110,7 @@ index 8b130bc3a328f..c2c52b67c938a 100644
  #if BUILDFLAG(ENABLE_LIBRARY_CDMS)
    storage_partition_->GetCdmStorageDataModel()->GetUsagePerAllStorageKeys(
 diff --git a/components/privacy_sandbox/privacy_sandbox_features.cc b/components/privacy_sandbox/privacy_sandbox_features.cc
-index c2a7047d75598..133f6ae227585 100644
+index 20376547798b8..1fd366dfdceb1 100644
 --- a/components/privacy_sandbox/privacy_sandbox_features.cc
 +++ b/components/privacy_sandbox/privacy_sandbox_features.cc
 @@ -1,4 +1,4 @@
@@ -322,10 +322,10 @@ index 12f09023269e2..3226fce7668d4 100644
  
  // static
 diff --git a/content/browser/interest_group/ad_auction_service_impl.cc b/content/browser/interest_group/ad_auction_service_impl.cc
-index 0f75f7628248f..330b99614c737 100644
+index 156f08a3a562c..5d454590d46fc 100644
 --- a/content/browser/interest_group/ad_auction_service_impl.cc
 +++ b/content/browser/interest_group/ad_auction_service_impl.cc
-@@ -190,11 +190,6 @@ AdAuctionServiceImpl::BiddingAndAuctionDataConstructionState::
+@@ -191,11 +191,6 @@ AdAuctionServiceImpl::BiddingAndAuctionDataConstructionState::
  void AdAuctionServiceImpl::CreateMojoService(
      RenderFrameHost* render_frame_host,
      mojo::PendingReceiver<blink::mojom::AdAuctionService> receiver) {
@@ -338,10 +338,10 @@ index 0f75f7628248f..330b99614c737 100644
  
  void AdAuctionServiceImpl::JoinInterestGroup(
 diff --git a/content/browser/storage_partition_impl.cc b/content/browser/storage_partition_impl.cc
-index 2a49d3a2e90b9..0dfaa6c29d817 100644
+index ae61b2d3115cd..2b4d830e391a9 100644
 --- a/content/browser/storage_partition_impl.cc
 +++ b/content/browser/storage_partition_impl.cc
-@@ -1468,38 +1468,6 @@ void StoragePartitionImpl::Initialize(
+@@ -1485,38 +1485,6 @@ void StoragePartitionImpl::Initialize(
  
    bucket_manager_ = std::make_unique<BucketManager>(this);
  
@@ -380,7 +380,7 @@ index 2a49d3a2e90b9..0dfaa6c29d817 100644
  
    GeneratedCodeCacheSettings settings =
        GetContentClient()->browser()->GetGeneratedCodeCacheSettings(
-@@ -1528,8 +1496,6 @@ void StoragePartitionImpl::Initialize(
+@@ -1545,8 +1513,6 @@ void StoragePartitionImpl::Initialize(
  
    font_access_manager_ = FontAccessManager::Create();
  
@@ -389,7 +389,7 @@ index 2a49d3a2e90b9..0dfaa6c29d817 100644
  
  #if BUILDFLAG(ENABLE_LIBRARY_CDMS)
    if (is_in_memory()) {
-@@ -1553,11 +1519,6 @@ void StoragePartitionImpl::Initialize(
+@@ -1570,11 +1536,6 @@ void StoragePartitionImpl::Initialize(
          std::make_unique<SharedStorageHeaderObserver>(this);
    }
  
@@ -398,14 +398,14 @@ index 2a49d3a2e90b9..0dfaa6c29d817 100644
 -        std::make_unique<PrivateAggregationManagerImpl>(is_in_memory(), path,
 -                                                        this);
 -  }
- }
  
- void StoragePartitionImpl::ResetSessionStorageConnections() {
+   if (base::FeatureList::IsEnabled(
+           blink::features::kDeclarativePerformanceObserver)) {
 diff --git a/content/browser/web_contents/web_contents_impl.cc b/content/browser/web_contents/web_contents_impl.cc
-index fe05eb81d5a62..6637c3ec37788 100644
+index 7edad76e875c0..ffc7afa18fc5d 100644
 --- a/content/browser/web_contents/web_contents_impl.cc
 +++ b/content/browser/web_contents/web_contents_impl.cc
-@@ -4356,12 +4356,6 @@ void WebContentsImpl::Init(const WebContents::CreateParams& params,
+@@ -4370,12 +4370,6 @@ void WebContentsImpl::Init(const WebContents::CreateParams& params,
    DateTimeChooser::CreateDateTimeChooser(this);
  #endif
  

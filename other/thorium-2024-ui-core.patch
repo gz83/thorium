@@ -59,10 +59,10 @@ index ed11adf55026f..034a5f66e2848 100644
    return ui::ImageModel::FromVectorIcon(*icon_id, color);
  }
 diff --git a/chrome/browser/ui/color/chrome_color_mixer.cc b/chrome/browser/ui/color/chrome_color_mixer.cc
-index 599797319f500..f6ff582becae7 100644
+index 0b07f90b8a979..8daec27972016 100644
 --- a/chrome/browser/ui/color/chrome_color_mixer.cc
 +++ b/chrome/browser/ui/color/chrome_color_mixer.cc
-@@ -352,8 +352,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
+@@ -356,8 +356,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
        gfx::kGoogleGrey500, kColorBookmarkBarBackground, 6.0f);
    mixer[kColorBookmarkFolderIcon] = {ui::kColorIcon};
    mixer[kColorBookmarkBarSeparator] = {kColorToolbarSeparator};
@@ -77,7 +77,7 @@ index 599797319f500..f6ff582becae7 100644
    mixer[kColorBookmarkDragImageBackground] = {ui::kColorAccent};
    mixer[kColorBookmarkDragImageCountBackground] = {ui::kColorAlertHighSeverity};
    mixer[kColorBookmarkDragImageCountForeground] =
-@@ -773,8 +777,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
+@@ -783,8 +787,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
    mixer[kColorAppMenuChipInkDropRipple] = {kColorToolbarInkDropRipple};
    mixer[kColorToolbarCloseButtonBackgroundDefault] = {
        ui::kColorSysBaseContainer};
@@ -146,7 +146,7 @@ index 9dfe5e7cd531d..32713ce4bb89d 100644
    // Must be the last one in order to override other mixer colors.
    AddNativeChromeColorMixer(provider, key);
 diff --git a/chrome/browser/ui/color/tab_strip_color_mixer.cc b/chrome/browser/ui/color/tab_strip_color_mixer.cc
-index 9670cc8734065..44c3feeb09c79 100644
+index cbb8807bcf5bd..a2ff602d388af 100644
 --- a/chrome/browser/ui/color/tab_strip_color_mixer.cc
 +++ b/chrome/browser/ui/color/tab_strip_color_mixer.cc
 @@ -8,6 +8,7 @@
@@ -178,10 +178,10 @@ index 9670cc8734065..44c3feeb09c79 100644
        ui::AlphaBlend(kColorTabBackgroundActiveFrameInactive,
                       kColorTabBackgroundInactiveFrameInactive,
 diff --git a/chrome/browser/ui/layout_constants.cc b/chrome/browser/ui/layout_constants.cc
-index b2c1709b4c2ac..0af3486d89f3b 100644
+index d89ceaf9e4b0c..8eb294114e009 100644
 --- a/chrome/browser/ui/layout_constants.cc
 +++ b/chrome/browser/ui/layout_constants.cc
-@@ -18,22 +18,25 @@
+@@ -19,24 +19,27 @@
  
  int GetLayoutConstant(LayoutConstant constant) {
    const bool touch_ui = ui::TouchUiController::Get()->touch_ui();
@@ -193,6 +193,8 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      case LayoutConstant::kAppMenuMaximumCharacterLength:
 -      return 30;
 +      return thorium_2024 ? 28 : 30;
+     case LayoutConstant::kAppMenuButtonImageLabelPadding:
+       return features::IsToolbarGlowUpEnabled() ? 4 : 2;
      case LayoutConstant::kBookmarkBarHeight: {
        // The fixed margin ensures the bookmark buttons appear centered relative
        // to the white space above and below.
@@ -212,7 +214,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      case LayoutConstant::kBookmarkBarButtonImageLabelPadding:
        return 6;
      case LayoutConstant::kWebAppMenuButtonSize:
-@@ -51,7 +54,7 @@ int GetLayoutConstant(LayoutConstant constant) {
+@@ -54,7 +57,7 @@ int GetLayoutConstant(LayoutConstant constant) {
      case LayoutConstant::kLocationBarChildInternalSpacing:
        return touch_ui ? 10 : 4;
      case LayoutConstant::kLocationBarChildCornerRadius:
@@ -221,7 +223,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      case LayoutConstant::kLocationBarChipIconSize:
        return 16;
      case LayoutConstant::kLocationBarChipPadding:
-@@ -59,7 +62,7 @@ int GetLayoutConstant(LayoutConstant constant) {
+@@ -62,7 +65,7 @@ int GetLayoutConstant(LayoutConstant constant) {
      case LayoutConstant::kLocationBarElementPadding:
        return touch_ui ? 3 : 2;
      case LayoutConstant::kLocationBarPageInfoIconVerticalPadding:
@@ -230,7 +232,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      case LayoutConstant::kLocationBarPageInfoIconLabelExtraTrailingPadding:
        return 4;
      case LayoutConstant::kLocationBarPageInfoIconDangerousLeadingPadding:
-@@ -67,11 +70,11 @@ int GetLayoutConstant(LayoutConstant constant) {
+@@ -70,11 +73,11 @@ int GetLayoutConstant(LayoutConstant constant) {
      case LayoutConstant::kLocationBarPageInfoIconDangerousTrailingPadding:
        return 10;
      case LayoutConstant::kLocationBarTrailingDecorationEdgePadding:
@@ -245,7 +247,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      // LINT.IfChange(LocationBarIconSize)
      case LayoutConstant::kLocationBarIconSize:
        return touch_ui ? 20 : 16;
-@@ -90,15 +93,26 @@ int GetLayoutConstant(LayoutConstant constant) {
+@@ -97,15 +100,26 @@ int GetLayoutConstant(LayoutConstant constant) {
        return 16;
      case LayoutConstant::kTabAlertIndicatorIconWidth:
        return touch_ui ? 12 : 16;
@@ -273,7 +275,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      case LayoutConstant::kTabSeparatorHeight:
        return touch_ui ? 24 : 20;
      case LayoutConstant::kTabPreTitlePadding:
-@@ -108,32 +122,33 @@ int GetLayoutConstant(LayoutConstant constant) {
+@@ -115,32 +129,33 @@ int GetLayoutConstant(LayoutConstant constant) {
      case LayoutConstant::kTabstripToolbarOverlap:
        return 1;
      case LayoutConstant::kToolbarButtonHeight:
@@ -314,7 +316,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      case LayoutConstant::kVerticalTabCornerRadius:
        return 8;
      case LayoutConstant::kVerticalTabHeight:
-@@ -174,15 +189,20 @@ int GetLayoutConstant(LayoutConstant constant) {
+@@ -181,15 +196,20 @@ int GetLayoutConstant(LayoutConstant constant) {
  
  gfx::Insets GetLayoutInsets(LayoutInset inset) {
    const bool touch_ui = ui::TouchUiController::Get()->touch_ui();
@@ -337,7 +339,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
  
      case LOCATION_BAR_PAGE_INFO_ICON_PADDING:
        return touch_ui ? gfx::Insets::VH(5, 10) : gfx::Insets::VH(4, 4);
-@@ -197,10 +217,11 @@ gfx::Insets GetLayoutInsets(LayoutInset inset) {
+@@ -204,10 +224,11 @@ gfx::Insets GetLayoutInsets(LayoutInset inset) {
      }
  
      case TOOLBAR_BUTTON:
@@ -351,7 +353,7 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
          return GetLayoutInsets(TOOLBAR_BUTTON);
        } else {
          return gfx::Insets::TLBR(7, 4, 7, 6);
-@@ -213,17 +234,20 @@ gfx::Insets GetLayoutInsets(LayoutInset inset) {
+@@ -220,17 +241,20 @@ gfx::Insets GetLayoutInsets(LayoutInset inset) {
        return gfx::Insets::TLBR(0, 8, 0, 8);
  
      case AVATAR_CHIP_PADDING:
@@ -376,10 +378,10 @@ index b2c1709b4c2ac..0af3486d89f3b 100644
      case VERTICAL_TAB_STRIP_BOTTOM_BUTTON_UNCOLLAPSED:
        return gfx::Insets::VH(5, 14);
 diff --git a/chrome/browser/ui/layout_constants.h b/chrome/browser/ui/layout_constants.h
-index 608a5c38e6dd8..286b51f64679d 100644
+index e4f9e586a2e16..7c5f416f73d71 100644
 --- a/chrome/browser/ui/layout_constants.h
 +++ b/chrome/browser/ui/layout_constants.h
-@@ -153,6 +153,18 @@ enum class LayoutConstant {
+@@ -165,6 +165,18 @@ enum class LayoutConstant {
    // detached tab, and on all sides of the controls padding.
    kTabStripPadding,
  
@@ -730,7 +732,7 @@ index f829637e45840..fa0323c4db2a6 100644
    caption_button_container_->SetBounds(
        CaptionButtonsOnLeadingEdge()
 diff --git a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
-index 021ae254abc9e..1af903c54fcab 100644
+index d6e6b476c450f..204e00a7e3482 100644
 --- a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
 +++ b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
 @@ -10,6 +10,7 @@
@@ -741,7 +743,7 @@ index 021ae254abc9e..1af903c54fcab 100644
  #include "chrome/browser/glic/public/features.h"
  #include "chrome/browser/glic/public/glic_enabling.h"
  #include "chrome/browser/themes/theme_properties.h"
-@@ -323,8 +324,11 @@ HorizontalTabStripRegionView::HorizontalTabStripRegionView(
+@@ -247,8 +248,11 @@ HorizontalTabStripRegionView::HorizontalTabStripRegionView(
          std::make_unique<NewTabButton>(
              base::BindRepeating(&TabStrip::NewTabButtonPressed,
                                  base::Unretained(tab_strip_)),
@@ -755,18 +757,21 @@ index 021ae254abc9e..1af903c54fcab 100644
              Edge::kNone, Edge::kNone, browser);
  
      new_tab_button_ = AddChildView(std::move(tab_strip_control_button));
-@@ -358,7 +362,9 @@ HorizontalTabStripRegionView::HorizontalTabStripRegionView(
-     tab_search_button_->SetProperty(
+@@ -281,8 +285,11 @@ HorizontalTabStripRegionView::HorizontalTabStripRegionView(
+     combo_button_ = AddChildView(std::move(combo_button));
+     combo_button_->SetProperty(
          views::kMarginsKey,
-         gfx::Insets::TLBR(0, 0, 0,
+-        gfx::Insets::TLBR(0, 0, 0,
 -                          GetLayoutConstant(LayoutConstant::kTabStripPadding)));
-+                          GetLayoutConstant(features::IsThorium2024()
-+                                                ? LayoutConstant::kTabSearchPadding
-+                                                : LayoutConstant::kTabStripPadding)));
++        gfx::Insets::TLBR(
++            0, 0, 0,
++            GetLayoutConstant(features::IsThorium2024()
++                                  ? LayoutConstant::kTabSearchPadding
++                                  : LayoutConstant::kTabStripPadding)));
    }
    if (tab_strip_action_container) {
      tab_strip_action_container_ =
-@@ -513,14 +519,20 @@ void HorizontalTabStripRegionView::Layout(PassKey) {
+@@ -407,14 +414,20 @@ void HorizontalTabStripRegionView::Layout(PassKey) {
      // negative margins.
      gfx::Size button_size = button_to_paint_to_layer->GetPreferredSize();
  
@@ -790,7 +795,7 @@ index 021ae254abc9e..1af903c54fcab 100644
      gfx::Rect button_new_bounds = gfx::Rect(button_new_position, button_size);
  
      // If the tabsearch button is before the tabstrip container, then manually
-@@ -741,10 +753,14 @@ void HorizontalTabStripRegionView::LogTabSearchPositionForTesting() {
+@@ -632,10 +645,14 @@ bool HorizontalTabStripRegionView::HasLeadingButtons() const {
  }
  
  void HorizontalTabStripRegionView::UpdateButtonBorders() {
@@ -806,7 +811,7 @@ index 021ae254abc9e..1af903c54fcab 100644
    const int top_inset = extra_vertical_space / 2;
    const int bottom_inset =
        extra_vertical_space - top_inset +
-@@ -814,7 +830,9 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
+@@ -694,7 +711,9 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
  
      tab_strip_right_margin =
          button_to_paint_to_layer->GetPreferredSize().width() +
@@ -817,18 +822,7 @@ index 021ae254abc9e..1af903c54fcab 100644
    }
  
    // If the tab search button is before the tab strip, it also overlaps the
-@@ -828,7 +846,9 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
-     CHECK(tab_search_button_->GetProperty(views::kViewIgnoredByLayoutKey));
-     current_leading_width +=
-         tab_search_button_->GetPreferredSize().width() +
--        GetLayoutConstant(LayoutConstant::kTabStripPadding);
-+        GetLayoutConstant(features::IsThorium2024()
-+                              ? LayoutConstant::kTabInactivePadding
-+                              : LayoutConstant::kTabStripPadding);
-   }
- 
-   if (unfocus_button_ && unfocus_button_->GetVisible()) {
-@@ -837,7 +857,9 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
+@@ -708,7 +727,9 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
      unfocus_button_->SetProperty(views::kViewIgnoredByLayoutKey, true);
      current_leading_width +=
          unfocus_button_->GetPreferredSize().width() +
@@ -838,8 +832,8 @@ index 021ae254abc9e..1af903c54fcab 100644
 +                              : LayoutConstant::kTabStripPadding);
    }
  
-   if (combo_button_) {
-@@ -846,13 +868,17 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
+   if (render_combo_button_before_tab_strip_ && combo_button_ &&
+@@ -721,12 +742,17 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
      combo_button_->SetProperty(views::kViewIgnoredByLayoutKey, true);
      current_leading_width +=
          combo_button_->GetPreferredSize().width() +
@@ -850,16 +844,17 @@ index 021ae254abc9e..1af903c54fcab 100644
    }
  
    if (current_leading_width > 0) {
-     tab_strip_left_margin =
-         current_leading_width +
--        GetLayoutConstant(LayoutConstant::kTabStripPadding) -
+-    tab_strip_left_margin = current_leading_width +
+-                            GetLayoutConstant(LayoutConstant::kTabStripPadding);
++    tab_strip_left_margin =
++        current_leading_width +
 +        GetLayoutConstant(features::IsThorium2024()
 +                              ? LayoutConstant::kTabInactivePadding
-+                              : LayoutConstant::kTabStripPadding) -
-         TabStyle::Get()->GetBottomCornerRadius();
++                              : LayoutConstant::kTabStripPadding);
    }
  
-@@ -870,10 +896,14 @@ void HorizontalTabStripRegionView::AdjustViewBoundsRect(View* view,
+   bool subtract_radius = current_leading_width > 0;
+@@ -760,10 +786,14 @@ void HorizontalTabStripRegionView::AdjustViewBoundsRect(View* view,
                                                          int offset) {
    const gfx::Size view_size = view->GetPreferredSize();
    const int x = tab_strip_->x() + TabStyle::Get()->GetBottomCornerRadius() -
@@ -878,7 +873,7 @@ index 021ae254abc9e..1af903c54fcab 100644
  }
  
 diff --git a/chrome/browser/ui/views/frame/opaque_browser_frame_view.cc b/chrome/browser/ui/views/frame/opaque_browser_frame_view.cc
-index be7c8cc4c6bb1..fa6fa652598e8 100644
+index 7eb01603c68d0..043171b6be4b4 100644
 --- a/chrome/browser/ui/views/frame/opaque_browser_frame_view.cc
 +++ b/chrome/browser/ui/views/frame/opaque_browser_frame_view.cc
 @@ -298,7 +298,9 @@ void OpaqueBrowserFrameView::MaybeAddAppIconToLayoutParams(
@@ -940,10 +935,10 @@ index 4a92fd22a44b2..e4e690f02864f 100644
    // are disabled.  If |restored| is true, acts as if the window is restored
    // regardless of the real mode.
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 5060aa43da14a..2e383a06ea35f 100644
+index d0e2f9ba5136e..714c12b19f859 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-@@ -214,9 +214,11 @@ int IncrementalMinimumWidth(const views::View* view) {
+@@ -208,9 +208,11 @@ int IncrementalMinimumWidth(const views::View* view) {
  
  // The padding between the intent chip and the other trailing decorations.
  constexpr int kIntentChipIntraItemPadding = 12;
@@ -955,7 +950,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
  
  }  // namespace
  
-@@ -251,17 +253,24 @@ LocationBarView::LocationBarView(Browser* browser,
+@@ -245,26 +247,33 @@ LocationBarView::LocationBarView(Browser* browser,
        });
    set_suppress_default_focus_handling();
    if (!is_popup_mode_) {
@@ -964,6 +959,15 @@ index 5060aa43da14a..2e383a06ea35f 100644
 -        base::BindRepeating([](const View* view) {
 -          const auto* v = views::AsViewClass<LocationBarView>(view);
 -          CHECK(v);
+-
+-          // The predicate might be called before LocationBarView is fully
+-          // initialized (e.g. during view hierarchy construction or focus ring
+-          // installation). GetOmniboxController() or its edit_model() might be
+-          // null at this stage.
+-          if (!v->is_initialized_) {
+-            return false;
+-          }
+-
 -          // Show focus ring when the Omnibox is visibly focused and the popup
 -          // is closed.
 -          return v->GetOmniboxController()->edit_model()->is_caret_visible() &&
@@ -981,6 +985,15 @@ index 5060aa43da14a..2e383a06ea35f 100644
 +          base::BindRepeating([](const View* view) {
 +            const auto* v = views::AsViewClass<LocationBarView>(view);
 +            CHECK(v);
++
++            // The predicate might be called before LocationBarView is fully
++            // initialized (e.g. during view hierarchy construction or focus
++            // ring installation). GetOmniboxController() or its edit_model()
++            // might be null at this stage.
++            if (!v->is_initialized_) {
++              return false;
++            }
++
 +            // Show focus ring when the Omnibox is visibly focused and the popup
 +            // is closed.
 +            return v->GetOmniboxController()->edit_model()->is_caret_visible() &&
@@ -991,7 +1004,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
      views::InstallPillHighlightPathGenerator(this);
  
  #if BUILDFLAG(OS_LEVEL_GEOLOCATION_PERMISSION_SUPPORTED)
-@@ -321,10 +330,16 @@ void LocationBarView::Init() {
+@@ -330,10 +339,16 @@ void LocationBarView::Init() {
    const gfx::FontList& font_list = typography_provider.GetFont(
        CONTEXT_OMNIBOX_PRIMARY, views::style::STYLE_PRIMARY);
  
@@ -1012,7 +1025,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
  
    auto location_icon_view =
        std::make_unique<LocationIconView>(omnibox_chip_font_list, this, this);
-@@ -485,7 +500,7 @@ void LocationBarView::Init() {
+@@ -486,7 +501,7 @@ void LocationBarView::Init() {
    // if all page actions (i.e. up to bookmark star) are migrated.
    const bool should_bridge_containers =
        !IsPageActionMigrated(PageActionIconType::kBookmarkStar);
@@ -1021,7 +1034,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
    const page_actions::PageActionViewParams page_action_params{
        .icon_size =
            GetLayoutConstant(LayoutConstant::kLocationBarTrailingIconSize),
-@@ -867,7 +882,7 @@ void LocationBarView::Layout(PassKey) {
+@@ -861,7 +876,7 @@ void LocationBarView::Layout(PassKey) {
    // e.g. the page info icon, the google G icon, the selected suggestion icon.
    int icon_left = 5;
    // The padding between the LHS icon and the text.
@@ -1030,7 +1043,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
  
    // Apply indentation to align the omnibox input icon and the text with those
    // of the suggestions in the popup. However, there are two exceptions where
-@@ -886,22 +901,22 @@ void LocationBarView::Layout(PassKey) {
+@@ -880,22 +895,22 @@ void LocationBarView::Layout(PassKey) {
                               !location_icon_view_->ShouldShowLabel() &&
                               !ShouldShowKeywordBubble();
    if (should_indent) {
@@ -1057,7 +1070,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
    }
  
    LocationBarLayout leading_decorations(LocationBarLayout::Position::kLeftEdge,
-@@ -933,7 +948,10 @@ void LocationBarView::Layout(PassKey) {
+@@ -927,7 +942,10 @@ void LocationBarView::Layout(PassKey) {
                  !ShouldShowKeywordBubble()
            : chip_controller_->chip()->GetVisible() &&
                  !ShouldShowKeywordBubble();
@@ -1068,7 +1081,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
      if (base::FeatureList::IsEnabled(
              content_settings::features::kLeftHandSideActivityIndicators)) {
        leading_decorations.AddDecoration(vertical_padding, location_height,
-@@ -1028,13 +1046,17 @@ void LocationBarView::Layout(PassKey) {
+@@ -1001,13 +1019,17 @@ void LocationBarView::Layout(PassKey) {
    add_trailing_decoration(ai_mode_hint_label_, /*intra_item_padding=*/0,
                            /*edge_padding=*/trailing_decorations_edge_padding);
    for (ContentSettingImageView* view : base::Reversed(content_setting_views_)) {
@@ -1088,7 +1101,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
      add_trailing_decoration(intent_chip_, intra_item_padding,
                              /*edge_padding=*/trailing_decorations_edge_padding);
    }
-@@ -1315,13 +1337,21 @@ SkColor LocationBarView::GetIconLabelBubbleSurroundingForegroundColor() const {
+@@ -1288,13 +1310,21 @@ SkColor LocationBarView::GetIconLabelBubbleSurroundingForegroundColor() const {
    // fall back to the usual omnibox text color to ensure UI consistency.
    // In either case, all IconLabelBubbleViews situated within the location bar
    // will inherit the selected "surrounding foreground color".
@@ -1113,7 +1126,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
    return 0xFF;
  }
  
-@@ -1586,7 +1616,7 @@ void LocationBarView::RefreshBackground() {
+@@ -1559,7 +1589,7 @@ void LocationBarView::RefreshBackground() {
      // focused.
      background_color_ =
          color_provider->GetColor(kColorOmniboxResultsBackground);
@@ -1122,7 +1135,7 @@ index 5060aa43da14a..2e383a06ea35f 100644
      // Under CR23 guidelines, if the Omnibox is unfocused, but still contains
      // in-progress user input, the background color matches the popup (unless
      // high-contrast mode is enabled).
-@@ -1596,6 +1626,16 @@ void LocationBarView::RefreshBackground() {
+@@ -1569,6 +1599,16 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;
@@ -1340,7 +1353,7 @@ index d77dca2702c68..616340b0fcc8f 100644
  }
  
 diff --git a/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.h b/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.h
-index 6becfa6da8a41..8350629a15d70 100644
+index 17ff3a90e9b43..327ccb49644d1 100644
 --- a/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.h
 +++ b/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.h
 @@ -33,12 +33,18 @@ class RoundedOmniboxResultsFrame : public views::View {
@@ -1392,10 +1405,10 @@ index 2f6613ef50fd4..7bca0c5935174 100644
            : vector_icons::kSubmenuArrowChromeRefreshOldIcon,
        ui::kColorIcon, kIconSize);
 diff --git a/chrome/browser/ui/views/side_panel/side_panel.cc b/chrome/browser/ui/views/side_panel/side_panel.cc
-index 767354aa29145..b252a173cccf5 100644
+index 90f261de2344d..c3aeb822ac966 100644
 --- a/chrome/browser/ui/views/side_panel/side_panel.cc
 +++ b/chrome/browser/ui/views/side_panel/side_panel.cc
-@@ -68,7 +68,8 @@ constexpr BrowserAnimationGroup kAnimationGroup =
+@@ -71,7 +71,8 @@ constexpr BrowserAnimationGroup kAnimationGroup =
  // This thickness includes the solid-color background and the inner round-rect
  // border-color stroke. It does not include the outer-color separator.
  int GetBorderThickness() {
@@ -1437,8 +1450,126 @@ index b7663b7b03f9b..c82d7aaf806bf 100644
    const SkColor resize_handle_color =
        GetColorProvider()->GetColor(kColorSidePanelHoverResizeAreaHandle);
    SetBackground(CreateRoundedRectBackground(resize_handle_color, 2));
+diff --git a/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc b/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
+index 46aa9c7d3bd2d..ee64772b32f63 100644
+--- a/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
++++ b/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
+@@ -46,6 +46,7 @@
+ namespace {
+ constexpr base::TimeDelta kHideTabSearchButtonDelay = base::Seconds(2);
+ constexpr base::TimeDelta kAnimationDuration = base::Milliseconds(300);
++constexpr int kThorium2024TabSearchIconSize = 16;
+ }  // namespace
+ 
+ DEFINE_CLASS_ELEMENT_IDENTIFIER_VALUE(TabStripComboButton,
+@@ -102,6 +103,10 @@ TabStripComboButton::TabStripComboButton(BrowserWindowInterface* browser,
+   }
+   end_button_ = AddChildView(
+       CreateFlatEdgeButtonFor(kActionTabSearch, kTabSearchButtonElementId));
++  if (context_ == Context::kHorizontalTabStrip && features::IsThorium2024()) {
++    end_button_->SetUseThorium2024Style(true);
++    end_button_->SetIconSize(kThorium2024TabSearchIconSize);
++  }
+ 
+   PrefService* prefs = browser_->GetProfile()->GetPrefs();
+   pref_registrar_.Init(prefs);
+@@ -428,7 +433,7 @@ void TabStripComboButton::SetTabSearchBubbleHost(TabSearchBubbleHost* host) {
+         context_ == Context::kVerticalTabStrip
+             ? features::IsRoundedIconsEnabled() ? kManageSearchIcon
+                                                 : kTabSearchTabStripOldIcon
+-        : features::IsRoundedIconsEnabled()
++        : (features::IsThorium2024() || features::IsRoundedIconsEnabled())
+             ? vector_icons::kKeyboardArrowDownIcon
+             : vector_icons::kExpandMoreOldIcon));
+   }
+diff --git a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc
+index 74f9b8fb0b4f5..be89deb33c207 100644
+--- a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc
++++ b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc
+@@ -126,6 +126,28 @@ void TabStripFlatEdgeButton::SetIconOpacity(float opacity) {
+   image_container_view()->layer()->SetOpacity(opacity);
+ }
+ 
++void TabStripFlatEdgeButton::SetUseThorium2024Style(
++    bool use_thorium_2024_style) {
++  if (use_thorium_2024_style_ == use_thorium_2024_style) {
++    return;
++  }
++  use_thorium_2024_style_ = use_thorium_2024_style;
++  SetProperty(views::kHighlightPathGeneratorKey,
++              std::make_unique<views::RoundRectHighlightPathGenerator>(
++                  gfx::Insets(), GetButtonCornerRadii()));
++  views::InkDrop::Get(this)->GetInkDrop()->HostSizeChanged(size());
++
++  const std::optional<ui::ImageModel>& model =
++      GetImageModel(views::Button::STATE_NORMAL);
++  if (model && model->IsVectorIcon()) {
++    UpdateIcon(*model);
++  }
++  if (should_show_label_) {
++    UpdateLabelColor();
++  }
++  SchedulePaint();
++}
++
+ void TabStripFlatEdgeButton::SetExpansionFactor(float factor) {
+   if (expansion_factor_ == factor) {
+     return;
+@@ -256,20 +278,30 @@ void TabStripFlatEdgeButton::RemovedFromWidget() {
+ }
+ 
+ ui::ColorId TabStripFlatEdgeButton::GetForegroundColor() const {
++  if (use_thorium_2024_style_) {
++    return GetWidget() && GetWidget()->ShouldPaintAsActive()
++               ? kColorTabForegroundInactiveFrameActive
++               : kColorNewTabButtonCRForegroundFrameInactive;
++  }
+   return GetWidget() && GetWidget()->ShouldPaintAsActive()
+              ? kColorTabSearchButtonCRForegroundFrameActive
+              : kColorTabSearchButtonCRForegroundFrameInactive;
+ }
+ 
+ ui::ColorId TabStripFlatEdgeButton::GetBackgroundColor() const {
++  if (use_thorium_2024_style_) {
++    return GetWidget() && GetWidget()->ShouldPaintAsActive()
++               ? kColorNewTabButtonBackgroundFrameActive
++               : kColorNewTabButtonBackgroundFrameInactive;
++  }
+   return GetWidget() && GetWidget()->ShouldPaintAsActive()
+              ? kColorNewTabButtonCRBackgroundFrameActive
+              : kColorNewTabButtonCRBackgroundFrameInactive;
+ }
+ 
+ gfx::RoundedCornersF TabStripFlatEdgeButton::GetButtonCornerRadii() const {
+-  constexpr float kFlatRadius = 2.0f;
+-  constexpr float kRoundedRadius = 10.0f;
++  const float kFlatRadius = use_thorium_2024_style_ ? 4.0f : 2.0f;
++  const float kRoundedRadius = use_thorium_2024_style_ ? 14.0f : 10.0f;
+   float flat_radius = kFlatRadius + ((kRoundedRadius - kFlatRadius) *
+                                      (1.0f - flat_edge_factor_));
+ 
+diff --git a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h
+index 37bfed74a1201..1065282429cbd 100644
+--- a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h
++++ b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h
+@@ -41,6 +41,7 @@ class TabStripFlatEdgeButton : public views::LabelButton,
+   void UpdateIcon(const ui::ImageModel& icon_image);
+   void SetInsets(const gfx::Insets& insets);
+   void SetIconOpacity(float opacity);
++  void SetUseThorium2024Style(bool use_thorium_2024_style);
+ 
+   void SetExpansionFactor(float factor);
+   float GetExpansionFactor() const { return expansion_factor_; }
+@@ -87,6 +88,7 @@ class TabStripFlatEdgeButton : public views::LabelButton,
+   float flat_edge_factor_ = 1.0f;
+   FlatEdge flat_edge_ = FlatEdge::kNone;
+   base::CallbackListSubscription paint_as_active_subscription_;
++  bool use_thorium_2024_style_ = false;
+ 
+   base::RepeatingClosureList will_invoke_action_callback_list_;
+ };
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index f80c98d3bd162..466a47b4ae49a 100644
+index 97f5ca3d6710d..585b1027ca382 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
 @@ -1,4 +1,4 @@
@@ -1447,15 +1578,15 @@ index f80c98d3bd162..466a47b4ae49a 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -83,6 +83,7 @@
+@@ -63,6 +63,7 @@
+ #include "ui/base/metadata/metadata_impl_macros.h"
+ #include "ui/base/models/list_selection_model.h"
  #include "ui/base/pointer/touch_ui_controller.h"
- #include "ui/base/resource/resource_bundle.h"
- #include "ui/base/theme_provider.h"
 +#include "ui/base/ui_base_features.h"
  #include "ui/compositor/clip_recorder.h"
  #include "ui/compositor/compositor.h"
  #include "ui/gfx/animation/tween.h"
-@@ -136,7 +137,9 @@ constexpr int kPinnedTabExtraWidthToRenderAsNormal = 30;
+@@ -109,7 +110,9 @@ constexpr int kPinnedTabExtraWidthToRenderAsNormal = 30;
  // Additional padding of close button to the right of the tab
  // indicator when `extra_alert_indicator_padding_` is true.
  constexpr int kTabAlertIndicatorCloseButtonPaddingAdjustmentTouchUI = 8;
@@ -1465,7 +1596,7 @@ index f80c98d3bd162..466a47b4ae49a 100644
  
  bool g_show_hover_card_on_mouse_hover = true;
  
-@@ -386,7 +389,11 @@ void Tab::Layout(PassKey) {
+@@ -359,7 +362,11 @@ void Tab::Layout(PassKey) {
    const bool was_showing_icon = showing_icon_;
    UpdateIconVisibility();
  
@@ -1478,7 +1609,7 @@ index f80c98d3bd162..466a47b4ae49a 100644
  
    // Position the underline under the tab contents.
    constexpr int kGlicUnderlineYOffset = 8;
-@@ -404,6 +411,13 @@ void Tab::Layout(PassKey) {
+@@ -377,6 +384,13 @@ void Tab::Layout(PassKey) {
    // indicator, but visually it will be smaller at kFaviconSize wide.
    gfx::Rect favicon_bounds(start, contents_rect.y(), 0, 0);
    if (showing_icon_) {
@@ -1492,7 +1623,7 @@ index f80c98d3bd162..466a47b4ae49a 100644
      if (center_icon_) {
        // When centering the favicon, the favicon is allowed to escape the normal
        // contents rect.
-@@ -466,7 +480,9 @@ void Tab::Layout(PassKey) {
+@@ -439,7 +453,9 @@ void Tab::Layout(PassKey) {
        if (extra_alert_indicator_padding_) {
          right -= ui::TouchUiController::Get()->touch_ui()
                       ? kTabAlertIndicatorCloseButtonPaddingAdjustmentTouchUI
@@ -1503,7 +1634,7 @@ index f80c98d3bd162..466a47b4ae49a 100644
        }
      }
      const gfx::Size image_size = alert_indicator_button_->GetPreferredSize();
-@@ -1062,6 +1078,9 @@ void Tab::UpdateIconVisibility() {
+@@ -1035,6 +1051,9 @@ void Tab::UpdateIconVisibility() {
    // a non-narrow tab.
    if (!closing_) {
      center_icon_ = false;
@@ -1513,7 +1644,7 @@ index f80c98d3bd162..466a47b4ae49a 100644
    }
  
    showing_icon_ = showing_alert_indicator_ = false;
-@@ -1099,6 +1118,9 @@ void Tab::UpdateIconVisibility() {
+@@ -1072,6 +1091,9 @@ void Tab::UpdateIconVisibility() {
      // While animating to or from the pinned state, pinned tabs are rendered as
      // normal tabs. Force the extra padding on so the favicon doesn't jitter
      // left and then back right again as it resizes through layout regimes.
@@ -1523,7 +1654,7 @@ index f80c98d3bd162..466a47b4ae49a 100644
      extra_alert_indicator_padding_ = true;
      return;
    }
-@@ -1227,6 +1249,16 @@ void Tab::UpdateIconVisibility() {
+@@ -1200,6 +1222,16 @@ void Tab::UpdateIconVisibility() {
      }
    }
  
@@ -1558,64 +1689,20 @@ index 190d0cd9fd770..4bb45b158f396 100644
    // When both the close button and alert indicator are visible, we add extra
    // padding between them to space them out visually.
    bool extra_alert_indicator_padding_ = false;
-diff --git a/chrome/browser/ui/views/tabs/tab_search_button.cc b/chrome/browser/ui/views/tabs/tab_search_button.cc
-index c62091a212ecf..92b1e02986950 100644
---- a/chrome/browser/ui/views/tabs/tab_search_button.cc
-+++ b/chrome/browser/ui/views/tabs/tab_search_button.cc
-@@ -31,7 +31,8 @@ TabSearchButton::TabSearchButton(
-     Edge animated_flat_edge)
-     : TabStripControlButton(browser_window_interface,
-                             PressedCallback(),
--                            features::IsRoundedIconsEnabled()
-+                            features::IsThorium2024() ||
-+                                    features::IsRoundedIconsEnabled()
-                                 ? vector_icons::kKeyboardArrowDownIcon
-                                 : vector_icons::kExpandMoreOldIcon,
-                             fixed_flat_edge,
-@@ -42,11 +43,13 @@ TabSearchButton::TabSearchButton(
-   GetViewAccessibility().SetName(
-       l10n_util::GetStringUTF16(IDS_ACCNAME_TAB_SEARCH));
- 
--  SetForegroundFrameActiveColorId(kColorNewTabButtonForegroundFrameActive);
--  SetForegroundFrameInactiveColorId(kColorNewTabButtonForegroundFrameInactive);
--  SetBackgroundFrameActiveColorId(kColorNewTabButtonCRBackgroundFrameActive);
--  SetBackgroundFrameInactiveColorId(
--      kColorNewTabButtonCRBackgroundFrameInactive);
-+  if (!features::IsThorium2024()) {
-+    SetForegroundFrameActiveColorId(kColorNewTabButtonForegroundFrameActive);
-+    SetForegroundFrameInactiveColorId(kColorNewTabButtonForegroundFrameInactive);
-+    SetBackgroundFrameActiveColorId(kColorNewTabButtonCRBackgroundFrameActive);
-+    SetBackgroundFrameInactiveColorId(
-+        kColorNewTabButtonCRBackgroundFrameInactive);
-+  }
- 
-   UpdateColors();
- }
-@@ -63,7 +66,9 @@ void TabSearchButton::NotifyClick(const ui::Event& event) {
- }
- 
- int TabSearchButton::GetCornerRadius() const {
--  return kCRTabSearchCornerRadius;
-+  return features::IsThorium2024()
-+             ? TabStripControlButton::kButtonSize.width() / 2
-+             : kCRTabSearchCornerRadius;
- }
- 
- int TabSearchButton::GetFlatCornerRadius() const {
 diff --git a/chrome/browser/ui/views/tabs/tab_style_views.cc b/chrome/browser/ui/views/tabs/tab_style_views.cc
-index 44a60df681ef2..095f0009ae8c5 100644
+index ed475c0656008..83b5a9e136d80 100644
 --- a/chrome/browser/ui/views/tabs/tab_style_views.cc
 +++ b/chrome/browser/ui/views/tabs/tab_style_views.cc
-@@ -238,7 +238,7 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
-     // this. Detached tab shapes do not need to respect this.
-     if (path_type != TabStyle::PathType::kInteriorClip &&
-         path_type != TabStyle::PathType::kHitTest) {
+@@ -216,7 +216,7 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
+ 
+     // The hit test extends the full height to make it easier to select tabs.
+     if (path_type != TabStyle::PathType::kHitTest) {
 -      tab_height -= GetLayoutConstant(LayoutConstant::kTabStripPadding) * scale;
 +      tab_height -= GetLayoutConstant(LayoutConstant::kTabMargin) * scale;
        tab_height -=
            GetLayoutConstant(LayoutConstant::kTabstripToolbarOverlap) * scale;
      }
-@@ -251,7 +251,7 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
+@@ -229,7 +229,7 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
  
      float left = aligned_bounds.x() + extension_corner_radius;
      float top = aligned_bounds.y() +
@@ -1624,7 +1711,7 @@ index 44a60df681ef2..095f0009ae8c5 100644
  
      float right = aligned_bounds.right() - extension_corner_radius;
      const int bottom = top + tab_height;
-@@ -263,7 +263,7 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
+@@ -241,7 +241,7 @@ SkPath TabStyleViewsImpl::GetPath(TabStyle::PathType path_type,
      // of the tab, encompassing the top padding. This makes it easy to click on
      // tabs by moving the mouse to the top of the screen.
      if (path_type == TabStyle::PathType::kHitTest && is_frame_condensed) {
@@ -1633,10 +1720,10 @@ index 44a60df681ef2..095f0009ae8c5 100644
        // Don't round the top corners to avoid creating dead space between tabs.
        top_left_corner_radius = 0;
        top_right_corner_radius = 0;
-@@ -976,6 +976,10 @@ void TabStyleViewsImpl::PaintTabBackgroundFill(
-     cc::PaintFlags flags;
-     flags.setAntiAlias(true);
-     flags.setColor(GetCurrentTabBackgroundColor(selection_state, hovered));
+@@ -929,6 +929,10 @@ void TabStyleViewsImpl::PaintTabBackgroundFill(
+     }
+ 
+     flags.setColor(color);
 +    if (features::IsThorium2024() &&
 +        selection_state != TabStyle::TabSelectionState::kActive) {
 +      flags.setAlphaf(0.7f);
@@ -1663,10 +1750,10 @@ index d4c4f01c14c21..8e906b84fef0e 100644
        gfx::Insets(extra_height / 2) + *GetProperty(views::kInternalPaddingKey);
  
 diff --git a/chrome/browser/ui/webui/settings/settings_ui.cc b/chrome/browser/ui/webui/settings/settings_ui.cc
-index 5df96f4435834..2422661b9b61d 100644
+index d5c37bda84eb7..268423d43bd1f 100644
 --- a/chrome/browser/ui/webui/settings/settings_ui.cc
 +++ b/chrome/browser/ui/webui/settings/settings_ui.cc
-@@ -149,6 +149,7 @@
+@@ -154,6 +154,7 @@
  #include "third_party/blink/public/common/features.h"
  #include "ui/accessibility/accessibility_features.h"
  #include "ui/base/interaction/element_identifier.h"
@@ -1674,7 +1761,7 @@ index 5df96f4435834..2422661b9b61d 100644
  #include "ui/webui/tracked_element/tracked_element_handler_document_singleton.h"
  #include "ui/webui/webui_util.h"
  
-@@ -181,7 +182,6 @@
+@@ -186,7 +187,6 @@
  #include "chromeos/constants/chromeos_features.h"
  #include "components/account_manager_core/chromeos/account_manager.h"
  #include "components/user_manager/user.h"
@@ -1682,9 +1769,9 @@ index 5df96f4435834..2422661b9b61d 100644
  #else  // !BUILDFLAG(IS_CHROMEOS)
  #include "chrome/browser/search/background/ntp_custom_background_service_factory.h"
  #include "chrome/browser/signin/account_consistency_mode_manager.h"
-@@ -696,6 +696,9 @@ SettingsUI::SettingsUI(content::WebUI* web_ui)
+@@ -716,6 +716,9 @@ SettingsUI::SettingsUI(content::WebUI* web_ui)
        "personalContextSettingsDescription",
-       IDS_ACCESSIBILITY_ANNOTATOR_SETTINGS_DESCRIPTION_DESKTOP);
+       IDS_PERSONAL_CONTEXT_SETTINGS_DESCRIPTION_DESKTOP);
  
 +  html_source->AddString(
 +      "thorium2024", features::IsThorium2024() ? "thorium-2024" : "");
@@ -1693,10 +1780,10 @@ index 5df96f4435834..2422661b9b61d 100644
        "webuiRefresh2026",
        features::IsWebuiRefresh2026Enabled() ? "webui-refresh-2026" : "");
 diff --git a/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc b/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc
-index bc7c354550ad4..1c59bd5517619 100644
+index 763d6a9fbd5d2..41eb29abb899e 100644
 --- a/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc
 +++ b/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc
-@@ -102,6 +102,14 @@ std::string_view LayoutConstantToCssVarName(LayoutConstant layout_constant) {
+@@ -110,6 +110,14 @@ std::string_view LayoutConstantToCssVarName(LayoutConstant layout_constant) {
        return "--tab-strip-height";
      case kTabStripPadding:
        return "--tab-strip-padding";
@@ -1712,10 +1799,10 @@ index bc7c354550ad4..1c59bd5517619 100644
        return "--tab-separator-height";
      case kTabPreTitlePadding:
 diff --git a/ui/base/ui_base_features.cc b/ui/base/ui_base_features.cc
-index 434225ce92bff..7b3997fe2f7c9 100644
+index 1cee901ca32f1..5fee918061ee0 100644
 --- a/ui/base/ui_base_features.cc
 +++ b/ui/base/ui_base_features.cc
-@@ -411,6 +411,16 @@ bool IsVariableRefreshRateAlwaysOn() {
+@@ -417,6 +417,16 @@ bool IsVariableRefreshRateAlwaysOn() {
    return base::FeatureList::IsEnabled(kEnableVariableRefreshRateAlwaysOn);
  }
  
@@ -1733,10 +1820,10 @@ index 434225ce92bff..7b3997fe2f7c9 100644
  
  #if BUILDFLAG(IS_WIN)
 diff --git a/ui/base/ui_base_features.h b/ui/base/ui_base_features.h
-index a68a5fbcd74e7..f2c85b7721b0c 100644
+index 10a258323560f..0686f6ee057c0 100644
 --- a/ui/base/ui_base_features.h
 +++ b/ui/base/ui_base_features.h
-@@ -234,6 +234,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES)
+@@ -239,6 +239,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES)
  BASE_DECLARE_FEATURE(kEnableVariableRefreshRateAlwaysOn);
  COMPONENT_EXPORT(UI_BASE_FEATURES) bool IsVariableRefreshRateAlwaysOn();
  
@@ -2278,7 +2365,7 @@ index d1461bbffb758..0c02bb10cb17e 100644
  }
  
 diff --git a/ui/views/controls/menu/menu_item_view.cc b/ui/views/controls/menu/menu_item_view.cc
-index f22907bb8d3c8..559b43a5ee39d 100644
+index fbb45b3a420ec..52fe557dbcfae 100644
 --- a/ui/views/controls/menu/menu_item_view.cc
 +++ b/ui/views/controls/menu/menu_item_view.cc
 @@ -1651,11 +1651,14 @@ void MenuItemView::UpdateSelectionBasedState(bool paint_as_selected) {

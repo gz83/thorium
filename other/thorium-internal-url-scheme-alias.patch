@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 0944c5f707fa3..086c55c204ae6 100644
+index 6a8c485a1e752..f89b010dbdab4 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -643,6 +643,8 @@ source_set("core") {
+@@ -863,6 +863,8 @@ source_set("core") {
      "startup_data.cc",
      "thorium_flag_choices.h",
      "thorium_flag_entries.h",
@@ -12,10 +12,10 @@ index 0944c5f707fa3..086c55c204ae6 100644
      "unexpire_flags.h",
      "universal_web_contents_observers.cc",
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index edab63d18ffd0..8782ae107e30b 100644
+index cbac8ed6171b7..0cf29f1699317 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -556,6 +556,7 @@
+@@ -562,6 +562,7 @@
  #include "chrome/browser/search/instant_service_factory.h"
  #include "chrome/browser/themes/theme_service.h"
  #include "chrome/browser/themes/theme_service_factory.h"
@@ -23,7 +23,7 @@ index edab63d18ffd0..8782ae107e30b 100644
  #include "chrome/browser/ui/browser.h"
  #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
  #include "chrome/browser/ui/browser_window/public/global_browser_collection.h"
-@@ -5148,6 +5149,8 @@ bool ChromeContentBrowserClient::
+@@ -5150,6 +5151,8 @@ bool ChromeContentBrowserClient::
  
  void ChromeContentBrowserClient::BrowserURLHandlerCreated(
      BrowserURLHandler* handler) {
@@ -135,12 +135,12 @@ index 0000000000000..5b32f2d6254d4
 +
 +#endif  // CHROME_BROWSER_THORIUM_URL_UTILS_H_
 diff --git a/chrome/browser/ui/incognito_allowed_url.cc b/chrome/browser/ui/incognito_allowed_url.cc
-index 27bfd067a20f2..de8bfc0a171af 100644
+index 90cbf265af08d..1db9738f74b52 100644
 --- a/chrome/browser/ui/incognito_allowed_url.cc
 +++ b/chrome/browser/ui/incognito_allowed_url.cc
 @@ -23,7 +23,8 @@ namespace {
  bool IsHostAllowedInIncognito(const GURL& url) {
-   std::string scheme = url.GetScheme();
+   std::string_view scheme = url.scheme();
    std::string_view host = url.host();
 -  if (scheme != content::kChromeUIScheme) {
 +  if (scheme != content::kChromeUIScheme &&
@@ -366,10 +366,10 @@ index 50c2903b4ff3a..9e6218c19c13c 100644
    typedef std::pair<URLHandler, URLHandler> HandlerPair;
    std::vector<HandlerPair> url_handlers_;
 diff --git a/content/browser/renderer_host/navigation_controller_impl.cc b/content/browser/renderer_host/navigation_controller_impl.cc
-index 21d7764fa1d87..a48097769f8e3 100644
+index fbb1a45f48bbc..ac48d230d36e1 100644
 --- a/content/browser/renderer_host/navigation_controller_impl.cc
 +++ b/content/browser/renderer_host/navigation_controller_impl.cc
-@@ -454,9 +454,9 @@ void RewriteUrlForNavigation(const GURL& original_url,
+@@ -456,9 +456,9 @@ void RewriteUrlForNavigation(const GURL& original_url,
    // remove "view-source:" from the beginning of the URL to get the URL that
    // will actually be loaded. This real URL won't be shown to the user, just
    // used internally.

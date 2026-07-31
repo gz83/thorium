@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/startup/default_browser_prompt/default_browser_prompt.cc b/chrome/browser/ui/startup/default_browser_prompt/default_browser_prompt.cc
-index 036092b985baa..1a054ff5fe643 100644
+index 8e37dc9050a71..756c7c25ecfcc 100644
 --- a/chrome/browser/ui/startup/default_browser_prompt/default_browser_prompt.cc
 +++ b/chrome/browser/ui/startup/default_browser_prompt/default_browser_prompt.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 036092b985baa..1a054ff5fe643 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -36,43 +36,6 @@
+@@ -36,60 +36,12 @@
  #include "content/public/browser/visibility.h"
  #include "content/public/browser/web_contents.h"
  
@@ -52,23 +52,22 @@ index 036092b985baa..1a054ff5fe643 100644
  void RegisterDefaultBrowserPromptPrefs(PrefRegistrySimple* registry) {
    registry->RegisterStringPref(prefs::kBrowserSuppressDefaultBrowserPrompt,
                                 std::string());
-@@ -119,8 +82,8 @@ void MigrateDefaultBrowserLastDeclinedPref(PrefService* profile_prefs) {
-   }
  }
  
 -void ShowDefaultBrowserPrompt(Profile* profile,
--                              base::OnceCallback<void(bool)> done_callback) {
 +void ShowDefaultBrowserPrompt(Profile*,
-+                              base::OnceCallback<void(bool)>) {
-   // Do not check if Chrome is the default browser if there is a policy in
-   // control of this setting.
-   if (g_browser_process->local_state()->IsManagedPreference(
-@@ -130,7 +93,5 @@ void ShowDefaultBrowserPrompt(Profile* profile,
-     return;
-   }
- 
+                               base::OnceCallback<void(bool)> done_callback) {
+-  // Do not check if Chrome is the default browser if there is a policy in
+-  // control of this setting.
+-  if (g_browser_process->local_state()->IsManagedPreference(
+-          prefs::kDefaultBrowserSettingEnabled)) {
+-    // Handling of the browser.default_browser_setting_enabled policy setting is
+-    // taken care of in BrowserProcessImpl.
+-    return;
+-  }
+-
 -  default_browser::DefaultBrowserManager::From(g_browser_process)
 -      ->GetDefaultBrowserState(base::BindOnce(
 -          &OnCheckIsDefaultBrowserFinished, profile, std::move(done_callback)));
-+  return;
++  std::move(done_callback).Run(false);
  }

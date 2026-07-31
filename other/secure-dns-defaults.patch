@@ -18,7 +18,7 @@ index e5a2aadcc85f6..3ce7e0d2088fd 100644
  }
  
 diff --git a/chrome/browser/net/stub_resolver_config_reader.cc b/chrome/browser/net/stub_resolver_config_reader.cc
-index 3d9047c1cf558..444429525ca4a 100644
+index d855df0c5ea08..0843195792999 100644
 --- a/chrome/browser/net/stub_resolver_config_reader.cc
 +++ b/chrome/browser/net/stub_resolver_config_reader.cc
 @@ -1,4 +1,4 @@

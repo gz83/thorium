@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/browser_actions.cc b/chrome/browser/ui/browser_actions.cc
-index aa3427c786f00..1a19a3986e090 100644
+index 812961aed273a..2010f6bc8fa53 100644
 --- a/chrome/browser/ui/browser_actions.cc
 +++ b/chrome/browser/ui/browser_actions.cc
-@@ -11,6 +11,7 @@
+@@ -12,6 +12,7 @@
  
  #include "base/check_deref.h"
  #include "base/check_op.h"
@@ -10,7 +10,7 @@ index aa3427c786f00..1a19a3986e090 100644
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
  #include "base/metrics/user_metrics.h"
-@@ -833,6 +834,9 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -905,6 +906,9 @@ void BrowserActions::InitializeChromeMenuActions() {
    TabStripModel* const tab_strip_model = bwi_->GetTabStripModel();
    BrowserWindowInterface* const bwi = base::to_address(bwi_);
    const bool is_guest_session = profile->IsGuestSession();
@@ -20,7 +20,7 @@ index aa3427c786f00..1a19a3986e090 100644
  
    root_action_item_->AddChild(
        ChromeMenuAction(
-@@ -845,8 +849,12 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -917,8 +921,12 @@ void BrowserActions::InitializeChromeMenuActions() {
                profile),
            kActionNewIncognitoWindow, IDS_NEW_INCOGNITO_WINDOW,
            IDS_NEW_INCOGNITO_WINDOW,
@@ -35,34 +35,35 @@ index aa3427c786f00..1a19a3986e090 100644
            .SetEnabled(IncognitoModePrefs::IsIncognitoAllowed(profile))
            .Build());
  
-@@ -1001,9 +1009,11 @@ void BrowserActions::InitializeChromeMenuActions() {
-                            bwi, is_incognito),
-                        kActionClearBrowsingData, IDS_CLEAR_BROWSING_DATA,
-                        IDS_CLEAR_BROWSING_DATA,
--                       features::IsRoundedIconsEnabled()
--                           ? kDeleteIcon
--                           : kTrashCanRefreshOldIcon)
-+                       disable_thorium_command_icons
-+                           ? (features::IsRoundedIconsEnabled()
-+                                  ? kDeleteIcon
-+                                  : kTrashCanRefreshOldIcon)
-+                           : kTrashCanRefreshThoriumIcon)
+@@ -1076,8 +1084,10 @@ void BrowserActions::InitializeChromeMenuActions() {
+               bwi, is_incognito),
+           kActionClearBrowsingData, IDS_CLEAR_BROWSING_DATA,
+           IDS_CLEAR_BROWSING_DATA,
+-          features::IsRoundedIconsEnabled() ? kDeleteIcon
+-                                            : kTrashCanRefreshOldIcon)
++          disable_thorium_command_icons
++              ? (features::IsRoundedIconsEnabled() ? kDeleteIcon
++                                                   : kTrashCanRefreshOldIcon)
++              : kTrashCanRefreshThoriumIcon)
            .SetEnabled(is_incognito ||
                        (!is_guest_session && !profile->IsSystemProfile()))
            .Build());
-@@ -1217,9 +1227,7 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -1292,9 +1302,10 @@ void BrowserActions::InitializeChromeMenuActions() {
                  },
                  bwi),
              kActionShowChromeLabs, IDS_CHROMELABS, IDS_CHROMELABS,
 -            features::IsRoundedIconsEnabled()   ? kScienceIcon
 -            : features::IsRoundedIconsEnabled() ? vector_icons::kScienceIcon
 -                                                : kScienceOldIcon)
-+            disable_thorium_command_icons ? kScienceIcon : kScienceThoriumIcon)
++            disable_thorium_command_icons
++                ? (features::IsRoundedIconsEnabled() ? kScienceIcon
++                                                     : kScienceOldIcon)
++                : kScienceThoriumIcon)
              .SetVisible(ShouldShowChromeLabsUI(profile))
              .Build());
    }
 diff --git a/chrome/browser/ui/content_settings/content_setting_image_model.cc b/chrome/browser/ui/content_settings/content_setting_image_model.cc
-index bcdbd0957b0e7..c0eba8e182044 100644
+index fa25c2f365691..d9e6e4639fe11 100644
 --- a/chrome/browser/ui/content_settings/content_setting_image_model.cc
 +++ b/chrome/browser/ui/content_settings/content_setting_image_model.cc
 @@ -8,6 +8,7 @@
@@ -175,7 +176,7 @@ index 08e5d23de4982..4504a91a608e4 100644
      case TabAlert::kAudioRecording:
      case TabAlert::kVideoRecording:
 diff --git a/chrome/browser/ui/tabs/tab_menu_model.cc b/chrome/browser/ui/tabs/tab_menu_model.cc
-index d59e95f5a5ebe..9b525ad02e9ea 100644
+index 86616617c2737..6d71426e14547 100644
 --- a/chrome/browser/ui/tabs/tab_menu_model.cc
 +++ b/chrome/browser/ui/tabs/tab_menu_model.cc
 @@ -446,15 +446,24 @@ void TabMenuModel::Build(int index) {
@@ -209,10 +210,10 @@ index d59e95f5a5ebe..9b525ad02e9ea 100644
    }
  
 diff --git a/chrome/browser/ui/toolbar/app_menu_model.cc b/chrome/browser/ui/toolbar/app_menu_model.cc
-index 95ad4098919a8..82f91a9db81d1 100644
+index ebcb598315714..8262a0bfacdc0 100644
 --- a/chrome/browser/ui/toolbar/app_menu_model.cc
 +++ b/chrome/browser/ui/toolbar/app_menu_model.cc
-@@ -771,13 +771,18 @@ void ProfileSubMenuModel::BuildCustomizeProfileRow(Profile* profile) {
+@@ -785,13 +785,18 @@ void ProfileSubMenuModel::BuildCustomizeProfileRow(Profile* profile) {
  }
  
  void ProfileSubMenuModel::BuildCloseProfileRow(Profile* profile) {
@@ -234,7 +235,7 @@ index 95ad4098919a8..82f91a9db81d1 100644
                        ui::kColorMenuIcon, kDefaultIconSize));
  }
  
-@@ -1209,9 +1214,14 @@ void ExtensionsMenuModel::Build(Browser* browser) {
+@@ -1211,9 +1216,14 @@ void ExtensionsMenuModel::Build(Browser* browser) {
    AddItemWithStringIdAndVectorIcon(
        this, IDC_EXTENSIONS_SUBMENU_MANAGE_EXTENSIONS,
        IDS_EXTENSIONS_SUBMENU_MANAGE_EXTENSIONS_ITEM,
@@ -252,7 +253,7 @@ index 95ad4098919a8..82f91a9db81d1 100644
    SetElementIdentifierAt(
        GetIndexOfCommandId(IDC_EXTENSIONS_SUBMENU_MANAGE_EXTENSIONS).value(),
        kManageExtensionsMenuItem);
-@@ -2051,6 +2061,9 @@ void AppMenuModel::Build() {
+@@ -2053,6 +2063,9 @@ void AppMenuModel::Build() {
    // Build (and, by extension, Init) should only be called once.
    DCHECK_EQ(0u, GetItemCount());
  
@@ -262,7 +263,7 @@ index 95ad4098919a8..82f91a9db81d1 100644
    if (app_menu_icon_controller_ &&
        app_menu_icon_controller_->GetTypeAndSeverity().type ==
            AppMenuIconController::IconType::kUpgradeNotification) {
-@@ -2100,8 +2113,12 @@ void AppMenuModel::Build() {
+@@ -2102,8 +2115,12 @@ void AppMenuModel::Build() {
    if (!browser_->profile()->IsGuestSession()) {
      AddItemWithStringIdAndVectorIcon(
          this, IDC_NEW_INCOGNITO_WINDOW, IDS_NEW_INCOGNITO_WINDOW,
@@ -277,7 +278,7 @@ index 95ad4098919a8..82f91a9db81d1 100644
      SetElementIdentifierAt(
          GetIndexOfCommandId(IDC_NEW_INCOGNITO_WINDOW).value(),
          kIncognitoMenuItem);
-@@ -2189,9 +2206,13 @@ void AppMenuModel::Build() {
+@@ -2190,9 +2207,13 @@ void AppMenuModel::Build() {
        !extensions::ui_util::HasManageableExtensions(browser_->profile())) {
      AddItemWithStringIdAndVectorIcon(
          this, IDC_FIND_EXTENSIONS, IDS_FIND_EXTENSIONS,
@@ -294,7 +295,7 @@ index 95ad4098919a8..82f91a9db81d1 100644
      SetElementIdentifierAt(GetIndexOfCommandId(IDC_FIND_EXTENSIONS).value(),
                             ExtensionsMenuModel::kVisitChromeWebStoreMenuItem);
    } else {
-@@ -2199,16 +2220,23 @@ void AppMenuModel::Build() {
+@@ -2200,16 +2221,23 @@ void AppMenuModel::Build() {
      AddSubMenuWithStringIdAndVectorIcon(
          this, IDC_EXTENSIONS_SUBMENU, IDS_EXTENSIONS_SUBMENU,
          sub_menus_.back().get(),
@@ -582,7 +583,7 @@ index 7bca0c5935174..75ff06c111e85 100644
  }
  
 diff --git a/chrome/browser/ui/views/profiles/profile_menu_view.cc b/chrome/browser/ui/views/profiles/profile_menu_view.cc
-index 990eab66ec0c1..0fd9167999671 100644
+index d0f61863c6dae..22a612cfef457 100644
 --- a/chrome/browser/ui/views/profiles/profile_menu_view.cc
 +++ b/chrome/browser/ui/views/profiles/profile_menu_view.cc
 @@ -8,6 +8,7 @@
@@ -593,7 +594,7 @@ index 990eab66ec0c1..0fd9167999671 100644
  #include "ash/constants/web_app_id_constants.h"
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
-@@ -1151,12 +1152,17 @@ void ProfileMenuView::MaybeBuildCloseBrowsersButton() {
+@@ -1171,12 +1172,17 @@ void ProfileMenuView::MaybeBuildCloseBrowsersButton() {
      }
    }
  
@@ -655,7 +656,7 @@ index bbbdc846ef822..b1862af8ef913 100644
                         ? kArrowForwardIcon
                         : kForwardArrowTouchOldIcon);
 diff --git a/chrome/browser/ui/views/toolbar/browser_app_menu_button.cc b/chrome/browser/ui/views/toolbar/browser_app_menu_button.cc
-index 77612f77f3acb..272cde24b8a06 100644
+index 4dedc2c68e96f..bed73759fa084 100644
 --- a/chrome/browser/ui/views/toolbar/browser_app_menu_button.cc
 +++ b/chrome/browser/ui/views/toolbar/browser_app_menu_button.cc
 @@ -1,4 +1,4 @@
@@ -672,7 +673,7 @@ index 77612f77f3acb..272cde24b8a06 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/location.h"
-@@ -146,13 +147,19 @@ void BrowserAppMenuButton::UpdateThemeBasedState() {
+@@ -151,13 +152,19 @@ void BrowserAppMenuButton::UpdateThemeBasedState() {
  }
  
  void BrowserAppMenuButton::UpdateIcon() {
@@ -730,7 +731,7 @@ index d23ce42d48414..f3994c578a924 100644
                                                     : kNavigateHomeTouchOldIcon);
    SetTooltipText(l10n_util::GetStringUTF16(IDS_TOOLTIP_HOME));
 diff --git a/chrome/browser/ui/views/toolbar/reload_button.cc b/chrome/browser/ui/views/toolbar/reload_button.cc
-index 7979627da8eec..547261be5d5a1 100644
+index 817ca74a9a9dc..9f7fcc1d66f0a 100644
 --- a/chrome/browser/ui/views/toolbar/reload_button.cc
 +++ b/chrome/browser/ui/views/toolbar/reload_button.cc
 @@ -1,4 +1,4 @@
@@ -770,7 +771,7 @@ index 7979627da8eec..547261be5d5a1 100644
                             ? kCloseIcon
                             : kNavigateStopTouchOldIcon),
 diff --git a/chrome/browser/ui/views/toolbar/toolbar_controller.cc b/chrome/browser/ui/views/toolbar/toolbar_controller.cc
-index 1122043b3895c..0a995e6aeac69 100644
+index 2f28c96117c4a..20f4be1568f3a 100644
 --- a/chrome/browser/ui/views/toolbar/toolbar_controller.cc
 +++ b/chrome/browser/ui/views/toolbar/toolbar_controller.cc
 @@ -10,6 +10,7 @@
@@ -781,7 +782,7 @@ index 1122043b3895c..0a995e6aeac69 100644
  #include "base/containers/adapters.h"
  #include "base/metrics/user_metrics.h"
  #include "base/metrics/user_metrics_action.h"
-@@ -236,6 +237,9 @@ ToolbarController::~ToolbarController() {
+@@ -238,6 +239,9 @@ ToolbarController::~ToolbarController() {
  std::vector<ToolbarController::ResponsiveElementInfo>
  ToolbarController::GetDefaultResponsiveElements(Browser* browser) {
    bool is_incognito = browser->profile()->IsIncognitoProfile();
@@ -791,7 +792,7 @@ index 1122043b3895c..0a995e6aeac69 100644
    // TODO(crbug.com/40912482): Fill in observed identifier.
    // Order matters because it should match overflow menu order top to bottom.
    std::vector<ToolbarController::ResponsiveElementInfo> elements = {
-@@ -317,19 +321,26 @@ ToolbarController::GetDefaultResponsiveElements(Browser* browser) {
+@@ -322,19 +326,26 @@ ToolbarController::GetDefaultResponsiveElements(Browser* browser) {
                 IDS_OVERFLOW_MENU_ITEM_TEXT_MEDIA_CONTROLS,
                 &(features::IsRoundedIconsEnabled()
                       ? kQueueMusicIcon
@@ -826,7 +827,7 @@ index 1122043b3895c..0a995e6aeac69 100644
             /*is_section_end=*/false)});
  
 diff --git a/ui/views/bubble/bubble_frame_view.cc b/ui/views/bubble/bubble_frame_view.cc
-index dc2df50dd75f8..f5aa0de7661c5 100644
+index 15bdfd36473dd..88ca859b26b82 100644
 --- a/ui/views/bubble/bubble_frame_view.cc
 +++ b/ui/views/bubble/bubble_frame_view.cc
 @@ -7,6 +7,7 @@
@@ -881,7 +882,7 @@ index 4171cd3e9380a..887f198b5e94f 100644
    SetImageModel(Button::STATE_NORMAL, drop_arrow_image);
  }
 diff --git a/ui/views/controls/menu/menu_item_view.cc b/ui/views/controls/menu/menu_item_view.cc
-index 559b43a5ee39d..d580c90c6cfa5 100644
+index 52fe557dbcfae..2edf1a7821837 100644
 --- a/ui/views/controls/menu/menu_item_view.cc
 +++ b/ui/views/controls/menu/menu_item_view.cc
 @@ -15,6 +15,7 @@

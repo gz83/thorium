@@ -1,5 +1,5 @@
 diff --git a/extensions/browser/ui_util.cc b/extensions/browser/ui_util.cc
-index f32f25522138f..0a58f48afd902 100644
+index a4a6b622dc7bc..0e9322afeeca8 100644
 --- a/extensions/browser/ui_util.cc
 +++ b/extensions/browser/ui_util.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index f32f25522138f..0a58f48afd902 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -73,14 +73,14 @@ bool ShouldDisplayInExtensionSettings(Manifest::Type type,
+@@ -28,14 +28,14 @@ bool ShouldDisplayInExtensionSettings(Manifest::Type type,
      return false;
    }
  

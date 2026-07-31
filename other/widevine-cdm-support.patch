@@ -1,5 +1,5 @@
 diff --git a/README.chromium b/README.chromium
-index c0e22cb9ec196..693240aefa530 100644
+index 640b7f9df12ec..693240aefa530 100644
 --- a/README.chromium
 +++ b/README.chromium
 @@ -1,10 +1,11 @@
@@ -7,7 +7,7 @@ index c0e22cb9ec196..693240aefa530 100644
  Short Name: Widevine CDM
 -URL: https://chrome-internal.googlesource.com/chrome/deps/widevine/scripts.git
 -Version: N/A
--Revision: c96f53fde16f37b1a6cc2b6c468af3c4a364f426
+-Revision: 6a0f9d00e79c6453d33dcccaf7c4e701e0eba4e8
 +URL: https://www.widevine.com
 +Version: 4.10.3050.0 (desktop; ChromeOS versions are architecture-specific)
 +Date: 2026-07-12
@@ -35,10 +35,10 @@ index c0e22cb9ec196..693240aefa530 100644
 +a5473a7f65a3aabb419d2b63b51de3c21aedf8d2. ChromeOS payload provenance is
 +documented in cdm/chromeos/README.chromium.
 diff --git a/cdm/BUILD.gn b/cdm/BUILD.gn
-index 6d18f9fa16371..8ec51a6aed383 100644
+index c55f6a97871c2..ff0f1678c3742 100644
 --- a/cdm/BUILD.gn
 +++ b/cdm/BUILD.gn
-@@ -26,6 +26,12 @@ buildflag_header("buildflags") {
+@@ -25,6 +25,12 @@ buildflag_header("buildflags") {
  }
  
  if (bundle_widevine_cdm) {
@@ -51,7 +51,7 @@ index 6d18f9fa16371..8ec51a6aed383 100644
    widevine_arch = target_cpu
  
    widevine_cdm_root = "${widevine_root}/${target_os}/${widevine_arch}"
-@@ -37,6 +43,11 @@ if (bundle_widevine_cdm) {
+@@ -36,6 +42,11 @@ if (bundle_widevine_cdm) {
    ]
  
    if (enable_widevine_cdm_host_verification) {
@@ -64,7 +64,7 @@ index 6d18f9fa16371..8ec51a6aed383 100644
      widevine_cdm_binary_files += [ "${widevine_cdm_root}/${cdm_file_name}.sig" ]
    }
 diff --git a/cdm/widevine.gni b/cdm/widevine.gni
-index 927b2e4809cf7..b3159c0ccf429 100644
+index 53fe6db5958ce..b941aed2e4e4c 100644
 --- a/cdm/widevine.gni
 +++ b/cdm/widevine.gni
 @@ -1,4 +1,4 @@
@@ -99,7 +99,7 @@ index 927b2e4809cf7..b3159c0ccf429 100644
      (target_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) ||
      (target_os == "mac" && (target_cpu == "x64" || target_cpu == "arm64")) ||
      (target_os == "win" &&
-@@ -62,6 +61,13 @@ declare_args() {
+@@ -54,6 +53,13 @@ declare_args() {
    widevine_root = "."
  }
  
@@ -113,7 +113,7 @@ index 927b2e4809cf7..b3159c0ccf429 100644
  # Enable Widevine CDM host verification, which will sign additional binaries
  # with Widevine certs and copy signature files as needed.
  enable_widevine_cdm_host_verification =
-@@ -74,7 +80,7 @@ declare_args() {
+@@ -66,7 +72,7 @@ declare_args() {
    # For developers building with "is_official_build" locally without Widevine
    # signing certs, please manually set `ignore_missing_widevine_signing_cert`
    # to true to suppress the error.

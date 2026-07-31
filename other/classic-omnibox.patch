@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/layout_constants.cc b/chrome/browser/ui/layout_constants.cc
-index 0af3486d89f3b..cc4b80966419b 100644
+index 8eb294114e009..23c0474eadb9c 100644
 --- a/chrome/browser/ui/layout_constants.cc
 +++ b/chrome/browser/ui/layout_constants.cc
 @@ -4,6 +4,7 @@
@@ -10,7 +10,7 @@ index 0af3486d89f3b..cc4b80966419b 100644
  #include "base/notreached.h"
  #include "build/build_config.h"
  #include "chrome/browser/ui/tabs/features.h"
-@@ -18,6 +19,8 @@
+@@ -19,6 +20,8 @@
  
  int GetLayoutConstant(LayoutConstant constant) {
    const bool touch_ui = ui::TouchUiController::Get()->touch_ui();
@@ -19,7 +19,7 @@ index 0af3486d89f3b..cc4b80966419b 100644
    const bool thorium_2024 = features::IsThorium2024();
    switch (constant) {
      case LayoutConstant::kAppMenuProfileRowAvatarIconSize:
-@@ -54,7 +57,7 @@ int GetLayoutConstant(LayoutConstant constant) {
+@@ -57,7 +60,7 @@ int GetLayoutConstant(LayoutConstant constant) {
      case LayoutConstant::kLocationBarChildInternalSpacing:
        return touch_ui ? 10 : 4;
      case LayoutConstant::kLocationBarChildCornerRadius:
@@ -29,7 +29,7 @@ index 0af3486d89f3b..cc4b80966419b 100644
        return 16;
      case LayoutConstant::kLocationBarChipPadding:
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 2e383a06ea35f..449daaedecbea 100644
+index 714c12b19f859..94955523d1a6a 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
 @@ -11,6 +11,7 @@
@@ -40,7 +40,7 @@ index 2e383a06ea35f..449daaedecbea 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
-@@ -271,7 +272,11 @@ LocationBarView::LocationBarView(Browser* browser,
+@@ -274,7 +275,11 @@ LocationBarView::LocationBarView(Browser* browser,
            }));
        views::FocusRing::Get(this)->SetOutsetFocusRingDisabled(true);
      }
@@ -65,7 +65,7 @@ index 2e383a06ea35f..449daaedecbea 100644
    return ComputeBorderRadius(size());
  }
  
-@@ -1626,6 +1636,12 @@ void LocationBarView::RefreshBackground() {
+@@ -1599,6 +1609,12 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;

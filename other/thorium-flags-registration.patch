@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 311a3dfebc076..0944c5f707fa3 100644
+index bfc8555485593..6a8c485a1e752 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 311a3dfebc076..0944c5f707fa3 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -641,6 +641,8 @@ source_set("core") {
+@@ -861,6 +861,8 @@ source_set("core") {
      "resources_util.cc",
      "shell_integration.cc",
      "startup_data.cc",
@@ -18,7 +18,7 @@ index 311a3dfebc076..0944c5f707fa3 100644
      "unexpire_flags.h",
      "universal_web_contents_observers.cc",
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
-index b329463946b5e..a3c6b469ca0ef 100644
+index f70be181954c1..e80cafb7ebe83 100644
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
 @@ -1,4 +1,4 @@
@@ -27,7 +27,7 @@ index b329463946b5e..a3c6b469ca0ef 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -152,6 +152,7 @@
+@@ -153,6 +153,7 @@
  #include "components/paint_preview/buildflags/buildflags.h"
  #include "components/paint_preview/features/features.h"
  #include "components/password_manager/core/browser/features/password_features.h"
@@ -35,7 +35,7 @@ index b329463946b5e..a3c6b469ca0ef 100644
  #include "components/password_manager/core/common/password_manager_features.h"
  #include "components/payments/core/features.h"
  #include "components/performance_manager/public/features.h"
-@@ -4704,11 +4705,16 @@ const FeatureEntry::FeatureVariation kToolbarGlowUpVariations[] = {
+@@ -4735,11 +4736,16 @@ const FeatureEntry::FeatureVariation kToolbarGlowUpVariations[] = {
  // calculate and verify checksum.
  //
  // When adding a new choice, add it to the end of the list.

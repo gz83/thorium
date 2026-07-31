@@ -1,5 +1,5 @@
 diff --git a/components/history/core/browser/history_backend.cc b/components/history/core/browser/history_backend.cc
-index 0098d980cd83d..6f2580f45f3a1 100644
+index ea0c6d4ec324a..7531059b72440 100644
 --- a/components/history/core/browser/history_backend.cc
 +++ b/components/history/core/browser/history_backend.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 0098d980cd83d..6f2580f45f3a1 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -14,6 +14,7 @@
+@@ -15,6 +15,7 @@
  #include <utility>
  #include <vector>
  
@@ -16,7 +16,7 @@ index 0098d980cd83d..6f2580f45f3a1 100644
  #include "base/compiler_specific.h"
  #include "base/containers/flat_set.h"
  #include "base/feature_list.h"
-@@ -1374,8 +1375,12 @@ void HistoryBackend::InitImpl(
+@@ -1381,8 +1382,12 @@ void HistoryBackend::InitImpl(
    // Get the first item in our database.
    db_->GetStartDate(&first_recorded_time_);
  
@@ -31,7 +31,7 @@ index 0098d980cd83d..6f2580f45f3a1 100644
  }
  
  void HistoryBackend::CloseAllDatabases() {
-@@ -1616,7 +1621,13 @@ void HistoryBackend::AddPagesWithDetails(const URLRows& urls,
+@@ -1623,7 +1628,13 @@ void HistoryBackend::AddPagesWithDetails(const URLRows& urls,
  }
  
  bool HistoryBackend::IsExpiredVisitTime(const base::Time& time) const {
@@ -47,7 +47,7 @@ index 0098d980cd83d..6f2580f45f3a1 100644
  
  // static
 diff --git a/components/history/core/browser/history_backend.h b/components/history/core/browser/history_backend.h
-index 38f7fb922dd5e..742df99fa14f4 100644
+index 62e9eabdbb6c9..db92580ddb9dc 100644
 --- a/components/history/core/browser/history_backend.h
 +++ b/components/history/core/browser/history_backend.h
 @@ -1,4 +1,4 @@

@@ -1,8 +1,8 @@
 diff --git a/chrome/app/chrome_command_ids.h b/chrome/app/chrome_command_ids.h
-index 0f50c4d73e0cf..204179d257ed3 100644
+index 3bdb2131ef0e2..c9bfff5b0d059 100644
 --- a/chrome/app/chrome_command_ids.h
 +++ b/chrome/app/chrome_command_ids.h
-@@ -368,6 +368,7 @@
+@@ -373,6 +373,7 @@
  #define IDC_CONTENT_CONTEXT_OPENLINKINPROFILE 50108
  #define IDC_CONTENT_CONTEXT_OPENLINKBOOKMARKAPP 50109
  #define IDC_CONTENT_CONTEXT_OPENLINKSPLITVIEW 50111
@@ -11,10 +11,10 @@ index 0f50c4d73e0cf..204179d257ed3 100644
  // Image items.
  #define IDC_CONTENT_CONTEXT_SAVEIMAGEAS 50120
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index bd985bfd9e0f8..c5c8c8228d3a1 100644
+index 311d3d0ee6770..a0b2376891522 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -701,6 +701,9 @@ are declared in tools/grit/grit_args.gni.
+@@ -714,6 +714,9 @@ are declared in tools/grit/grit_args.gni.
            <message name="IDS_CONTENT_CONTEXT_OPENLINKNEWTAB" desc="The name of the Open Link in New Tab command in the content area context menu">
              Open link in new &amp;tab
            </message>
@@ -24,7 +24,7 @@ index bd985bfd9e0f8..c5c8c8228d3a1 100644
            <message name="IDS_CONTENT_CONTEXT_OPENLINKNEWWINDOW" desc="The name of the Open Link in New Window command in the content area context menu">
              Open link in new &amp;window
            </message>
-@@ -1040,6 +1043,9 @@ are declared in tools/grit/grit_args.gni.
+@@ -1058,6 +1061,9 @@ are declared in tools/grit/grit_args.gni.
            <message name="IDS_CONTENT_CONTEXT_OPENLINKNEWTAB" desc="In Title Case: The name of the Open Link in New Tab command in the content area context menu">
              Open Link in New &amp;Tab
            </message>
@@ -35,42 +35,42 @@ index bd985bfd9e0f8..c5c8c8228d3a1 100644
              Open Link in New &amp;Window
            </message>
 diff --git a/chrome/browser/renderer_context_menu/render_view_context_menu.cc b/chrome/browser/renderer_context_menu/render_view_context_menu.cc
-index 055326ebf4431..5b1a90402fd36 100644
+index 400fd3134f4fc..35fb31bca4217 100644
 --- a/chrome/browser/renderer_context_menu/render_view_context_menu.cc
 +++ b/chrome/browser/renderer_context_menu/render_view_context_menu.cc
-@@ -616,13 +616,14 @@ const std::map<int, int>& GetIdcToUmaMap(UmaEnumIdLookupType type) {
-        {IDC_CONTENT_CONTEXT_LISTEN_TO_THIS_PAGE, 164},
-        {IDC_CONTENT_CONTEXT_DICTATION, 165},
+@@ -624,13 +624,14 @@ const std::map<int, int>& GetIdcToUmaMap(UmaEnumIdLookupType type) {
         {IDC_CONTENT_CONTEXT_ADD_LINK_TO_READING_LIST, 166},
-+       {IDC_CONTENT_CONTEXT_OPENLINKSAMETAB, 167},
+        {IDC_SPELLCHECK_REMOVE_FROM_DICTIONARY, 167},
+        {IDC_CONTENT_CONTEXT_SAVE_TO_MEMORY_BANKS, 168},
++       {IDC_CONTENT_CONTEXT_OPENLINKSAMETAB, 169},
         // To add new items:
         //   - Add one more line above this comment block, using the UMA value
         //     from the line below this comment block.
         //   - Increment the UMA value in that latter line.
         //   - Add the new item to the RenderViewContextMenuItem enum in
         //     tools/metrics/histograms/metadata/ui/enums.xml.
--       {0, 167}});
-+       {0, 168}});
+-       {0, 169}});
++       {0, 170}});
    // LINT.ThenChange(//tools/metrics/histograms/metadata/ui/enums.xml:RenderViewContextMenuItem)
  
    // LINT.IfChange(ContextMenuOptionDesktop)
-@@ -661,13 +662,14 @@ const std::map<int, int>& GetIdcToUmaMap(UmaEnumIdLookupType type) {
-        {IDC_CONTENT_CONTEXT_SEARCHWEBFORNEWTAB, 29},
+@@ -670,13 +671,14 @@ const std::map<int, int>& GetIdcToUmaMap(UmaEnumIdLookupType type) {
         {IDC_CONTENT_CONTEXT_OPENLINKSPLITVIEW, 31},
         {IDC_CONTENT_CONTEXT_GLICSHAREIMAGE, 32},
-+       {IDC_CONTENT_CONTEXT_OPENLINKSAMETAB, 33},
+        {IDC_SPELLCHECK_REMOVE_FROM_DICTIONARY, 33},
++       {IDC_CONTENT_CONTEXT_OPENLINKSAMETAB, 34},
         // To add new items:
         //   - Add one more line above this comment block, using the UMA value
         //     from the line below this comment block.
         //   - Increment the UMA value in that latter line.
         //   - Add the new item to the ContextMenuOptionDesktop enum in
-        //     tools/metrics/histograms/metadata/enums.xml.
--       {0, 32}});
-+       {0, 33}});
+        //     tools/metrics/histograms/metadata/ui/enums.xml.
+-       {0, 33}});
++       {0, 34}});
    // LINT.ThenChange(//tools/metrics/histograms/metadata/ui/enums.xml:ContextMenuOptionDesktop)
  
    return *(type == UmaEnumIdLookupType::GeneralEnumId ? kGeneralMap
-@@ -729,7 +731,8 @@ int FindUMAEnumValueForCommand(int id, UmaEnumIdLookupType type) {
+@@ -738,7 +740,8 @@ int FindUMAEnumValueForCommand(int id, UmaEnumIdLookupType type) {
  
  // Returns true if the command id is for opening a link.
  bool IsCommandForOpenLink(int id) {
@@ -80,7 +80,7 @@ index 055326ebf4431..5b1a90402fd36 100644
           id == IDC_CONTENT_CONTEXT_OPENLINKNEWWINDOW ||
           id == IDC_CONTENT_CONTEXT_OPENLINKOFFTHERECORD ||
           id == IDC_CONTENT_CONTEXT_OPENLINKSPLITVIEW ||
-@@ -1935,7 +1938,12 @@ void RenderViewContextMenu::AppendLinkItems() {
+@@ -1951,7 +1954,12 @@ void RenderViewContextMenu::AppendLinkItems() {
        }
      }
  #endif
@@ -94,7 +94,7 @@ index 055326ebf4431..5b1a90402fd36 100644
      if (params_.link_url.is_valid()) {
        AppendProtocolHandlerSubMenu();
      }
-@@ -3311,6 +3319,7 @@ bool RenderViewContextMenu::IsCommandIdEnabled(int id) const {
+@@ -3342,6 +3350,7 @@ bool RenderViewContextMenu::IsCommandIdEnabled(int id) const {
  
      case IDC_CONTENT_CONTEXT_OPENLINKBOOKMARKAPP:
      case IDC_CONTENT_CONTEXT_OPENLINKINPROFILE:
@@ -102,7 +102,7 @@ index 055326ebf4431..5b1a90402fd36 100644
      case IDC_CONTENT_CONTEXT_OPENLINKNEWTAB:
      case IDC_CONTENT_CONTEXT_OPENLINKNEWWINDOW:
        return navigation_allowed && params_.link_url.is_valid() &&
-@@ -3633,6 +3642,30 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
+@@ -3666,6 +3675,30 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
    }
  
    switch (id) {
@@ -134,10 +134,10 @@ index 055326ebf4431..5b1a90402fd36 100644
        WindowOpenDisposition new_tab_disposition =
            WindowOpenDisposition::NEW_BACKGROUND_TAB;
 diff --git a/chrome/browser/ui/actions/chrome_action_id.h b/chrome/browser/ui/actions/chrome_action_id.h
-index fb93a1bc1e616..cba464deeb599 100644
+index 1a6acad48b6ff..89f8c8b18f335 100644
 --- a/chrome/browser/ui/actions/chrome_action_id.h
 +++ b/chrome/browser/ui/actions/chrome_action_id.h
-@@ -267,6 +267,7 @@
+@@ -260,6 +260,7 @@
    E(kActionExtensionsContextCustomLast, IDC_EXTENSIONS_CONTEXT_CUSTOM_LAST) \
    /* Context menu items in the render view. */ \
    /* Link items. */ \
@@ -146,22 +146,22 @@ index fb93a1bc1e616..cba464deeb599 100644
    E(kActionContentContextOpenLinkNewWindow, \
      IDC_CONTENT_CONTEXT_OPENLINKNEWWINDOW) \
 diff --git a/tools/metrics/histograms/metadata/ui/enums.xml b/tools/metrics/histograms/metadata/ui/enums.xml
-index 0b5754cc68d86..541900f47dee5 100644
+index f61c47251904e..a818cc3763676 100644
 --- a/tools/metrics/histograms/metadata/ui/enums.xml
 +++ b/tools/metrics/histograms/metadata/ui/enums.xml
-@@ -78,6 +78,7 @@ chromium-metrics-reviews@google.com.
-   <int value="29" label="Search web for... in new tab"/>
+@@ -79,6 +79,7 @@ chromium-metrics-reviews@google.com.
    <int value="31" label="Open link in split view"/>
    <int value="32" label="Create image with Gemini in Chrome"/>
-+  <int value="33" label="Open link in this tab"/>
+   <int value="33" label="Remove from dictionary"/>
++  <int value="34" label="Open link in this tab"/>
  </enum>
  
  <!-- LINT.ThenChange(//chrome/browser/renderer_context_menu/render_view_context_menu.cc:ContextMenuOptionDesktop) -->
-@@ -367,6 +368,7 @@ chromium-metrics-reviews@google.com.
-   <int value="164" label="IDC_CONTENT_CONTEXT_LISTEN_TO_THIS_PAGE"/>
-   <int value="165" label="IDC_CONTENT_CONTEXT_DICTATION"/>
+@@ -371,6 +372,7 @@ chromium-metrics-reviews@google.com.
    <int value="166" label="IDC_CONTENT_CONTEXT_ADD_LINK_TO_READING_LIST"/>
-+  <int value="167" label="IDC_CONTENT_CONTEXT_OPENLINKSAMETAB"/>
+   <int value="167" label="IDC_SPELLCHECK_REMOVE_FROM_DICTIONARY"/>
+   <int value="168" label="IDC_CONTENT_CONTEXT_SAVE_TO_MEMORY_BANKS"/>
++  <int value="169" label="IDC_CONTENT_CONTEXT_OPENLINKSAMETAB"/>
  </enum>
  
  <!-- LINT.ThenChange(//chrome/browser/renderer_context_menu/render_view_context_menu.cc:RenderViewContextMenuItem) -->

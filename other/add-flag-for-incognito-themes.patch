@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 8782ae107e30b..b50f1fde68ef3 100644
+index 0cf29f1699317..978abe8a02235 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -4154,9 +4154,12 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
+@@ -4169,9 +4169,12 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
      preferred_root_scrollbar_color_scheme = preferred_color_scheme;
    }
  #else  // !BUILDFLAG(IS_ANDROID)
@@ -82,10 +82,10 @@ index 6d7b24b67ff1f..ff0250adf59a5 100644
  }
  
 diff --git a/chrome/browser/ui/views/frame/browser_widget.cc b/chrome/browser/ui/views/frame/browser_widget.cc
-index 576e71e230c5e..ef229e5ac1fd2 100644
+index 582e4ccaf8879..29c5971cfe63c 100644
 --- a/chrome/browser/ui/views/frame/browser_widget.cc
 +++ b/chrome/browser/ui/views/frame/browser_widget.cc
-@@ -608,5 +608,10 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
+@@ -564,5 +564,10 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
  }
  
  bool BrowserWidget::IsIncognitoBrowser() const {

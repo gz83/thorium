@@ -1,5 +1,5 @@
 diff --git a/components/BUILD.gn b/components/BUILD.gn
-index aa7d37c13421c..1be24e3c49552 100644
+index 2c6d65c0b41b0..f7d0c801035b6 100644
 --- a/components/BUILD.gn
 +++ b/components/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index aa7d37c13421c..1be24e3c49552 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -1238,8 +1238,8 @@ if (use_blink) {
+@@ -1254,8 +1254,8 @@ if (use_blink) {
      ]
  
      if (is_mac) {
@@ -20,7 +20,7 @@ index aa7d37c13421c..1be24e3c49552 100644
  
      if (toolkit_views && !is_mac && !is_castos) {
 diff --git a/content/shell/BUILD.gn b/content/shell/BUILD.gn
-index 1ab8f3cac2e00..5c794cb59b5f6 100644
+index 05ec8ec8bcaea..a1cb13b4bec4b 100644
 --- a/content/shell/BUILD.gn
 +++ b/content/shell/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -76,7 +76,7 @@ index 1ab8f3cac2e00..5c794cb59b5f6 100644
        visibility = [ ":*" ]
      }
  
-@@ -1098,7 +1098,7 @@ if (is_android) {
+@@ -1106,7 +1106,7 @@ if (is_android) {
        "//content/test/data/media/",
      ]
      data_deps = [
@@ -85,7 +85,7 @@ index 1ab8f3cac2e00..5c794cb59b5f6 100644
        "//build/android:devil_chromium_py",
        "//build/android:test_runner_py",
        "//testing:test_scripts_shared",
-@@ -1110,7 +1110,7 @@ if (is_android) {
+@@ -1118,7 +1118,7 @@ if (is_android) {
  group("content_shell_crash_test") {
    testonly = true
    data_deps = [
@@ -95,7 +95,7 @@ index 1ab8f3cac2e00..5c794cb59b5f6 100644
      "//third_party/angle:includes",
    ]
 diff --git a/content/shell/android/BUILD.gn b/content/shell/android/BUILD.gn
-index a3bedcddfa313..0481e0c360256 100644
+index 7e79de30c48bb..202d82c8684cc 100644
 --- a/content/shell/android/BUILD.gn
 +++ b/content/shell/android/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -104,7 +104,7 @@ index a3bedcddfa313..0481e0c360256 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -227,7 +227,7 @@ template("content_shell_apk_tmpl") {
+@@ -224,7 +224,7 @@ template("content_shell_apk_tmpl") {
  
  content_shell_apk_tmpl("content_shell_apk") {
    target_type = "android_apk"
@@ -113,7 +113,7 @@ index a3bedcddfa313..0481e0c360256 100644
    android_manifest = content_shell_manifest
    android_manifest_dep = ":content_shell_manifest"
    shared_libraries = [ ":libcontent_shell_content_view" ]
-@@ -237,7 +237,7 @@ content_shell_apk_tmpl("content_shell_apk") {
+@@ -234,7 +234,7 @@ content_shell_apk_tmpl("content_shell_apk") {
  
  content_shell_apk_tmpl("content_shell_test_apk") {
    target_type = "instrumentation_test_apk"
@@ -123,7 +123,7 @@ index a3bedcddfa313..0481e0c360256 100644
    android_manifest_dep = ":content_shell_test_manifest"
    shared_libraries = [ ":libcontent_native_test" ]
 diff --git a/content/shell/android/shell_apk/AndroidManifest.xml.jinja2 b/content/shell/android/shell_apk/AndroidManifest.xml.jinja2
-index 368b94da51aac..98c59a42aefb1 100644
+index 65d5dedaf3438..1b96acde4eb4c 100644
 --- a/content/shell/android/shell_apk/AndroidManifest.xml.jinja2
 +++ b/content/shell/android/shell_apk/AndroidManifest.xml.jinja2
 @@ -1,7 +1,7 @@
@@ -135,10 +135,10 @@ index 368b94da51aac..98c59a42aefb1 100644
  Use of this source code is governed by a BSD-style license that can be
  found in the LICENSE file.
  -->
-@@ -29,7 +29,7 @@ found in the LICENSE file.
-     <application android:name="org.chromium.content_shell_apk.ContentShellApplication"
-             android:icon="@mipmap/app_icon"
-             android:zygotePreloadName="org.chromium.content_public.app.ZygotePreload"
+@@ -32,7 +32,7 @@ found in the LICENSE file.
+             {% if javaless_renderers is defined %}
+             android:zygotePreloadNativeLib="lib{{ library_name }}.so"
+             {% endif %}
 -            android:label="{% block application_label %}Content Shell{% endblock %}">
 +            android:label="{% block application_label %}Thorium Shell{% endblock %}">
          <activity android:name="org.chromium.content_shell_apk.ContentShellActivity"
@@ -159,7 +159,7 @@ index 0837469134df6..6cf1319b88bfc 100644
  #ifdef APSTUDIO_INVOKED
  /////////////////////////////////////////////////////////////////////////////
 diff --git a/content/shell/app/shell_main_delegate.cc b/content/shell/app/shell_main_delegate.cc
-index 9ab00913acf58..f56291adf6171 100644
+index 599eef5652a57..22e5ff88ec76d 100644
 --- a/content/shell/app/shell_main_delegate.cc
 +++ b/content/shell/app/shell_main_delegate.cc
 @@ -1,4 +1,4 @@
@@ -168,7 +168,7 @@ index 9ab00913acf58..f56291adf6171 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -165,7 +165,7 @@ void InitLogging(const base::CommandLine& command_line) {
+@@ -170,7 +170,7 @@ void InitLogging(const base::CommandLine& command_line) {
  #else
        base::PathService::Get(base::DIR_EXE, &log_filename);
  #endif
@@ -199,7 +199,7 @@ index 0c52b54f11aaa..02b15082cd391 100644
    shell_data.window_widget->Init(std::move(params));
  #endif  // BUILDFLAG(IS_CHROMEOS)
 diff --git a/content/test/BUILD.gn b/content/test/BUILD.gn
-index 94aaa3396b101..1dbec16f1de78 100644
+index 540d201dbbf67..063ecba8b038c 100644
 --- a/content/test/BUILD.gn
 +++ b/content/test/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -208,7 +208,7 @@ index 94aaa3396b101..1dbec16f1de78 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -2400,8 +2400,8 @@ test("content_browsertests") {
+@@ -2415,8 +2415,8 @@ test("content_browsertests") {
        "../renderer/render_view_browsertest_mac.mm",
      ]
      deps += [ "//third_party/ocmock" ]
@@ -216,10 +216,10 @@ index 94aaa3396b101..1dbec16f1de78 100644
 -    data += [ "$root_out_dir/Content Shell.app/" ]
 +    data_deps += [ "//content/shell:thorium_shell" ]
 +    data += [ "$root_out_dir/Thorium Shell.app/" ]
-     weak_frameworks = [ "ScreenCaptureKit.framework" ]  # macOS 12.3
+     frameworks = [ "ScreenCaptureKit.framework" ]
    }
  
-@@ -2453,7 +2453,7 @@ test("content_browsertests") {
+@@ -2468,7 +2468,7 @@ test("content_browsertests") {
        "//mojo/public/cpp/platform",
        "//mojo/public/mojom/base",
      ]

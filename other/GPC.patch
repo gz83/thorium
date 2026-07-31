@@ -1,8 +1,8 @@
 diff --git a/chrome/android/chrome_java_resources.gni b/chrome/android/chrome_java_resources.gni
-index a13c34ab9fdbc..09448e5bc514b 100644
+index 7d2c511750546..96a84be12eaea 100644
 --- a/chrome/android/chrome_java_resources.gni
 +++ b/chrome/android/chrome_java_resources.gni
-@@ -660,6 +660,7 @@ chrome_java_resources = [
+@@ -658,6 +658,7 @@ chrome_java_resources = [
    "java/res/xml/contextual_search_preferences.xml",
    "java/res/xml/developer_preferences.xml",
    "java/res/xml/do_not_track_preferences.xml",
@@ -11,10 +11,10 @@ index a13c34ab9fdbc..09448e5bc514b 100644
    "java/res/xml/homepage_preferences.xml",
    "java/res/xml/legal_information_preferences.xml",
 diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java_sources.gni
-index 3148d3452db86..59c4b295248e7 100644
+index 42388df2aeae8..c0c8fc5a1c776 100644
 --- a/chrome/android/chrome_java_sources.gni
 +++ b/chrome/android/chrome_java_sources.gni
-@@ -1014,6 +1014,7 @@ chrome_java_sources = [
+@@ -1011,6 +1011,7 @@ chrome_java_sources = [
    "java/src/org/chromium/chrome/browser/photo_picker/DecoderServiceImpl.java",
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditor.java",
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditorBridge.java",
@@ -123,7 +123,7 @@ index 0000000000000..506ca6fa69cce
 +    }
 +}
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
-index 5b3fdecca51c6..d564d286618aa 100644
+index 7105205ab38dc..7263d67d34e97 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
 @@ -95,6 +95,7 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
@@ -150,10 +150,10 @@ index 5b3fdecca51c6..d564d286618aa 100644
          if (preloadPagesPreference != null) {
              preloadPagesPreference.setSummary(
 diff --git a/chrome/app/settings_strings.grdp b/chrome/app/settings_strings.grdp
-index 5c21f43b441c6..f050f0283ec03 100644
+index 763bba112d55b..1f5625bc25b5e 100644
 --- a/chrome/app/settings_strings.grdp
 +++ b/chrome/app/settings_strings.grdp
-@@ -1884,6 +1884,18 @@
+@@ -1899,6 +1899,18 @@
      <message name="IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_LEARN_MORE_ACCESSIBILITY_LABEL" desc="The accessibility label for a link to learn more about Do Not Track">
        Learn more about Do Not Track
      </message>
@@ -169,14 +169,14 @@ index 5c21f43b441c6..f050f0283ec03 100644
 +    <message name="IDS_SETTINGS_ENABLE_GPC_LEARN_MORE_ACCESSIBILITY_LABEL" desc="Accessibility label for the link to learn more about Global Privacy Control.">
 +      Learn more about Global Privacy Control
 +    </message>
-     <message name="IDS_SETTINGS_PERMISSIONS" desc="Name of the settings page which allows users to manage permissions and site content settings">
-       Permissions and content settings
+     <message name="IDS_SETTINGS_PERMISSIONS_DESCRIPTION" desc="Description of the controls available on the permissions and site content settings page">
+       Controls what information sites can use and show (location, camera, pop-ups, and more)
      </message>
 diff --git a/chrome/browser/extensions/api/settings_private/prefs_util.cc b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-index 2b553047ecd20..80b0b65a22e0b 100644
+index 2fc9c7317244a..e2441804abf45 100644
 --- a/chrome/browser/extensions/api/settings_private/prefs_util.cc
 +++ b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-@@ -461,6 +461,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
+@@ -467,6 +467,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
    (*s_allowlist)[::prefs::kBlockAll3pcToggleEnabled] =
        settings_api::PrefType::kBoolean;
    (*s_allowlist)[::prefs::kEnableDoNotTrack] = settings_api::PrefType::kBoolean;
@@ -185,7 +185,7 @@ index 2b553047ecd20..80b0b65a22e0b 100644
    // Sync and personalization page.
    (*s_allowlist)[::prefs::kSearchSuggestEnabled] =
 diff --git a/chrome/browser/renderer_preferences_util.cc b/chrome/browser/renderer_preferences_util.cc
-index 24c322a58bc48..a01afc10439ba 100644
+index eb964aed4ff47..3d982971f49a5 100644
 --- a/chrome/browser/renderer_preferences_util.cc
 +++ b/chrome/browser/renderer_preferences_util.cc
 @@ -25,6 +25,7 @@
@@ -194,9 +194,9 @@ index 24c322a58bc48..a01afc10439ba 100644
  #include "components/prefs/pref_service.h"
 +#include "components/privacy_sandbox/privacy_sandbox_prefs.h"
  #include "content/public/browser/renderer_preferences_util.h"
- #include "content/public/common/content_features.h"
  #include "media/media_buildflags.h"
-@@ -150,6 +151,7 @@ void UpdateFromSystemSettings(blink::RendererPreferences* prefs,
+ #include "third_party/blink/public/common/peerconnection/webrtc_ip_handling_policy.h"
+@@ -149,6 +150,7 @@ void UpdateFromSystemSettings(blink::RendererPreferences* prefs,
    prefs->enable_referrers = pref_service->GetBoolean(prefs::kEnableReferrers);
    prefs->enable_do_not_track =
        pref_service->GetBoolean(prefs::kEnableDoNotTrack);
@@ -205,10 +205,10 @@ index 24c322a58bc48..a01afc10439ba 100644
        pref_service->GetBoolean(prefs::kEnableEncryptedMedia);
  
 diff --git a/chrome/browser/resources/settings/BUILD.gn b/chrome/browser/resources/settings/BUILD.gn
-index 87dae3bc17b2a..c3b9f6e1e6587 100644
+index 098043d5079c4..6ca52daab8583 100644
 --- a/chrome/browser/resources/settings/BUILD.gn
 +++ b/chrome/browser/resources/settings/BUILD.gn
-@@ -133,6 +133,7 @@ build_webui("build") {
+@@ -131,6 +131,7 @@ build_webui("build") {
      "performance_page/tab_discard/exception_tabbed_add_dialog.ts",
      "privacy_page/cookies_page.ts",
      "privacy_page/do_not_track_toggle.ts",
@@ -405,7 +405,7 @@ index 0000000000000..d4c2ddde9d163
 +customElements.define(
 +  SettingsGpcToggleElement.is, SettingsGpcToggleElement);
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-index c014cc23c9e7a..abd214d592024 100644
+index 6e8b1f8a33f33..ba7d256df8a2e 100644
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 @@ -1038,6 +1038,12 @@ For more settings that use data to improve your Chrome experience, go to <ph nam
@@ -464,20 +464,21 @@ index d97fca41eaa55..75efa47e47f25 100644
    void OnWebPrefChanged(const std::string& pref_name);
    void OnLiveCaptionEnabledPrefChanged(const std::string& pref_name);
 diff --git a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-index 1d656809eeeff..b7b3ad9beb5f3 100644
+index 3ec69ce500eb8..761681c47205a 100644
 --- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 +++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-@@ -2357,6 +2357,10 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
+@@ -2391,6 +2391,11 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
        {"doNotTrackDialogMessage", IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_TEXT},
        {"doNotTrackDialogLearnMoreA11yLabel",
         IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_LEARN_MORE_ACCESSIBILITY_LABEL},
 +      {"gpc", IDS_SETTINGS_ENABLE_GPC},
 +      {"gpcDialogTitle", IDS_SETTINGS_ENABLE_GPC_DIALOG_TITLE},
 +      {"gpcDialogMessage", IDS_SETTINGS_ENABLE_GPC_DIALOG_TEXT},
-+      {"gpcLearnMoreAccessibilityLabel", IDS_SETTINGS_ENABLE_GPC_LEARN_MORE_ACCESSIBILITY_LABEL},
-       // TODO(crbug.com/40122957): This string is no longer used. Remove.
-       {"permissionsPageTitle", IDS_SETTINGS_PERMISSIONS},
++      {"gpcLearnMoreAccessibilityLabel",
++       IDS_SETTINGS_ENABLE_GPC_LEARN_MORE_ACCESSIBILITY_LABEL},
        {"siteSettingsSublabel", IDS_SETTINGS_PERMISSIONS_DESCRIPTION},
+       {"securityPageTitle", IDS_SETTINGS_SECURITY},
+       {"securityPageDescription", IDS_SETTINGS_SECURITY_DESCRIPTION},
 diff --git a/components/privacy_sandbox/privacy_sandbox_prefs.cc b/components/privacy_sandbox/privacy_sandbox_prefs.cc
 index c58d4cb4a9e53..51c4d9b781ec5 100644
 --- a/components/privacy_sandbox/privacy_sandbox_prefs.cc
@@ -521,7 +522,7 @@ index a8cdb42779b98..36efd26e75ca8 100644
    // TODO(crbug.com/40833603): WARNING: This bypasses the permissions policy.
    // Unfortunately, workers lack a permissions policy and to derive proper hints
 diff --git a/content/browser/renderer_host/ipc_utils.cc b/content/browser/renderer_host/ipc_utils.cc
-index 4e9bf143e8a03..cfc3908b89645 100644
+index 0dbd11c95af0a..080b0fc7330da 100644
 --- a/content/browser/renderer_host/ipc_utils.cc
 +++ b/content/browser/renderer_host/ipc_utils.cc
 @@ -25,6 +25,7 @@
@@ -543,10 +544,10 @@ index 4e9bf143e8a03..cfc3908b89645 100644
                features::kKillOnInvalidNavigationHeaders)) {
          SCOPED_CRASH_KEY_STRING64("Bug487795397", "invalid_header",
 diff --git a/content/renderer/render_frame_impl.cc b/content/renderer/render_frame_impl.cc
-index b2c85f19aeee6..3780f5a50a640 100644
+index 7b80ee59a590a..3e4cf32701b9c 100644
 --- a/content/renderer/render_frame_impl.cc
 +++ b/content/renderer/render_frame_impl.cc
-@@ -4562,6 +4562,10 @@ void RenderFrameImpl::FinalizeRequestInternal(
+@@ -4600,6 +4600,10 @@ void RenderFrameImpl::FinalizeRequestInternal(
      request.SetHttpHeaderField(
          blink::WebString::FromUtf8(blink::kDoNotTrackHeader), "1");
    }
@@ -634,10 +635,10 @@ index aa6d396335d33..d3bbf616a0ce4 100644
    // the use of Clear Key key system which is always allowed as required by the
    // spec.
 diff --git a/third_party/blink/renderer/bindings/idl_in_modules.gni b/third_party/blink/renderer/bindings/idl_in_modules.gni
-index 1228ae367d3b6..6d6df901c77af 100644
+index 296e7230642aa..9b22a9319b401 100644
 --- a/third_party/blink/renderer/bindings/idl_in_modules.gni
 +++ b/third_party/blink/renderer/bindings/idl_in_modules.gni
-@@ -1297,6 +1297,11 @@ static_idl_files_in_modules = [
+@@ -1299,6 +1299,11 @@ static_idl_files_in_modules = [
    "//third_party/blink/renderer/modules/xr/xr_webgl_sub_image.idl",
  ]
  
@@ -650,10 +651,10 @@ index 1228ae367d3b6..6d6df901c77af 100644
  # This uses target_os rather than current_os (which is what is_android is set
  # from) for the case of generating the v8 context snapshot for android. When
 diff --git a/third_party/blink/renderer/core/exported/web_view_impl.cc b/third_party/blink/renderer/core/exported/web_view_impl.cc
-index 8e36f79f70044..02863ffdf55e8 100644
+index 59f2f2f70904b..33c9adcf9700e 100644
 --- a/third_party/blink/renderer/core/exported/web_view_impl.cc
 +++ b/third_party/blink/renderer/core/exported/web_view_impl.cc
-@@ -3634,6 +3634,9 @@ void WebViewImpl::UpdateRendererPreferences(
+@@ -3776,6 +3776,9 @@ void WebViewImpl::UpdateRendererPreferences(
    GetSettings()->SetCaretBrowsingEnabled(
        renderer_preferences_.caret_browsing_enabled);
  
@@ -664,10 +665,10 @@ index 8e36f79f70044..02863ffdf55e8 100644
    GetSettings()->SetSelectionClipboardBufferAvailable(
        renderer_preferences_.selection_clipboard_buffer_available);
 diff --git a/third_party/blink/renderer/modules/BUILD.gn b/third_party/blink/renderer/modules/BUILD.gn
-index 3955d4448f604..7f698985f6cb2 100644
+index d4abe985e445a..9d6a846903eb8 100644
 --- a/third_party/blink/renderer/modules/BUILD.gn
 +++ b/third_party/blink/renderer/modules/BUILD.gn
-@@ -167,6 +167,10 @@ component("modules") {
+@@ -169,6 +169,10 @@ component("modules") {
      "//third_party/blink/renderer/modules/xr",
    ]
  
@@ -784,10 +785,10 @@ index e0e9af90a35fd..8370aae45dd53 100644
    auto url_request_extra_data = base::MakeRefCounted<WebURLRequestExtraData>();
    request.SetURLRequestExtraData(std::move(url_request_extra_data));
 diff --git a/third_party/blink/renderer/platform/runtime_enabled_features.json5 b/third_party/blink/renderer/platform/runtime_enabled_features.json5
-index ce5e21a444e38..f5af51194c28c 100644
+index 2a689dd0a8bf3..955185c936933 100644
 --- a/third_party/blink/renderer/platform/runtime_enabled_features.json5
 +++ b/third_party/blink/renderer/platform/runtime_enabled_features.json5
-@@ -3260,6 +3260,11 @@
+@@ -3360,6 +3360,11 @@
        name: "GetUserMediaEchoCancellationModes",
        status: "stable",
      },

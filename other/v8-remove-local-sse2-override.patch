@@ -1,8 +1,8 @@
 diff --git a/BUILD.gn b/BUILD.gn
-index a19ec521254..3e7b59612b0 100644
+index 03938a26b4d..0b93e144a76 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
-@@ -1748,10 +1748,6 @@ config("toolchain") {
+@@ -1766,10 +1766,6 @@ config("toolchain") {
  
    if (v8_current_cpu == "x86") {
      defines += [ "V8_TARGET_ARCH_IA32" ]

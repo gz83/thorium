@@ -1,8 +1,8 @@
 diff --git a/base/BUILD.gn b/base/BUILD.gn
-index 4dae6c29c574c..a2e1b6211c5df 100644
+index 889b5f6ef48e5..b44af04f73478 100644
 --- a/base/BUILD.gn
 +++ b/base/BUILD.gn
-@@ -1166,6 +1166,7 @@ component("base") {
+@@ -1174,6 +1174,7 @@ component("base") {
      "//build:chromecast_buildflags",
      "//build:robolectric_buildflags",
      "//third_party/abseil-cpp:absl",
@@ -10,7 +10,7 @@ index 4dae6c29c574c..a2e1b6211c5df 100644
    ]
  
    sources += [
-@@ -2892,6 +2893,7 @@ buildflag_header("debugging_buildflags") {
+@@ -2927,6 +2928,7 @@ buildflag_header("debugging_buildflags") {
      "ENABLE_ALLOCATION_TRACE_RECORDER_FULL_REPORTING=$build_allocation_trace_recorder_full_reporting",
      "PRINT_UNSYMBOLIZED_STACK_TRACES=$print_unsymbolized_stack_traces",
      "ENABLE_CHECK_ELISION_WARNING=$enable_check_elision_warning",
@@ -57,10 +57,10 @@ index 5b22ac50c50af..acbe6482224f1 100644
  
  declare_args() {
 diff --git a/base/files/file_util_win.cc b/base/files/file_util_win.cc
-index ffb6b3ebb35dd..0ce1f343ff1a3 100644
+index ad90f2146bdac..39c047fac804e 100644
 --- a/base/files/file_util_win.cc
 +++ b/base/files/file_util_win.cc
-@@ -1116,8 +1116,9 @@ bool IsLink(const FilePath& file_path) {
+@@ -1114,8 +1114,9 @@ bool IsLink(const FilePath& file_path) {
  }
  
  bool GetFileInfo(const FilePath& file_path, File::Info* results) {
@@ -72,7 +72,7 @@ index ffb6b3ebb35dd..0ce1f343ff1a3 100644
    if (!GetFileAttributesEx(file_path.value().c_str(), GetFileExInfoStandard,
                             &attr)) {
 diff --git a/base/logging.cc b/base/logging.cc
-index 726c5cb00266b..eb856a3ed1739 100644
+index 7686a1e1e1f8e..6867ebd1a339f 100644
 --- a/base/logging.cc
 +++ b/base/logging.cc
 @@ -10,6 +10,7 @@
@@ -186,10 +186,10 @@ index 2d72f112e9b9f..567503f15f329 100644
  BASE_EXPORT bool ShouldCreateLogMessage(int severity);
  
 diff --git a/content/browser/renderer_host/render_process_host_impl.cc b/content/browser/renderer_host/render_process_host_impl.cc
-index abe9030414bcc..a47ae0a7e17a6 100644
+index 2a8abef097d85..259cce5ab45f9 100644
 --- a/content/browser/renderer_host/render_process_host_impl.cc
 +++ b/content/browser/renderer_host/render_process_host_impl.cc
-@@ -4018,7 +4018,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
+@@ -4053,7 +4053,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
      }
    }
  

@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/glic/glic_pref_names.cc b/chrome/browser/glic/glic_pref_names.cc
-index 82c51dbad702b..75cce9e3b95b3 100644
+index 913b44bf54d6f..ae1004e89b53a 100644
 --- a/chrome/browser/glic/glic_pref_names.cc
 +++ b/chrome/browser/glic/glic_pref_names.cc
-@@ -29,7 +29,7 @@ GlicActuationOnWebPolicyState GetGlicActuationOnWebPolicyState() {
+@@ -49,7 +49,7 @@ GlicActuationOnWebPolicyState GetGlicActuationOnWebPolicyState() {
  }
  
  void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
@@ -12,10 +12,10 @@ index 82c51dbad702b..75cce9e3b95b3 100644
    registry->RegisterBooleanPref(kGlicGeolocationEnabled, false);
    registry->RegisterBooleanPref(kGlicTabContextEnabled, false);
 diff --git a/chrome/browser/ui/omnibox/omnibox_next_features.cc b/chrome/browser/ui/omnibox/omnibox_next_features.cc
-index 0a543bf7a5eea..b397681ca7e22 100644
+index fc07c7a33bd8b..18956dc73670c 100644
 --- a/chrome/browser/ui/omnibox/omnibox_next_features.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_next_features.cc
-@@ -18,6 +18,8 @@
+@@ -19,6 +19,8 @@
  #include "components/contextual_search/contextual_search_session_handle.h"
  #include "components/omnibox/browser/aim_eligibility_service.h"
  #include "components/omnibox/browser/omnibox_field_trial.h"
@@ -38,9 +38,9 @@ index 0a543bf7a5eea..b397681ca7e22 100644
 +
    const auto* aim_eligibility_service =
        AimEligibilityServiceFactory::GetForProfile(profile);
-   const bool is_aim_entrypoint_enabled =
+   const auto* ai_mode_button_service =
 diff --git a/components/lens/lens_features.cc b/components/lens/lens_features.cc
-index 83c00289ecd84..058c34e1067b1 100644
+index 955c865f81b48..57a9a99d9d49f 100644
 --- a/components/lens/lens_features.cc
 +++ b/components/lens/lens_features.cc
 @@ -23,7 +23,7 @@ BASE_FEATURE(kLensOverlay,

@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 24c769cf019fe..5060aa43da14a 100644
+index 0353e3f0aeec9..d0e2f9ba5136e 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-@@ -567,6 +567,10 @@ void LocationBarView::Init() {
+@@ -568,6 +568,10 @@ void LocationBarView::Init() {
                                  PageActionIconType::kAiMode);
    }
  

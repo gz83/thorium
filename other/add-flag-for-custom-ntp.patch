@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index b50f1fde68ef3..2dbeedb21012b 100644
+index 978abe8a02235..d5923509c1d45 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -860,11 +860,22 @@ bool HandleNewTabPageLocationOverride(
+@@ -868,11 +868,22 @@ bool HandleNewTabPageLocationOverride(
  
    // Don't change the URL when incognito mode.
    if (profile->IsOffTheRecord()) {
@@ -27,10 +27,10 @@ index b50f1fde68ef3..2dbeedb21012b 100644
      return false;
    }
 diff --git a/components/webui/flags/flags_state.cc b/components/webui/flags/flags_state.cc
-index 9117c06df8cbe..a4fb0cb356c52 100644
+index 491ecd3b0aa90..085abcebbbbc9 100644
 --- a/components/webui/flags/flags_state.cc
 +++ b/components/webui/flags/flags_state.cc
-@@ -228,6 +228,9 @@ std::string GetCombinedOriginListValue(const FlagsStorage& flags_storage,
+@@ -245,6 +245,9 @@ std::string GetCombinedOriginListValue(const FlagsStorage& flags_storage,
        command_line.GetSwitchValueASCII(command_line_switch);
    const std::string new_value =
        flags_storage.GetOriginListFlag(internal_entry_name);
@@ -40,7 +40,7 @@ index 9117c06df8cbe..a4fb0cb356c52 100644
    return CombineAndSanitizeOriginLists(existing_value, new_value);
  }
  
-@@ -476,7 +479,9 @@ void FlagsState::SetOriginListFlag(const std::string& internal_name,
+@@ -493,7 +496,9 @@ void FlagsState::SetOriginListFlag(const std::string& internal_name,
                                     const std::string& value,
                                     FlagsStorage* flags_storage) {
    const std::string new_value =

@@ -127,10 +127,10 @@ index 1c4952ef447da..a20b39920c956 100644
  namespace content {
  class WebUI;
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 086c55c204ae6..2ff59f65c860b 100644
+index f89b010dbdab4..0d8c587b6922f 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -4292,12 +4292,10 @@ static_library("browser") {
+@@ -4049,12 +4049,10 @@ source_set("browser") {
        deps += [ "//chrome/browser/nearby_sharing/internal/icons:vector_icons" ]
      }
  
@@ -148,7 +148,7 @@ index 086c55c204ae6..2ff59f65c860b 100644
      if (enable_server_based_recognition) {
        deps += [ "//chrome/services/speech/internal:lib" ]
 diff --git a/chrome/browser/ash/system_web_apps/apps/BUILD.gn b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
-index a8f16907b19c2..c8bf0165d4b4a 100644
+index d515dd5303f39..4399792651ad3 100644
 --- a/chrome/browser/ash/system_web_apps/apps/BUILD.gn
 +++ b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
 @@ -185,17 +185,15 @@ static_library("apps") {
@@ -216,10 +216,10 @@ index a40e8c795b241..d6f44749a4c41 100644
    SystemWebAppDelegateMap delegate_map;
    for (auto& info : info_vec) {
 diff --git a/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc b/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc
-index 6776c46efba9d..8340a844ee778 100644
+index 0e3e1cfd7bd05..819f8567dfa5d 100644
 --- a/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc
 +++ b/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc
-@@ -172,10 +172,10 @@
+@@ -170,10 +170,10 @@
  #include "media/capture/video/chromeos/mojom/camera_app.mojom.h"
  #include "mojo/public/cpp/bindings/binder_map.h"
  
@@ -231,7 +231,7 @@ index 6776c46efba9d..8340a844ee778 100644
  #include "ash/webui/status_area_internals/mojom/status_area_internals.mojom.h"
  #include "ash/webui/status_area_internals/status_area_internals_ui.h"
  #endif  // defined(OFFICIAL_BUILD)
-@@ -600,10 +600,10 @@ void PopulateChromeWebUIFrameInterfaceBrokersTrustedPartsCros(
+@@ -595,10 +595,10 @@ void PopulateChromeWebUIFrameInterfaceBrokersTrustedPartsCros(
    registry.ForWebUI<ash::smb_dialog::SmbCredentialsDialogUI>();
    registry.ForWebUI<ash::MallUI>().Add<ash::mall::mojom::PageHandler>();
  
@@ -243,7 +243,7 @@ index 6776c46efba9d..8340a844ee778 100644
    registry.ForWebUI<ash::StatusAreaInternalsUI>()
        .Add<ash::mojom::status_area_internals::PageHandler>();
  #endif  // !defined(OFFICIAL_BUILD)
-@@ -643,10 +643,8 @@ void PopulateChromeWebUIFrameInterfaceBrokersUntrustedPartsCros(
+@@ -638,10 +638,8 @@ void PopulateChromeWebUIFrameInterfaceBrokersUntrustedPartsCros(
    registry.ForWebUI<ash::ScannerFeedbackUntrustedUI>()
        .Add<ash::mojom::scanner_feedback_ui::PageHandler>();
  
@@ -255,10 +255,10 @@ index 6776c46efba9d..8340a844ee778 100644
  
  }  // namespace chrome::internal
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 5b8bb04a2fa99..21c413d3f709d 100644
+index d8509bc62e70c..d1936281cbee8 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -2954,9 +2954,7 @@ static_library("ui") {
+@@ -3206,9 +3206,7 @@ static_library("ui") {
        ]
      }
  
@@ -270,23 +270,17 @@ index 5b8bb04a2fa99..21c413d3f709d 100644
  
    if (is_win || is_mac || is_linux || is_chromeos) {
 diff --git a/chrome/browser/ui/webui/ash/config/BUILD.gn b/chrome/browser/ui/webui/ash/config/BUILD.gn
-index fed60eca096f7..96b4f7db01c8c 100644
+index 91dda583aa88f..14d7af22235eb 100644
 --- a/chrome/browser/ui/webui/ash/config/BUILD.gn
 +++ b/chrome/browser/ui/webui/ash/config/BUILD.gn
-@@ -114,10 +114,9 @@ static_library("config") {
+@@ -115,7 +115,5 @@ static_library("config") {
      "//ui/webui",
    ]
  
 -  if (!is_official_build) {
 -    deps += [ "//ash/webui/sample_system_web_app_ui" ]
--    if (!use_real_dbus_clients) {
--      deps += [ "//chrome/browser/ui/webui/ash/emulator" ]
--    }
+-  }
 +  deps += [ "//ash/webui/sample_system_web_app_ui" ]
-+
-+  if (!is_official_build && !use_real_dbus_clients) {
-+    deps += [ "//chrome/browser/ui/webui/ash/emulator" ]
-   }
  }
 diff --git a/chrome/browser/ui/webui/ash/config/chrome_untrusted_web_ui_configs_chromeos.cc b/chrome/browser/ui/webui/ash/config/chrome_untrusted_web_ui_configs_chromeos.cc
 index b564b12f102af..1cd846325a0c1 100644
@@ -314,25 +308,20 @@ index b564b12f102af..1cd846325a0c1 100644
  
  }  // namespace ash
 diff --git a/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc b/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc
-index 2f7aeed9469b3..a48742f8e54de 100644
+index 546e1e84a86e7..4cc3755d94210 100644
 --- a/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc
 +++ b/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc
-@@ -119,12 +119,10 @@
+@@ -118,9 +118,7 @@
  #include "chromeos/ash/components/install_attributes/install_attributes.h"
  #include "chromeos/ash/experiences/guest_os/borealis/motd/borealis_motd_ui.h"
  #include "ui/webui/webui_util.h"
 -#if !defined(OFFICIAL_BUILD)
  #include "ash/webui/sample_system_web_app_ui/sample_system_web_app_ui.h"
--#if !defined(USE_REAL_DBUS_CLIENTS)
-+#if !defined(OFFICIAL_BUILD) && !defined(USE_REAL_DBUS_CLIENTS)
- #include "chrome/browser/ui/webui/ash/emulator/device_emulator_ui.h"
--#endif  // !defined(USE_REAL_DBUS_CLIENTS)
 -#endif  // !defined(OFFICIAL_BUILD)
-+#endif  // !defined(OFFICIAL_BUILD) && !defined(USE_REAL_DBUS_CLIENTS)
  
  namespace content {
  class WebUI;
-@@ -354,8 +352,8 @@ void RegisterAshChromeWebUIConfigs() {
+@@ -349,8 +347,8 @@ void RegisterAshChromeWebUIConfigs() {
        base::BindRepeating(vc_background_ui::CreateVcBackgroundUI)));
    map.AddWebUIConfig(std::make_unique<GrowthInternalsUIConfig>());
    map.AddWebUIConfig(std::make_unique<FloatingWorkspaceUIConfig>());
@@ -340,5 +329,5 @@ index 2f7aeed9469b3..a48742f8e54de 100644
    map.AddWebUIConfig(std::make_unique<SampleSystemWebAppUIConfig>());
 +#if !defined(OFFICIAL_BUILD)
    map.AddWebUIConfig(std::make_unique<StatusAreaInternalsUIConfig>());
- #if !defined(USE_REAL_DBUS_CLIENTS)
-   map.AddWebUIConfig(std::make_unique<DeviceEmulatorUIConfig>());
+ #endif  // !defined(OFFICIAL_BUILD)
+ }

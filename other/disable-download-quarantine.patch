@@ -1,5 +1,5 @@
 diff --git a/components/download/internal/common/base_file.cc b/components/download/internal/common/base_file.cc
-index fc570b5d32d35..02de6067a6e26 100644
+index 185b2b86e3d8a..fbcea2125190f 100644
 --- a/components/download/internal/common/base_file.cc
 +++ b/components/download/internal/common/base_file.cc
 @@ -1,4 +1,4 @@
@@ -16,7 +16,7 @@ index fc570b5d32d35..02de6067a6e26 100644
  #include "crypto/hash.h"
  #include "crypto/secure_hash.h"
  
-@@ -543,94 +542,10 @@ DownloadInterruptReason BaseFile::PublishDownload() {
+@@ -573,94 +572,10 @@ DownloadInterruptReason BaseFile::PublishDownload() {
  }
  #endif  // BUILDFLAG(IS_ANDROID)
  
@@ -112,7 +112,7 @@ index fc570b5d32d35..02de6067a6e26 100644
  }
  
  void BaseFile::AnnotateWithSourceInformation(
-@@ -640,32 +555,7 @@ void BaseFile::AnnotateWithSourceInformation(
+@@ -670,32 +585,7 @@ void BaseFile::AnnotateWithSourceInformation(
      const std::optional<url::Origin>& request_initiator,
      mojo::PendingRemote<quarantine::mojom::Quarantine> remote_quarantine,
      OnAnnotationDoneCallback on_annotation_done_callback) {
@@ -187,7 +187,7 @@ index d46c5c570d6cf..4a4c518e33de6 100644
  
    base::WeakPtrFactory<BaseFile> weak_factory_{this};
 diff --git a/content/browser/BUILD.gn b/content/browser/BUILD.gn
-index d8b60778cdb82..b2e32483589ad 100644
+index 2c3a21e01a602..ba1a0f118240b 100644
 --- a/content/browser/BUILD.gn
 +++ b/content/browser/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -196,7 +196,7 @@ index d8b60778cdb82..b2e32483589ad 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -158,7 +158,6 @@ source_set("browser") {
+@@ -165,7 +165,6 @@ source_set("browser") {
      "//components/power_monitor",
      "//components/schema_org/common:mojom",
      "//components/services/filesystem:lib",

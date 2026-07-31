@@ -19,7 +19,7 @@ index 90c0418ac4529..686aee77d5d12 100644
  #endif  // !BUILDFLAG(IS_ANDROID)
  
 diff --git a/chrome/browser/ui/views/frame/browser_root_view.cc b/chrome/browser/ui/views/frame/browser_root_view.cc
-index 47d7e467d9ddd..d90e8776294b6 100644
+index e2b20fd711da3..5ba582faef96d 100644
 --- a/chrome/browser/ui/views/frame/browser_root_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_root_view.cc
 @@ -12,6 +12,7 @@

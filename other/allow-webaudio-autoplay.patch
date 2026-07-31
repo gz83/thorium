@@ -1,5 +1,5 @@
 diff --git a/third_party/blink/renderer/modules/webaudio/audio_context.cc b/third_party/blink/renderer/modules/webaudio/audio_context.cc
-index 64cc335435bf3..a43559dc0f392 100644
+index 5dcadd8e1db15..0c36a4fbf27f6 100644
 --- a/third_party/blink/renderer/modules/webaudio/audio_context.cc
 +++ b/third_party/blink/renderer/modules/webaudio/audio_context.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 64cc335435bf3..a43559dc0f392 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -1278,7 +1278,13 @@ AutoplayPolicy::Type AudioContext::GetAutoplayPolicy() const {
+@@ -1317,7 +1317,13 @@ AutoplayPolicy::Type AudioContext::GetAutoplayPolicy() const {
    LocalDOMWindow* window = GetWindow();
    DCHECK(window);
  

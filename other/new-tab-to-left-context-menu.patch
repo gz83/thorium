@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/tabs/tab_menu_model.cc b/chrome/browser/ui/tabs/tab_menu_model.cc
-index 6fcbab81cc34b..d59e95f5a5ebe 100644
+index 1baf7a072c6fd..86616617c2737 100644
 --- a/chrome/browser/ui/tabs/tab_menu_model.cc
 +++ b/chrome/browser/ui/tabs/tab_menu_model.cc
 @@ -270,6 +270,10 @@ void TabMenuModel::Build(int index) {
@@ -14,10 +14,10 @@ index 6fcbab81cc34b..d59e95f5a5ebe 100644
      if (tab_strip_->GetActiveTab()->IsSplit()) {
        swap_with_split_submenu_ =
 diff --git a/chrome/browser/ui/tabs/tab_strip_model.cc b/chrome/browser/ui/tabs/tab_strip_model.cc
-index 3326a79d2ba31..5b86e57e8fa04 100644
+index e45f2404bd018..249d4428bccac 100644
 --- a/chrome/browser/ui/tabs/tab_strip_model.cc
 +++ b/chrome/browser/ui/tabs/tab_strip_model.cc
-@@ -2416,6 +2416,7 @@ bool TabStripModel::IsContextMenuCommandEnabled(
+@@ -2400,6 +2400,7 @@ bool TabStripModel::IsContextMenuCommandEnabled(
    }
  
    switch (command_id) {
@@ -25,7 +25,7 @@ index 3326a79d2ba31..5b86e57e8fa04 100644
      case CommandNewTabToRight:
      case CommandCloseTab:
        return true;
-@@ -2530,6 +2531,15 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
+@@ -2508,6 +2509,15 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
      return;
    }
    switch (command_id) {
@@ -42,10 +42,10 @@ index 3326a79d2ba31..5b86e57e8fa04 100644
        base::UmaHistogramCounts1000(
            "Tab.ContextMenu.NewTabToRight.SelectedTabsCount",
 diff --git a/chrome/browser/ui/tabs/tab_strip_model.h b/chrome/browser/ui/tabs/tab_strip_model.h
-index ef083215f22db..a85062a7aeb96 100644
+index cf144a90c3a88..5b246ed822001 100644
 --- a/chrome/browser/ui/tabs/tab_strip_model.h
 +++ b/chrome/browser/ui/tabs/tab_strip_model.h
-@@ -748,6 +748,7 @@ class TabStripModel {
+@@ -740,6 +740,7 @@ class TabStripModel {
    // for entries in the 'Add to existing group' submenu.
    enum ContextMenuCommand {
      CommandFirst,

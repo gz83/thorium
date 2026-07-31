@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc b/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
-index bf25013da7b21..1998487f7731e 100644
+index ccc1c31a7ef60..48655ff34ae90 100644
 --- a/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
 +++ b/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
 @@ -8,6 +8,7 @@
@@ -10,7 +10,7 @@ index bf25013da7b21..1998487f7731e 100644
  #include "base/functional/bind.h"
  #include "base/functional/callback.h"
  #include "base/memory/raw_ptr.h"
-@@ -582,6 +583,20 @@ void OpenAllIfAllowed(
+@@ -587,6 +588,20 @@ void OpenAllIfAllowed(
      page_load_metrics::NavigationHandleUserData::InitiatorLocation
          navigation_type,
      std::optional<BookmarkLaunchAction> launch_action) {
@@ -32,10 +32,10 @@ index bf25013da7b21..1998487f7731e 100644
        nodes, initial_disposition == WindowOpenDisposition::OFF_THE_RECORD);
  
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index dc14ea3d8481a..6c573f2d73b4d 100644
+index 6587a02261171..07742fe78026b 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -179,6 +179,16 @@ BASE_FEATURE_PARAM(int,
+@@ -189,6 +189,16 @@ BASE_FEATURE_PARAM(int,
                     "hover_delay_ms",
                     500);
  
@@ -53,10 +53,10 @@ index dc14ea3d8481a..6c573f2d73b4d 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index ec7a8ea8d70a2..e3e7b04fb2592 100644
+index f24e516c5eb9d..a3f0ae2f62a5f 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -386,6 +386,9 @@ BASE_DECLARE_FEATURE(kRightClickToCloseTab);
+@@ -393,6 +393,9 @@ BASE_DECLARE_FEATURE(kRightClickToCloseTab);
  BASE_DECLARE_FEATURE(kHoverActivateTab);
  BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
  

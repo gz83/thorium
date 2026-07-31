@@ -19,7 +19,7 @@ index c10df92f30b12..7d3806e1a66b1 100644
 +// "Implementors SHOULD NOT set non-essential HTTP headers in DoH client requests."
 +LOAD_FLAG(MINIMAL_HEADERS, 1 << 20)
 diff --git a/net/dns/dns_http_attempt.cc b/net/dns/dns_http_attempt.cc
-index c7afbb1d9071e..a277cf2c23957 100644
+index 2120851a49bec..5b83f53c3516d 100644
 --- a/net/dns/dns_http_attempt.cc
 +++ b/net/dns/dns_http_attempt.cc
 @@ -1,4 +1,4 @@
@@ -28,7 +28,7 @@ index c7afbb1d9071e..a277cf2c23957 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -170,7 +170,7 @@ DnsHTTPAttempt::DnsHTTPAttempt(base::WeakPtr<ResolveContext> resolve_context,
+@@ -173,7 +173,7 @@ DnsHTTPAttempt::DnsHTTPAttempt(base::WeakPtr<ResolveContext> resolve_context,
    // avoid deadlock and enable the use of preconfigured IP addresses.
    request_->SetSecureDnsPolicy(SecureDnsPolicy::kBootstrap);
    request_->SetLoadFlags(request_->load_flags() | LOAD_DISABLE_CACHE |
@@ -38,7 +38,7 @@ index c7afbb1d9071e..a277cf2c23957 100644
    request_->set_isolation_info(GetDohIsolationInfo());
  }
 diff --git a/net/url_request/url_request_http_job.cc b/net/url_request/url_request_http_job.cc
-index fce5645a3f08f..1546695d74f87 100644
+index 2d627cd75e4fb..f6bd98cd4ef21 100644
 --- a/net/url_request/url_request_http_job.cc
 +++ b/net/url_request/url_request_http_job.cc
 @@ -1,4 +1,4 @@
@@ -47,7 +47,7 @@ index fce5645a3f08f..1546695d74f87 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -532,18 +532,22 @@ void URLRequestHttpJob::OnGotFirstPartySetMetadata(
+@@ -515,18 +515,22 @@ void URLRequestHttpJob::Start() {
    // fields in the referrer.
    GURL referrer(request_->referrer());
  
@@ -80,7 +80,7 @@ index fce5645a3f08f..1546695d74f87 100644
  
    AddExtraHeaders();
  
-@@ -798,10 +802,13 @@ void URLRequestHttpJob::StartTransactionInternal() {
+@@ -781,10 +785,13 @@ void URLRequestHttpJob::StartTransactionInternal() {
  void URLRequestHttpJob::AddExtraHeaders() {
    request_info_.extra_headers.SetAcceptEncodingIfMissing(
        request()->url(), request()->accepted_stream_types(),

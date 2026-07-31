@@ -123,7 +123,7 @@ index 6e30ef11474c4..904dc62c7bcb5 100644
  
  #if BUILDFLAG(IS_MAC)
 diff --git a/chrome/common/chrome_paths.cc b/chrome/common/chrome_paths.cc
-index eae95c5f35740..af46f59fc2691 100644
+index 56ff14c59c12a..8e80b183a7622 100644
 --- a/chrome/common/chrome_paths.cc
 +++ b/chrome/common/chrome_paths.cc
 @@ -54,7 +54,7 @@ const base::FilePath::CharType kFilepathSinglePrefExtensions[] =
@@ -145,7 +145,7 @@ index eae95c5f35740..af46f59fc2691 100644
                  .Append(FILE_PATH_LITERAL("External Extensions"));
  #else
        if (!base::PathService::Get(base::DIR_MODULE, &cur)) {
-@@ -471,7 +470,7 @@ bool PathProvider(int key, base::FilePath* result) {
+@@ -459,7 +458,7 @@ bool PathProvider(int key, base::FilePath* result) {
            "/Library/Google/ChromeForTesting/NativeMessagingHosts"));
  #else
        cur = base::FilePath(FILE_PATH_LITERAL(
@@ -154,7 +154,7 @@ index eae95c5f35740..af46f59fc2691 100644
  #endif
  #else  // BUILDFLAG(IS_MAC)
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
-@@ -482,7 +481,7 @@ bool PathProvider(int key, base::FilePath* result) {
+@@ -470,7 +469,7 @@ bool PathProvider(int key, base::FilePath* result) {
            "/etc/opt/chrome_for_testing/native-messaging-hosts"));
  #else
        cur = base::FilePath(

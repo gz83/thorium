@@ -1,8 +1,8 @@
 diff --git a/android_webview/BUILD.gn b/android_webview/BUILD.gn
-index d73a95f06d14b..59cc7015d4451 100644
+index 49f4e5682fdb3..d75e4bf14183e 100644
 --- a/android_webview/BUILD.gn
 +++ b/android_webview/BUILD.gn
-@@ -1287,7 +1287,7 @@ declare_args() {
+@@ -1273,7 +1273,7 @@ declare_args() {
        # logic more easily on an emulator, so the decision to use the arm64
        # orderfile for x64 (instead of arm32) is somewhat arbitrary. We just
        # needed to use some real orderfile.
@@ -25,10 +25,10 @@ index 00422b2d4079e..7a1d41b2bf67a 100644
  #else
                          BackupRefPtrEnabledProcesses::kAllProcesses,
 diff --git a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-index 8385dac71a408..602afb2d200ca 100644
+index eea905bce6b6d..33faa4901127b 100644
 --- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 +++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-@@ -175,6 +175,8 @@ pa_buildflag_header("buildflags") {
+@@ -177,6 +177,8 @@ pa_buildflag_header("buildflags") {
      "HAS_64_BIT_POINTERS=$has_64_bit_pointers",
      "HAS_MEMORY_TAGGING=$has_memory_tagging",
      "IS_ANDROID=$is_android",
@@ -38,7 +38,7 @@ index 8385dac71a408..602afb2d200ca 100644
      "IS_CHROMEOS=$is_chromeos",
      "IS_COMPONENT_BUILD=$is_component_build",
 diff --git a/base/android/device_info.cc b/base/android/device_info.cc
-index f69a39d59a7e7..ba46c32454577 100644
+index 173b678a1b8d9..d5d21c7ed2cf1 100644
 --- a/base/android/device_info.cc
 +++ b/base/android/device_info.cc
 @@ -103,10 +103,14 @@ bool is_foldable() {
@@ -67,7 +67,7 @@ index f69a39d59a7e7..ba46c32454577 100644
  
  // This returns the cached value during initial startup. If you need this
 diff --git a/base/android/device_info.h b/base/android/device_info.h
-index 18657de247973..babebfe747bc9 100644
+index 2fda999479e2a..809c38b290877 100644
 --- a/base/android/device_info.h
 +++ b/base/android/device_info.h
 @@ -29,7 +29,8 @@ BASE_EXPORT void Set(const IDeviceInfo& info);
@@ -81,11 +81,11 @@ index 18657de247973..babebfe747bc9 100644
  BASE_EXPORT int32_t vulkan_deqp_level();
  BASE_EXPORT bool is_xr();
 diff --git a/base/android/java/src/org/chromium/base/DeviceInfo.java b/base/android/java/src/org/chromium/base/DeviceInfo.java
-index d845b094945a3..c2c5b51be3068 100644
+index 4f57696b0d244..534b724ac59a9 100644
 --- a/base/android/java/src/org/chromium/base/DeviceInfo.java
 +++ b/base/android/java/src/org/chromium/base/DeviceInfo.java
-@@ -152,10 +152,14 @@ public final class DeviceInfo {
-         return getInstance().mIDeviceInfo.isFoldable;
+@@ -154,10 +154,14 @@ public final class DeviceInfo {
+                 : getInstance().mIDeviceInfo.isFoldable;
      }
  
 -    public static boolean isDesktop() {
@@ -100,7 +100,7 @@ index d845b094945a3..c2c5b51be3068 100644
      public static int getVulkanDeqpLevel() {
          return getInstance().mIDeviceInfo.vulkanDeqpLevel;
      }
-@@ -320,7 +324,7 @@ public final class DeviceInfo {
+@@ -343,7 +347,7 @@ public final class DeviceInfo {
          mIDeviceInfo.isDesktop =
                  (sIsDesktopForTesting != null)
                          ? sIsDesktopForTesting
@@ -110,10 +110,10 @@ index d845b094945a3..c2c5b51be3068 100644
                                  || CommandLine.getInstance()
                                          .hasSwitch(BaseSwitches.FORCE_DESKTOP_ANDROID);
 diff --git a/build/BUILD.gn b/build/BUILD.gn
-index 95ceaf090e6c0..e2621fda96602 100644
+index 3fa5cae7e11f6..d07f9074c0baa 100644
 --- a/build/BUILD.gn
 +++ b/build/BUILD.gn
-@@ -120,7 +120,7 @@ buildflag_header("ios_buildflags") {
+@@ -116,7 +116,7 @@ buildflag_header("ios_buildflags") {
  #
  buildflag_header("android_buildflags") {
    header = "android_buildflags.h"
@@ -143,10 +143,10 @@ index 21b22ca8cfeb6..31e97f8184c8b 100644
  
      // Use to check if proguard is enabled for the current build.
 diff --git a/build/config/android/rules.gni b/build/config/android/rules.gni
-index cbe9d51a3d783..761b20f792669 100644
+index e5187476c2a59..52034b86cbe3f 100644
 --- a/build/config/android/rules.gni
 +++ b/build/config/android/rules.gni
-@@ -2041,8 +2041,8 @@ if (!is_robolectric && enable_java_templates) {
+@@ -2046,8 +2046,8 @@ if (!is_robolectric && enable_java_templates) {
        } else {
          defines += [ "_LOGTAG_PREFIX=cr_" ]
        }
@@ -187,7 +187,7 @@ index d80c9ff95a2b0..cf6762581e4e9 100644
  
  declare_args() {
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index 796deaad89b33..d7af91301477e 100644
+index 93d903bceab4e..9c30dd89713d1 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -244,7 +244,7 @@ if (is_android) {
@@ -226,23 +226,23 @@ index 2c84cf8929ac2..7888b3dc2913e 100644
      // ALPHA_8 to angle_vulkan_image_backing may fail because it expects 1 byte
      // alignment stride. Workaround via copying it to N32.
 diff --git a/cc/scheduler/scheduler_state_machine.cc b/cc/scheduler/scheduler_state_machine.cc
-index ae87756c7fb14..6ff2d1a34b1e2 100644
+index ce6e121c9b4bc..865de84c3c10e 100644
 --- a/cc/scheduler/scheduler_state_machine.cc
 +++ b/cc/scheduler/scheduler_state_machine.cc
-@@ -35,7 +35,7 @@ const int kMaxPendingSubmitFrames = 1;
- bool IsEligibleToThrottleMainFrameRate() {
+@@ -38,7 +38,7 @@ bool IsEligibleToThrottleMainFrameRate() {
  #if BUILDFLAG(IS_ANDROID)
-   // Still requires balancing tradeoffs for desktop Android, not enabled yet.
--  return !base::android::device_info::is_desktop();
-+  return !base::android::device_info::is_desktop_false();
+   // Still requires balancing tradeoffs for desktop Android, not enabled
+   // unconditionally yet.
+-  return !base::android::device_info::is_desktop() ||
++  return !base::android::device_info::is_desktop_false() ||
+          base::FeatureList::IsEnabled(
+              features::kThrottleMainFrameTo60HzDesktopAndroid);
  #else
-   return true;
- #endif
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index 0750b64fd75ef..99c3f9f7ae776 100644
+index 79c599fa7a31f..3ba5a91dba827 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
-@@ -1014,7 +1014,7 @@ if (_is_default_toolchain) {
+@@ -1011,7 +1011,7 @@ if (_is_default_toolchain) {
        "//components/visited_url_ranking/internal:internal_java",
      ]
  
@@ -251,7 +251,7 @@ index 0750b64fd75ef..99c3f9f7ae776 100644
        deps +=
            [ "//chrome/browser/ui/android/extensions/windowing/internal:java" ]
      } else {
-@@ -2428,7 +2428,7 @@ if (_is_default_toolchain) {
+@@ -2422,7 +2422,7 @@ if (_is_default_toolchain) {
        "//components/embedder_support/android:virtual_structure_javatests",
      ]
  
@@ -261,7 +261,7 @@ index 0750b64fd75ef..99c3f9f7ae776 100644
          "//chrome/browser/ui/android/extensions/windowing/internal:javatests",
  
 diff --git a/chrome/android/chrome_public_apk_tmpl.gni b/chrome/android/chrome_public_apk_tmpl.gni
-index 26c1c75715df1..bd6e983fdb005 100644
+index 87d3ac86d09f1..1c6f79d5b31bb 100644
 --- a/chrome/android/chrome_public_apk_tmpl.gni
 +++ b/chrome/android/chrome_public_apk_tmpl.gni
 @@ -41,7 +41,7 @@ default_chrome_public_jinja_variables = [
@@ -312,10 +312,10 @@ index 58206529e71f5..2bf1e39648297 100644
 \ No newline at end of file
 +</ScrollView>
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ChromeBaseAppCompatActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/ChromeBaseAppCompatActivity.java
-index 2b393556d95f3..cce19e66f77ce 100644
+index b532555cc531a..d96d0140b0e15 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/ChromeBaseAppCompatActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/ChromeBaseAppCompatActivity.java
-@@ -630,7 +630,7 @@ public class ChromeBaseAppCompatActivity extends AppCompatActivity
+@@ -637,7 +637,7 @@ public class ChromeBaseAppCompatActivity extends AppCompatActivity
              applySingleThemeOverlay(R.style.ThemeOverlay_BrowserUI_OptOutEdgeToEdge);
          }
  
@@ -325,10 +325,10 @@ index 2b393556d95f3..cce19e66f77ce 100644
              applySingleThemeOverlay(R.style.ThemeOverlay_BrowserUI_DesktopDensity_TabStrip);
          }
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
-index 28cae2eb64535..37c1fc17963fc 100644
+index 977f05360fe1e..96eaefd093b52 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
-@@ -2215,7 +2215,7 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
+@@ -2234,7 +2234,7 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
  
      @Override
      public boolean shouldPersistAcrossReboots() {
@@ -338,10 +338,10 @@ index 28cae2eb64535..37c1fc17963fc 100644
  
      private void handleDebugIntent(Intent intent) {
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
-index df1e608403265..ff5d483bc585c 100644
+index bc53c8309c5db..a9428807cf260 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
-@@ -2229,7 +2229,7 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
+@@ -2251,7 +2251,7 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
                  HostZoomMap.setTransparentZoomAdjustment(
                          (float) ContentFeatureList.sAndroidMonitorZoomScalingFactor.getValue()
                                  / 100.0f);
@@ -351,11 +351,11 @@ index df1e608403265..ff5d483bc585c 100644
                          (float) ContentFeatureList.sAndroidDesktopZoomScalingFactor.getValue()
                                  / 100.0f);
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java b/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
-index 09f9956d31cd6..5bacfbea92f54 100644
+index ca950caa15b62..248a9fc271ce0 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
-@@ -1244,7 +1244,7 @@ public abstract class AppMenuPropertiesDelegateImpl implements AppMenuProperties
-                         && !shouldShowReaderModePrefs(currentTab)
+@@ -1312,7 +1312,7 @@ public abstract class AppMenuPropertiesDelegateImpl implements AppMenuProperties
+                 !isNativePage
                          && currentTab != null
                          && currentTab.getWebContents() != null
 -                        && !DeviceInfo.isDesktop();
@@ -364,7 +364,7 @@ index 09f9956d31cd6..5bacfbea92f54 100644
          if (!itemVisible) return null;
  
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/appearance/settings/AppearanceSettingsFragment.java b/chrome/android/java/src/org/chromium/chrome/browser/appearance/settings/AppearanceSettingsFragment.java
-index 8bd5cc9b16047..351a69ac30025 100644
+index 11981cea6b874..78749f67d1b31 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/appearance/settings/AppearanceSettingsFragment.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/appearance/settings/AppearanceSettingsFragment.java
 @@ -62,7 +62,7 @@ public class AppearanceSettingsFragment extends ChromeBaseSettingsFragment
@@ -377,7 +377,7 @@ index 8bd5cc9b16047..351a69ac30025 100644
          initToolbarShortcutPref();
          initUiThemePref();
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/compositor/layouts/LayoutManagerChrome.java b/chrome/android/java/src/org/chromium/chrome/browser/compositor/layouts/LayoutManagerChrome.java
-index f8c210b6896a8..0fa3ec9b52e2b 100644
+index cce48679ee229..7507a484661b8 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/compositor/layouts/LayoutManagerChrome.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/compositor/layouts/LayoutManagerChrome.java
 @@ -502,6 +502,10 @@ public class LayoutManagerChrome extends LayoutManagerImpl implements Accessibil
@@ -392,7 +392,7 @@ index f8c210b6896a8..0fa3ec9b52e2b 100644
                  // Dragging on the toolbar with the pointer should not cause swipes.
                  return false;
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/compositor/overlays/strip/StripLayoutUtils.java b/chrome/android/java/src/org/chromium/chrome/browser/compositor/overlays/strip/StripLayoutUtils.java
-index 0ba4d789f23ad..952f4ad65d726 100644
+index 5bb2239487ba7..a0511e6bef065 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/compositor/overlays/strip/StripLayoutUtils.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/compositor/overlays/strip/StripLayoutUtils.java
 @@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
@@ -460,10 +460,10 @@ index 29c5930f5d1fd..2644f29c214fb 100644
                  windowAndroid,
                  activityTabProvider,
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/externalnav/ExternalNavigationDelegateImpl.java b/chrome/android/java/src/org/chromium/chrome/browser/externalnav/ExternalNavigationDelegateImpl.java
-index ca3657e4202b6..cdf663f521455 100644
+index cfa270abe2a19..ae615d24d987b 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/externalnav/ExternalNavigationDelegateImpl.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/externalnav/ExternalNavigationDelegateImpl.java
-@@ -306,6 +306,9 @@ public class ExternalNavigationDelegateImpl implements ExternalNavigationDelegat
+@@ -303,6 +303,9 @@ public class ExternalNavigationDelegateImpl implements ExternalNavigationDelegat
  
      @Override
      public @Nullable Intent createIntentToPreventIncognitoAccess(GURL url) {
@@ -473,7 +473,7 @@ index ca3657e4202b6..cdf663f521455 100644
          if (!url.getSpec().startsWith(UrlConstants.CHROME_EXTENSIONS_URL)) {
              return null;
          }
-@@ -334,7 +337,7 @@ public class ExternalNavigationDelegateImpl implements ExternalNavigationDelegat
+@@ -331,7 +334,7 @@ public class ExternalNavigationDelegateImpl implements ExternalNavigationDelegat
                  && params.isInitialNavigationInFrame()
                  // TODO(crbug.com/452537438): Figure out a better way to check whether we are in
                  // desktop windowing mode or if the device can enter desktop windowing mode.
@@ -496,23 +496,23 @@ index d375e5065262e..491b25b1d9ab0 100644
                  isDesktop
                          ? R.dimen.document_picture_in_picture_header_min_height_desktop
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31.java b/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31.java
-index 2f7dba0c21b0c..b7fa9a61ce27c 100644
+index b2f9767d0513b..050135e5cfb0a 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31.java
-@@ -447,7 +447,7 @@ class MultiInstanceManagerApi31 extends MultiInstanceManagerImpl
- 
+@@ -453,7 +453,7 @@ class MultiInstanceManagerApi31 extends MultiInstanceManagerImpl
              boolean instanceExists = ChromeMultiInstancePersistentStore.hasInstance(i);
              if (instanceExists
+                     && !isRelaunch
 -                    && (DeviceInfo.isDesktop()
 +                    && (DeviceInfo.isDesktopFalse()
                              && ChromeFeatureList.sOnStartupWindowPolicy.isEnabled())) {
                  // This supports updated default id allocation / startup behavior where a newly
                  // created activity will refrain from using existing instance state and will be
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiWindowUtils.java b/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiWindowUtils.java
-index 3b962153e100d..7bdc6d6436b1a 100644
+index 8c697cfb48c29..b7f444d0a3f93 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiWindowUtils.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/multiwindow/MultiWindowUtils.java
-@@ -219,7 +219,7 @@ public class MultiWindowUtils implements ActivityStateListener {
+@@ -222,7 +222,7 @@ public class MultiWindowUtils implements ActivityStateListener {
              return TabWindowManager.MAX_SELECTORS_LEGACY;
          }
  
@@ -521,7 +521,7 @@ index 3b962153e100d..7bdc6d6436b1a 100644
              return TabWindowManager.MAX_SELECTORS_1000;
          }
  
-@@ -652,7 +652,7 @@ public class MultiWindowUtils implements ActivityStateListener {
+@@ -658,7 +658,7 @@ public class MultiWindowUtils implements ActivityStateListener {
       */
      public static boolean shouldShowInstanceSwitcherIph() {
          int instanceCount = getInstanceCount(PersistedInstanceType.ANY);
@@ -531,10 +531,10 @@ index 3b962153e100d..7bdc6d6436b1a 100644
      }
  
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
-index c8250e849de3c..da51d17a53501 100644
+index db587085f68c7..2a0fd4485a1c8 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
-@@ -169,7 +169,7 @@ public class ChromeSiteSettingsDelegate implements SiteSettingsDelegate {
+@@ -171,7 +171,7 @@ public class ChromeSiteSettingsDelegate implements SiteSettingsDelegate {
                  return PermissionUtil.handTrackingNeedsAdditionalPermissions();
              case SiteSettingsCategory.Type.REQUEST_DESKTOP_SITE:
                  // Desktop Android always requests desktop sites, so hide the category.
@@ -622,10 +622,10 @@ index 2bf3f1786851a..b1cbefd03f678 100644
          }
  
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
-index 4bc3bf5a65ad5..549f368876444 100644
+index e248048c4b702..86a88d83195a9 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
-@@ -1571,7 +1571,7 @@ public class TabbedAppMenuPropertiesDelegate extends AppMenuPropertiesDelegateIm
+@@ -2075,7 +2075,7 @@ public class TabbedAppMenuPropertiesDelegate extends AppMenuPropertiesDelegateIm
          // 2. The current tab is a PDF page.
          NativePage nativePage = currentTab.getNativePage();
          boolean isPdf = nativePage != null && nativePage.isPdf();
@@ -635,10 +635,10 @@ index 4bc3bf5a65ad5..549f368876444 100644
  
      private ListItem buildPrintItem(Tab currentTab) {
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java
-index 1ef95cec79cb4..9b8cf514f3089 100644
+index 8a8d752a07e66..6a552fa8e5944 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java
-@@ -703,7 +703,7 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
+@@ -745,7 +745,7 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
          maybeShowPromosOnForeground();
  
          mCrossDeviceSettingImporter =
@@ -647,9 +647,9 @@ index 1ef95cec79cb4..9b8cf514f3089 100644
                          ? null
                          : new CrossDeviceSettingImporter(
                                  activityLifecycleDispatcher,
-@@ -2530,7 +2530,7 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
+@@ -2716,7 +2716,7 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
+             return true;
          } else if (id == R.id.toggle_bookmark_bar) {
-             // isActivityStateBookmarkBarCompatible already checks the flag sAndroidBookmarkBar.
              if (BookmarkBarUtils.isActivityStateBookmarkBarCompatible(mActivity)) {
 -                if (DeviceInfo.isDesktop()) {
 +                if (DeviceInfo.isDesktopThorium()) {
@@ -657,18 +657,18 @@ index 1ef95cec79cb4..9b8cf514f3089 100644
                      BookmarkBarUtils.toggleUserPrefsShowBookmarksBar(
                              mProfileSupplier.asNonNull().get(), /* fromKeyboardShortcut= */ true);
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java b/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
-index 2145dc1ab1682..490a8f6481c72 100644
+index 17f7465c79133..b7d5efa29693c 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
-@@ -2600,7 +2600,7 @@ public class ToolbarManager
-                                 mActivityTabProvider.asObservable(),
-                                 mTabCreatorManager.getTabCreator(false),
-                                 getBrowsingModeThemeColorProvider(),
--                                (ToolbarTablet) mToolbarLayout,
-+                                mToolbarLayout,
-                                 contextMenuPopulatorFactory,
-                                 selectionDropdownMenuDelegate,
-                                 mTabModelSelector,
+@@ -2638,7 +2638,7 @@ public class ToolbarManager
+                                                         mActivityTabProvider.asObservable(),
+                                                         mTabCreatorManager.getTabCreator(false),
+                                                         getBrowsingModeThemeColorProvider(),
+-                                                        (ToolbarTablet) mToolbarLayout,
++                                                        mToolbarLayout,
+                                                         contextMenuPopulatorFactory,
+                                                         selectionDropdownMenuDelegate,
+                                                         mTabModelSelector,
 diff --git a/chrome/app/extensions_strings.grdp b/chrome/app/extensions_strings.grdp
 index 4c74dc4ca8988..75421913a1494 100644
 --- a/chrome/app/extensions_strings.grdp
@@ -691,10 +691,10 @@ index 4c74dc4ca8988..75421913a1494 100644
      No description provided
    </message>
 diff --git a/chrome/app/theme/theme_resources.grd b/chrome/app/theme/theme_resources.grd
-index baf154ba17dfe..5a292f20ed101 100644
+index ad5523311d2d2..3519444004d52 100644
 --- a/chrome/app/theme/theme_resources.grd
 +++ b/chrome/app/theme/theme_resources.grd
-@@ -395,7 +395,7 @@
+@@ -407,7 +407,7 @@
          <structure type="chrome_scaled_image" name="IDR_UPLOAD_VIOLATION_DARK" file="common/upload_violation_dark.png" />
        </if>
        <if expr="not _google_chrome">
@@ -703,7 +703,7 @@ index baf154ba17dfe..5a292f20ed101 100644
            <!-- Desktop Android supports extensions and the web store. -->
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON" file="chromium/webstore_icon.png" />
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON_16" file="chromium/webstore_icon_16.png" />
-@@ -404,7 +404,7 @@
+@@ -416,7 +416,7 @@
          </if>
        </if>
        <if expr="_google_chrome">
@@ -713,19 +713,19 @@ index baf154ba17dfe..5a292f20ed101 100644
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON" file="google_chrome/webstore_icon.png" />
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON_16" file="google_chrome/webstore_icon_16.png" />
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 2ff59f65c860b..8f0ef485a4329 100644
+index 0d8c587b6922f..d2875864e918a 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -4996,7 +4996,7 @@ static_library("browser") {
+@@ -4470,7 +4470,7 @@ source_set("browser") {
  
    # TODO(https://crbug.com/356905053): Add more dependencies here and merge this
    # block with the `enable_extensions` block above.
 -  if (enable_desktop_android_extensions) {
 +  if (enable_desktop_android_extensions_thorium) {
-     sources += [
-       # TODO(https://crbug.com/356905053): These files are temporary workarounds
-       # allow for a lightweight extensions runtime in desktop-android builds.
-@@ -5457,7 +5457,7 @@ group("browser_generated_files") {
+     deps += [
+       "//chrome/browser/extensions",
+       "//chrome/browser/ui/android/extensions",
+@@ -4870,7 +4870,7 @@ group("browser_generated_files") {
            [ "//chrome/browser/ui/webui/new_tab_page/foo:mojo_bindings" ]
      }
    }
@@ -735,10 +735,10 @@ index 2ff59f65c860b..8f0ef485a4329 100644
    }
  
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
-index 3db603f5c2095..49622b54ea29f 100644
+index 3e798a0963fbc..89e89c9dad816 100644
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -384,6 +384,10 @@
+@@ -389,6 +389,10 @@
  #include "extensions/common/switches.h"
  #endif  // BUILDFLAG(ENABLE_EXTENSIONS_CORE)
  
@@ -749,7 +749,7 @@ index 3db603f5c2095..49622b54ea29f 100644
  #if BUILDFLAG(ENABLE_PDF)
  #include "pdf/pdf_features.h"
  #endif
-@@ -8937,6 +8941,13 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -8932,6 +8936,13 @@ const FeatureEntry kFeatureEntries[] = {
       FEATURE_VALUE_TYPE(ash::features::kTrafficCountersForWiFiTesting)},
  #endif  // BUILDFLAG(IS_CHROMEOS)
  
@@ -761,13 +761,13 @@ index 3db603f5c2095..49622b54ea29f 100644
 +#endif  // BUILDFLAG(IS_ANDROID)
 +
  #if BUILDFLAG(ENABLE_EXTENSIONS)
-     {"api-mime-handler", flag_descriptions::kApiMimeHandlerName,
-      flag_descriptions::kApiMimeHandlerDescription, kOsDesktop,
+     {"api-contextual-tasks-private",
+      flag_descriptions::kApiContextualTasksPrivateName,
 diff --git a/chrome/browser/android/metrics/android_atoms_logger.cc b/chrome/browser/android/metrics/android_atoms_logger.cc
-index e457fbd338f65..1a8ee714a2e11 100644
+index 88d48eccc5a31..7928cc6a16e27 100644
 --- a/chrome/browser/android/metrics/android_atoms_logger.cc
 +++ b/chrome/browser/android/metrics/android_atoms_logger.cc
-@@ -26,7 +26,7 @@ void AndroidAtomsLogger::Initialize() {
+@@ -28,7 +28,7 @@ void AndroidAtomsLogger::Initialize() {
  
  // static
  bool AndroidAtomsLogger::IsDesktop() {
@@ -777,32 +777,109 @@ index e457fbd338f65..1a8ee714a2e11 100644
  
  AndroidAtomsLogger::AndroidAtomsLogger()
 diff --git a/chrome/browser/android/selection/chrome_selection_dropdown_menu_delegate.cc b/chrome/browser/android/selection/chrome_selection_dropdown_menu_delegate.cc
-index 0b57028f530e3..62834ab507059 100644
+index bbae64b880f81..df75a8ea8888f 100644
 --- a/chrome/browser/android/selection/chrome_selection_dropdown_menu_delegate.cc
 +++ b/chrome/browser/android/selection/chrome_selection_dropdown_menu_delegate.cc
-@@ -8,7 +8,7 @@
- #include "content/public/browser/render_frame_host.h"
+@@ -16,7 +16,7 @@
  #include "extensions/buildflags/buildflags.h"
+ #include "ui/menus/simple_menu_model.h"
  
 -#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
 +#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
  #include "chrome/browser/extensions/extension_menu_model_android.h"
- #endif  // BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
+ #endif
  
-@@ -25,7 +25,7 @@ std::unique_ptr<ui::MenuModel>
- ChromeSelectionDropdownMenuDelegate::GetSelectionPopupExtraItems(
-     content::RenderFrameHost& render_frame_host,
-     const content::ContextMenuParams& params) {
+@@ -24,14 +24,14 @@ namespace android {
+ 
+ namespace {
+ 
 -#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
 +#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
-   std::unique_ptr<extensions::ExtensionMenuModel> extension_menu_model =
-       std::make_unique<extensions::ExtensionMenuModel>(render_frame_host,
-                                                        params);
+ using BaseSelectionDropdownMenuModel = extensions::ExtensionMenuModel;
+ #else
+ using BaseSelectionDropdownMenuModel = ui::SimpleMenuModel;
+ #endif
+ 
+ class ChromeSelectionDropdownMenuModel : public BaseSelectionDropdownMenuModel
+-#if !BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if !BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+     ,
+                                          public ui::SimpleMenuModel::Delegate
+ #endif
+@@ -39,7 +39,7 @@ class ChromeSelectionDropdownMenuModel : public BaseSelectionDropdownMenuModel
+  public:
+   ChromeSelectionDropdownMenuModel(content::RenderFrameHost& render_frame_host,
+                                    const content::ContextMenuParams& params)
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+       : BaseSelectionDropdownMenuModel(render_frame_host, params),
+ #else
+       : BaseSelectionDropdownMenuModel(this),
+@@ -58,7 +58,7 @@ class ChromeSelectionDropdownMenuModel : public BaseSelectionDropdownMenuModel
+       }
+       return;
+     }
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+     BaseSelectionDropdownMenuModel::ExecuteCommand(command_id, event_flags);
+ #endif
+   }
+@@ -67,7 +67,7 @@ class ChromeSelectionDropdownMenuModel : public BaseSelectionDropdownMenuModel
+     if (command_id == IDC_CONTENT_CONTEXT_INSPECTELEMENT) {
+       return false;
+     }
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+     return BaseSelectionDropdownMenuModel::IsCommandIdChecked(command_id);
+ #else
+     return false;
+@@ -78,7 +78,7 @@ class ChromeSelectionDropdownMenuModel : public BaseSelectionDropdownMenuModel
+     if (command_id == IDC_CONTENT_CONTEXT_INSPECTELEMENT) {
+       return true;
+     }
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+     return BaseSelectionDropdownMenuModel::IsCommandIdEnabled(command_id);
+ #else
+     return false;
+@@ -89,7 +89,7 @@ class ChromeSelectionDropdownMenuModel : public BaseSelectionDropdownMenuModel
+     if (command_id == IDC_CONTENT_CONTEXT_INSPECTELEMENT) {
+       return true;
+     }
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+     return BaseSelectionDropdownMenuModel::IsCommandIdVisible(command_id);
+ #else
+     return false;
+@@ -120,7 +120,7 @@ ChromeSelectionDropdownMenuDelegate::GetSelectionPopupExtraItems(
+       content::WebContents::FromRenderFrameHost(&render_frame_host);
+   bool is_devtools_allowed = IsInspectionAllowed(profile, web_contents);
+ 
+-#if !BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if !BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+   if (!is_devtools_allowed) {
+     return nullptr;
+   }
+@@ -129,12 +129,12 @@ ChromeSelectionDropdownMenuDelegate::GetSelectionPopupExtraItems(
+   std::unique_ptr<ChromeSelectionDropdownMenuModel> model =
+       std::make_unique<ChromeSelectionDropdownMenuModel>(render_frame_host,
+                                                          params);
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+   model->PopulateModel();
+ #endif
+ 
+   if (is_devtools_allowed) {
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+     if (model->GetItemCount() > 0) {
+       model->AddSeparator(ui::NORMAL_SEPARATOR);
+     }
 diff --git a/chrome/browser/bookmarks/android/bookmark_bridge.cc b/chrome/browser/bookmarks/android/bookmark_bridge.cc
-index fa78cab1139ce..6347f070c809e 100644
+index 75d65679a02ca..1b5caf6550dc0 100644
 --- a/chrome/browser/bookmarks/android/bookmark_bridge.cc
 +++ b/chrome/browser/bookmarks/android/bookmark_bridge.cc
-@@ -733,7 +733,7 @@ BookmarkBridge::GetDefaultBookmarkFolder(JNIEnv* env) {
+@@ -734,7 +734,7 @@ BookmarkBridge::GetDefaultBookmarkFolder(JNIEnv* env) {
    // On Desktop builds of Android, default to the "Other bookmarks" folder
    // rather than the "Mobile bookmarks" folder, which we will use on non-Desktop
    // builds.
@@ -812,10 +889,10 @@ index fa78cab1139ce..6347f070c809e 100644
        return GetAccountOtherFolderId(env);
      }
 diff --git a/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java b/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java
-index 428ea1e6ca2fb..ff635862ebb72 100644
+index 9df3248a90a67..fbfbbb533cd26 100644
 --- a/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java
 +++ b/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java
-@@ -212,7 +212,7 @@ public class BookmarkBarUtils {
+@@ -210,7 +210,7 @@ public class BookmarkBarUtils {
          // On Desktop, we sync with the UserPrefs.
          // On tablets we use the device preference logic (policy (pref service)  > local pref
          // (shared pref) > FeatureParam).
@@ -824,7 +901,7 @@ index 428ea1e6ca2fb..ff635862ebb72 100644
                  ? isUserPrefsShowBookmarksBarEnabled(profile)
                  : isDevicePrefShowBookmarksBarEnabled(profile);
      }
-@@ -431,13 +431,13 @@ public class BookmarkBarUtils {
+@@ -428,13 +428,13 @@ public class BookmarkBarUtils {
          boolean isCurrentlyVisible = isBookmarkBarVisible(context, profile, isXrFullSpaceMode);
  
          // Record if the Bookmark Bar is visible, but not in cases of a forced feature param.
@@ -880,10 +957,10 @@ index 0c58de6f01b36..9f325087247b9 100644
      }
  
 diff --git a/chrome/browser/browser_process_impl.cc b/chrome/browser/browser_process_impl.cc
-index 3389caba30366..696e889057804 100644
+index 4199b0c95932f..e6b0a1ca035ab 100644
 --- a/chrome/browser/browser_process_impl.cc
 +++ b/chrome/browser/browser_process_impl.cc
-@@ -400,7 +400,7 @@ void BrowserProcessImpl::Init() {
+@@ -399,7 +399,7 @@ void BrowserProcessImpl::Init() {
    // TODO(devlin): Move this block out of BrowserProcessImpl to somewhere like
    // //chrome/browser/initialize_extensions_browser_client, analogous to
    // `EnsureExtensionsClientInitialized()` above?
@@ -893,7 +970,7 @@ index 3389caba30366..696e889057804 100644
  #elif BUILDFLAG(ENABLE_EXTENSIONS)
    extensions_browser_client_ =
 diff --git a/chrome/browser/chrome_browser_field_trials.cc b/chrome/browser/chrome_browser_field_trials.cc
-index e7e795e1e7208..640a9073717f1 100644
+index 19667a2a82a9e..b8fd371304c11 100644
 --- a/chrome/browser/chrome_browser_field_trials.cc
 +++ b/chrome/browser/chrome_browser_field_trials.cc
 @@ -142,7 +142,7 @@ void ChromeBrowserFieldTrials::RegisterFeatureOverrides(
@@ -905,7 +982,7 @@ index e7e795e1e7208..640a9073717f1 100644
    // Nota bene: Anything here is expected to be short-lived, unless deemed too
    // risky to launch to non-desktop platforms. New features being added here
    // should be the exception, and not the norm. Instead, you should place the
-@@ -158,33 +158,33 @@ void ChromeBrowserFieldTrials::RegisterFeatureOverrides(
+@@ -158,32 +158,32 @@ void ChromeBrowserFieldTrials::RegisterFeatureOverrides(
    // TODO(crbug.com/426461170): Remove once we enable this feature for all form
    // factors. Currently we have no conclusion whether to enable this on mobile
    // phones yet.
@@ -913,9 +990,7 @@ index e7e795e1e7208..640a9073717f1 100644
 -      media::kAndroidEnableBackgroundMediaCapturing);
 +  // feature_overrides.EnableFeature(
 +  //     media::kAndroidEnableBackgroundMediaCapturing);
-   // TODO(crbug.com/465596248): Remove when experiment is complete.
--  feature_overrides.EnableFeature(chrome::android::kProtectRecentlyVisibleTab);
-+  // feature_overrides.EnableFeature(chrome::android::kProtectRecentlyVisibleTab);
+ 
    // TODO(crbug.com/422903297): Remove when tablet rollout is complete.
 -  feature_overrides.EnableFeature(features::kRendererProcessLimitOnAndroid);
 +  // feature_overrides.EnableFeature(features::kRendererProcessLimitOnAndroid);
@@ -953,7 +1028,7 @@ index e7e795e1e7208..640a9073717f1 100644
    // Enables automatic picture-in-picture.
    // TODO(crbug.com/421608904): Remove when rollout is complete to all form
    // factors.
-@@ -197,53 +197,53 @@ void ChromeBrowserFieldTrials::RegisterFeatureOverrides(
+@@ -196,48 +196,48 @@ void ChromeBrowserFieldTrials::RegisterFeatureOverrides(
    // Enable Media Engagement bypass and preload for desktop Android.
    // TODO(crbug.com/490450572): Re-evaluate if we want to enable these features
    // for all Android form factors after analysis.
@@ -1016,28 +1091,13 @@ index e7e795e1e7208..640a9073717f1 100644
 +  // feature_overrides.EnableFeature(features::kLazyBrowserInterfaceBroker);
 +  // feature_overrides.EnableFeature(chrome::android::kLoadAllTabsAtStartup);
  
-   // Enable the ability for extensions to override chrome pages.
-   // TODO(crbug.com/404069963): Remove flag when the feature is verified to be
-   // stable on desktop Android.
--  feature_overrides.EnableFeature(chrome::android::kChromeNativeUrlOverriding);
-+  // feature_overrides.EnableFeature(chrome::android::kChromeNativeUrlOverriding);
- 
    // Enable desktop full screen to a screen feature flag by default for desktop
    // platforms.
-@@ -255,7 +255,7 @@ void ChromeBrowserFieldTrials::RegisterFeatureOverrides(
-   // Enables the ability to specify a platform-specific zoom scaling that will
-   // apply transparently to all pages.
-   // TODO(crbug.com/450281745): Remove once feature is enabled by default.
--  feature_overrides.EnableFeature(::features::kAndroidDesktopZoomScaling);
-+  // feature_overrides.EnableFeature(::features::kAndroidDesktopZoomScaling);
- 
-   // Enables desktop page web prefs for large displays on Android.
-   // TODO(crbug.com/433519850): Remove once feature is enabled by default.
 diff --git a/chrome/browser/chrome_browser_interface_binders_webui.cc b/chrome/browser/chrome_browser_interface_binders_webui.cc
-index b636ad2726268..370bfede7be7c 100644
+index 1783d12811ef3..4681742156c63 100644
 --- a/chrome/browser/chrome_browser_interface_binders_webui.cc
 +++ b/chrome/browser/chrome_browser_interface_binders_webui.cc
-@@ -84,13 +84,13 @@
+@@ -87,13 +87,13 @@
  #include "ui/webui/resources/cr_components/composebox/composebox.mojom.h"
  #endif
  
@@ -1054,7 +1114,7 @@ index b636ad2726268..370bfede7be7c 100644
  #include "chrome/browser/ui/webui/discards/discards.mojom.h"
  #include "chrome/browser/ui/webui/discards/discards_ui.h"
  #include "chrome/browser/ui/webui/discards/site_data.mojom.h"
-@@ -106,7 +106,7 @@ namespace chrome::internal {
+@@ -109,7 +109,7 @@ namespace chrome::internal {
  using content::RegisterWebUIControllerInterfaceBinder;
  
  namespace {
@@ -1063,7 +1123,7 @@ index b636ad2726268..370bfede7be7c 100644
  void BindColorChangeListener(
      content::RenderFrameHost* frame_host,
      mojo::PendingReceiver<color_change_listener::mojom::PageHandler>
-@@ -115,7 +115,7 @@ void BindColorChangeListener(
+@@ -118,7 +118,7 @@ void BindColorChangeListener(
        ui::ColorChangeHandler::GetOrCreateForCurrentDocument(frame_host);
    color_change_handler->Bind(std::move(pending_receiver));
  }
@@ -1072,7 +1132,7 @@ index b636ad2726268..370bfede7be7c 100644
  
  void BindTrackedElementHandler(
      content::RenderFrameHost* frame_host,
-@@ -278,10 +278,10 @@ void PopulateChromeWebUIFrameBindersPartsAllPlatforms(
+@@ -295,10 +295,10 @@ void PopulateChromeWebUIFrameBindersPartsAllPlatforms(
    }
  #endif  // BUILDFLAG(ENABLE_WEBUI_NTP)
  
@@ -1085,7 +1145,7 @@ index b636ad2726268..370bfede7be7c 100644
  
  // TODO(b/502297163): Implement for Android.
  #if BUILDFLAG(ENABLE_WEBUI_NTP) && BUILDFLAG(IS_ANDROID)
-@@ -337,7 +337,7 @@ void PopulateChromeWebUIFrameBinders(
+@@ -354,7 +354,7 @@ void PopulateChromeWebUIFrameBinders(
  #endif  // BUILDFLAG(IS_CHROMEOS)
  
  #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
@@ -1094,7 +1154,7 @@ index b636ad2726268..370bfede7be7c 100644
    RegisterWebUIControllerInterfaceBinder<discards::mojom::DetailsProvider,
                                           DiscardsUI>(map);
  
-@@ -370,10 +370,10 @@ void PopulateTrustedChromeWebUIFrameInterfaceBrokers(
+@@ -389,10 +389,10 @@ void PopulateTrustedChromeWebUIFrameInterfaceBrokers(
    PopulateChromeWebUIFrameInterfaceBrokersTrustedPartsDesktop(registry);
  #endif  // !BUILDFLAG(IS_ANDROID)
  
@@ -1107,7 +1167,7 @@ index b636ad2726268..370bfede7be7c 100644
  
    registry.AddGlobal<tracked_element::mojom::TrackedElementHandler>(
        base::BindRepeating(&BindTrackedElementHandler));
-@@ -394,10 +394,10 @@ void PopulateUntrustedChromeWebUIFrameInterfaceBrokers(
+@@ -413,10 +413,10 @@ void PopulateUntrustedChromeWebUIFrameInterfaceBrokers(
    PopulateChromeWebUIFrameInterfaceBrokersUntrustedPartsDesktop(registry);
  #endif  // !BUILDFLAG(IS_ANDROID)
  
@@ -1121,10 +1181,10 @@ index b636ad2726268..370bfede7be7c 100644
    registry.AddGlobal<tracked_element::mojom::TrackedElementHandler>(
        base::BindRepeating(&BindTrackedElementHandler));
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 2dbeedb21012b..204c6a2422059 100644
+index d5923509c1d45..e2d76eb02940e 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -4409,7 +4409,7 @@ base::OnceClosure ChromeContentBrowserClient::SelectClientCertificate(
+@@ -4424,7 +4424,7 @@ base::OnceClosure ChromeContentBrowserClient::SelectClientCertificate(
      // TODO(wenz): This should instead proceed with the selected certificate
      // when there are matching certificates in the OS.
  #if BUILDFLAG(ENABLE_EXTENSIONS) && \
@@ -1133,7 +1193,7 @@ index 2dbeedb21012b..204c6a2422059 100644
      if (matching_certificates.empty() && nonmatching_certificates.empty()) {
        extensions::ProcessMap* process_map =
            extensions::ProcessMap::Get(profile);
-@@ -4702,7 +4702,7 @@ void ChromeContentBrowserClient::OverrideWebPreferences(
+@@ -4717,7 +4717,7 @@ void ChromeContentBrowserClient::OverrideWebPreferences(
  // Fill font preferences. These are not registered on Android unless we're built
  // with extensions (the chrome.fontSettings API can change these).
  // - http://crbug.com/40337093, http://crbug.com/41304476.
@@ -1156,10 +1216,10 @@ index 1d082e6b0a98d..71538a6c01d18 100644
  
      /**
 diff --git a/chrome/browser/devtools/BUILD.gn b/chrome/browser/devtools/BUILD.gn
-index 802955898f7d6..ed6292049d174 100644
+index f2a7f5db9ebe4..a549d59d382f7 100644
 --- a/chrome/browser/devtools/BUILD.gn
 +++ b/chrome/browser/devtools/BUILD.gn
-@@ -372,7 +372,7 @@ static_library("devtools") {
+@@ -374,7 +374,7 @@ static_library("devtools") {
      }
    }
  
@@ -1169,10 +1229,10 @@ index 802955898f7d6..ed6292049d174 100644
        "global_confirm_info_bar.cc",
        "global_confirm_info_bar.h",
 diff --git a/chrome/browser/download/BUILD.gn b/chrome/browser/download/BUILD.gn
-index b8e11e85008a2..793e7a52ef2b8 100644
+index c6a53b1843e43..a6318621055f6 100644
 --- a/chrome/browser/download/BUILD.gn
 +++ b/chrome/browser/download/BUILD.gn
-@@ -365,7 +365,7 @@ source_set("impl") {
+@@ -367,7 +367,7 @@ source_set("impl") {
      sources += [ "drag_download_item_aura.cc" ]
    }
  
@@ -1182,10 +1242,10 @@ index b8e11e85008a2..793e7a52ef2b8 100644
    }
  
 diff --git a/chrome/browser/download/chrome_download_manager_delegate.cc b/chrome/browser/download/chrome_download_manager_delegate.cc
-index 6a0c0e732b49b..fecdb84d90118 100644
+index a56a6adf13fdd..4bb3f10da2e81 100644
 --- a/chrome/browser/download/chrome_download_manager_delegate.cc
 +++ b/chrome/browser/download/chrome_download_manager_delegate.cc
-@@ -780,7 +780,7 @@ bool ChromeDownloadManagerDelegate::DetermineDownloadTarget(
+@@ -789,7 +789,7 @@ bool ChromeDownloadManagerDelegate::DetermineDownloadTarget(
    DownloadPathReservationTracker::FilenameConflictAction action =
        kDefaultPlatformConflictAction;
  #if BUILDFLAG(IS_ANDROID)
@@ -1217,19 +1277,19 @@ index 0c4da356e3582..4284734b25bd8 100644
    // can disable UI updates.
    // TODO(crbug.com/459823225): Expand the IsDangerous() check to other
 diff --git a/chrome/browser/extensions/BUILD.gn b/chrome/browser/extensions/BUILD.gn
-index e0eeeb2cafba5..ff72c512528a1 100644
+index ab563732a6c07..110475af1da20 100644
 --- a/chrome/browser/extensions/BUILD.gn
 +++ b/chrome/browser/extensions/BUILD.gn
-@@ -679,7 +679,7 @@ source_set("extensions") {
+@@ -692,7 +692,7 @@ source_set("extensions") {
        "//chrome/browser/ui/android/tab_model",
      ]
  
 -    if (enable_desktop_android_extensions) {
 +    if (enable_desktop_android_extensions_thorium) {
-       # pack_extension_job.cc and developer_private_functions.cc include headers
-       # from android extension bridges under IS_ANDROID.
-       deps += [ "//chrome/browser/ui/android/extensions:public" ]
-@@ -1737,7 +1737,7 @@ source_set("chrome_extensions_browser_client") {
+       sources += [
+         # These files are temporary workarounds to allow for a lightweight
+         # extensions runtime in desktop-android builds. They should be removed
+@@ -1844,7 +1844,7 @@ source_set("chrome_extensions_browser_client") {
      "//extensions/browser/updater",
    ]
  
@@ -1238,15 +1298,6 @@ index e0eeeb2cafba5..ff72c512528a1 100644
      sources += [ "chrome_extensions_browser_client_android.cc" ]
  
      deps += [
-@@ -2153,7 +2153,7 @@ source_set("unit_tests") {
-     }
-   }
- 
--  if (enable_desktop_android_extensions) {
-+  if (enable_desktop_android_extensions_thorium) {
-     # developer_private_api_unittest.cc includes extension_util_bridge.h under
-     # IS_ANDROID.
-     deps += [ "//chrome/browser/ui/android/extensions:public" ]
 diff --git a/chrome/browser/extensions/api/chrome_extensions_api_client_android.cc b/chrome/browser/extensions/api/chrome_extensions_api_client_android.cc
 index 6df055df9399c..58f3b9e35f83f 100644
 --- a/chrome/browser/extensions/api/chrome_extensions_api_client_android.cc
@@ -1261,7 +1312,7 @@ index 6df055df9399c..58f3b9e35f83f 100644
  namespace extensions {
  
 diff --git a/chrome/browser/extensions/api/identity/web_auth_flow.cc b/chrome/browser/extensions/api/identity/web_auth_flow.cc
-index 617d0c9feaf80..d884cb58e58f4 100644
+index 5f280a3431dbb..afc7f90b6c681 100644
 --- a/chrome/browser/extensions/api/identity/web_auth_flow.cc
 +++ b/chrome/browser/extensions/api/identity/web_auth_flow.cc
 @@ -38,7 +38,7 @@
@@ -1284,7 +1335,7 @@ index 617d0c9feaf80..d884cb58e58f4 100644
    window_created_callback_for_testing_ = std::move(callback);
 @@ -193,7 +193,7 @@ bool WebAuthFlow::DisplayAuthPageInPopupWindow() {
  
-   browser->window()->Show();
+   browser->GetWindow()->Show();
  #else
 -  static_assert(BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS));
 +  static_assert(BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM));
@@ -1314,10 +1365,10 @@ index 0d36f8e5e449e..b69b071b49712 100644
        window_created_callback_for_testing_;
  #endif
 diff --git a/chrome/browser/extensions/api/tabs/tabs_api.cc b/chrome/browser/extensions/api/tabs/tabs_api.cc
-index 6a7780c3cedfa..f93ccf1f593fb 100644
+index ed88aa88e605f..5b97a760eeceb 100644
 --- a/chrome/browser/extensions/api/tabs/tabs_api.cc
 +++ b/chrome/browser/extensions/api/tabs/tabs_api.cc
-@@ -1868,6 +1868,9 @@ base::ListValue TabsQueryFunction::BuildTabList(
+@@ -1882,6 +1882,9 @@ base::ListValue TabsQueryFunction::BuildTabList(
      }
  
      TabListInterface* tab_list = TabListInterface::From(browser);
@@ -1483,10 +1534,10 @@ index 499b16c384d7c..8c0bd8038cad9 100644
    const api::tabs::WindowType window_type_;
  
 diff --git a/chrome/browser/extensions/extension_management.cc b/chrome/browser/extensions/extension_management.cc
-index bf956adc4678c..de6fde414bf53 100644
+index 58dd92c0f076d..a8b66b3f32b6c 100644
 --- a/chrome/browser/extensions/extension_management.cc
 +++ b/chrome/browser/extensions/extension_management.cc
-@@ -181,8 +181,12 @@ ManagedInstallationMode ExtensionManagement::GetInstallationMode(
+@@ -180,8 +180,12 @@ ManagedInstallationMode ExtensionManagement::GetInstallationMode(
                               update_url ? *update_url : std::string());
  }
  
@@ -1500,7 +1551,7 @@ index bf956adc4678c..de6fde414bf53 100644
    std::string user_name = profile_->GetProfileUserName();
    // Crude check to avoid passing invalid strings to `ExtractDomainName`.
    if (user_name.contains("@")) {
-@@ -199,7 +203,7 @@ bool ExtensionManagement::ExtensionsEnabledForDesktopAndroid() const {
+@@ -198,7 +202,7 @@ bool ExtensionManagement::ExtensionsEnabledForDesktopAndroid() const {
  ManagedInstallationMode ExtensionManagement::GetInstallationMode(
      const ExtensionId& extension_id,
      const std::string& update_url) {
@@ -1510,10 +1561,10 @@ index bf956adc4678c..de6fde414bf53 100644
    // temporary until extensions are ready for dogfooding.
    // TODO(crbug.com/422307625): Remove this check once extensions are ready for
 diff --git a/chrome/browser/extensions/extension_management.h b/chrome/browser/extensions/extension_management.h
-index 0033475ec1ee3..f4ff471feb4b1 100644
+index 457ac3b12c28e..fc5913c47b9f3 100644
 --- a/chrome/browser/extensions/extension_management.h
 +++ b/chrome/browser/extensions/extension_management.h
-@@ -126,7 +126,7 @@ class ExtensionManagement : public KeyedService,
+@@ -118,7 +118,7 @@ class ExtensionManagement : public KeyedService,
    const std::vector<std::unique_ptr<ManagementPolicy::Provider>>& GetProviders()
        const;
  
@@ -1552,7 +1603,7 @@ index cbc8416dde6c8..6c5219f3e10b9 100644
    });
  }
 diff --git a/chrome/browser/extensions/extension_util.cc b/chrome/browser/extensions/extension_util.cc
-index 3c832b93140a8..c25b4480e1323 100644
+index 9086cf5c263a4..c804f4d8b33ed 100644
 --- a/chrome/browser/extensions/extension_util.cc
 +++ b/chrome/browser/extensions/extension_util.cc
 @@ -10,6 +10,7 @@
@@ -1563,7 +1614,7 @@ index 3c832b93140a8..c25b4480e1323 100644
  #include "build/build_config.h"
  #include "build/chromeos_buildflags.h"
  #include "chrome/browser/extensions/sync/extension_sync_service.h"
-@@ -36,6 +37,9 @@
+@@ -38,6 +39,9 @@
  #include "extensions/browser/user_script_manager.h"
  #include "extensions/buildflags/buildflags.h"
  #include "extensions/common/extension.h"
@@ -1573,7 +1624,7 @@ index 3c832b93140a8..c25b4480e1323 100644
  #include "extensions/common/features/feature_developer_mode_only.h"
  #include "extensions/common/icons/extension_icon_set.h"
  #include "extensions/common/manifest_handlers/incognito_info.h"
-@@ -334,6 +338,13 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
+@@ -353,6 +357,13 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
  
  bool AreExtensionsDisabled(const base::CommandLine& command_line,
                             content::BrowserContext* context) {
@@ -1588,15 +1639,16 @@ index 3c832b93140a8..c25b4480e1323 100644
    return ExtensionsDisabledViaCommandLine(command_line) ||
           profile->GetPrefs()->GetBoolean(prefs::kDisableExtensions);
 diff --git a/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java b/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java
-index e6436b82446a9..755dd786da406 100644
+index 455f56f857496..d5fef3a6a15f8 100644
 --- a/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java
 +++ b/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java
-@@ -27,7 +27,7 @@ public final class FeedFeatures {
+@@ -26,7 +26,8 @@ public final class FeedFeatures {
       *     enterprise policy, or by flag. The value returned should not be cached as it may change.
       */
      public static boolean isFeedEnabled(Profile profile) {
--        return (!ChromeFeatureList.sNtpSimplification.isEnabled() || !DeviceInfo.isDesktop())
-+        return (!ChromeFeatureList.sNtpSimplification.isEnabled() || !DeviceInfo.isDesktopThorium())
+-        return !DeviceInfo.isDesktop()
++        return (!ChromeFeatureList.sNtpSimplification.isEnabled()
++                        || !DeviceInfo.isDesktopThorium())
                  && FeedServiceBridge.isEnabled()
                  && isFeedEnabledByDse(profile);
      }
@@ -1627,26 +1679,25 @@ index efbd97de81493..bf0eea5256021 100644
        base::android::device_info::is_automotive() ||
        base::android::device_info::is_xr()) {
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
-index dec4ef61ba959..810c949b43cbf 100644
+index b66e12bea83e5..c2936b59cebc8 100644
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -2039,6 +2039,11 @@ inline constexpr char kEnableControlledFrameDescription[] =
-     "https://github.com/WICG/controlled-frame/blob/main/EXPLAINER.md "
-     "for more information.";
- 
+@@ -2395,6 +2395,10 @@ inline constexpr char kExtensionsCollapseMainMenuDescription[] =
+     "Enables a mode where if the current profile has no extensions, the "
+     "extensions submenu in the application menu is replaced by a single item, "
+     "e.g. \"Explore Extensions\".";
 +inline constexpr char kEnableExtensionsAndroidName[] =
 +    "Enable Extensions Android";
 +inline constexpr char kEnableExtensionsAndroidDescription[] =
 +    "Allows the use of extensions on Android.";
-+
- inline constexpr char kEnableExtensionsMenuTeardownFixName[] =
-     "Enable Extensions Menu Teardown Fix";
- inline constexpr char kEnableExtensionsMenuTeardownFixDescription[] =
+ inline constexpr char kExtensionsMenuAccessControlName[] =
+     "Extensions Menu Access Control";
+ inline constexpr char kExtensionsMenuAccessControlDescription[] =
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index f7a88aa0fc810..77c469736abd9 100644
+index ab17481450474..dc32230b3309a 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-@@ -777,7 +777,10 @@ public abstract class ChromeFeatureList {
+@@ -794,7 +794,10 @@ public abstract class ChromeFeatureList {
      public static final CachedFlag sAndroidNewMediaPicker =
              newCachedFlag(ANDROID_NEW_MEDIA_PICKER, true);
      public static final CachedFlag sAndroidOpenIncognitoAsWindow =
@@ -1658,29 +1709,11 @@ index f7a88aa0fc810..77c469736abd9 100644
      public static final CachedFlag sAndroidOpenIncognitoAsWindowRestrictions =
              newCachedFlag(ANDROID_OPEN_INCOGNITO_AS_WINDOW_RESTRICTIONS, true);
      public static final CachedFlag sAndroidPageInfoAsAppMenuItem =
-@@ -904,7 +907,7 @@ public abstract class ChromeFeatureList {
-     public static final CachedFlag sChromeItemPickerUi =
-             newCachedFlag(CHROME_ITEM_PICKER_UI, /* defaultValue= */ false);
-     public static final CachedFlag sChromeNativeUrlOverriding =
--            newCachedFlag(CHROME_NATIVE_URL_OVERRIDING, BuildConfig.IS_DESKTOP_ANDROID);
-+            newCachedFlag(CHROME_NATIVE_URL_OVERRIDING, BuildConfig.IS_DESKTOP_ANDROID_FALSE);
-     public static final CachedFlag sClampAutomotiveScaling =
-             newCachedFlag(CLAMP_AUTOMOTIVE_SCALING, true);
-     public static final CachedFlag sClankStartupLatencyInjection =
-@@ -1124,7 +1127,7 @@ public abstract class ChromeFeatureList {
-             newCachedFlag(POWER_SAVING_MODE_BROADCAST_RECEIVER_IN_BACKGROUND, true);
-     public static final CachedFlag sPriceChangeModule = newCachedFlag(PRICE_CHANGE_MODULE, true);
-     public static final CachedFlag sProtectRecentlyVisibleTab =
--            newCachedFlag(PROTECT_RECENTLY_VISIBLE_TAB, BuildConfig.IS_DESKTOP_ANDROID);
-+            newCachedFlag(PROTECT_RECENTLY_VISIBLE_TAB, BuildConfig.IS_DESKTOP_ANDROID_THORIUM);
-     public static final CachedFlag sReportNotificationContentDetectionData =
-             newCachedFlag(
-                     REPORT_NOTIFICATION_CONTENT_DETECTION_DATA,
 diff --git a/chrome/browser/glic/BUILD.gn b/chrome/browser/glic/BUILD.gn
-index 53aa3c15f737b..fb4452d131f41 100644
+index b4d549fcfa486..0fab0d6f1392c 100644
 --- a/chrome/browser/glic/BUILD.gn
 +++ b/chrome/browser/glic/BUILD.gn
-@@ -869,7 +869,7 @@ source_set("browser_tests") {
+@@ -896,7 +896,7 @@ source_set("browser_tests") {
      ]
    }
  
@@ -1689,24 +1722,11 @@ index 53aa3c15f737b..fb4452d131f41 100644
      sources += [ "service/glic_android_peek_browsertest.cc" ]
    }
  
-diff --git a/chrome/browser/glic/public/features.cc b/chrome/browser/glic/public/features.cc
-index 0c0bb126fd130..6482566b78558 100644
---- a/chrome/browser/glic/public/features.cc
-+++ b/chrome/browser/glic/public/features.cc
-@@ -72,7 +72,7 @@ BASE_FEATURE(kGlicLiveMode,
- );
- 
- BASE_FEATURE(kGlicDefaultToLastActiveConversation,
--#if BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_DESKTOP_ANDROID)
-+#if BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_DESKTOP_ANDROID_THORIUM)
-              base::FEATURE_ENABLED_BY_DEFAULT
- #else
-              base::FEATURE_DISABLED_BY_DEFAULT
 diff --git a/chrome/browser/glic/service/glic_instance_impl.cc b/chrome/browser/glic/service/glic_instance_impl.cc
-index 9422ed3e3df71..b4740e143524e 100644
+index de6ce6bc42fb6..7c678592b6689 100644
 --- a/chrome/browser/glic/service/glic_instance_impl.cc
 +++ b/chrome/browser/glic/service/glic_instance_impl.cc
-@@ -117,7 +117,7 @@ BASE_FEATURE(kGlicSuppressAnimationsOnDetach, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -118,7 +118,7 @@ BASE_FEATURE(kGlicSuppressAnimationsOnDetach, base::FEATURE_ENABLED_BY_DEFAULT);
  BASE_FEATURE(kGlicRemoveDaisyChainingWhenFreShowing,
               base::FEATURE_ENABLED_BY_DEFAULT);
  
@@ -1736,10 +1756,10 @@ index dfaa6adb1c0b0..d5883bf773d0e 100644
          }
  
 diff --git a/chrome/browser/media/router/BUILD.gn b/chrome/browser/media/router/BUILD.gn
-index 9e73a34e7077b..6747392521459 100644
+index a793a99f283d2..b9a578c64216c 100644
 --- a/chrome/browser/media/router/BUILD.gn
 +++ b/chrome/browser/media/router/BUILD.gn
-@@ -265,7 +265,7 @@ static_library("test_support") {
+@@ -263,7 +263,7 @@ static_library("test_support") {
    deps = []
    sources = []
  
@@ -1748,7 +1768,7 @@ index 9e73a34e7077b..6747392521459 100644
      deps += [
        "//base",
        "//chrome/browser/media/router/discovery",
-@@ -416,7 +416,7 @@ source_set("unittests") {
+@@ -414,7 +414,7 @@ source_set("unittests") {
    }
  
    # Traditional desktop platforms and desktop android with extensions support.
@@ -1758,7 +1778,7 @@ index 9e73a34e7077b..6747392521459 100644
    }
  
 diff --git a/chrome/browser/media/router/discovery/BUILD.gn b/chrome/browser/media/router/discovery/BUILD.gn
-index 4d439e6a82b2c..916a924029126 100644
+index 3be64b9683aa7..ea892d8c17fee 100644
 --- a/chrome/browser/media/router/discovery/BUILD.gn
 +++ b/chrome/browser/media/router/discovery/BUILD.gn
 @@ -4,7 +4,7 @@
@@ -1833,7 +1853,7 @@ index a976fc9319771..b9d3feed6519c 100644
  // Media Router where it interferes. Can also be useful to disable for local
  // development on Mac because DIAL local discovery opens a local port
 diff --git a/chrome/browser/media/webrtc/webrtc_event_log_manager.cc b/chrome/browser/media/webrtc/webrtc_event_log_manager.cc
-index a0415898afbad..79f7321bdb5c8 100644
+index 29906af5d46c3..a66149ad8b080 100644
 --- a/chrome/browser/media/webrtc/webrtc_event_log_manager.cc
 +++ b/chrome/browser/media/webrtc/webrtc_event_log_manager.cc
 @@ -117,7 +117,7 @@ class PeerConnectionTrackerProxyImpl
@@ -1845,7 +1865,7 @@ index a0415898afbad..79f7321bdb5c8 100644
    bool enabled = false;
  #else
    bool enabled = true;
-@@ -514,7 +514,7 @@ WebRtcEventLogManager::CreateRemoteLogFileWriterFactory() {
+@@ -515,7 +515,7 @@ WebRtcEventLogManager::CreateRemoteLogFileWriterFactory() {
    if (remote_log_file_writer_factory_for_testing_) {
      return std::move(remote_log_file_writer_factory_for_testing_);
    } else {
@@ -1854,19 +1874,6 @@ index a0415898afbad..79f7321bdb5c8 100644
      return std::make_unique<GzippedLogFileWriterFactory>(
          std::make_unique<GzipLogCompressorFactory>(
              std::make_unique<DefaultGzippedSizeEstimator::Factory>()));
-diff --git a/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationUtils.java b/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationUtils.java
-index 044dde2acfaf4..6aa9cd20b8936 100644
---- a/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationUtils.java
-+++ b/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationUtils.java
-@@ -313,7 +313,7 @@ public class NtpCustomizationUtils {
- 
-     /** Returns whether the NTP simplification is enabled on desktop. */
-     public static boolean isNtpSimplificationEnabledOnDesktop() {
--        return ChromeFeatureList.sNtpSimplification.isEnabled() && DeviceInfo.isDesktop();
-+        return ChromeFeatureList.sNtpSimplification.isEnabled() && DeviceInfo.isDesktopThorium();
-     }
- 
-     /**
 diff --git a/chrome/browser/open_in_app/android/java/src/org/chromium/chrome/browser/open_in_app/OpenInAppUtils.java b/chrome/browser/open_in_app/android/java/src/org/chromium/chrome/browser/open_in_app/OpenInAppUtils.java
 index 7bffc96c135ee..9594c0288652c 100644
 --- a/chrome/browser/open_in_app/android/java/src/org/chromium/chrome/browser/open_in_app/OpenInAppUtils.java
@@ -1881,7 +1888,7 @@ index 7bffc96c135ee..9594c0288652c 100644
  
      private OpenInAppUtils() {}
 diff --git a/chrome/browser/performance_manager/policies/process_rank_policy_android.cc b/chrome/browser/performance_manager/policies/process_rank_policy_android.cc
-index 33ae2ec1c298f..85c7bf1d2fbd0 100644
+index 710b74d58ce8f..b69d8c5dafc50 100644
 --- a/chrome/browser/performance_manager/policies/process_rank_policy_android.cc
 +++ b/chrome/browser/performance_manager/policies/process_rank_policy_android.cc
 @@ -129,7 +129,7 @@ class WebViewUpdater : public PageNodeObserver,
@@ -1894,10 +1901,10 @@ index 33ae2ec1c298f..85c7bf1d2fbd0 100644
               chrome::android::kChangeUnfocusedPriority);
  }
 diff --git a/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc b/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
-index ca154d6788c54..721e6fa1f855b 100644
+index faa78dde106bd..98a5a1f29384d 100644
 --- a/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
 +++ b/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
-@@ -679,7 +679,7 @@ void ChromeBrowserMainExtraPartsProfiles::
+@@ -700,7 +700,7 @@ void ChromeBrowserMainExtraPartsProfiles::
    chromeos_extensions::EnsureBrowserContextKeyedServiceFactoriesBuilt();
  #endif
    extensions::EnsureBrowserContextKeyedServiceFactoriesBuilt();
@@ -1907,7 +1914,7 @@ index ca154d6788c54..721e6fa1f855b 100644
    // EnsureBrowserContextKeyedServiceFactoriesBuilt() is invoked before the
    // ExtensionsBrowserClient is ready on Android. This is due to Android
 diff --git a/chrome/browser/profiles/off_the_record_profile_impl.cc b/chrome/browser/profiles/off_the_record_profile_impl.cc
-index 1d71e81a6f4c2..0ef784016eaa5 100644
+index 4f8ae0cd7efed..87e8bb527ccd6 100644
 --- a/chrome/browser/profiles/off_the_record_profile_impl.cc
 +++ b/chrome/browser/profiles/off_the_record_profile_impl.cc
 @@ -111,6 +111,7 @@
@@ -1943,10 +1950,10 @@ index d08378d6b30fe..121dcf8a24292 100644
  // linux-chromeos-dbg is failing to destroy the profile in under 1 second
  const int64_t kTimerDelaySeconds = 2;
 diff --git a/chrome/browser/resources/BUILD.gn b/chrome/browser/resources/BUILD.gn
-index 368d6b766dcf5..37ca4b4c02805 100644
+index ec4d76a98b844..3db716af03954 100644
 --- a/chrome/browser/resources/BUILD.gn
 +++ b/chrome/browser/resources/BUILD.gn
-@@ -131,7 +131,7 @@ group("resources") {
+@@ -136,7 +136,7 @@ group("resources") {
      ]
    }
  
@@ -2034,14 +2041,13 @@ index c7c0e3249310e..954bcdd657294 100644
  
  #content-wrapper:has(extensions-review-panel),
 diff --git a/chrome/browser/resources/extensions/manager.css b/chrome/browser/resources/extensions/manager.css
-index 18cf43dd6c300..683d6036d1cef 100644
+index e13459ca14e7e..2304ce6e59636 100644
 --- a/chrome/browser/resources/extensions/manager.css
 +++ b/chrome/browser/resources/extensions/manager.css
-@@ -73,3 +73,7 @@ extensions-item {
- #right {
-   flex: 1 1 0;
+@@ -87,3 +87,6 @@ picture[slot='header-icon'] img {
+   width: 100%;
  }
-+
+ 
 +#drawer {
 +  z-index: 9999;
 +}
@@ -2064,7 +2070,7 @@ index f064de9624d6f..40e40e9dfe4f9 100644
  ${this.showPackDialog_ ? html`
    <extensions-pack-dialog .delegate="${this.delegate as ServiceInterface}"
 diff --git a/chrome/browser/sessions/session_restore_android.cc b/chrome/browser/sessions/session_restore_android.cc
-index c0bd8e6467edc..9924d5deab5b4 100644
+index b8d4da2e62091..872c90bc2ab9d 100644
 --- a/chrome/browser/sessions/session_restore_android.cc
 +++ b/chrome/browser/sessions/session_restore_android.cc
 @@ -23,7 +23,7 @@
@@ -2076,7 +2082,7 @@ index c0bd8e6467edc..9924d5deab5b4 100644
  BrowserWindowInterface::Type BrowserTypeFromWindowType(
      sessions::SessionWindow::WindowType type) {
    switch (type) {
-@@ -109,7 +109,7 @@ void SessionRestore::RestoreForeignSessionWindows(
+@@ -113,7 +113,7 @@ void SessionRestore::RestoreForeignSessionWindows(
      std::vector<const sessions::SessionWindow*>::const_iterator begin,
      std::vector<const sessions::SessionWindow*>::const_iterator end,
      base::OnceCallback<void(std::vector<BrowserWindowInterface*>)> callback) {
@@ -2086,10 +2092,10 @@ index c0bd8e6467edc..9924d5deab5b4 100644
    size_t window_count = std::distance(begin, end);
    // Wait for `window_count` callbacks.
 diff --git a/chrome/browser/share/android/java/src/org/chromium/chrome/browser/share/ChromeProvidedSharingOptionsProviderBase.java b/chrome/browser/share/android/java/src/org/chromium/chrome/browser/share/ChromeProvidedSharingOptionsProviderBase.java
-index b1d09237edc9e..266ee70e49655 100644
+index cd8e1d9c9ef2c..92b61794f4e11 100644
 --- a/chrome/browser/share/android/java/src/org/chromium/chrome/browser/share/ChromeProvidedSharingOptionsProviderBase.java
 +++ b/chrome/browser/share/android/java/src/org/chromium/chrome/browser/share/ChromeProvidedSharingOptionsProviderBase.java
-@@ -306,7 +306,7 @@ public abstract class ChromeProvidedSharingOptionsProviderBase {
+@@ -307,7 +307,7 @@ public abstract class ChromeProvidedSharingOptionsProviderBase {
      }
  
      private void maybeAddCollaborateFirstPartyOption() {
@@ -2098,7 +2104,7 @@ index b1d09237edc9e..266ee70e49655 100644
              return;
          }
          FirstPartyOption option = createCollaborateFirstPartyOption();
-@@ -341,7 +341,7 @@ public abstract class ChromeProvidedSharingOptionsProviderBase {
+@@ -342,7 +342,7 @@ public abstract class ChromeProvidedSharingOptionsProviderBase {
  
      private void maybeAddPrintFirstPartyOption() {
          // For the desktop case, the Print action will be showed in the main menu.
@@ -2170,23 +2176,26 @@ index b73e21844e5c1..7ee9c71234431 100644
        extensions_browser_client_;
  #endif
 diff --git a/chrome/browser/task_manager/common/task_manager_features.cc b/chrome/browser/task_manager/common/task_manager_features.cc
-index b7a7c9dbbdf63..9ee32dd5bcafe 100644
+index 056c9e71a2871..bad0b1d0b306d 100644
 --- a/chrome/browser/task_manager/common/task_manager_features.cc
 +++ b/chrome/browser/task_manager/common/task_manager_features.cc
-@@ -11,7 +11,7 @@ namespace features {
+@@ -11,7 +11,11 @@ namespace features {
  #if BUILDFLAG(IS_ANDROID)
  // Enables the Task Manager on Clank.
  BASE_FEATURE(kTaskManagerClank,
--#if BUILDFLAG(IS_DESKTOP_ANDROID)
 +#if BUILDFLAG(IS_DESKTOP_ANDROID_THORIUM)
-              base::FEATURE_ENABLED_BY_DEFAULT
- #else
++             base::FEATURE_ENABLED_BY_DEFAULT
++#else
               base::FEATURE_DISABLED_BY_DEFAULT
++#endif
+ );
+ #endif  // BUILDFLAG(IS_ANDROID)
+ 
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 21c413d3f709d..77a6fb37f942f 100644
+index d1936281cbee8..0f25cb6651a15 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -718,7 +718,7 @@ static_library("ui") {
+@@ -999,7 +999,7 @@ static_library("ui") {
    ]
  
    # Desktop-Android-only dependencies.
@@ -2195,15 +2204,16 @@ index 21c413d3f709d..77a6fb37f942f 100644
      deps += [ "//chrome/browser/ui/android/extensions/windowing/internal" ]
    }
  
-@@ -2995,7 +2995,7 @@ static_library("ui") {
+@@ -3247,7 +3247,8 @@ static_library("ui") {
      allow_circular_includes_from += [ "//chrome/browser/ui/wallet" ]
    }
  
 -  if (is_win || is_mac || is_linux || is_chromeos || is_desktop_android) {
-+  if (is_win || is_mac || is_linux || is_chromeos || is_desktop_android_thorium) {
-     sources += [
-       "webui/discards/discards_ui.cc",
-       "webui/discards/discards_ui.h",
++  if (is_win || is_mac || is_linux || is_chromeos ||
++      is_desktop_android_thorium) {
+     deps += [
+       "//chrome/browser/ui/webui/discards",
+       "//chrome/browser/ui/webui/management",
 diff --git a/chrome/browser/ui/android/BUILD.gn b/chrome/browser/ui/android/BUILD.gn
 index 589bb2f89bc73..dbb60632cc5ac 100644
 --- a/chrome/browser/ui/android/BUILD.gn
@@ -2332,21 +2342,6 @@ index 052a1061fabeb..152867b0da948 100644
  
          // Enable lock in desktop window mode. Only relevant when the device supports it.
          if (mDesktopWindowStateManager != null) {
-diff --git a/chrome/browser/ui/android/extensions/BUILD.gn b/chrome/browser/ui/android/extensions/BUILD.gn
-index d979dfba3ab31..b79bbe7b3bbc2 100644
---- a/chrome/browser/ui/android/extensions/BUILD.gn
-+++ b/chrome/browser/ui/android/extensions/BUILD.gn
-@@ -154,8 +154,8 @@ if (enable_extensions_core) {
- 
- java_cpp_template("generate_buildflags") {
-   sources = [ "java/templates/ExtensionsBuildflags.template" ]
--  if (enable_desktop_android_extensions) {
--    defines = [ "_ENABLE_DESKTOP_ANDROID_EXTENSIONS" ]
-+  if (enable_desktop_android_extensions_thorium) {
-+    defines = [ "_ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM" ]
-   }
- }
- 
 diff --git a/chrome/browser/ui/android/extensions/extension_actions_bridge.cc b/chrome/browser/ui/android/extensions/extension_actions_bridge.cc
 index 7e85367ba88c8..473c343b3f663 100644
 --- a/chrome/browser/ui/android/extensions/extension_actions_bridge.cc
@@ -2551,10 +2546,10 @@ index 85a2567522853..d373ff950270c 100644
    raw_ptr<WindowControllerListObserverForTesting>
        window_controller_list_observer_for_testing_;
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-index abd214d592024..725d996295c5b 100644
+index ba7d256df8a2e..5c54b26147919 100644
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -5619,6 +5619,18 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
+@@ -5659,6 +5659,18 @@ To change this setting, <ph name="BEGIN_LINK">BEGIN_LINK</ph>delete the Chrome d
        <message name="IDS_STORAGE_MANAGEMENT_CLEAR_ALL_DATA_BUTTON" desc="Text on the button to clear all Chrome data. [CHAR_LIMIT=30]">
          Clear All Data
        </message>
@@ -2573,24 +2568,11 @@ index abd214d592024..725d996295c5b 100644
        <message name="IDS_STORAGE_MANAGEMENT_RESET_APP_DIALOG_TITLE" desc="Title of the reset app dialog in the storage UI used to reset the app.">
          Delete app data?
        </message>
-diff --git a/chrome/browser/ui/android/tab_model/tab_model.cc b/chrome/browser/ui/android/tab_model/tab_model.cc
-index cb5a9e6119182..cb51091357568 100644
---- a/chrome/browser/ui/android/tab_model/tab_model.cc
-+++ b/chrome/browser/ui/android/tab_model/tab_model.cc
-@@ -183,7 +183,7 @@ bool TabListInterface::CanEditTabList(Profile& profile) {
- 
- // static
- bool TabModel::EnableBrowserWindowInterfaceMobile() {
--#if BUILDFLAG(IS_DESKTOP_ANDROID)
-+#if BUILDFLAG(IS_DESKTOP_ANDROID_THORIUM)
-   return true;
- #else   // !BUILDFLAG(IS_DESKTOP_ANDROID)
-   return base::FeatureList::IsEnabled(
 diff --git a/chrome/browser/ui/android/tab_model/tab_model_test_helper.h b/chrome/browser/ui/android/tab_model/tab_model_test_helper.h
-index 82967a5360cfb..a5b76eec13672 100644
+index 4707bcb5d2963..1832241bc263f 100644
 --- a/chrome/browser/ui/android/tab_model/tab_model_test_helper.h
 +++ b/chrome/browser/ui/android/tab_model/tab_model_test_helper.h
-@@ -136,7 +136,7 @@ class TestTabModel : public TabModel {
+@@ -137,7 +137,7 @@ class TestTabModel : public TabModel {
  
  // BrowserWindowInterface is available on desktop Android, but not other Android
  // builds.
@@ -2754,18 +2736,19 @@ index 7cea64494e668..1412e241a555e 100644
                                  ExtensionsMenuItemProperties.PRIMARY_ACTION_ON_CLICK,
                                  (view) -> mMenuBridge.executeAction(entry.id))
 diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsToolbarCoordinatorImpl.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsToolbarCoordinatorImpl.java
-index b461ce6e0723f..7bffdfe89fedd 100644
+index a10295d52bb52..006c248efcee3 100644
 --- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsToolbarCoordinatorImpl.java
 +++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsToolbarCoordinatorImpl.java
-@@ -112,14 +112,14 @@ public class ExtensionsToolbarCoordinatorImpl
-             @Nullable SelectionDropdownMenuDelegate selectionDropdownMenuDelegate,
+@@ -119,7 +119,7 @@ public class ExtensionsToolbarCoordinatorImpl
              TabModelSelector tabModelSelector,
-             ModalDialogManager modalDialogManager) {
+             ModalDialogManager modalDialogManager,
+             @Nullable Runnable onFeatureRemoved) {
 -        mBridge = new ExtensionActionsBridge(task, profile);
 +        mBridge = ExtensionActionsBridge.Instance();
          mWindowAndroid = windowAndroid;
          mProfile = profile;
- 
+         mCurrentTabSupplier = currentTabSupplier;
+@@ -128,7 +128,7 @@ public class ExtensionsToolbarCoordinatorImpl
          extensionsToolbarStub.setLayoutResource(R.layout.extensions_toolbar_container);
          mContainer = (LinearLayout) extensionsToolbarStub.inflate();
  
@@ -2774,7 +2757,7 @@ index b461ce6e0723f..7bffdfe89fedd 100644
          mExtensionsToolbarBridge.addObserver(mExtensionsToolbarBridgeObserver);
  
          mPrefService = UserPrefs.get(profile);
-@@ -128,6 +128,7 @@ public class ExtensionsToolbarCoordinatorImpl
+@@ -137,6 +137,7 @@ public class ExtensionsToolbarCoordinatorImpl
                  new ExtensionActionListCoordinator(
                          context,
                          mContainer.findViewById(R.id.extension_action_list),
@@ -2782,7 +2765,7 @@ index b461ce6e0723f..7bffdfe89fedd 100644
                          windowAndroid,
                          task,
                          profile,
-@@ -157,6 +158,7 @@ public class ExtensionsToolbarCoordinatorImpl
+@@ -166,6 +167,7 @@ public class ExtensionsToolbarCoordinatorImpl
                          tabCreator,
                          mExtensionsToolbarBridge,
                          mMenuButtonPinningDelegate,
@@ -2790,17 +2773,17 @@ index b461ce6e0723f..7bffdfe89fedd 100644
                          modalDialogManager);
  
          mExtensionAccessControlButtonCoordinator =
-@@ -202,8 +204,8 @@ public class ExtensionsToolbarCoordinatorImpl
+@@ -243,8 +245,8 @@ public class ExtensionsToolbarCoordinatorImpl
          mExtensionAccessControlButtonCoordinator.destroy();
          mExtensionsMenuCoordinator.destroy();
          mExtensionActionListCoordinator.destroy();
 -        mExtensionsToolbarBridge.destroy();
 -        mBridge.destroy();
-+        // mExtensionsToolbarBridge.destroy();
-+        // mBridge.destroy();
++        // The bridges are shared across Android tasks and are destroyed by
++        // their owning singleton lifecycle.
+         mCurrentTabSupplier = null;
  
          LifetimeAssert.setSafeToGc(mLifetimeAssert, true);
-     }
 diff --git a/chrome/browser/ui/browser_window/BUILD.gn b/chrome/browser/ui/browser_window/BUILD.gn
 index ab08cd298d5b0..a6e4b09bde977 100644
 --- a/chrome/browser/ui/browser_window/BUILD.gn
@@ -2814,19 +2797,6 @@ index ab08cd298d5b0..a6e4b09bde977 100644
    source_set("browser_tests") {
      testonly = true
      sources = [ "internal/profile_browser_collection_browsertest.cc" ]
-diff --git a/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskTrackerFactory.java b/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskTrackerFactory.java
-index 2385b568515a2..f317a86584df6 100644
---- a/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskTrackerFactory.java
-+++ b/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskTrackerFactory.java
-@@ -20,7 +20,7 @@ public final class ChromeAndroidTaskTrackerFactory {
-      */
-     @Nullable
-     public static ChromeAndroidTaskTracker getInstance() {
--        if (BuildConfig.IS_DESKTOP_ANDROID) {
-+        if (BuildConfig.IS_DESKTOP_ANDROID_THORIUM) {
-             return ChromeAndroidTaskTrackerImpl.getInstance();
-         }
- 
 diff --git a/chrome/browser/ui/prefs/BUILD.gn b/chrome/browser/ui/prefs/BUILD.gn
 index af8a8aafba46a..de4bdf191703a 100644
 --- a/chrome/browser/ui/prefs/BUILD.gn
@@ -2899,10 +2869,10 @@ index 87dc1b8b9a63e..6df97cd6c2323 100644
  
    registry->RegisterIntegerPref(prefs::kWebKitDefaultFontSize, 16);
 diff --git a/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
-index 8a9cd6e702764..b20fa111899dd 100644
+index 2413a9d29d6f1..4f0939965b24b 100644
 --- a/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 +++ b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
-@@ -186,7 +186,7 @@
+@@ -188,7 +188,7 @@
          // BUILDFLAG(IS_ANDROID)
  
  #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
@@ -2911,7 +2881,7 @@ index 8a9cd6e702764..b20fa111899dd 100644
  #include "chrome/browser/ui/webui/discards/discards_ui.h"
  #include "chrome/browser/ui/webui/management/management_ui.h"
  #endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) ||
-@@ -448,7 +448,7 @@ void RegisterChromeWebUIConfigs() {
+@@ -453,7 +453,7 @@ void RegisterChromeWebUIConfigs() {
          // BUILDFLAG(IS_ANDROID)
  
  #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
@@ -2975,10 +2945,10 @@ index 85e35dd43ccc2..500a0f0814ba8 100644
        performance_manager::features::kPerformanceInterventionDemoMode);
  #endif  // !BUILDFLAG(IS_DESKTOP_ANDROID)
 diff --git a/chrome/chrome_paks.gni b/chrome/chrome_paks.gni
-index a2462b2ed1fe5..b122ba270700e 100644
+index 2bd694fc07dfd..2791da4042f52 100644
 --- a/chrome/chrome_paks.gni
 +++ b/chrome/chrome_paks.gni
-@@ -498,7 +498,7 @@ template("chrome_extra_paks") {
+@@ -503,7 +503,7 @@ template("chrome_extra_paks") {
        ]
      }
  
@@ -2988,10 +2958,10 @@ index a2462b2ed1fe5..b122ba270700e 100644
          "$root_gen_dir/chrome/discards_resources.pak",
          "$root_gen_dir/chrome/management_resources.pak",
 diff --git a/chrome/common/chrome_features.cc b/chrome/common/chrome_features.cc
-index 3862b617276ed..57218d635bf2a 100644
+index 7b4bb8552034c..7697b8e1c5490 100644
 --- a/chrome/common/chrome_features.cc
 +++ b/chrome/common/chrome_features.cc
-@@ -901,7 +901,7 @@ extern const base::FeatureParam<std::string> kGlicCaaGuestRedirectPatterns{
+@@ -917,7 +917,7 @@ extern const base::FeatureParam<std::string> kGlicCaaGuestRedirectPatterns{
      "https://access.workspace.google.com https://admin.google.com "
      "https://accounts.google.com/info/servicerestricted"};
  
@@ -3001,11 +2971,11 @@ index 3862b617276ed..57218d635bf2a 100644
  #else
  BASE_FEATURE(kGlicDaisyChainNewTabs, base::FEATURE_ENABLED_BY_DEFAULT);
 diff --git a/chrome/common/chrome_switches.cc b/chrome/common/chrome_switches.cc
-index e980faedf244b..f3022fb3eab74 100644
+index c4df3b712e024..423ad24969ccb 100644
 --- a/chrome/common/chrome_switches.cc
 +++ b/chrome/common/chrome_switches.cc
-@@ -774,7 +774,7 @@ const char kRequestDesktopSites[] = "request-desktop-sites";
- const char kUseWebUiNtp[] = "use-webui-ntp";
+@@ -779,7 +779,7 @@ const char kMarketUrlForTesting[] = "market-url-for-testing";
+ const char kRequestDesktopSites[] = "request-desktop-sites";
  #endif  // BUILDFLAG(IS_ANDROID)
  
 -#if !BUILDFLAG(IS_ANDROID) || BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
@@ -3014,11 +2984,11 @@ index e980faedf244b..f3022fb3eab74 100644
  // session. The value will be parsed as milliseconds. Lowering this value will
  // result in a lower end to end latency, but could come at the cost of other
 diff --git a/chrome/common/chrome_switches.h b/chrome/common/chrome_switches.h
-index 6e432013f51be..fa328c3f337a9 100644
+index a29dfa7a7bc42..2f60f08905cbd 100644
 --- a/chrome/common/chrome_switches.h
 +++ b/chrome/common/chrome_switches.h
-@@ -233,7 +233,7 @@ extern const char kRequestDesktopSites[];
- extern const char kUseWebUiNtp[];
+@@ -232,7 +232,7 @@ extern const char kMarketUrlForTesting[];
+ extern const char kRequestDesktopSites[];
  #endif  // BUILDFLAG(IS_ANDROID)
  
 -#if !BUILDFLAG(IS_ANDROID) || BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
@@ -3027,7 +2997,7 @@ index 6e432013f51be..fa328c3f337a9 100644
  #endif
  
 diff --git a/chrome/common/extensions/api/api_sources.gni b/chrome/common/extensions/api/api_sources.gni
-index a03125c5f90ba..21154078c69b7 100644
+index 5357482de4a04..f89180933ba90 100644
 --- a/chrome/common/extensions/api/api_sources.gni
 +++ b/chrome/common/extensions/api/api_sources.gni
 @@ -67,6 +67,13 @@ uncompiled_sources_ = [
@@ -3045,7 +3015,7 @@ index a03125c5f90ba..21154078c69b7 100644
  types_only_schema_sources_ = []
  
 diff --git a/chrome/common/webui_url_constants.cc b/chrome/common/webui_url_constants.cc
-index 64cb8f1ad8f7e..e8a9192081015 100644
+index 4b60deca0d790..e6090e7d8433e 100644
 --- a/chrome/common/webui_url_constants.cc
 +++ b/chrome/common/webui_url_constants.cc
 @@ -260,7 +260,7 @@ base::span<const base::cstring_view> ChromeURLHosts() {
@@ -3058,10 +3028,10 @@ index 64cb8f1ad8f7e..e8a9192081015 100644
  #endif
  #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
 diff --git a/chrome/common/webui_url_constants.h b/chrome/common/webui_url_constants.h
-index d1ae2653be3e5..a303425affb40 100644
+index 72979f1562259..64ed1ff785d83 100644
 --- a/chrome/common/webui_url_constants.h
 +++ b/chrome/common/webui_url_constants.h
-@@ -473,7 +473,7 @@ bool IsSystemWebUIHost(std::string_view host);
+@@ -486,7 +486,7 @@ bool IsSystemWebUIHost(std::string_view host);
  #endif  // BUILDFLAG(IS_CHROMEOS)
  
  #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
@@ -3092,7 +3062,7 @@ index 122507ac7161b..657e1793026d4 100644
    Release();
  }
 diff --git a/chrome/renderer/sandbox_status_extension_android.h b/chrome/renderer/sandbox_status_extension_android.h
-index df15e167ecef7..8fe98e991d410 100644
+index dbb546b6ddc2b..b1be720c2dc7e 100644
 --- a/chrome/renderer/sandbox_status_extension_android.h
 +++ b/chrome/renderer/sandbox_status_extension_android.h
 @@ -73,6 +73,7 @@ class SandboxStatusExtension
@@ -3104,28 +3074,10 @@ index df15e167ecef7..8fe98e991d410 100644
  
  #endif  // CHROME_RENDERER_SANDBOX_STATUS_EXTENSION_ANDROID_H_
 diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
-index 80e65782a47d8..526a72b54f708 100644
+index 9e2dc913343f7..06b1becd6868f 100644
 --- a/chrome/test/BUILD.gn
 +++ b/chrome/test/BUILD.gn
-@@ -428,7 +428,7 @@ static_library("test_support") {
-     ]
-   }
- 
--  if (enable_desktop_android_extensions) {
-+  if (enable_desktop_android_extensions_thorium) {
-     public_deps += [
-       "//extensions/browser:test_support",
-       "//extensions/common:test_support",
-@@ -543,7 +543,7 @@ static_library("test_support") {
-   # TODO(https://crbug.com/356905053): Continue pulling more common test
-   # support pieces into here and eventually merge this with the
-   # `enable_extensions` block above.
--  if (enable_desktop_android_extensions) {
-+  if (enable_desktop_android_extensions_thorium) {
-     sources += [
-       "../browser/extensions/test_extension_menu_model_android.cc",
-       "../browser/extensions/test_extension_menu_model_android.h",
-@@ -1649,7 +1649,7 @@ source_set("platform_browser_tests") {
+@@ -1494,7 +1494,7 @@ source_set("platform_browser_tests") {
      sources += [ "../browser/enterprise/remote_commands/user_remote_commands_service_browsertest.cc" ]
    }
  
@@ -3134,16 +3086,7 @@ index 80e65782a47d8..526a72b54f708 100644
      deps += [ "//chrome/browser/ui/prefs:browser_tests" ]
    }
    if (enable_extensions) {
-@@ -2035,7 +2035,7 @@ source_set("platform_browser_tests") {
-         "../browser/devtools/devtools_remote_server_infobar_browsertest.cc",
-       ]
-     }
--    if (!is_android || enable_desktop_android_extensions) {
-+    if (!is_android || enable_desktop_android_extensions_thorium) {
-       sources +=
-           [ "../browser/devtools/global_confirm_info_bar_browsertest.cc" ]
-     }
-@@ -2363,7 +2363,7 @@ if (is_android) {
+@@ -1899,7 +1899,7 @@ if (is_android) {
  
      # TODO(crbug.com/473636857): Include once all Android builds correctly use
      # BrowserWindowInterface.
@@ -3152,7 +3095,7 @@ index 80e65782a47d8..526a72b54f708 100644
        deps += [
          "//chrome/browser/ui/android:browser_tests",
          "//chrome/browser/ui/browser_window:browser_tests",
-@@ -2459,7 +2459,7 @@ if (is_android) {
+@@ -1997,7 +1997,7 @@ if (is_android) {
        ]
      }
  
@@ -3161,7 +3104,7 @@ index 80e65782a47d8..526a72b54f708 100644
        sources += [
          # These API tests can't be part of platform_browser_tests because they
          # run in interactive_ui_tests on Win/Mac/Linux.
-@@ -6572,7 +6572,7 @@ template("performance_test_suite_template_base") {
+@@ -5398,7 +5398,7 @@ template("performance_test_suite_template_base") {
      }
      args += [ "--chromium-output-directory=@WrappedPath(.)" ]
  
@@ -3170,16 +3113,7 @@ index 80e65782a47d8..526a72b54f708 100644
        data = [ "//third_party/crossbench-web-tests" ]
      }
  
-@@ -8378,7 +8378,7 @@ test("unit_tests") {
-       ]
-     }
- 
--    if (is_desktop_android) {
-+    if (is_desktop_android_thorium) {
-       deps += [
-         # Unit test targets for //chrome/browser/ui/browser_window/internal.
-         #
-@@ -9835,7 +9835,7 @@ test("unit_tests") {
+@@ -8306,7 +8306,7 @@ test("unit_tests") {
      ]
    }
  
@@ -3188,15 +3122,6 @@ index 80e65782a47d8..526a72b54f708 100644
      sources +=
          [ "../browser/policy/developer_tools_policy_handler_unittest.cc" ]
    }
-@@ -10072,7 +10072,7 @@ test("unit_tests") {
-     }
-   }
- 
--  if (is_win || is_mac || is_linux || is_chromeos || is_desktop_android) {
-+  if (is_win || is_mac || is_linux || is_chromeos || is_desktop_android_thorium) {
-     sources += [
-       "../browser/ui/webui/management/management_ui_handler_unittest.cc",
-       "../browser/ui/webui/management/management_ui_unittest.cc",
 diff --git a/chrome/test/data/webui/cr_components/BUILD.gn b/chrome/test/data/webui/cr_components/BUILD.gn
 index bfc4a0ba29d7d..8f29a47781466 100644
 --- a/chrome/test/data/webui/cr_components/BUILD.gn
@@ -3404,10 +3329,10 @@ index 3d9a79fb3e1bd..1c9eec1f18cf7 100644
  
      /** Modifies the output of {@link #isDesktopPlatform()} for testing. */
 diff --git a/components/policy/android/java/src/org/chromium/components/policy/CombinedPolicyProvider.java b/components/policy/android/java/src/org/chromium/components/policy/CombinedPolicyProvider.java
-index 93d8c93989b02..26b2552badc6c 100644
+index f9aab7e116dd6..4353d5bf66865 100644
 --- a/components/policy/android/java/src/org/chromium/components/policy/CombinedPolicyProvider.java
 +++ b/components/policy/android/java/src/org/chromium/components/policy/CombinedPolicyProvider.java
-@@ -60,10 +60,10 @@ public class CombinedPolicyProvider {
+@@ -66,10 +66,10 @@ public class CombinedPolicyProvider {
  
          Log.i(TAG, "#linkNativeInternal() " + mPolicyProviders.size());
  
@@ -3498,10 +3423,10 @@ index 7c2ec2e253633..33703ac7c44d7 100644
    } else {
      return "google/android/user";
 diff --git a/components/policy/core/common/features.cc b/components/policy/core/common/features.cc
-index 579089604067a..4fd427499a46b 100644
+index 45f1a6e39feac..e9a1807638d83 100644
 --- a/components/policy/core/common/features.cc
 +++ b/components/policy/core/common/features.cc
-@@ -40,7 +40,7 @@ const base::FeatureParam<base::TimeDelta> kPolicyRegistrationDelay{
+@@ -43,7 +43,7 @@ const base::FeatureParam<base::TimeDelta> kPolicyRegistrationDelay{
  // Used to add a captive portal check in SafeSitesNavigationThrottle.
  BASE_FEATURE(kSafeSitesCaptivePortalCheck, base::FEATURE_ENABLED_BY_DEFAULT);
  
@@ -3590,10 +3515,10 @@ index 80dd4436fb4c9..253fe06e5622b 100644
            <td class="label">Desktop Android</td>
            <td class="version">true</td>
 diff --git a/content/browser/BUILD.gn b/content/browser/BUILD.gn
-index b2e32483589ad..de5d580731b10 100644
+index ba1a0f118240b..c4ab724572cda 100644
 --- a/content/browser/BUILD.gn
 +++ b/content/browser/BUILD.gn
-@@ -3644,7 +3644,7 @@ source_set("browser") {
+@@ -3675,7 +3675,7 @@ source_set("browser") {
    # For platforms that support extension service workers.
    # NOTE: Fuchsia depends on this class, but probably shouldn't, as it doesn't
    # support extensions.
@@ -3603,10 +3528,10 @@ index b2e32483589ad..de5d580731b10 100644
      sources += [
        "service_worker/service_worker_usb_delegate_observer.cc",
 diff --git a/content/browser/android/selection/selection_popup_controller.cc b/content/browser/android/selection/selection_popup_controller.cc
-index fefd6ea6aa448..982594882483d 100644
+index b846c7e1d2718..11b87d6bddcce 100644
 --- a/content/browser/android/selection/selection_popup_controller.cc
 +++ b/content/browser/android/selection/selection_popup_controller.cc
-@@ -351,6 +351,11 @@ void SelectionPopupController::OnSelectAroundCaretAck(
+@@ -365,6 +365,11 @@ void SelectionPopupController::OnSelectAroundCaretAck(
        result->word_start_adjust, result->word_end_adjust);
  }
  
@@ -3631,10 +3556,10 @@ index 69e4f491da8ae..4dbe71c5bc6f6 100644
    void RestoreSelectionPopupsIfNecessary();
    void ChildLocalSurfaceIdChanged();
 diff --git a/content/browser/browser_main_loop.cc b/content/browser/browser_main_loop.cc
-index 90ee66b3e959f..531d001a53a58 100644
+index e605be3dfaade..bbd9a902f3547 100644
 --- a/content/browser/browser_main_loop.cc
 +++ b/content/browser/browser_main_loop.cc
-@@ -855,7 +855,7 @@ int BrowserMainLoop::PreCreateThreads() {
+@@ -858,7 +858,7 @@ int BrowserMainLoop::PreCreateThreads() {
    base::UmaHistogramBoolean("SiteIsolation.IsSitePerProcessOrStricter",
                              SiteIsolationPolicy::IsSitePerProcessOrStricter());
  
@@ -3644,7 +3569,7 @@ index 90ee66b3e959f..531d001a53a58 100644
        "SiteIsolation.IsSitePerProcessOrStricter.AndroidDesktop",
        SiteIsolationPolicy::IsSitePerProcessOrStricter());
 diff --git a/content/browser/renderer_host/render_widget_host_view_android.cc b/content/browser/renderer_host/render_widget_host_view_android.cc
-index 31dce31614ba7..dc93e7b3c6fdf 100644
+index e838916f09d7b..a916941150cd8 100644
 --- a/content/browser/renderer_host/render_widget_host_view_android.cc
 +++ b/content/browser/renderer_host/render_widget_host_view_android.cc
 @@ -183,7 +183,7 @@ bool IsTooltipsEnabled() {
@@ -3724,10 +3649,10 @@ index 63cf887a77aa2..34736a43cf7b2 100644
    base::ObserverList<TestVersionObserver> test_version_observers_;
  
 diff --git a/content/browser/service_worker/service_worker_version.cc b/content/browser/service_worker/service_worker_version.cc
-index d6b2ed9495545..85a732d04d305 100644
+index 29c27b342812d..ff4e1206a5378 100644
 --- a/content/browser/service_worker/service_worker_version.cc
 +++ b/content/browser/service_worker/service_worker_version.cc
-@@ -443,12 +443,12 @@ void ServiceWorkerVersion::SetStatus(Status status) {
+@@ -447,12 +447,12 @@ void ServiceWorkerVersion::SetStatus(Status status) {
          registration_id_, has_hid_event_handlers_);
  #endif  // !BUILDFLAG(IS_ANDROID)
  
@@ -3801,10 +3726,10 @@ index 3207ba881da2f..c47d23d85acdf 100644
          return true;
      }
 diff --git a/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java b/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java
-index 6c4f807df80ce..54b237e1e8b0e 100644
+index f622b5afd3d02..ab68b11e11c9a 100644
 --- a/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java
 +++ b/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java
-@@ -777,6 +777,9 @@ public class SelectionPopupControllerImpl extends ActionModeCallbackHelper
+@@ -826,6 +826,9 @@ public class SelectionPopupControllerImpl extends ActionModeCallbackHelper
       */
      @Override
      public void finishActionMode() {
@@ -3814,7 +3739,7 @@ index 6c4f807df80ce..54b237e1e8b0e 100644
          mHidden = false;
          mHandler.removeCallbacks(mRepeatingHideRunnable);
  
-@@ -2041,6 +2044,8 @@ public class SelectionPopupControllerImpl extends ActionModeCallbackHelper
+@@ -2105,6 +2108,8 @@ public class SelectionPopupControllerImpl extends ActionModeCallbackHelper
  
          void setTextHandlesTemporarilyHidden(long nativeSelectionPopupController, boolean hidden);
  
@@ -3824,10 +3749,10 @@ index 6c4f807df80ce..54b237e1e8b0e 100644
                  long nativeSelectionPopupController, boolean hidden);
  
 diff --git a/content/public/common/content_features.cc b/content/public/common/content_features.cc
-index 060453a715069..cae3177ee5557 100644
+index 752ffd130704a..58377ccf7d7c4 100644
 --- a/content/public/common/content_features.cc
 +++ b/content/public/common/content_features.cc
-@@ -656,7 +656,7 @@ BASE_FEATURE(kLoadingPredictorLimitPreconnectSocketCount,
+@@ -679,7 +679,7 @@ BASE_FEATURE(kLoadingPredictorLimitPreconnectSocketCount,
               base::FEATURE_DISABLED_BY_DEFAULT);
  
  BASE_FEATURE(kLogJsConsoleMessages,
@@ -3836,7 +3761,7 @@ index 060453a715069..cae3177ee5557 100644
               base::FEATURE_DISABLED_BY_DEFAULT
  #else
               base::FEATURE_ENABLED_BY_DEFAULT
-@@ -1570,7 +1570,7 @@ bool IsFluidResizeEnabled() {
+@@ -1591,7 +1591,7 @@ bool IsFluidResizeEnabled() {
    // dragging seen on tablets and desktops.
    return base::FeatureList::IsEnabled(features::kFluidResize) &&
           (base::android::device_info::is_tablet() ||
@@ -3859,7 +3784,7 @@ index 5074b48ec9d15..ad445d8256619 100644
      // on a large display. Feature is enabled by default except for WebView
      return false;
 diff --git a/extensions/browser/BUILD.gn b/extensions/browser/BUILD.gn
-index fdec71aa4597d..f0effa8d3253a 100644
+index 858019a86af36..84ad5d4d69b61 100644
 --- a/extensions/browser/BUILD.gn
 +++ b/extensions/browser/BUILD.gn
 @@ -10,7 +10,7 @@ import("//rlz/buildflags/buildflags.gni")
@@ -3871,7 +3796,7 @@ index fdec71aa4597d..f0effa8d3253a 100644
    import("//build/config/android/rules.gni")
  }
  
-@@ -1301,7 +1301,7 @@ source_set("unit_tests") {
+@@ -1299,7 +1299,7 @@ source_set("unit_tests") {
    configs += [ "//build/config/compiler:no_exit_time_destructors" ]
  }
  
@@ -3881,10 +3806,10 @@ index fdec71aa4597d..f0effa8d3253a 100644
      sources = [ "extension_action.h" ]
    }
 diff --git a/extensions/browser/api/api_browser_context_keyed_service_factories.cc b/extensions/browser/api/api_browser_context_keyed_service_factories.cc
-index f77abfb36ffab..3d2083f8534eb 100644
+index 8986c5877c919..fe56b1ea9fc0d 100644
 --- a/extensions/browser/api/api_browser_context_keyed_service_factories.cc
 +++ b/extensions/browser/api/api_browser_context_keyed_service_factories.cc
-@@ -70,7 +70,7 @@
+@@ -71,7 +71,7 @@
  
  namespace extensions {
  
@@ -3920,7 +3845,7 @@ index 46c329f4a7489..5326c5f8c86d6 100644
    // initialization flow is different.
    // ExtensionsAPIClient is instantiated as part of the ExtensionsBrowserClient,
 diff --git a/extensions/browser/extension_frame_host.cc b/extensions/browser/extension_frame_host.cc
-index 85d93336eed85..e28eeb4cf0ce5 100644
+index 75455e775fa9c..3b18c13caf3ea 100644
 --- a/extensions/browser/extension_frame_host.cc
 +++ b/extensions/browser/extension_frame_host.cc
 @@ -7,6 +7,7 @@
@@ -3931,17 +3856,17 @@ index 85d93336eed85..e28eeb4cf0ce5 100644
  #include "base/strings/strcat.h"
  #include "base/strings/string_number_conversions.h"
  #include "base/trace_event/typed_macros.h"
-@@ -247,12 +248,20 @@ void ExtensionFrameHost::OpenChannelToExtension(
-     mojo::PendingAssociatedRemote<extensions::mojom::MessagePort> port,
-     mojo::PendingAssociatedReceiver<extensions::mojom::MessagePortHost>
-         port_host) {
+@@ -101,6 +102,9 @@ void ExtensionFrameHost::GetAppInstallState(
+ 
+ void ExtensionFrameHost::Request(mojom::RequestParamsPtr params,
+                                  RequestCallback callback) {
 +  if (!MessageServiceApi::GetMessageService()) {
-+    LOG(INFO) << "--No MessageServiceApi";
 +    return;
 +  }
-   content::RenderFrameHost* render_frame_host =
-       receivers_.GetCurrentTargetFrame();
-   auto* process = render_frame_host->GetProcess();
+   content::RenderFrameHost& render_frame_host = receivers_.CurrentTargetFrame();
+   ExtensionWebContentsObserver::GetForWebContents(web_contents_)
+       ->dispatcher()
+@@ -249,6 +253,10 @@ void ExtensionFrameHost::OpenChannelToExtension(
    TRACE_EVENT("extensions", "ExtensionFrameHost::OpenChannelToExtension",
                ChromeTrackEvent::kRenderProcessHost, *process);
  
@@ -3950,7 +3875,7 @@ index 85d93336eed85..e28eeb4cf0ce5 100644
 +    return;
 +  }
    MessageServiceApi::GetMessageService()->OpenChannelToExtension(
-       render_frame_host->GetBrowserContext(), render_frame_host, port_id, *info,
+       render_frame_host.GetBrowserContext(), &render_frame_host, port_id, *info,
        channel_type, channel_name, std::move(port), std::move(port_host));
 diff --git a/extensions/browser/extension_host.cc b/extensions/browser/extension_host.cc
 index b315c564c3995..5a9597e5a0fe0 100644
@@ -3995,7 +3920,7 @@ index b315c564c3995..5a9597e5a0fe0 100644
  
  bool ExtensionHost::IsBackgroundPage() const {
 diff --git a/extensions/buildflags/BUILD.gn b/extensions/buildflags/BUILD.gn
-index 475eb7c920b5a..0fb90fbc446a1 100644
+index 24852573a75ef..46965a51ad383 100644
 --- a/extensions/buildflags/BUILD.gn
 +++ b/extensions/buildflags/BUILD.gn
 @@ -16,7 +16,8 @@ buildflag_header("buildflags") {
@@ -4029,10 +3954,10 @@ index 66a2fa71d68a5..4c1e72f89732b 100644
 +      enable_extensions || enable_desktop_android_extensions_thorium
  }
 diff --git a/extensions/common/api/schema.gni b/extensions/common/api/schema.gni
-index 4c5ca053aac64..0f2e0926291bd 100644
+index 95c13eec3cef6..ea5d0a4019d03 100644
 --- a/extensions/common/api/schema.gni
 +++ b/extensions/common/api/schema.gni
-@@ -116,7 +116,7 @@ if (enable_extensions) {
+@@ -122,7 +122,7 @@ if (enable_extensions) {
  # the C++ types for certain APIs, since they are used from outside the
  # extensions layer. These should be removed as we add support for the full
  # API by moving these entries to the `extensions_api_schema_files_` above.
@@ -4055,10 +3980,10 @@ index 80bfe1714f0fa..330020a569b8d 100644
    return ui::kKeybindingPlatformLinux;
  #else
 diff --git a/extensions/common/extension_features.cc b/extensions/common/extension_features.cc
-index 1056869c2ff53..df07d47afb389 100644
+index c601a1dcd4bb9..fb93688fbb84e 100644
 --- a/extensions/common/extension_features.cc
 +++ b/extensions/common/extension_features.cc
-@@ -104,7 +104,7 @@ BASE_FEATURE(kComponentExtensionAllowWorkerChromeResources,
+@@ -107,7 +107,7 @@ BASE_FEATURE(kComponentExtensionAllowWorkerChromeResources,
  
  BASE_FEATURE(kEnableWebHidInWebView, base::FEATURE_ENABLED_BY_DEFAULT);
  
@@ -4067,7 +3992,7 @@ index 1056869c2ff53..df07d47afb389 100644
  // Disabled by default because on first-run we don't have a Finch seed yet, so
  // we want to default to the safe behavior of no extensions.
  BASE_FEATURE(kEnableExtensionsForCorpDesktopAndroid,
-@@ -228,7 +228,7 @@ BASE_FEATURE(kDisableExtensionsOnChromeUrlsSwitch,
+@@ -217,7 +217,7 @@ BASE_FEATURE(kDisableExtensionsOnChromeUrlsSwitch,
  // TODO (crbug.com/426554244): Determine if this switch should be
  // removed for desktop-android builds as well.
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING) && !BUILDFLAG(IS_CHROMEOS) && \
@@ -4076,7 +4001,7 @@ index 1056869c2ff53..df07d47afb389 100644
               base::FEATURE_ENABLED_BY_DEFAULT
  #else
               base::FEATURE_DISABLED_BY_DEFAULT
-@@ -272,4 +272,10 @@ BASE_FEATURE(kSearchEngineUnconditionalDialog,
+@@ -261,4 +261,10 @@ BASE_FEATURE(kSearchEngineUnconditionalDialog,
  
  BASE_FEATURE(kOptimizeWebRequestProxy, base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -4088,7 +4013,7 @@ index 1056869c2ff53..df07d47afb389 100644
 +
  }  // namespace extensions_features
 diff --git a/extensions/common/extension_features.h b/extensions/common/extension_features.h
-index 12fe6ef71fbc4..1ee683824c630 100644
+index 71d2a0e4b45c7..ea6ad662bc174 100644
 --- a/extensions/common/extension_features.h
 +++ b/extensions/common/extension_features.h
 @@ -137,7 +137,7 @@ BASE_DECLARE_FEATURE(kComponentExtensionAllowWorkerChromeResources);
@@ -4100,9 +4025,9 @@ index 12fe6ef71fbc4..1ee683824c630 100644
  // If enabled, extensions will be enabled for @google.com and @managedchrome.com
  // users on desktop Android. Otherwise they will be blocked.
  BASE_DECLARE_FEATURE(kEnableExtensionsForCorpDesktopAndroid);
-@@ -351,6 +351,10 @@ BASE_DECLARE_FEATURE(kWebRequestSecurityInfo);
- // optimizations like preconnect.
- BASE_DECLARE_FEATURE(kOptimizeWebRequestProxy);
+@@ -328,6 +328,10 @@ BASE_DECLARE_FEATURE(kOptimizeWebRequestProxy);
+ // single `webRequestInternal.eventHandlingDone` per context.
+ BASE_DECLARE_FEATURE(kWebRequestPerContextEventDispatch);
  
 +#if BUILDFLAG(IS_ANDROID)
 +BASE_DECLARE_FEATURE(kEnableExtensionsAndroid);
@@ -4179,10 +4104,10 @@ index 8ce0b539c861c..c39defdc4578d 100644
  #else
    NOTREACHED();
 diff --git a/gpu/config/gpu_finch_features.cc b/gpu/config/gpu_finch_features.cc
-index 0a1deaa88c290..d6c83822ae3c2 100644
+index 0273624365912..70ad0ff1b80af 100644
 --- a/gpu/config/gpu_finch_features.cc
 +++ b/gpu/config/gpu_finch_features.cc
-@@ -564,7 +564,7 @@ bool IsSkiaGraphiteSupportedByDevice(const base::CommandLine* command_line) {
+@@ -587,7 +587,7 @@ bool IsSkiaGraphiteSupportedByDevice(const base::CommandLine* command_line) {
    // Desktop Android isn't ready to pick up the fieldtrial_testing_config.json
    // change that enables graphite. However, it's the same platform as regular
    // Android and does. Skip enabling the feature there for now.
@@ -4191,7 +4116,7 @@ index 0a1deaa88c290..d6c83822ae3c2 100644
      return false;
    }
  
-@@ -677,7 +677,7 @@ bool ShouldEnableDrDc() {
+@@ -710,7 +710,7 @@ bool ShouldEnableDrDc() {
    // Chrome on Android desktop aims to be Vulkan-only, which can result
    // in crashes when enabled together with DrDc. Re-enable DrDc after
    // crbug.com/380295059 is fixed if it is shown beneficial on desktop.
@@ -4201,7 +4126,7 @@ index 0a1deaa88c290..d6c83822ae3c2 100644
    }
  #endif
 diff --git a/media/audio/android/audio_manager_android.cc b/media/audio/android/audio_manager_android.cc
-index de207cc84d4a2..2c79d113af9c6 100644
+index bfc5a3aa56048..7d540ede6ef89 100644
 --- a/media/audio/android/audio_manager_android.cc
 +++ b/media/audio/android/audio_manager_android.cc
 @@ -399,7 +399,7 @@ AudioManagerAndroid::AudioManagerAndroid(
@@ -4255,10 +4180,10 @@ index 174028663459a..3616ee1857f69 100644
  
  # Skia only needs to support GPU rasterization if we use the full Chromium
 diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/features.cc
-index 8a3a6ab7707fa..ac60cc28cae83 100644
+index e50380d86e391..7119eaec5fa6b 100644
 --- a/third_party/blink/common/features.cc
 +++ b/third_party/blink/common/features.cc
-@@ -2533,7 +2533,7 @@ BASE_FEATURE(kStopInBackground,
+@@ -2532,7 +2532,7 @@ BASE_FEATURE(kStopInBackground,
  // b/248036988 - Disable this for Chromecast on Android builds to prevent apps
  // that play audio in the background from stopping.
  #if BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_CAST_ANDROID) && \
@@ -4267,7 +4192,7 @@ index 8a3a6ab7707fa..ac60cc28cae83 100644
               base::FEATURE_ENABLED_BY_DEFAULT
  #else
               base::FEATURE_DISABLED_BY_DEFAULT
-@@ -2824,7 +2824,7 @@ bool IsFencedFramesEnabled() {
+@@ -2820,7 +2820,7 @@ bool IsFencedFramesEnabled() {
  // https://bugs.chromium.org/p/chromium/issues/detail?id=1335069#c3.
  bool IsMemoryPurgeOnBackgroundingEnabled() {
    return
@@ -4326,7 +4251,7 @@ index cd2b6b9337663..e184d6739995d 100644
  
  # Must match `enable_hidpi` in ui/base/ui_features.gni.
 diff --git a/tools/json_schema_compiler/cpp_bundle_generator.py b/tools/json_schema_compiler/cpp_bundle_generator.py
-index f345f64751374..d4cf3d969b05f 100644
+index 51c6a2457384f..fa699728aaefe 100644
 --- a/tools/json_schema_compiler/cpp_bundle_generator.py
 +++ b/tools/json_schema_compiler/cpp_bundle_generator.py
 @@ -138,7 +138,7 @@ class CppBundleGenerator(object):
@@ -4352,10 +4277,10 @@ index 46713bd30ba2b..f664d9a12759a 100644
              if (shouldShowVideoTypes() && camcorder != null) extraIntents.add(camcorder);
              if (shouldShowAudioTypes() && soundRecorder != null) extraIntents.add(soundRecorder);
 diff --git a/ui/android/java/src/org/chromium/ui/base/TouchDevice.java b/ui/android/java/src/org/chromium/ui/base/TouchDevice.java
-index 873e17281c84e..e560b8cb467ef 100644
+index 1e3c2d35a2fb7..c915aa6176009 100644
 --- a/ui/android/java/src/org/chromium/ui/base/TouchDevice.java
 +++ b/ui/android/java/src/org/chromium/ui/base/TouchDevice.java
-@@ -149,7 +149,7 @@ public class TouchDevice {
+@@ -147,7 +147,7 @@ public class TouchDevice {
          // mode. Kept in case other Samsung configurations do report it.
          // TODO(crbug.com/502461774): Find a reliable DeX detection heuristic
          // that covers the phone-as-trackpad case.
@@ -4363,7 +4288,7 @@ index 873e17281c84e..e560b8cb467ef 100644
 +        if (DeviceInfo.isDesktopFalse()) { // nocheck
              return true;
          }
-         UiModeManager uiModeManager =
+         int uiMode = ContextUtils.getApplicationContext().getResources().getConfiguration().uiMode;
 diff --git a/ui/android/java/src/org/chromium/ui/util/StyleUtils.java b/ui/android/java/src/org/chromium/ui/util/StyleUtils.java
 index 683e6f41c6a1a..5ec0b4080003e 100644
 --- a/ui/android/java/src/org/chromium/ui/util/StyleUtils.java
@@ -4444,19 +4369,6 @@ index 788cb001fe287..3b85e116ce493 100644
                              && packageManager.hasSystemFeature(PackageManager.FEATURE_PC);
          }
  
-diff --git a/ui/base/accelerators/command.cc b/ui/base/accelerators/command.cc
-index daf6eb31a1a77..42e9028f16401 100644
---- a/ui/base/accelerators/command.cc
-+++ b/ui/base/accelerators/command.cc
-@@ -87,7 +87,7 @@ std::string Command::CommandPlatform() {
-   // TODO(crbug.com/40220501): Change this once we decide what string should be
-   // used for Fuchsia.
-   return ui::kKeybindingPlatformLinux;
--#elif BUILDFLAG(IS_DESKTOP_ANDROID)
-+#elif BUILDFLAG(IS_DESKTOP_ANDROID_THORIUM)
-   // For now, we use linux keybindings on desktop android.
-   // TODO(https://crbug.com/356905053): Should this be ChromeOS keybindings?
-   return ui::kKeybindingPlatformLinux;
 diff --git a/ui/base/device_form_factor_android.cc b/ui/base/device_form_factor_android.cc
 index 5cc65ab1ef046..96556d3a163ff 100644
 --- a/ui/base/device_form_factor_android.cc
@@ -4493,7 +4405,7 @@ index c62fceb610d26..ab2adb1cbae9d 100644
        return HOVER_TYPE_HOVER;
      }
 diff --git a/ui/gl/features.gni b/ui/gl/features.gni
-index e0bdd667233d5..02931a0e96d03 100644
+index 4141d758f269f..949d3285a642b 100644
 --- a/ui/gl/features.gni
 +++ b/ui/gl/features.gni
 @@ -14,7 +14,7 @@ declare_args() {
@@ -4539,7 +4451,7 @@ index 38910fd023e7c..2a49b6e924451 100644
            [ "//ui/webui/resources/cr_components/color_change_listener:mojom" ]
        sources += [
 diff --git a/ui/webui/resources/BUILD.gn b/ui/webui/resources/BUILD.gn
-index 9cb5e00971323..780f3c7fad75d 100644
+index 204e2c65b3bc2..f57875653edd8 100644
 --- a/ui/webui/resources/BUILD.gn
 +++ b/ui/webui/resources/BUILD.gn
 @@ -52,7 +52,7 @@ generate_grd("build_grd") {
@@ -4552,7 +4464,7 @@ index 9cb5e00971323..780f3c7fad75d 100644
        "cr_components/app_management:build_grdp",
        "cr_components/color_change_listener:build_grdp",
 diff --git a/ui/webui/resources/cr_components/app_management/BUILD.gn b/ui/webui/resources/cr_components/app_management/BUILD.gn
-index 72179fc1de639..8efacc06d99ff 100644
+index b09059dfe8e2a..190de6c727e05 100644
 --- a/ui/webui/resources/cr_components/app_management/BUILD.gn
 +++ b/ui/webui/resources/cr_components/app_management/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4591,7 +4503,7 @@ index 5adcca50200bd..aa8cb974533c8 100644
  build_webui("build") {
    grd_prefix = "cr_components_cr_shortcut_input"
 diff --git a/ui/webui/resources/cr_components/customize_color_scheme_mode/BUILD.gn b/ui/webui/resources/cr_components/customize_color_scheme_mode/BUILD.gn
-index f49c789412408..7331a626d6414 100644
+index f35dabc04c7b2..162690aaae2aa 100644
 --- a/ui/webui/resources/cr_components/customize_color_scheme_mode/BUILD.gn
 +++ b/ui/webui/resources/cr_components/customize_color_scheme_mode/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4604,7 +4516,7 @@ index f49c789412408..7331a626d6414 100644
  mojom("mojom") {
    sources = [ "customize_color_scheme_mode.mojom" ]
 diff --git a/ui/webui/resources/cr_components/help_bubble/BUILD.gn b/ui/webui/resources/cr_components/help_bubble/BUILD.gn
-index 4be1f8f4dede6..934263c672e00 100644
+index 8afb54f0d1493..4326e110f112a 100644
 --- a/ui/webui/resources/cr_components/help_bubble/BUILD.gn
 +++ b/ui/webui/resources/cr_components/help_bubble/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4617,7 +4529,7 @@ index 4be1f8f4dede6..934263c672e00 100644
  mojom("mojo_bindings") {
    sources = [
 diff --git a/ui/webui/resources/cr_components/history/BUILD.gn b/ui/webui/resources/cr_components/history/BUILD.gn
-index 0cd84c6ce5e11..45feef106a62f 100644
+index b69034649b365..385f215a5c3f0 100644
 --- a/ui/webui/resources/cr_components/history/BUILD.gn
 +++ b/ui/webui/resources/cr_components/history/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4630,7 +4542,7 @@ index 0cd84c6ce5e11..45feef106a62f 100644
  mojom("mojo_bindings") {
    sources = [
 diff --git a/ui/webui/resources/cr_components/history_clusters/BUILD.gn b/ui/webui/resources/cr_components/history_clusters/BUILD.gn
-index e3570e4fe625e..40ef23f4a239e 100644
+index 773a1c8f2a885..fc8fa12bbfb7b 100644
 --- a/ui/webui/resources/cr_components/history_clusters/BUILD.gn
 +++ b/ui/webui/resources/cr_components/history_clusters/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4643,7 +4555,7 @@ index e3570e4fe625e..40ef23f4a239e 100644
  mojom("mojo_bindings") {
    sources = [ "history_clusters.mojom" ]
 diff --git a/ui/webui/resources/cr_components/history_embeddings/BUILD.gn b/ui/webui/resources/cr_components/history_embeddings/BUILD.gn
-index 66bcedd982454..ebdab2d49e1f9 100644
+index 47f1849ecb2f3..47499e97d2265 100644
 --- a/ui/webui/resources/cr_components/history_embeddings/BUILD.gn
 +++ b/ui/webui/resources/cr_components/history_embeddings/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4682,7 +4594,7 @@ index 9f6536aa1d387..d45b19ae2f855 100644
  build_webui("build") {
    grd_prefix = "cr_components_managed_footnote"
 diff --git a/ui/webui/resources/cr_components/most_visited/BUILD.gn b/ui/webui/resources/cr_components/most_visited/BUILD.gn
-index ea43770304f5f..29ad37ebc2c51 100644
+index 6e4f17cf4d869..8f53fbee4438a 100644
 --- a/ui/webui/resources/cr_components/most_visited/BUILD.gn
 +++ b/ui/webui/resources/cr_components/most_visited/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4708,7 +4620,7 @@ index b2d27149dd107..1e942cccbb879 100644
  build_webui("build") {
    grd_prefix = "cr_components_page_image_service"
 diff --git a/ui/webui/resources/cr_components/theme_color_picker/BUILD.gn b/ui/webui/resources/cr_components/theme_color_picker/BUILD.gn
-index 7d295bd6979f6..8b677b664d5d0 100644
+index 5a154d864cead..22390956429a2 100644
 --- a/ui/webui/resources/cr_components/theme_color_picker/BUILD.gn
 +++ b/ui/webui/resources/cr_components/theme_color_picker/BUILD.gn
 @@ -6,7 +6,7 @@ import("//mojo/public/tools/bindings/mojom.gni")
@@ -4769,19 +4681,6 @@ index 91cc473cde764..cab09724c2a3f 100644
      in_files += [ "md_colors.css" ]
    }
  }
-diff --git a/ui/webui/resources/images/BUILD.gn b/ui/webui/resources/images/BUILD.gn
-index c7275ffa49c1a..0be83c5e1626c 100644
---- a/ui/webui/resources/images/BUILD.gn
-+++ b/ui/webui/resources/images/BUILD.gn
-@@ -62,7 +62,7 @@ generate_grd("build_grdp") {
-     ]
-   }
- 
--  if ((!is_android && !is_ios) || is_desktop_android) {
-+  if ((!is_android && !is_ios) || is_desktop_android_thorium) {
-     input_files += [
-       "arrow_right.svg",
-       "business.svg",
 diff --git a/ui/webui/resources/js/BUILD.gn b/ui/webui/resources/js/BUILD.gn
 index 4fba94dd93e76..97f5827e20de9 100644
 --- a/ui/webui/resources/js/BUILD.gn
@@ -4796,10 +4695,10 @@ index 4fba94dd93e76..97f5827e20de9 100644
      mojo_files_deps += [ "./browser_command:mojo_bindings_ts__generator" ]
      mojo_files += [ "$root_gen_dir/ui/webui/resources/js/browser_command/browser_command.mojom-webui.ts" ]
 diff --git a/ui/webui/webui_features.gni b/ui/webui/webui_features.gni
-index 4b773074206d9..d58182f470488 100644
+index 36a8bc3a2e7df..c8d65760dc622 100644
 --- a/ui/webui/webui_features.gni
 +++ b/ui/webui/webui_features.gni
-@@ -44,12 +44,12 @@ if (enable_cast_receiver || is_cast_android || is_castos) {
+@@ -44,7 +44,7 @@ if (enable_cast_receiver || is_cast_android || is_castos) {
      # Enable the WebUI version of the New Tab Page.
      enable_webui_ntp =
          target_os == "win" || target_os == "mac" || target_os == "linux" ||
@@ -4808,9 +4707,3 @@ index 4b773074206d9..d58182f470488 100644
    }
    declare_args() {
      # Enable WebUI Contextual Tasks Composebox.
-     enable_webui_contextual_tasks_composebox =
--        enable_webui_ntp || is_desktop_android
-+        enable_webui_ntp || is_desktop_android_thorium
-   }
-   if (enable_webui_ntp) {
-     # NTP relies on chrome.metricsPrivate, which is an extensions API.

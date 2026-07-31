@@ -27,10 +27,10 @@ index df8f9455d224f..f0857b4b67eff 100644
  #endif  // !BUILDFLAG(IS_ANDROID)
  
 diff --git a/chrome/common/logging_chrome.cc b/chrome/common/logging_chrome.cc
-index 2e7ae1d3a591c..6c235fe0a9955 100644
+index c35abca0f4ec1..2588c5e1b2191 100644
 --- a/chrome/common/logging_chrome.cc
 +++ b/chrome/common/logging_chrome.cc
-@@ -573,7 +573,7 @@ base::FilePath GetLogFileName(const base::CommandLine& command_line) {
+@@ -578,7 +578,7 @@ base::FilePath GetLogFileName(const base::CommandLine& command_line) {
  
    // If command line and environment do not provide a log file we can use,
    // fallback to the default.

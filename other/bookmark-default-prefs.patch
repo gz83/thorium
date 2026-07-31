@@ -1,5 +1,5 @@
 diff --git a/components/bookmarks/browser/bookmark_utils.cc b/components/bookmarks/browser/bookmark_utils.cc
-index f2adc35182b40..cfe22a5142318 100644
+index d8f32a1ca60e4..be78d0b2c703d 100644
 --- a/components/bookmarks/browser/bookmark_utils.cc
 +++ b/components/bookmarks/browser/bookmark_utils.cc
 @@ -1,4 +1,4 @@

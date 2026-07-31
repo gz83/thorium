@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/download/chrome_download_manager_delegate.cc b/chrome/browser/download/chrome_download_manager_delegate.cc
-index df1bc60215471..6a0c0e732b49b 100644
+index f02af613fc8be..a56a6adf13fdd 100644
 --- a/chrome/browser/download/chrome_download_manager_delegate.cc
 +++ b/chrome/browser/download/chrome_download_manager_delegate.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index df1bc60215471..6a0c0e732b49b 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -2143,8 +2143,12 @@ bool ChromeDownloadManagerDelegate::IsOpenInBrowserPreferredForFile(
+@@ -2152,8 +2152,12 @@ bool ChromeDownloadManagerDelegate::IsOpenInBrowserPreferredForFile(
  bool ChromeDownloadManagerDelegate::ShouldBlockFile(
      download::DownloadItem* item,
      download::DownloadDangerType danger_type) const {
@@ -22,7 +22,7 @@ index df1bc60215471..6a0c0e732b49b 100644
      return false;
    }
  
-@@ -2198,44 +2202,14 @@ bool ChromeDownloadManagerDelegate::ShouldBlockFile(
+@@ -2207,44 +2211,14 @@ bool ChromeDownloadManagerDelegate::ShouldBlockFile(
  void ChromeDownloadManagerDelegate::MaybeSendDangerousDownloadOpenedReport(
      DownloadItem* download,
      bool show_download_in_folder) {
@@ -70,7 +70,7 @@ index df1bc60215471..6a0c0e732b49b 100644
      const content::WebContents::Getter& web_contents_getter,
      const GURL& url,
 diff --git a/chrome/browser/download/download_target_determiner.cc b/chrome/browser/download/download_target_determiner.cc
-index 56b6e324e3a7a..a319ac415a8e2 100644
+index 6c4f979795979..c966f19b5ec91 100644
 --- a/chrome/browser/download/download_target_determiner.cc
 +++ b/chrome/browser/download/download_target_determiner.cc
 @@ -1,4 +1,4 @@

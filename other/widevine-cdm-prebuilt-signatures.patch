@@ -1,8 +1,8 @@
 diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
-index 18417167ff8dd..5705543001704 100644
+index 973a46b2a34bb..89d9c6ccd808d 100644
 --- a/chrome/BUILD.gn
 +++ b/chrome/BUILD.gn
-@@ -1013,7 +1013,7 @@ if (is_win) {
+@@ -1022,7 +1022,7 @@ if (is_win) {
    if (bundle_widevine_cdm) {
      bundle_data("widevine_cdm_library_binaries") {
        sources = [ "$root_out_dir/$widevine_cdm_path/libwidevinecdm.dylib" ]

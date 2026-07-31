@@ -46,13 +46,12 @@
      kOsDesktop,
      FEATURE_VALUE_TYPE(features::kThoriumHideCastContextMenu)},
 #if !BUILDFLAG(IS_ANDROID)
-    {"left-aligned-tab-search-button",
-     "Left-Aligned Tab Search Button",
-     "Places the standalone Tab Search button on the physical left side of "
-     "the tab strip. The button is on the right by default. This does not "
-     "control the Horizontal Tab Strip Combo Button.",
+    {"left-aligned-tab-strip-combo-button",
+     "Left-Aligned Tab Strip Combo Button",
+     "Places the horizontal tab strip combo button on the physical left side "
+     "of the tab strip. The combo button is on the right by default.",
      kOsDesktop,
-     FEATURE_VALUE_TYPE(tabs::kThoriumLeftAlignedTabSearchButton)},
+     FEATURE_VALUE_TYPE(tabs::kThoriumLeftAlignedTabStripComboButton)},
 #endif  // !BUILDFLAG(IS_ANDROID)
     {"restore-tab-button",
      "Restore Tab Button",

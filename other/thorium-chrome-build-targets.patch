@@ -1,5 +1,5 @@
 diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
-index 5705543001704..f97404c9a3ee1 100644
+index 89d9c6ccd808d..f031c48fde1cf 100644
 --- a/chrome/BUILD.gn
 +++ b/chrome/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 5705543001704..f97404c9a3ee1 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -85,12 +85,12 @@ if (is_win) {
+@@ -86,12 +86,12 @@ if (is_win) {
      # initialexe/ is used so that the we can reorder imports and write back to
      # the final destination at $root_out_dir/.
      inputs = [
@@ -25,7 +25,7 @@ index 5705543001704..f97404c9a3ee1 100644
      ]
      args = [
        "-i",
-@@ -148,9 +148,11 @@ if (!is_android && !is_mac) {
+@@ -149,9 +149,11 @@ if (!is_android && !is_mac) {
    }
  
    if (is_win) {
@@ -39,8 +39,8 @@ index 5705543001704..f97404c9a3ee1 100644
    }
  
    executable("chrome_initial") {
-@@ -1718,7 +1720,11 @@ if (is_linux || is_chromeos) {
-       }
+@@ -1703,7 +1705,11 @@ if (is_linux || is_chromeos) {
+       ]
      }
      extract_symbols("chrome_symbols") {
 -      binary = "$root_out_dir/chrome"

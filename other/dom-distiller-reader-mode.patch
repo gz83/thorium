@@ -31,7 +31,7 @@ index 570369d1febfe..f80502ac392de 100644
    position: relative;
    width: 100%;
 diff --git a/components/dom_distiller/core/dom_distiller_features.cc b/components/dom_distiller/core/dom_distiller_features.cc
-index b6fc52b3ee56f..a5b10bc954e81 100644
+index e4fcf51e5f4fa..bbdd0fb456b7d 100644
 --- a/components/dom_distiller/core/dom_distiller_features.cc
 +++ b/components/dom_distiller/core/dom_distiller_features.cc
 @@ -1,4 +1,4 @@
@@ -101,15 +101,12 @@ index b6fc52b3ee56f..a5b10bc954e81 100644
  
  bool ShouldUseReadabilityDistiller() {
  #if BUILDFLAG(IS_IOS)
-@@ -98,9 +89,9 @@ BASE_FEATURE(kReaderModeBlurTransitionAnimation,
+@@ -98,7 +89,7 @@ BASE_FEATURE(kReaderModeBlurTransitionAnimation,
  BASE_FEATURE(kReaderModeDelayBottomSheetPeek,
               base::FEATURE_DISABLED_BY_DEFAULT);
  
 -BASE_FEATURE(kReaderModeDistillInApp, base::FEATURE_ENABLED_BY_DEFAULT);
 +BASE_FEATURE(kReaderModeDistillInApp, base::FEATURE_DISABLED_BY_DEFAULT);
- 
--BASE_FEATURE(kReaderModeImprovements, base::FEATURE_DISABLED_BY_DEFAULT);
-+BASE_FEATURE(kReaderModeImprovements, base::FEATURE_ENABLED_BY_DEFAULT);
  
  BASE_FEATURE(kReaderModeToggleLinks, base::FEATURE_DISABLED_BY_DEFAULT);
  

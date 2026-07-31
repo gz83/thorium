@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/browser_commands.cc b/chrome/browser/ui/browser_commands.cc
-index 98184befe73cc..e8333d166923c 100644
+index 83efe1922093d..3d4d6385f6edd 100644
 --- a/chrome/browser/ui/browser_commands.cc
 +++ b/chrome/browser/ui/browser_commands.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 98184befe73cc..e8333d166923c 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -189,7 +189,6 @@
+@@ -191,7 +191,6 @@
  #include "content/public/browser/web_contents.h"
  #include "content/public/common/content_switches.h"
  #include "content/public/common/url_constants.h"
@@ -16,7 +16,7 @@ index 98184befe73cc..e8333d166923c 100644
  #include "extensions/buildflags/buildflags.h"
  #include "pdf/buildflags.h"
  #include "printing/buildflags/buildflags.h"
-@@ -757,11 +756,6 @@ int GetContentRestrictions(const BrowserWindowInterface* browser) {
+@@ -783,11 +782,6 @@ int GetContentRestrictions(const BrowserWindowInterface* browser) {
      CoreTabHelper* core_tab_helper =
          CoreTabHelper::FromWebContents(current_tab);
      content_restrictions = core_tab_helper->content_restrictions();
@@ -28,7 +28,7 @@ index 98184befe73cc..e8333d166923c 100644
    }
    return content_restrictions;
  }
-@@ -2207,8 +2201,7 @@ bool CanSavePage(const BrowserWindowInterface* browser) {
+@@ -2235,8 +2229,7 @@ bool CanSavePage(const BrowserWindowInterface* browser) {
        policy::DownloadRestriction::ALL_FILES) {
      return false;
    }

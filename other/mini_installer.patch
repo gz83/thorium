@@ -1,8 +1,8 @@
 diff --git a/chrome/app/chromium_strings.grd b/chrome/app/chromium_strings.grd
-index a154b12dc4fa7..fd2024bb4c14a 100644
+index 12a62d6803668..221f9d9ff7901 100644
 --- a/chrome/app/chromium_strings.grd
 +++ b/chrome/app/chromium_strings.grd
-@@ -714,6 +714,21 @@ Chromium is unable to recover your settings.
+@@ -731,6 +731,21 @@ Chromium is unable to recover your settings.
          <message name="IDS_INSTALL_OS_NOT_SUPPORTED" desc="Error displayed if OS is not supported">
            Chromium requires Windows 10 or higher.
          </message>
@@ -25,7 +25,7 @@ index a154b12dc4fa7..fd2024bb4c14a 100644
            An operating system error occurred during installation. Please download Chromium again.
          </message>
 diff --git a/chrome/installer/mini_installer/BUILD.gn b/chrome/installer/mini_installer/BUILD.gn
-index 37a9269380b70..66af5ffafc8d0 100644
+index 7128e8164e866..4ef24397c0da1 100644
 --- a/chrome/installer/mini_installer/BUILD.gn
 +++ b/chrome/installer/mini_installer/BUILD.gn
 @@ -1,8 +1,9 @@
@@ -40,7 +40,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
  import("//build/config/python.gni")
  import("//build/config/ui.gni")
  import("//build/timestamp.gni")
-@@ -33,9 +34,13 @@ declare_args() {
+@@ -34,9 +35,13 @@ declare_args() {
    enable_uncompressed_archive = false
  }
  
@@ -57,7 +57,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
  }
  
  source_set("lib") {
-@@ -58,6 +63,8 @@ source_set("lib") {
+@@ -59,6 +64,8 @@ source_set("lib") {
      "mini_installer.rc",
      "mini_installer_constants.cc",
      "mini_installer_constants.h",
@@ -66,7 +66,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
      "mini_installer_resource.h",
      "mini_string.cc",
      "mini_string.h",
-@@ -68,19 +75,24 @@ source_set("lib") {
+@@ -69,19 +76,24 @@ source_set("lib") {
      "write_to_disk.h",
    ]
  
@@ -101,7 +101,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
  }
  
  source_set("unit_tests") {
-@@ -147,7 +159,7 @@ action("mini_installer_archive") {
+@@ -148,7 +160,7 @@ action("mini_installer_archive") {
    inputs = [
      "$root_out_dir/chrome.dll",
      "$root_out_dir/chrome_elf.dll",
@@ -110,7 +110,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
      "$root_out_dir/locales/en-US.pak",
      "$root_out_dir/setup.exe",
      "//chrome/tools/build/win/makecab.py",
-@@ -179,9 +191,6 @@ action("mini_installer_archive") {
+@@ -180,9 +192,6 @@ action("mini_installer_archive") {
      rebase_path(setup_runtime_deps, root_build_dir),
      "--build_time",
      build_timestamp,
@@ -120,7 +120,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
    ]
  
    deps = [
-@@ -250,13 +259,11 @@ source_set("mini_installer_sources") {
+@@ -255,13 +264,11 @@ source_set("mini_installer_sources") {
    sources = [ "mini_installer_exe_main.cc" ]
    deps = [
      ":lib",
@@ -138,7 +138,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
  }
  
  copy("copy_signing") {
-@@ -267,66 +274,73 @@ copy("copy_signing") {
+@@ -272,66 +279,73 @@ copy("copy_signing") {
  # Generates a mini_installer executable containing the resources provided in the
  # caller's `rc_file`.
  template("generate_mini_installer") {
@@ -248,7 +248,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
    }
  }
  
-@@ -353,14 +367,14 @@ if (!(is_component_build && is_debug && target_cpu == "x86") &&
+@@ -358,14 +372,14 @@ if (!(is_component_build && is_debug && target_cpu == "x86") &&
              root_out_dir)
      inputs = [
        "$root_out_dir/" + alternate_version_generator_rel_path,
@@ -266,7 +266,7 @@ index 37a9269380b70..66af5ffafc8d0 100644
        "$target_name.exe",
        "--path_7za",
 diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index 0f331c3e0f2a3..608b04fd21f93 100644
+index 5add215198e87..0789bbe0524c2 100644
 --- a/chrome/installer/mini_installer/chrome.release
 +++ b/chrome/installer/mini_installer/chrome.release
 @@ -1,4 +1,4 @@
@@ -301,7 +301,7 @@ index 0f331c3e0f2a3..608b04fd21f93 100644
  d3dcompiler_47.dll: %(VersionDir)s\
  eventlog_provider.dll: %(VersionDir)s\
  icudtl.dat: %(VersionDir)s\
-@@ -32,15 +37,45 @@ libGLESv2.dll: %(VersionDir)s\
+@@ -33,15 +38,45 @@ libLiteRtWebGpuAccelerator.dll: %(VersionDir)s\
  notification_helper.exe: %(VersionDir)s\
  optimization_guide_internal.dll: %(VersionDir)s\
  resources.pak: %(VersionDir)s\
@@ -347,7 +347,7 @@ index 0f331c3e0f2a3..608b04fd21f93 100644
  
  #
  # VisualElements sub-dir.
-@@ -71,6 +106,8 @@ IwaKeyDistribution\manifest.json: %(VersionDir)s\IwaKeyDistribution\
+@@ -72,6 +107,8 @@ IwaKeyDistribution\manifest.json: %(VersionDir)s\IwaKeyDistribution\
  
  [HIDPI]
  chrome_200_percent.pak: %(VersionDir)s\

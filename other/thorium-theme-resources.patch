@@ -1,8 +1,8 @@
 diff --git a/chrome/app/theme/theme_resources.grd b/chrome/app/theme/theme_resources.grd
-index 3d795c9030811..baf154ba17dfe 100644
+index 345b2d72c12bb..ad5523311d2d2 100644
 --- a/chrome/app/theme/theme_resources.grd
 +++ b/chrome/app/theme/theme_resources.grd
-@@ -163,7 +163,6 @@
+@@ -165,7 +165,6 @@
        </if>
        <structure type="chrome_scaled_image" name="IDR_PLUGINS_FAVICON" file="common/favicon_plugins.png" />
        <structure type="chrome_scaled_image" name="IDR_PRERENDER" file="common/prerender_succeed_icon.png" />
@@ -10,7 +10,7 @@ index 3d795c9030811..baf154ba17dfe 100644
        <if expr="not is_android">
            <structure type="chrome_scaled_image" name="IDR_PRICE_TRACKING_ON_IOS_ICON" file="common/price_tracking_on_ios.png" />
        </if>
-@@ -172,11 +171,13 @@
+@@ -174,11 +173,13 @@
            <if expr="is_linux">
              <then>
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_16" file="${branding_path_component}/linux/product_logo_16.png" />
@@ -24,7 +24,7 @@ index 3d795c9030811..baf154ba17dfe 100644
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_32_BETA" file="${branding_path_component}/product_logo_32_beta.png" />
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_32_DEV" file="${branding_path_component}/product_logo_32_dev.png" />
              </else>
-@@ -193,9 +194,11 @@
+@@ -195,9 +196,11 @@
            <if expr="is_linux">
              <then>
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_16" file="${branding_path_component}/linux/product_logo_16.png" />
@@ -36,7 +36,7 @@ index 3d795c9030811..baf154ba17dfe 100644
              </else>
            </if> <!-- is_linux -->
            <if expr="_is_chrome_for_testing_branded">
-@@ -206,6 +209,14 @@
+@@ -208,6 +211,14 @@
              <else> <!-- not _is_chrome_for_testing_branded -->
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_NAME_22" file="${branding_path_component}/product_logo_name_22.png" />
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_NAME_22_WHITE" file="${branding_path_component}/product_logo_name_22_white.png" />
@@ -51,17 +51,17 @@ index 3d795c9030811..baf154ba17dfe 100644
              </else>
            </if> <!-- _is_chrome_for_testing_branded -->
          </else>
-diff --git a/chrome/browser/resources/settings/about_page/about_page.html b/chrome/browser/resources/settings/about_page/about_page.html
-index 5069802bf7a17..106fbfa62a4ed 100644
---- a/chrome/browser/resources/settings/about_page/about_page.html
-+++ b/chrome/browser/resources/settings/about_page/about_page.html
-@@ -19,7 +19,9 @@
-       }
+diff --git a/chrome/browser/resources/settings/about_page/about_page.css b/chrome/browser/resources/settings/about_page/about_page.css
+index 2eb4882df945c..2f58938e50b52 100644
+--- a/chrome/browser/resources/settings/about_page/about_page.css
++++ b/chrome/browser/resources/settings/about_page/about_page.css
+@@ -29,7 +29,9 @@
+ }
  
-       #product-logo {
-+        height: 32px;
-         margin-inline-end: var(--about-page-image-space);
-+        width: 32px;
-       }
+ #productLogo {
++  height: 32px;
+   margin-inline-end: var(--about-page-image-space);
++  width: 32px;
+ }
  
-       .icon-container {
+ .icon-container {

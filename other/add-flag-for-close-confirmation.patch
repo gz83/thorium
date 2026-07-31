@@ -1,8 +1,8 @@
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index fc8fda672f99b..9cca7586b2bb2 100644
+index e7e465fa2b5ad..1e22017c1dd95 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -15031,6 +15031,10 @@ Please help our engineers fix this problem. Tell us what happened right before y
+@@ -15079,6 +15079,10 @@ Please help our engineers fix this problem. Tell us what happened right before y
          </message>
        </if>
  
@@ -14,7 +14,7 @@ index fc8fda672f99b..9cca7586b2bb2 100644
          <message name="IDS_RESTORE_WINDOW_MENU_WIN" desc="The Windows browser window menu item text for restoring the window.">
            &amp;Restore
 diff --git a/chrome/browser/ui/browser.cc b/chrome/browser/ui/browser.cc
-index cb36094135980..cf6ccbc1d44f7 100644
+index 21d8ba20a0437..ec1471a13cb8a 100644
 --- a/chrome/browser/ui/browser.cc
 +++ b/chrome/browser/ui/browser.cc
 @@ -151,6 +151,7 @@
@@ -42,7 +42,7 @@ index cb36094135980..cf6ccbc1d44f7 100644
        override_bounds_(params.initial_bounds),
        initial_show_state_(params.initial_show_state),
        initial_workspace_(params.initial_workspace),
-@@ -898,10 +902,12 @@ Browser::WarnBeforeClosingResult Browser::MaybeWarnBeforeClosing(
+@@ -713,10 +717,12 @@ Browser::WarnBeforeClosingResult Browser::MaybeWarnBeforeClosing(
      return WarnBeforeClosingResult::kOkToClose;
    }
  
@@ -59,7 +59,7 @@ index cb36094135980..cf6ccbc1d44f7 100644
    }
  
    DCHECK(!warn_before_closing_callback_)
-@@ -955,6 +961,8 @@ bool Browser::TryToCloseWindow(
+@@ -770,6 +776,8 @@ bool Browser::TryToCloseWindow(
  void Browser::ResetTryToCloseWindow() {
    cancel_download_confirmation_state_ =
        CancelDownloadConfirmationState::kNotPrompted;
@@ -68,7 +68,7 @@ index cb36094135980..cf6ccbc1d44f7 100644
    UnloadController::From(this)->ResetTryToCloseWindow();
  }
  
-@@ -3130,6 +3138,85 @@ bool Browser::CanCloseWithInProgressDownloads() {
+@@ -2933,6 +2941,85 @@ bool Browser::CanCloseWithInProgressDownloads() {
    return false;
  }
  
@@ -154,7 +154,7 @@ index cb36094135980..cf6ccbc1d44f7 100644
  void Browser::InProgressDownloadResponse(bool cancel_downloads) {
    if (cancel_downloads) {
      cancel_download_confirmation_state_ =
-@@ -3153,6 +3240,24 @@ void Browser::InProgressDownloadResponse(bool cancel_downloads) {
+@@ -2956,6 +3043,24 @@ void Browser::InProgressDownloadResponse(bool cancel_downloads) {
        .Run(WarnBeforeClosingResult::kDoNotClose);
  }
  
@@ -180,7 +180,7 @@ index cb36094135980..cf6ccbc1d44f7 100644
    switch (result) {
      case WarnBeforeClosingResult::kOkToClose:
 diff --git a/chrome/browser/ui/browser.h b/chrome/browser/ui/browser.h
-index 718dda248e492..dc7dc510df87b 100644
+index e2fcdc383237c..6b6290bf36a5c 100644
 --- a/chrome/browser/ui/browser.h
 +++ b/chrome/browser/ui/browser.h
 @@ -31,6 +31,7 @@
@@ -191,7 +191,7 @@ index 718dda248e492..dc7dc510df87b 100644
  #include "chrome/browser/ui/tabs/tab_change_type.h"
  #include "chrome/browser/ui/tabs/tab_strip_model.h"
  #include "chrome/browser/ui/tabs/tab_strip_model_observer.h"
-@@ -1040,12 +1041,17 @@ class Browser : public TabStripModelObserver,
+@@ -1000,12 +1001,17 @@ class Browser : public TabStripModelObserver,
    // Returns true if the window can close, false otherwise.
    bool CanCloseWithInProgressDownloads();
  
@@ -209,7 +209,7 @@ index 718dda248e492..dc7dc510df87b 100644
    // Called when the user has decided whether to proceed or not with the browser
    // closure, in case the cookie migration notice was shown. |proceed_closing|
    // is true if the browser can  be closed.
-@@ -1182,6 +1188,8 @@ class Browser : public TabStripModelObserver,
+@@ -1142,6 +1148,8 @@ class Browser : public TabStripModelObserver,
    // when the browser is closed with in-progress downloads.
    CancelDownloadConfirmationState cancel_download_confirmation_state_;
  

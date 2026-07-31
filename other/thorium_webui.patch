@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/webui/BUILD.gn b/chrome/browser/ui/webui/BUILD.gn
-index 70818ce2da0e8..e5c35940f14d8 100644
+index 9ad30f708e9cb..da9e3425e1a15 100644
 --- a/chrome/browser/ui/webui/BUILD.gn
 +++ b/chrome/browser/ui/webui/BUILD.gn
-@@ -32,6 +32,7 @@ source_set("configs") {
+@@ -33,6 +33,7 @@ source_set("configs") {
      "chrome_untrusted_web_ui_configs.h",
      "chrome_web_ui_configs.cc",
      "chrome_web_ui_configs.h",
@@ -11,10 +11,10 @@ index 70818ce2da0e8..e5c35940f14d8 100644
  
    configs += [ "//build/config/compiler:wexit_time_destructors" ]
 diff --git a/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
-index bced2aebb3495..8a9cd6e702764 100644
+index 184305a45acc2..2413a9d29d6f1 100644
 --- a/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 +++ b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
-@@ -55,6 +55,7 @@
+@@ -54,6 +54,7 @@
  #include "chrome/browser/ui/webui/signin_internals_ui.h"
  #include "chrome/browser/ui/webui/subresource_filter/subresource_filter_internals_ui.h"
  #include "chrome/browser/ui/webui/sync_internals/sync_internals_ui.h"
@@ -22,7 +22,7 @@ index bced2aebb3495..8a9cd6e702764 100644
  #include "chrome/browser/ui/webui/translate_internals/translate_internals_ui.h"
  #include "chrome/browser/ui/webui/usb_internals/usb_internals_ui.h"
  #include "chrome/browser/ui/webui/version/version_ui.h"
-@@ -303,6 +304,9 @@ void RegisterChromeWebUIConfigs() {
+@@ -309,6 +310,9 @@ void RegisterChromeWebUIConfigs() {
                       subresource_filter::SubresourceFilterInternalsUIConfig>());
    map.AddWebUIConfig(std::make_unique<SiteEngagementUIConfig>());
    map.AddWebUIConfig(std::make_unique<SyncInternalsUIConfig>());
@@ -292,10 +292,10 @@ index 0000000000000..e183c1f64b82a
 +
 +#endif  // THORIUM_EASTER_EGGS_H_
 diff --git a/chrome/common/webui_url_constants.cc b/chrome/common/webui_url_constants.cc
-index 307b2de1bdb81..64cb8f1ad8f7e 100644
+index 4c12bc642955f..4b60deca0d790 100644
 --- a/chrome/common/webui_url_constants.cc
 +++ b/chrome/common/webui_url_constants.cc
-@@ -125,6 +125,9 @@ base::span<const base::cstring_view> ChromeURLHosts() {
+@@ -124,6 +124,9 @@ base::span<const base::cstring_view> ChromeURLHosts() {
        kChromeUIAboutHost,
        kChromeUIAccessibilityHost,
        kChromeUIActorInternalsHost,
@@ -306,7 +306,7 @@ index 307b2de1bdb81..64cb8f1ad8f7e 100644
        kChromeUIAppServiceInternalsHost,
  #endif
 diff --git a/chrome/common/webui_url_constants.h b/chrome/common/webui_url_constants.h
-index 8288814da7d14..d1ae2653be3e5 100644
+index 497865b22520b..72979f1562259 100644
 --- a/chrome/common/webui_url_constants.h
 +++ b/chrome/common/webui_url_constants.h
 @@ -33,6 +33,12 @@ namespace chrome {
@@ -334,7 +334,7 @@ index 5096175e285c1..6d4a41ab2815f 100644
 +    <a href="{{thorium_link}}">here</a>. Chromium source code is available <a href="{{opensource_link}}">here</a>.
  </div>
 diff --git a/tools/licenses/licenses.py b/tools/licenses/licenses.py
-index d62ef1c2ddaa8..aaf8a20cd33c6 100755
+index a96f5c1531cd2..ef68ccff45e4a 100755
 --- a/tools/licenses/licenses.py
 +++ b/tools/licenses/licenses.py
 @@ -1114,6 +1114,8 @@ def GenerateCredits(args, metadatas):
@@ -347,7 +347,7 @@ index d62ef1c2ddaa8..aaf8a20cd33c6 100755
        'opensource_link': 'https://source.chromium.org/chromium'
    },
 diff --git a/ui/webui/resources/BUILD.gn b/ui/webui/resources/BUILD.gn
-index 074b55e748dab..9cb5e00971323 100644
+index cafa406b7d8d7..204e2c65b3bc2 100644
 --- a/ui/webui/resources/BUILD.gn
 +++ b/ui/webui/resources/BUILD.gn
 @@ -38,6 +38,7 @@ generate_grd("build_grd") {

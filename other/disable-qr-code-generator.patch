@@ -61,10 +61,10 @@ index a0817fafe64dd..3409c93a3c3e5 100644
    }
  }
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index ac4674d331763..6da0b290218bc 100644
+index 83004128a9adf..81b550e796c3b 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -199,6 +199,10 @@ BASE_FEATURE_PARAM(std::string,
+@@ -209,6 +209,10 @@ BASE_FEATURE_PARAM(std::string,
                     "mode",
                     "foreground");
  
@@ -76,10 +76,10 @@ index ac4674d331763..6da0b290218bc 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 18b9d852b7b64..9bb0af4ed0f77 100644
+index 98de193d80a07..1a0bfd381827a 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -392,6 +392,9 @@ BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
+@@ -399,6 +399,9 @@ BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
  BASE_DECLARE_FEATURE(kOpenOmniboxUrlInNewTab);
  BASE_DECLARE_FEATURE_PARAM(std::string, kOpenOmniboxUrlInNewTabMode);
  

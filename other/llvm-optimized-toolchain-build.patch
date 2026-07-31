@@ -1,5 +1,5 @@
 diff --git a/tools/clang/scripts/build.py b/tools/clang/scripts/build.py
-index 372440de944ac..44a9b8a4ba237 100755
+index 96ba719532d03..b4c5cfc9f24f8 100755
 --- a/tools/clang/scripts/build.py
 +++ b/tools/clang/scripts/build.py
 @@ -73,6 +73,8 @@ BUG_REPORT_URL = ('https://crbug.com in the Tools>LLVM component,'
@@ -8,10 +8,10 @@ index 372440de944ac..44a9b8a4ba237 100755
  
 +MIMALLOC_URL = 'https://github.com/microsoft/mimalloc/archive/refs/tags/v3.1.4.tar.gz'
 +
- win_sdk_dir = None
- def GetWinSDKDir():
-   """Get the location of the current SDK."""
-@@ -165,7 +167,7 @@ def CheckoutGitRepo(name, git_url, commit, dir):
+ # This must be less than or equal to the lowest target used in Chromium. See
+ # e.g. mac_deployment_target in //build/config/mac/mac_sdk.gni and min_version
+ # in //chrome/installer/gcapi_mac/BUILD.gn.
+@@ -170,7 +172,7 @@ def CheckoutGitRepo(name, git_url, commit, dir):
          ['git', 'diff-index', '--exit-code', 'HEAD'], fail_hard=False)
          and RunCommand(['git', 'fetch'], fail_hard=False)
          and RunCommand(['git', 'checkout', commit], fail_hard=False)
@@ -20,7 +20,7 @@ index 372440de944ac..44a9b8a4ba237 100755
        return
  
      # If we can't use the current repo, delete it.
-@@ -390,49 +392,54 @@ def BuildLibXml2(cc, cxx, cmake_sysroot, mac_deployment_target):
+@@ -404,49 +406,54 @@ def BuildLibXml2(cc, cxx, cmake_sysroot, mac_deployment_target):
    # WindowsManifestMerger.
    # Also enable WITH_THREADS, else libxml doesn't compile on Linux.
    cmake_args = [
@@ -118,7 +118,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    if cmake_sysroot:
      cmake_args.append('-DCMAKE_SYSROOT=' + cmake_sysroot)
    if sys.platform == 'darwin':
-@@ -461,6 +468,55 @@ def BuildLibXml2(cc, cxx, cmake_sysroot, mac_deployment_target):
+@@ -475,6 +482,55 @@ def BuildLibXml2(cc, cxx, cmake_sysroot, mac_deployment_target):
    return extra_cmake_flags, extra_cflags
  
  
@@ -174,7 +174,7 @@ index 372440de944ac..44a9b8a4ba237 100755
  class ZStdDirs:
    """
    The set of directories where zstd is located.
-@@ -501,14 +557,22 @@ def BuildZStd(cc, cxx, cmake_sysroot, mac_deployment_target):
+@@ -515,14 +571,22 @@ def BuildZStd(cc, cxx, cmake_sysroot, mac_deployment_target):
    os.chdir(dirs.build_dir)
  
    cmake_args = [
@@ -205,7 +205,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    if cmake_sysroot:
      cmake_args.append('-DCMAKE_SYSROOT=' + cmake_sysroot)
    if sys.platform == 'darwin':
-@@ -757,21 +821,9 @@ def main():
+@@ -771,21 +835,9 @@ def main():
                        action='store_true',
                        help='use the cmake from PATH instead of downloading '
                        'and using prebuilt cmake binaries')
@@ -227,7 +227,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    parser.add_argument('--with-fuchsia',
                        type=gn_arg,
                        nargs='?',
-@@ -789,10 +841,6 @@ def main():
+@@ -803,10 +855,6 @@ def main():
                        metavar='WRAPPER',
                        help='Use a compiler wrapper (like ccache) to build the '
                        'stage 1 compiler')
@@ -238,7 +238,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    parser.add_argument('--preserve-gcs-signature',
                        action='store_true',
                        help='By default, this script removes gcs hash files '
-@@ -805,8 +853,14 @@ def main():
+@@ -819,8 +867,14 @@ def main():
  
    global CLANG_REVISION, PACKAGE_VERSION, LLVM_BUILD_DIR, STAMP_FILE, FORCE_HEAD_REVISION_FILE
  
@@ -255,7 +255,7 @@ index 372440de944ac..44a9b8a4ba237 100755
      return 1
    if args.with_android and not os.path.exists(ANDROID_NDK_DIR):
      print('Android NDK not found at ' + ANDROID_NDK_DIR)
-@@ -831,10 +885,6 @@ def main():
+@@ -845,10 +899,6 @@ def main():
      print('for general Fuchsia build instructions.')
      return 1
  
@@ -266,7 +266,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    # Don't buffer stdout, so that print statements are immediately flushed.
    # LLVM tests print output without newlines, so with buffering they won't be
    # immediately printed.
-@@ -909,12 +959,18 @@ def main():
+@@ -923,12 +973,18 @@ def main():
    cc, cxx, lld = None, None, None
    cmake_sysroot = None
  
@@ -289,7 +289,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    if not args.no_tools:
      projects += ';clang-tools-extra'
    if args.bolt:
-@@ -927,7 +983,6 @@ def main():
+@@ -941,7 +997,6 @@ def main():
      runtimes = 'compiler-rt'
  
    pic_default = sys.platform == 'win32'
@@ -297,7 +297,7 @@ index 372440de944ac..44a9b8a4ba237 100755
  
    base_cmake_args = [
        '-GNinja',
-@@ -937,7 +992,7 @@ def main():
+@@ -951,7 +1006,7 @@ def main():
        f'-DLLVM_ENABLE_PROJECTS={projects}',
        f'-DLLVM_ENABLE_RUNTIMES={runtimes}',
        f'-DLLVM_TARGETS_TO_BUILD={targets}',
@@ -306,7 +306,7 @@ index 372440de944ac..44a9b8a4ba237 100755
        '-DLLVM_ENABLE_Z3_SOLVER=OFF',
        '-DCLANG_PLUGIN_SUPPORT=OFF',
        '-DCLANG_ENABLE_STATIC_ANALYZER=OFF',
-@@ -961,7 +1016,8 @@ def main():
+@@ -975,7 +1030,8 @@ def main():
        # `bootstrap` tool:
        # https://github.com/rust-lang/rust/blob/021861aea8de20c76c7411eb8ada7e8235e3d9b5/src/bootstrap/src/core/build_steps/llvm.rs#L348
        '-DLLVM_INSTALL_UTILS=ON',
@@ -316,9 +316,9 @@ index 372440de944ac..44a9b8a4ba237 100755
    ]
  
    if sys.platform == 'darwin':
-@@ -1029,6 +1085,10 @@ def main():
+@@ -1045,6 +1101,10 @@ def main():
  
-   deployment_target = '10.12'
+   deployment_target = DEFAULT_MACOSX_DEPLOYMENT_TARGET
  
 +  #Build mimalloc
 +  libmimalloc_ldflags = BuildLibMimalloc()
@@ -327,7 +327,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    # Statically link libxml2 to make lld-link not require mt.exe on Windows,
    # and to make sure lld-link output on other platforms is identical to
    # lld-link on Windows (for cross-builds).
-@@ -1039,14 +1099,13 @@ def main():
+@@ -1055,14 +1115,13 @@ def main():
    cflags += libxml_cflags
    cxxflags += libxml_cflags
  
@@ -349,7 +349,7 @@ index 372440de944ac..44a9b8a4ba237 100755
  
    lit_excludes = []
    if sys.platform.startswith('linux'):
-@@ -1112,7 +1171,7 @@ def main():
+@@ -1128,7 +1187,7 @@ def main():
        bootstrap_targets += ';ARM;AArch64'
      bootstrap_args = base_cmake_args + compiler_wrapper_cmake_args + [
          '-DLLVM_TARGETS_TO_BUILD=' + bootstrap_targets,
@@ -358,7 +358,7 @@ index 372440de944ac..44a9b8a4ba237 100755
          '-DLLVM_ENABLE_RUNTIMES=' + ';'.join(runtimes),
          '-DCMAKE_INSTALL_PREFIX=' + LLVM_BOOTSTRAP_INSTALL_DIR,
          '-DCMAKE_C_FLAGS=' + ' '.join(cflags),
-@@ -1170,6 +1229,9 @@ def main():
+@@ -1186,6 +1245,9 @@ def main():
  
      print('Bootstrap compiler installed.')
  
@@ -368,7 +368,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    if args.pgo:
      print('Building instrumented compiler')
      if os.path.exists(LLVM_INSTRUMENTED_DIR):
-@@ -1183,9 +1245,10 @@ def main():
+@@ -1199,9 +1261,10 @@ def main():
      cxxflags += ['-Wno-backend-plugin']
  
      instrument_args = base_cmake_args + [
@@ -382,7 +382,7 @@ index 372440de944ac..44a9b8a4ba237 100755
          '-DCMAKE_EXE_LINKER_FLAGS=' + ' '.join(ldflags),
          '-DCMAKE_SHARED_LINKER_FLAGS=' + ' '.join(ldflags),
          '-DCMAKE_MODULE_LINKER_FLAGS=' + ' '.join(ldflags),
-@@ -1230,9 +1293,15 @@ def main():
+@@ -1246,9 +1309,15 @@ def main():
        training_source = 'pgo_training-3.ii'
        with open(training_source, 'wb') as f:
          DownloadUrl(CDS_URL + '/' + training_source, f)
@@ -401,7 +401,7 @@ index 372440de944ac..44a9b8a4ba237 100755
        if sys.platform == 'darwin':
          train_cmd.extend(['-isysroot', isysroot])
        RunCommand(train_cmd, setenv=True)
-@@ -1281,13 +1350,18 @@ def main():
+@@ -1297,13 +1366,18 @@ def main():
    if cxx is not None: base_cmake_args.append('-DCMAKE_CXX_COMPILER=' + cxx)
    if lld is not None: base_cmake_args.append('-DCMAKE_LINKER=' + lld)
    final_install_dir = args.install_dir if args.install_dir else LLVM_BUILD_DIR
@@ -425,7 +425,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    ]
    if not args.no_tools:
      cmake_args.extend([
-@@ -1296,10 +1370,66 @@ def main():
+@@ -1312,10 +1386,66 @@ def main():
          os.path.join(CHROMIUM_DIR, 'tools', 'clang'),
          '-DCHROMIUM_TOOLS=%s' % ';'.join(chrome_tools)
      ])
@@ -494,7 +494,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    if sys.platform == 'win32':
      cmake_args.append('-DLLVM_ENABLE_ZLIB=FORCE_ON')
  
-@@ -1341,6 +1471,11 @@ def main():
+@@ -1357,6 +1487,11 @@ def main():
              # TODO(crbug.com/40242553): pass proper flags to i386 tests so they
              # compile correctly
              'LLVM_INCLUDE_TESTS=OFF',
@@ -506,7 +506,7 @@ index 372440de944ac..44a9b8a4ba237 100755
          ],
          "profile":
          True,
-@@ -1352,12 +1487,17 @@ def main():
+@@ -1368,12 +1503,17 @@ def main():
              'CMAKE_SYSROOT=%s' % sysroot_amd64,
              # Enable CET IBT so that binaries compiled with
              # -fcf-protection=branch can enable kernel IBT enforcement.
@@ -528,7 +528,7 @@ index 372440de944ac..44a9b8a4ba237 100755
      }
      # Using "armv7a-unknown-linux-gnueabhihf" confuses the compiler-rt
      # builtins build, since compiler-rt/cmake/builtin-config-ix.cmake
-@@ -1543,32 +1683,6 @@ def main():
+@@ -1559,32 +1699,6 @@ def main():
            "profile": build_profile
        }
  
@@ -561,7 +561,7 @@ index 372440de944ac..44a9b8a4ba237 100755
    # Convert FOO=BAR CMake flags per triple into
    # -DBUILTINS_$triple_FOO=BAR/-DRUNTIMES_$triple_FOO=BAR and build up
    # -DLLVM_BUILTIN_TARGETS/-DLLVM_RUNTIME_TARGETS.
-@@ -1630,7 +1744,7 @@ def main():
+@@ -1646,7 +1760,7 @@ def main():
      with timer.time('bolt instrument'):
        RunCommand([
            'bin/llvm-bolt', 'bin/clang', '-o', 'bin/clang-bolt.inst',
@@ -570,7 +570,7 @@ index 372440de944ac..44a9b8a4ba237 100755
            '--instrumentation-file=' +
            os.path.join(bolt_profiles_dir, 'prof.fdata')
        ])
-@@ -1643,14 +1757,20 @@ def main():
+@@ -1659,14 +1773,20 @@ def main():
      # Train by building a part of Clang.
      os.mkdir('bolt-training')
      os.chdir('bolt-training')
@@ -596,7 +596,7 @@ index 372440de944ac..44a9b8a4ba237 100755
          '-DCMAKE_C_COMPILER=' +
          os.path.join(LLVM_BUILD_DIR, 'bin/clang-bolt.inst'),
          '-DCMAKE_CXX_COMPILER=' +
-@@ -1659,6 +1779,8 @@ def main():
+@@ -1675,6 +1795,8 @@ def main():
          os.path.join(LLVM_BUILD_DIR, 'bin/clang-bolt.inst'),
          '-DCMAKE_ASM_COMPILER_ID=Clang',
      ]
@@ -605,7 +605,7 @@ index 372440de944ac..44a9b8a4ba237 100755
      with timer.time('bolt training cmake'):
        RunCommand(['cmake'] + bolt_train_cmake_args +
                   [os.path.join(LLVM_DIR, 'llvm')])
-@@ -1677,10 +1799,36 @@ def main():
+@@ -1693,10 +1815,36 @@ def main():
            'merged.fdata', bolt_profiles_dir
        ])
        RunCommand([
@@ -646,7 +646,7 @@ index 372440de944ac..44a9b8a4ba237 100755
        ])
  
      # Overwrite clang, preserving its timestamp so ninja doesn't rebuild it.
-@@ -1689,8 +1837,7 @@ def main():
+@@ -1705,8 +1853,7 @@ def main():
  
    VerifyVersionOfBuiltClangMatchesVERSION()
    VerifyZlibSupport()
@@ -656,7 +656,7 @@ index 372440de944ac..44a9b8a4ba237 100755
  
    # Run tests.
    if (chrome_tools and (args.run_tests or args.llvm_force_head_revision)):
-@@ -1713,6 +1860,11 @@ def main():
+@@ -1729,6 +1876,11 @@ def main():
                   FORCE_HEAD_REVISION_FILE,
                   preserve_hash_files=args.preserve_gcs_signature)
  

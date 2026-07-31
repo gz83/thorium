@@ -1,5 +1,5 @@
 diff --git a/media/base/supported_types.cc b/media/base/supported_types.cc
-index aa1f911343008..232bb9dc3e57e 100644
+index 087c1e89a977f..d69c6e6fdf450 100644
 --- a/media/base/supported_types.cc
 +++ b/media/base/supported_types.cc
 @@ -305,7 +305,9 @@ bool IsDecoderDolbyVisionProfileSupported(const VideoType& type) {
@@ -13,7 +13,7 @@ index aa1f911343008..232bb9dc3e57e 100644
      (BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC))
    return GetSupplementalDecoderAudioTypeCache()->IsProfileSupported(type);
  #else
-@@ -448,9 +450,10 @@ bool IsDefaultDecoderSupportedVideoType(const VideoType& type) {
+@@ -456,9 +458,10 @@ bool IsDefaultDecoderSupportedVideoType(const VideoType& type) {
        return IsDecoderHevcProfileSupported(type);
      case VideoCodec::kDolbyVision:
        return IsDecoderDolbyVisionProfileSupported(type);
@@ -26,7 +26,7 @@ index aa1f911343008..232bb9dc3e57e 100644
        return false;
    }
 diff --git a/media/ffmpeg/ffmpeg_common.cc b/media/ffmpeg/ffmpeg_common.cc
-index 27b73afbb4b60..4a6daa31ed652 100644
+index e008949d5d8fd..eb6716f9e0c9f 100644
 --- a/media/ffmpeg/ffmpeg_common.cc
 +++ b/media/ffmpeg/ffmpeg_common.cc
 @@ -186,6 +186,12 @@ AVCodecID AudioCodecToCodecID(AudioCodec audio_codec,
@@ -42,7 +42,7 @@ index 27b73afbb4b60..4a6daa31ed652 100644
      case AudioCodec::kALAC:
        return AV_CODEC_ID_ALAC;
      case AudioCodec::kMP3:
-@@ -1062,7 +1068,7 @@ int32_t HashCodecName(const char* codec_name) {
+@@ -1113,7 +1119,7 @@ int32_t HashCodecName(const char* codec_name) {
  
  const char* GetAllowedAudioDecoders() {
  #if BUILDFLAG(USE_PROPRIETARY_CODECS)

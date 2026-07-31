@@ -1,5 +1,5 @@
 diff --git a/components/vector_icons/BUILD.gn b/components/vector_icons/BUILD.gn
-index f4969982faa44..dd5dfddeaa634 100644
+index d6d391fa6bac3..05ff2298b0839 100644
 --- a/components/vector_icons/BUILD.gn
 +++ b/components/vector_icons/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index f4969982faa44..dd5dfddeaa634 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -509,6 +509,24 @@ if (current_toolchain == default_toolchain) {
+@@ -521,6 +521,24 @@ if (current_toolchain == default_toolchain) {
        "work_old.icon",
      ]
  

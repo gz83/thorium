@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/webui/version/version_ui.cc b/chrome/browser/ui/webui/version/version_ui.cc
-index 8353f5d5a5734..90533228b038a 100644
+index 6f1f293bacaef..2e72603400dc4 100644
 --- a/chrome/browser/ui/webui/version/version_ui.cc
 +++ b/chrome/browser/ui/webui/version/version_ui.cc
 @@ -121,6 +121,8 @@ void CreateAndAddVersionUIDataSource(Profile* profile) {

@@ -82,7 +82,7 @@ index 937cd3b1e4b84..5951f1dc7e59e 100644
                                                  base::BlockingType::MAY_BLOCK);
  
 diff --git a/components/os_crypt/async/browser/dpapi_key_provider.cc b/components/os_crypt/async/browser/dpapi_key_provider.cc
-index 5ecbff3d8daf9..0badee6edba1d 100644
+index 0bfbac71afa1c..462aab460d765 100644
 --- a/components/os_crypt/async/browser/dpapi_key_provider.cc
 +++ b/components/os_crypt/async/browser/dpapi_key_provider.cc
 @@ -1,4 +1,4 @@

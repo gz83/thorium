@@ -16,7 +16,6 @@ third_party/ffmpeg: other/fix-ffmpeg-android-x86-disable-hevc-nasm.patch
 third_party/ffmpeg: other/ffmpeg-branding.patch
 third_party/widevine: other/widevine-cdm-support.patch
 third_party/search_engines_data/resources: other/thorium-search-engines-data.patch
-third_party/abseil-cpp: other/abseil-bmi2-include-immintrin.patch
 third_party/zstd/src: other/zstd-clang-cl-bmi2-detection.patch
 v8: other/v8-remove-local-sse2-override.patch
 [sse2] third_party/angle: other/SSE2/angle-lockfree.patch
@@ -47,8 +46,7 @@ other/bookmark-default-prefs.patch
 other/bookmark-dialog-default-folder.patch
 other/increase-bookmark-open-prompt-threshold.patch
 other/thorium-browser-ui-default-prefs.patch
-other/tab-search-button-position.patch
-other/tab-search-button-pinning.patch
+other/tab-strip-combo-button-position.patch
 other/dom-distiller-reader-mode.patch
 
 # 30 - Build graph, toolchain, and platform build behavior.
