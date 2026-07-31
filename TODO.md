@@ -1,98 +1,100 @@
-## TODO document for ideas and patches. Underneath each will be a comment with info or location of patch.
+# TODO
 
-&#45; Adjust DPI from 300 to 72 for Windows .ico files.
+Actionable bugs and feature requests are tracked in
+[GitHub Issues](https://github.com/Alex313031/thorium/issues). This file records
+cross-cutting product decisions, implementation work, and verification tasks,
+whether or not they already have a dedicated issue.
 
- - Gimp and convert.exe to check ico sizes
+## Product decisions
 
-&#45; Add new Thorium shortcuts to ThoriumOS Shortcuts App
+- [ ] Decide whether macOS DMG filenames should include the Chromium version
+  and architecture. `create_dmg.py` currently produces `Thorium_MacOS.dmg`.
 
- - For ChromeOS only: If you plan on adding a new accelerator and want it
- displayed in the Shortcuts app, please follow the instructions at: `ash/webui/shortcut_customization_ui/backend/accelerator_layout_table.h`.
+- [ ] Re-evaluate SSD Restore behavior
+  ([Thorium issue #61](https://github.com/Alex313031/thorium/issues/61)).
+  Measure the current Chromium baseline's Session Restore write frequency
+  before deciding whether to adjust the save interval or offer an option that
+  disables persistent session writes.
 
-&#45; Resolve issues raised on GitHub.
+- [ ] Decide whether UA Client Hints should advertise an additional Chrome
+  brand. The traditional User-Agent already uses `Chrome/<version>`; consider
+  both website compatibility and accurate product identification.
 
-### Notes to self
+- [ ] Decide whether Thorium should enable the upstream autoplay settings UI.
+  First attempt to reproduce its historical Profile Picker crash on the
+  current Chromium baseline and document the result.
 
-## .grd text replacements (search with grep), because there are a few places we want to tweak some strings.
+## Implementation
 
-Chromium > Thorium
-Chrome > Thorium
-Google Thorium > Thorium
-Google recommends Thorium > Alex313031 recommends Thorium
-Thorium Web Store > Chrome Web Store (Except some UI elements like NTP)
-Thorium Remote Desktop > Chrome Remote Desktop
-ThoriumOS Flex > ThoriumOS
-made possible by Thorium > Chromium
-Experiments > Thorium Experiments
-Aw, Snap! > Aw, #@%!, this tab's process has gone bye bye...
-Dino strings in components/error_page_strings.grdp
+- [ ] Synchronize ThoriumOS Shortcuts app metadata with
+  `keyboard_shortcuts.patch` in the
+  [ThoriumOS repository](https://github.com/Alex313031/ThoriumOS):
+  - replace the stale Ctrl+Shift+D “Bookmark all tabs” entry with “Duplicate
+    tab”;
+  - document the Thorium browser shortcuts enabled on ChromeOS;
+  - verify that the displayed modifiers match the Ash accelerators changed by
+    the patch.
 
---M132--
+- [ ] Add a Settings UI for the existing disk-cache directory backend
+  ([Thorium issue #860](https://github.com/Alex313031/thorium/issues/860)).
+  Validate the selected directory and explain that the new location takes
+  effect after restart. Store the setting in Local State for all profiles, do
+  not automatically migrate or delete the old cache, and make the UI read-only
+  or clearly indicate when managed policy or `--disk-cache-dir` controls the
+  effective path.
 
-Add full version renaming support for Linux and Windows, and partial for MacOS.
-Add GM2 inkdrop for tabstrip control buttons.
-Remove //components/optimization_guide_core/optimization_guide_features.cc after upstream MacOS fix
+- [ ] Make `DownloadShelfView` propagate item preferred-height changes to
+  `BrowserView` and size the shelf from the tallest visible item. Verify that
+  the top and item separators remain continuous during window resizing and
+  transitions between normal, warning, and deep-scanning modes.
 
-Opt with BOLT > https://aaupov.github.io/blog/2022/11/12/bolt-chromium
-SSD Restore > https://github.com/Alex313031/thorium/issues/61
-Add textbox disk cache dir flag > https://github.com/Alex313031/thorium/issues/860
-Fix outline of omnibox and bookmarks bar underline with themes
+- [ ] Add a Restart Thorium desktop app-menu command that uses
+  `chrome::AttemptRestart()` and retains Chromium's normal session-restoration
+  semantics.
 
-https://source.chromium.org/chromium/chromium/src/+/99fe5ddf4ecd908fd52d1d03565176f2f481c79e
+- [ ] Add a Report issue desktop app-menu command that opens Thorium's GitHub
+  issue template.
 
-Make UA and hints report chrome, and set hints
+- [ ] Add a What's new desktop app-menu command that opens Thorium release
+  notes rather than Google Chrome-branded content.
 
-Test non-optimized Thorium, versus optimized Thorium, versus vanilla Chromium, versus vanilla Google Chrome, all at the same revision.
+## Verification and benchmarking
 
-Fix multiple profiles lag if exists
-Fix download shelf height better and prevent separators from disappearing on resize
-Fix unmaximized drag height for all platforms, possibly unify at 6,7,8 pixels, also GetDragHandleExtension
-Add restart thorium, report issue, and whats new menu items from Primo and new function
-Fix system extension integration like with dad uninstall issue
-Fix button sizing and jumping in toolbar on non-pixel aligned displays
-Fix omnibox dropdown alignment and search icon alignment again
-Add vector icon colors for top bar from Primo
-Fix omnibox dropdown highlight row right side rounding
-Fix side panel metrics and grab handle icon alignment
-Move thorium_shell, portable, and appimage to other, update doc refs
-Move patches to separate dir, update doc refs
-Fix download shelf height dynamically, inspect startpadding and Alex313031: TODO: Use NTB method to p in chrome/browser/ui/views/download/download_item_view.cc.
-Fix download shelf hovercards on filename too long
-kBetweenIconSpacing might cause crash
-MV2: https://github.com/primo-browser/primo/commit/5aa8d52a29f3b1162462a389444fb98b90ec4a1e  
-     https://github.com/primo-browser/primo/commit/de205e3623e8d922c97b949e82e7937c1c7f5f8a
-     https://github.com/primo-browser/primo/commit/e567420253e358977714769e5b83ea32f374e008
-Add thorium custom keyboard accelerators to chrome/browser/ui/cocoa/accelerators_cocoa.mm
+- [ ] Reproduce and verify the Omnibox outline and bookmark bar underline with
+  custom themes, with Thorium 2024 enabled and disabled. If the issue still
+  exists, record the affected platform, theme, and expected appearance before
+  changing the current color and border handling. Record the tested Thorium
+  version, platform, display scale, and result; open a dedicated issue with
+  screenshots for any failure.
 
-add thorium 2024 if else:
--  return gfx::Rect(x, NonClientTopHeight(false), std::max(0, available_width),
-+  return gfx::Rect(x, GetTabStripInsetsTop(false), std::max(0, available_width),
+- [ ] Establish a reproducible benchmark comparing non-optimized Thorium,
+  optimized Thorium, Chromium, and Google Chrome based on the same full
+  Chromium version where available. Define non-optimized Thorium from the same
+  Thorium source and feature patches by disabling only the compiler
+  optimizations under measurement. Keep the hardware, workload, profile, and
+  number of runs consistent. Archive the complete `args.gn` for locally built
+  binaries and record unavoidable differences in revision, toolchain, PGO
+  configuration, branding, and proprietary components.
 
-Fix spacing
-+    const gfx::Rect new_tab_button_new_bounds =
-         gfx::Rect(new_tab_button_new_position, new_tab_button_size);
+- [ ] Verify restored-window top drag and resize hit targets with Thorium 2024
+  UI on Windows, Linux/X11, Linux/Wayland, and macOS. Confirm that tabs and
+  caption buttons remain vertically aligned and that the top edge remains
+  resizable.
 
-remove
-+    static const int kCornerRadius = corner_radius;
+- [ ] Visually verify Omnibox input icon, text, and Views suggestion popup
+  alignment with Thorium 2024 enabled and disabled, including keyword mode,
+  permission chips, `classic-omnibox`, and 125%/150% display scaling. Record
+  the tested Thorium version, platform, display scale, and result; open a
+  dedicated issue with screenshots for any failure.
 
-Add PRIMO_DEBUG fixes to Thorium.
-https://github.com/primo-browser/primo/commit/946f3dfbed983efb7643fee26d31fd3c4205d9d9
-https://github.com/win32ss/supermium/issues/1412
-https://github.com/win32ss/supermium/commit/f46111bb8a9d29315740a28dcb2ee96fdb50f586
-https://github.com/win32ss/supermium/commit/535bb42b1f22d9fdaf4db0d8ee1ce1acf14a6fbf
-
-Notes:
-top_border_thickness
-kTopResizeFrameArea
-kNonClientRestoredExtraThickness
-//maybe remove
-Th24XOffset
-GetLayoutConstant(TAB_BUTTON_OFFSET)
-LOCATION_BAR_CHILD_CORNER_RADIUS:
-Th24StrokeOffset
-text_overriding_permission_chip_indent
-UpdateThumb
-
-// Other notes
-search tab_strip_region_views for layout_constants added
-investigate new metrics in layout_provider and layout_constants
+- [ ] Verify and document Thorium's `--no-autoplay` behavior against
+  [Supermium issue #1412](https://github.com/win32ss/supermium/issues/1412) on
+  every platform where Thorium distributes the switch:
+  - confirm that audible HTML media without a user gesture are blocked;
+  - confirm that muted video continues to follow Chromium's muted-autoplay
+    rules;
+  - confirm that an explicit `--autoplay-policy` takes precedence;
+  - document that desktop WebAudio remains allowed by
+    `allow-webaudio-autoplay.patch`, or decide separately whether it should
+    honor `--no-autoplay`;
+  - confirm that the Profile Picker remains stable.
