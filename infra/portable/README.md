@@ -65,13 +65,15 @@ Default output names are:
 
 ```text
 thorium-browser_VERSION_VARIANT.zip  # Linux
-Thorium_PROFILE_VERSION.zip          # Windows
+Thorium_[WIN32_]PROFILE_VERSION.zip  # Windows
 ```
 
 These names follow the release asset convention. Linux x64 variants use their
 SIMD profile (`AVX`, `AVX2`, `AVX512`, `SSE3`, or `SSE4`), while Linux ARM64
 and 32-bit x86 archives use `arm64` and `i386`. Windows uses the profile spelling
-in the installer filename. If an x64 profile cannot be inferred and no
+in the installer filename and reads the payload executable's PE machine field;
+32-bit x86 archives receive the `WIN32_` prefix. Windows SSE2 is supported as a
+32-bit compatibility profile. If a profile cannot be inferred and no
 `--profile` is supplied, the packager fails instead of publishing a
 non-standard fallback name.
 

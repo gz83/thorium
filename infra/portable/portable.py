@@ -14,6 +14,7 @@ import re
 import shlex
 import shutil
 import stat
+import struct
 import subprocess
 import sys
 import tempfile
@@ -27,6 +28,7 @@ VERSION_PATTERN = re.compile(r"(?<!\d)(\d+\.\d+\.\d+\.\d+)(?!\d)")
 RELEASE_PROFILES = (
     "AVX512",
     "AVX2",
+    "SSE2",
     "SSE4",
     "SSE3",
     "ARM64",
@@ -48,6 +50,7 @@ class LinuxPackageMetadata:
 class WindowsPackageMetadata:
     version: str
     shell: Path
+    architecture: str
 
 
 def environment_path(value: str) -> Path:
@@ -351,7 +354,48 @@ def extract_windows(
     return WindowsPackageMetadata(
         version_directory.name,
         shell.relative_to(staging),
+        windows_executable_architecture(browser),
     )
+
+
+def windows_executable_architecture(executable: Path) -> str:
+    try:
+        with executable.open("rb") as binary:
+            if binary.read(2) != b"MZ":
+                raise PortableError(
+                    f"Windows executable has no DOS header: {executable}"
+                )
+            binary.seek(0x3C)
+            pe_offset_data = binary.read(4)
+            if len(pe_offset_data) != 4:
+                raise PortableError(
+                    f"Windows executable has a truncated DOS header: {executable}"
+                )
+            pe_offset = struct.unpack("<I", pe_offset_data)[0]
+            binary.seek(pe_offset)
+            if binary.read(4) != b"PE\0\0":
+                raise PortableError(
+                    f"Windows executable has no PE signature: {executable}"
+                )
+            machine_data = binary.read(2)
+    except (OSError, OverflowError) as error:
+        raise PortableError(
+            f"could not inspect Windows executable architecture: {executable}: {error}"
+        ) from error
+
+    if len(machine_data) != 2:
+        raise PortableError(f"Windows executable has no PE machine field: {executable}")
+    machine = struct.unpack("<H", machine_data)[0]
+    architecture = {
+        0x014C: "x86",
+        0x8664: "x64",
+        0xAA64: "arm64",
+    }.get(machine)
+    if architecture is None:
+        raise PortableError(
+            f"unsupported Windows PE machine 0x{machine:04X}: {executable}"
+        )
+    return architecture
 
 
 def windows_version_directory(staging: Path) -> Path:
@@ -385,6 +429,24 @@ def profile_name(package: Path, configured: str | None) -> str | None:
             "in the installer filename"
         )
     return configured or inferred
+
+
+def windows_release_variant(profile: str, architecture: str) -> str:
+    if architecture == "x86":
+        if profile == "ARM64":
+            raise PortableError("ARM64 profile conflicts with Windows x86 payload")
+        return f"WIN32_{profile}"
+    if architecture == "x64":
+        if profile == "ARM64":
+            raise PortableError("ARM64 profile conflicts with Windows x64 payload")
+        return profile
+    if architecture == "arm64":
+        if profile != "ARM64":
+            raise PortableError(
+                f"profile {profile!r} conflicts with Windows ARM64 payload"
+            )
+        return profile
+    raise PortableError(f"unsupported Windows architecture {architecture!r}")
 
 
 def linux_release_variant(
@@ -476,8 +538,8 @@ def prepare_windows_package(
     configured_profile: str | None,
     expected_version: str | None,
 ) -> tuple[WindowsPackageMetadata, str]:
-    release_variant = profile_name(package, configured_profile)
-    if release_variant is None:
+    profile = profile_name(package, configured_profile)
+    if profile is None:
         raise PortableError(
             "could not infer the Windows SIMD profile; pass --profile to "
             "create a release-style archive name"
@@ -485,7 +547,7 @@ def prepare_windows_package(
     staging.mkdir()
     metadata = extract_windows(package, staging, work, seven_zip)
     validate_expected_version(metadata.version, expected_version)
-    return metadata, release_variant
+    return metadata, windows_release_variant(profile, metadata.architecture)
 
 
 def copy_support_files(
