@@ -1,0 +1,184 @@
+name: Test Windows on ARM64 artifact
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: Artifact containing one raw Thorium ARM64 mini installer
+        required: false
+        default: thorium-woa-installer
+        type: string
+      current_run_artifact:
+        description: Download the artifact from the caller's current run
+        required: false
+        default: true
+        type: boolean
+      source_run_id:
+        description: Run ID containing the artifact; empty means the caller run
+        required: false
+        default: ""
+        type: string
+      release_tag:
+        description: Same-repository release tag used instead of an artifact
+        required: false
+        default: ""
+        type: string
+      release_asset_pattern:
+        description: gh release download pattern
+        required: false
+        default: thorium_ARM64_installer.exe
+        type: string
+      installer_pattern:
+        description: Unique installer filename pattern inside the input
+        required: false
+        default: thorium_ARM64_installer.exe
+        type: string
+      expected_sha256:
+        description: Optional expected SHA-256 for the installer
+        required: false
+        default: ""
+        type: string
+      require_gui:
+        description: Fail when GUI navigation or full-window capture is unavailable
+        required: false
+        default: false
+        type: boolean
+  workflow_dispatch:
+    inputs:
+      artifact_name:
+        description: Artifact containing one raw Thorium ARM64 mini installer
+        required: false
+        default: thorium-woa-installer
+        type: string
+      current_run_artifact:
+        description: Download the artifact from this manual run (normally false)
+        required: false
+        default: false
+        type: boolean
+      source_run_id:
+        description: Run ID containing the artifact
+        required: false
+        default: ""
+        type: string
+      release_tag:
+        description: Same-repository release tag used instead of an artifact
+        required: false
+        default: ""
+        type: string
+      release_asset_pattern:
+        description: gh release download pattern
+        required: false
+        default: thorium_ARM64_installer.exe
+        type: string
+      installer_pattern:
+        description: Unique installer filename pattern inside the input
+        required: false
+        default: thorium_ARM64_installer.exe
+        type: string
+      expected_sha256:
+        description: Optional expected SHA-256 for the installer
+        required: false
+        default: ""
+        type: string
+      require_gui:
+        description: Fail when GUI navigation or full-window capture is unavailable
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: woa-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+  cancel-in-progress: false
+
+jobs:
+  smoke-test:
+    name: Install and run on Windows ARM64
+    runs-on: windows-11-arm
+    timeout-minutes: 30
+    env:
+      INPUT_DIRECTORY: ${{ github.workspace }}\woa-input
+      RESULT_DIRECTORY: ${{ github.workspace }}\woa-smoke-results
+    steps:
+      - name: Check out Thorium test harness
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate input source
+        shell: pwsh
+        env:
+          CURRENT_RUN_ARTIFACT: ${{ inputs.current_run_artifact }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          $sourceCount = @(
+            $env:CURRENT_RUN_ARTIFACT -eq 'true'
+            [bool]$env:SOURCE_RUN_ID
+            [bool]$env:RELEASE_TAG
+          ).Where({ $_ }).Count
+          if ($sourceCount -ne 1) {
+            throw 'Select exactly one source: current_run_artifact, source_run_id, or release_tag.'
+          }
+          New-Item -ItemType Directory -Path $env:INPUT_DIRECTORY -Force | Out-Null
+          New-Item -ItemType Directory -Path $env:RESULT_DIRECTORY -Force | Out-Null
+
+      - name: Download artifact from caller run
+        if: ${{ inputs.current_run_artifact }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: ${{ env.INPUT_DIRECTORY }}
+
+      - name: Download artifact from an earlier run
+        if: ${{ inputs.source_run_id != '' && !inputs.current_run_artifact }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: ${{ env.INPUT_DIRECTORY }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download installer from a release
+        if: ${{ inputs.release_tag != '' && !inputs.current_run_artifact }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_ASSET_PATTERN: ${{ inputs.release_asset_pattern }}
+        run: |
+          gh release download $env:RELEASE_TAG `
+            --repo '${{ github.repository }}' `
+            --pattern $env:RELEASE_ASSET_PATTERN `
+            --dir $env:INPUT_DIRECTORY
+
+      - name: Run WOA smoke tests
+        shell: pwsh
+        env:
+          INSTALLER_PATTERN: ${{ inputs.installer_pattern }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+          REQUIRE_GUI: ${{ inputs.require_gui }}
+        run: |
+          $parameters = @{
+            ArtifactDirectory = $env:INPUT_DIRECTORY
+            InstallerPattern = $env:INSTALLER_PATTERN
+            ResultsDirectory = $env:RESULT_DIRECTORY
+            ExpectedSha256 = $env:EXPECTED_SHA256
+          }
+          if ($env:REQUIRE_GUI -eq 'true') {
+            $parameters.RequireGui = $true
+          }
+          ./infra/woa/smoke_test.ps1 @parameters
+
+      - name: Upload smoke-test report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: woa-smoke-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.RESULT_DIRECTORY }}
+          if-no-files-found: warn
+          retention-days: 14

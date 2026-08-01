@@ -13,6 +13,8 @@ instructions are maintained in the
   configurations, `build_debug.py`, and the Thorium UI Debug Shell resources.
 - [`portable`](portable/README.md) creates Linux and Windows portable ZIP
   archives from existing release packages.
+- [`woa`](woa/README.md) validates a Windows ARM64 mini installer on a native
+  GitHub-hosted ARM64 runner, independently of the build host.
 - [`build_llvm.py`](build_llvm.py) builds the optimized LLVM/Clang, LLD, and
   Polly toolchain required by Thorium's LLVM optimization patch.
 
@@ -90,5 +92,6 @@ and should not be treated as an enabled product component.
 - [Linux build guide](../docs/BUILDING.md)
 - [GN argument guide](../docs/ABOUT_GN_ARGS.md)
 - [Debugging infrastructure](DEBUG/README.md)
+- [Windows on ARM64 smoke testing](woa/README.md)
 
 <img src="https://github.com/Alex313031/thorium/blob/main/logos/NEW/thorium_infra_256.png" alt="Thorium infrastructure" width="200">
