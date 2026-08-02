@@ -59,7 +59,7 @@ index f44478e5f9621..2d64b4aadf818 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index 7df3e18c4c93a..64917851be083 100644
+index 7df3e18c4c93a..81f48e74f7e07 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -107,9 +107,9 @@ index 7df3e18c4c93a..64917851be083 100644
 -# building with ThinLTO, no optimization is performed in the link step.
 +# The BUILDCONFIG file sets this config on targets by default. Official
 +# Thorium Windows and Linux x86 builds use the source-validated O2 ThinLTO
-+# policy. Linux AVX-512 disables link-time SLP vectorization to avoid an LLVM
-+# 23 bug that can produce invalid masked-load IR. Other platforms retain
-+# Chromium's default link-time behavior.
++# policy. Linux AVX-512 disables faulty SLP vectorization, while Linux i386
++# omits experimental GVN hoist/sink passes that can crash LLVM 23. Other
++# platforms retain Chromium's default link-time behavior.
  config("thinlto_optimize_default") {
    if (!is_debug && use_thin_lto && is_a_target_toolchain) {
      lto_opt_level = 0
@@ -147,7 +147,7 @@ index 7df3e18c4c93a..64917851be083 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1302,9 +1341,50 @@ config("thinlto_optimize_max") {
+@@ -1302,9 +1341,58 @@ config("thinlto_optimize_max") {
      } else {
        lto_opt_level = 0
      }
@@ -184,8 +184,6 @@ index 7df3e18c4c93a..64917851be083 100644
 +        ldflags += [
 +          "-Wl,-mllvm,-import-hot-multiplier=15",
 +          "-Wl,-mllvm,-adce-remove-loops=true",
-+          "-Wl,-mllvm,-enable-gvn-hoist",
-+          "-Wl,-mllvm,-enable-gvn-sink",
 +          "-Wl,-mllvm,-machine-sink-split",
 +          "-Wl,-mllvm,-phi-node-folding-threshold=4",
 +          "-Wl,-mllvm,-sink-insts-to-avoid-spills",
@@ -194,11 +192,21 @@ index 7df3e18c4c93a..64917851be083 100644
 +          "-Wl,-mllvm,-x86-align-branch=jcc+jmp+indirect",
 +          "-Wl,-mllvm,-x86-cmov-converter",
 +        ]
++
++        # LLVM 23 can crash in correlated-propagation after the experimental
++        # GVN hoist/sink passes process Abseil's mutex implementation for an
++        # i386 ThinLTO link. Keep the remaining O2/CGO policy intact.
++        if (current_cpu != "x86") {
++          ldflags += [
++            "-Wl,-mllvm,-enable-gvn-hoist",
++            "-Wl,-mllvm,-enable-gvn-sink",
++          ]
++        }
 +      }
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1341,7 +1421,10 @@ config("compiler_cpu_abi") {
+@@ -1341,7 +1429,10 @@ config("compiler_cpu_abi") {
  # for particular Chromium code or for working around particular
  # compiler bugs (or the combination of the two).
  config("compiler_codegen") {
@@ -210,7 +218,7 @@ index 7df3e18c4c93a..64917851be083 100644
    cflags = []
    ldflags = []
  
-@@ -2424,6 +2507,31 @@ config("no_incompatible_pointer_warnings") {
+@@ -2424,6 +2515,31 @@ config("no_incompatible_pointer_warnings") {
    }
  }
  
@@ -242,7 +250,7 @@ index 7df3e18c4c93a..64917851be083 100644
  # Optimization -----------------------------------------------------------------
  #
  # The BUILDCONFIG file sets the "default_optimization" config on targets by
-@@ -2660,9 +2768,18 @@ config("optimize_max") {
+@@ -2660,9 +2776,18 @@ config("optimize_max") {
    if (is_win) {
      # Favor speed over size, /O2 must be before the common flags.
      # /O2 implies /Ot, /Oi, and /GF.
