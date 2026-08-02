@@ -18,6 +18,11 @@ later extensions such as VNNI, IFMA, or VBMI. Its
 `-mtune=skylake-avx512` tuning choice does not add instruction sets beyond the
 explicit profile.
 
+Linux AVX-512 builds retain source-level `O3`, PGO, CFI, and ThinLTO `O2`, but
+disable SLP vectorization during the final link. LLVM 23 can otherwise produce
+invalid masked-load IR for Blink AVX-512 code. Front-end vectorization, Windows
+AVX-512, and the other x86 profiles are unchanged.
+
 Prepare the Chromium tree and AVX-512 product metadata from the Thorium
 repository root with:
 

@@ -1,5 +1,5 @@
 diff --git a/build/config/BUILDCONFIG.gn b/build/config/BUILDCONFIG.gn
-index f44478e5f9621..26802f8caa82c 100644
+index f44478e5f9621..2d64b4aadf818 100644
 --- a/build/config/BUILDCONFIG.gn
 +++ b/build/config/BUILDCONFIG.gn
 @@ -1,4 +1,4 @@
@@ -8,19 +8,47 @@ index f44478e5f9621..26802f8caa82c 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -172,6 +172,11 @@ declare_args() {
+@@ -172,6 +172,24 @@ declare_args() {
                         current_os != "ios" && current_os != "watchos"
  }
  
++_default_thorium_x86_profile = "none"
++if ((target_os == "win" || target_os == "linux" || target_os == "mac" ||
++     target_os == "android" || target_os == "chromeos" ||
++     target_os == "fuchsia") &&
++    (target_cpu == "x86" || target_cpu == "x64")) {
++  _default_thorium_x86_profile = "sse3"
++}
++
 +declare_args() {
 +  # True for Thorium overlay builds. This gates Thorium-only generated assets.
 +  is_thorium_build = true
++
++  # Selects the minimum x86 CPU feature set for Thorium targets. This is the
++  # only public SIMD compatibility setting; tuning and package names are
++  # derived from it.
++  thorium_x86_profile = _default_thorium_x86_profile
 +}
 +
  assert(!(is_debug && is_official_build), "Can't do official debug builds")
  assert(!(current_os == "ios" && is_component_build),
         "Can't use component build on iOS")
-@@ -433,6 +438,9 @@ if (current_os == "zos") {
+@@ -214,7 +232,13 @@ if (host_toolchain == "") {
+   # no toolchain omitted host_toolchain from its toolchain_args().
+ 
+   if (host_os == "linux") {
+-    if (target_os != "linux") {
++    if (is_thorium_build && target_os == "linux" && host_cpu == "x64" &&
++        target_cpu == "x64" && thorium_x86_profile == "avx512_skx") {
++      # AVX-512 target builds may run on an x64 build host without AVX-512.
++      # Keep all tools executed during the build on a baseline host toolchain.
++      host_toolchain =
++          "//build/toolchain/linux:clang_x64_thorium_build_host"
++    } else if (target_os != "linux") {
+       host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
+     } else if (is_clang) {
+       host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
+@@ -433,6 +457,9 @@ if (current_os == "zos") {
    default_compiler_configs += [ "//build/config/zos:compiler" ]
  }
  
@@ -31,7 +59,7 @@ index f44478e5f9621..26802f8caa82c 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index 7df3e18c4c93a..93d903bceab4e 100644
+index 7df3e18c4c93a..64917851be083 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -71,7 +99,7 @@ index 7df3e18c4c93a..93d903bceab4e 100644
  
      if (is_win) {
        ldflags += [
-@@ -1262,14 +1270,39 @@ config("disallow_unstable_features") {
+@@ -1262,14 +1270,45 @@ config("disallow_unstable_features") {
    rustflags = [ "-Zallow-features=" ]
  }
  
@@ -79,7 +107,9 @@ index 7df3e18c4c93a..93d903bceab4e 100644
 -# building with ThinLTO, no optimization is performed in the link step.
 +# The BUILDCONFIG file sets this config on targets by default. Official
 +# Thorium Windows and Linux x86 builds use the source-validated O2 ThinLTO
-+# policy; other platforms retain Chromium's default link-time behavior.
++# policy. Linux AVX-512 disables link-time SLP vectorization to avoid an LLVM
++# 23 bug that can produce invalid masked-load IR. Other platforms retain
++# Chromium's default link-time behavior.
  config("thinlto_optimize_default") {
    if (!is_debug && use_thin_lto && is_a_target_toolchain) {
      lto_opt_level = 0
@@ -102,6 +132,10 @@ index 7df3e18c4c93a..93d903bceab4e 100644
 +      }
 +    } else if (is_linux) {
 +      ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
++      if (_thorium_x86_thinlto && current_cpu == "x64" &&
++          thorium_x86_profile == "avx512_skx") {
++        ldflags += [ "-Wl,-mllvm,-vectorize-slp=false" ]
++      }
 +      if (_thorium_x86_thinlto) {
 +        ldflags += [ "-Wl,--lto-CGO3" ]
 +        ldflags += [
@@ -113,7 +147,7 @@ index 7df3e18c4c93a..93d903bceab4e 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1302,9 +1335,46 @@ config("thinlto_optimize_max") {
+@@ -1302,9 +1341,50 @@ config("thinlto_optimize_max") {
      } else {
        lto_opt_level = 0
      }
@@ -141,6 +175,10 @@ index 7df3e18c4c93a..93d903bceab4e 100644
 +      }
 +    } else if (is_linux) {
 +      ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
++      if (_thorium_x86_thinlto && current_cpu == "x64" &&
++          thorium_x86_profile == "avx512_skx") {
++        ldflags += [ "-Wl,-mllvm,-vectorize-slp=false" ]
++      }
 +      if (_thorium_x86_thinlto) {
 +        ldflags += [ "-Wl,--lto-CGO3" ]
 +        ldflags += [
@@ -160,7 +198,7 @@ index 7df3e18c4c93a..93d903bceab4e 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1341,7 +1411,10 @@ config("compiler_cpu_abi") {
+@@ -1341,7 +1421,10 @@ config("compiler_cpu_abi") {
  # for particular Chromium code or for working around particular
  # compiler bugs (or the combination of the two).
  config("compiler_codegen") {
@@ -172,7 +210,7 @@ index 7df3e18c4c93a..93d903bceab4e 100644
    cflags = []
    ldflags = []
  
-@@ -2424,6 +2497,31 @@ config("no_incompatible_pointer_warnings") {
+@@ -2424,6 +2507,31 @@ config("no_incompatible_pointer_warnings") {
    }
  }
  
@@ -204,7 +242,7 @@ index 7df3e18c4c93a..93d903bceab4e 100644
  # Optimization -----------------------------------------------------------------
  #
  # The BUILDCONFIG file sets the "default_optimization" config on targets by
-@@ -2660,9 +2758,18 @@ config("optimize_max") {
+@@ -2660,9 +2768,18 @@ config("optimize_max") {
    if (is_win) {
      # Favor speed over size, /O2 must be before the common flags.
      # /O2 implies /Ot, /Oi, and /GF.
@@ -250,10 +288,10 @@ index ae62bab587e7d..bbeb916437ad8 100644
        cpu_abi_cflags += [ "--target=arm-linux-gnueabihf" ]
 diff --git a/build/config/compiler_opt.gni b/build/config/compiler_opt.gni
 new file mode 100644
-index 0000000000000..59cc302488e85
+index 0000000000000..cffe8c6058e37
 --- /dev/null
 +++ b/build/config/compiler_opt.gni
-@@ -0,0 +1,227 @@
+@@ -0,0 +1,215 @@
 +# Copyright 2026 Alex313031
 +# Use of this source code is governed by a BSD-style license that can be
 +# found in the LICENSE file.
@@ -270,19 +308,6 @@ index 0000000000000..59cc302488e85
 +
 +_thorium_x86_profile_platform =
 +    is_win || is_linux || is_mac || is_android || is_chromeos || is_fuchsia
-+
-+_default_thorium_x86_profile = "none"
-+if (_thorium_x86_profile_platform &&
-+    (target_cpu == "x86" || target_cpu == "x64")) {
-+  _default_thorium_x86_profile = "sse3"
-+}
-+
-+declare_args() {
-+  # Selects the minimum x86 CPU feature set for Thorium targets. This is the
-+  # only public SIMD compatibility setting; tuning and package names are
-+  # derived from it.
-+  thorium_x86_profile = _default_thorium_x86_profile
-+}
 +
 +_thorium_x86_profile_is_valid =
 +    thorium_x86_profile == "none" || thorium_x86_profile == "sse2" ||
@@ -317,7 +342,8 @@ index 0000000000000..59cc302488e85
 +thorium_linux_package_suffix = ""
 +
 +_thorium_x86_apply_profile =
-+    is_a_target_toolchain && _thorium_x86_profile_platform &&
++    is_a_target_toolchain && !toolchain_for_rust_host_build_tools &&
++    _thorium_x86_profile_platform &&
 +    (current_cpu == "x86" || current_cpu == "x64")
 +
 +# ChromeOS device toolchains with an explicit -march own their complete ISA.
@@ -523,3 +549,36 @@ index 069432bbae2ff..f287524c4cc50 100644
    }
  
    # arflags apply only to static_libraries. The normal linker configs are only
+diff --git a/build/toolchain/gcc_toolchain.gni b/build/toolchain/gcc_toolchain.gni
+index d8457bfa53a4e..74f8848706d11 100644
+--- a/build/toolchain/gcc_toolchain.gni
++++ b/build/toolchain/gcc_toolchain.gni
+@@ -916,6 +916,7 @@ template("gcc_rust_host_build_tools_toolchain") {
+     toolchain_args = {
+       # Populate toolchain args from the invoker.
+       forward_variables_from(invoker.toolchain_args, "*")
++      thorium_x86_profile = "none"
+       toolchain_for_rust_host_build_tools = true
+ 
+       # The host build tools are static release builds to make the Chromium
+diff --git a/build/toolchain/linux/BUILD.gn b/build/toolchain/linux/BUILD.gn
+index a6e20a05c5eba..b2c7a29b72b0e 100644
+--- a/build/toolchain/linux/BUILD.gn
++++ b/build/toolchain/linux/BUILD.gn
+@@ -114,6 +114,16 @@ clang_toolchain("clang_x64") {
+   }
+ }
+ 
++# Build-time executables must run on the build host even when the Thorium
++# target requires AVX-512. Keep this toolchain at Chromium's x64 baseline.
++clang_toolchain("clang_x64_thorium_build_host") {
++  toolchain_args = {
++    current_cpu = "x64"
++    current_os = "linux"
++    thorium_x86_profile = "none"
++  }
++}
++
+ template("clang_v8_toolchain") {
+   clang_toolchain(target_name) {
+     toolchain_args = {
