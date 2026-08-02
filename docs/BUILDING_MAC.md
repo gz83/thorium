@@ -77,6 +77,26 @@ python3 create_dmg.py
 To package `Chromium.app` instead, use `python3 create_dmg.py --product
 chromium`. The script is macOS-only and uses Chromium's `pkg-dmg` tool.
 
+### Package a Linux-built application on GitHub Actions
+
+When cross-building the application on Linux, preserve its executable modes and
+symbolic links in a tar archive:
+
+```shell
+tar -C "$CR_DIR/out/thorium" -czf Thorium.app.tar.gz Thorium.app
+```
+
+Upload `Thorium.app.tar.gz` to a draft release, then manually run
+[`Package macOS DMG`](../.github/workflows/package-macos-dmg.yml). Supply the
+same release tag, the exact archive filename, the Chromium tag or commit used
+for the build, and the application's target architecture. The workflow obtains
+the matching Chromium `pkg-dmg`, validates the Mach-O architecture, invokes
+`create_dmg.py` on a macOS runner, and publishes the DMG and its SHA-256 file.
+
+The runner architecture does not have to match the application architecture;
+it performs packaging and ad-hoc signing rather than compilation. This process
+does not provide Developer ID signing or Apple notarization.
+
 Thorium's macOS 26 icon pipeline is maintained under
 [`logos/NEW/mac/gen`](../logos/NEW/mac/gen). Generated `Assets.car` and
 `app.icns` are repository resources; follow that directory's README when they

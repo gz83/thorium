@@ -59,7 +59,7 @@ index f44478e5f9621..2d64b4aadf818 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index 7df3e18c4c93a..81f48e74f7e07 100644
+index 7df3e18c4c93a..17c08652d9775 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -147,15 +147,13 @@ index 7df3e18c4c93a..81f48e74f7e07 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1302,9 +1341,58 @@ config("thinlto_optimize_max") {
-     } else {
-       lto_opt_level = 0
+@@ -1304,7 +1343,59 @@ config("thinlto_optimize_max") {
      }
-+    _thorium_x86_thinlto =
-+        is_full_optimization_build && lto_opt_level == 2 &&
-+        (is_win || is_linux) && (current_cpu == "x86" || current_cpu == "x64")
  
      if (is_win) {
++      _thorium_x86_thinlto =
++          is_full_optimization_build && lto_opt_level == 2 &&
++          (current_cpu == "x86" || current_cpu == "x64")
        ldflags = [ "/opt:lldlto=" + lto_opt_level ]
 +      if (_thorium_x86_thinlto) {
 +        ldflags += [ "-opt:lldltocgo=3" ]
@@ -174,6 +172,9 @@ index 7df3e18c4c93a..81f48e74f7e07 100644
 +        ]
 +      }
 +    } else if (is_linux) {
++      _thorium_x86_thinlto =
++          is_full_optimization_build && lto_opt_level == 2 &&
++          (current_cpu == "x86" || current_cpu == "x64")
 +      ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
 +      if (_thorium_x86_thinlto && current_cpu == "x64" &&
 +          thorium_x86_profile == "avx512_skx") {
@@ -206,7 +207,7 @@ index 7df3e18c4c93a..81f48e74f7e07 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1341,7 +1429,10 @@ config("compiler_cpu_abi") {
+@@ -1341,7 +1432,10 @@ config("compiler_cpu_abi") {
  # for particular Chromium code or for working around particular
  # compiler bugs (or the combination of the two).
  config("compiler_codegen") {
@@ -218,7 +219,7 @@ index 7df3e18c4c93a..81f48e74f7e07 100644
    cflags = []
    ldflags = []
  
-@@ -2424,6 +2515,31 @@ config("no_incompatible_pointer_warnings") {
+@@ -2424,6 +2518,31 @@ config("no_incompatible_pointer_warnings") {
    }
  }
  
@@ -250,7 +251,7 @@ index 7df3e18c4c93a..81f48e74f7e07 100644
  # Optimization -----------------------------------------------------------------
  #
  # The BUILDCONFIG file sets the "default_optimization" config on targets by
-@@ -2660,9 +2776,18 @@ config("optimize_max") {
+@@ -2660,9 +2779,18 @@ config("optimize_max") {
    if (is_win) {
      # Favor speed over size, /O2 must be before the common flags.
      # /O2 implies /Ot, /Oi, and /GF.

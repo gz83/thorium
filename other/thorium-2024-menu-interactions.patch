@@ -1,8 +1,8 @@
 diff --git a/ui/views/controls/menu/menu_config_mac.mm b/ui/views/controls/menu/menu_config_mac.mm
-index 88d9709480c3e..af4b8a924ebbc 100644
+index 32884002c7359..7775225628590 100644
 --- a/ui/views/controls/menu/menu_config_mac.mm
 +++ b/ui/views/controls/menu/menu_config_mac.mm
-@@ -40,9 +40,9 @@ void MenuConfig::InitPlatform() {
+@@ -38,9 +38,9 @@ void MenuConfig::InitPlatform() {
          new gfx::PlatformFontMac(gfx::PlatformFontMac::SystemFontType::kMenu)));
    }
    check_selected_combobox_item = true;

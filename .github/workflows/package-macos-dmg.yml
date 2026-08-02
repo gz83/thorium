@@ -1,0 +1,277 @@
+name: Package macOS DMG
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Draft release tag containing the Thorium.app archive
+        required: true
+        type: string
+      source_asset:
+        description: Exact .tar.gz release asset containing Thorium.app at its root
+        required: true
+        default: Thorium.app.tar.gz
+        type: string
+      source_sha256:
+        description: Optional SHA-256 of the source archive
+        required: false
+        default: ""
+        type: string
+      chromium_revision:
+        description: Exact Chromium tag or commit used to build Thorium.app
+        required: true
+        type: string
+      target_arch:
+        description: Architecture required in the Thorium executable
+        required: true
+        default: arm64
+        type: choice
+        options:
+          - arm64
+          - x64
+          - universal
+      runner:
+        description: macOS runner used only for packaging
+        required: true
+        default: macos-26
+        type: choice
+        options:
+          - macos-26
+          - macos-26-intel
+      upload_to_release:
+        description: Upload the generated DMG and checksum to the release
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: package-macos-dmg-${{ inputs.release_tag }}-${{ inputs.target_arch }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Package ${{ inputs.target_arch }} application
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      INPUT_DIR: ${{ github.workspace }}/dmg-input
+      PACKAGE_ROOT: ${{ github.workspace }}/dmg-work/chromium/src
+      OUTPUT_DIR: ${{ github.workspace }}/dmg-output
+      RELEASE_TAG: ${{ inputs.release_tag }}
+      SOURCE_ASSET: ${{ inputs.source_asset }}
+      SOURCE_SHA256: ${{ inputs.source_sha256 }}
+      CHROMIUM_REVISION: ${{ inputs.chromium_revision }}
+      TARGET_ARCH: ${{ inputs.target_arch }}
+
+    steps:
+      - name: Check out Thorium packaging scripts
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$SOURCE_ASSET" != "$(basename "$SOURCE_ASSET")" ||
+                "$SOURCE_ASSET" == *'*'* || "$SOURCE_ASSET" == *'?'* ||
+                "$SOURCE_ASSET" != *.tar.gz ]]; then
+            echo "::error::source_asset must be one exact .tar.gz filename"
+            exit 1
+          fi
+
+          if [[ ! "$CHROMIUM_REVISION" =~ ^[0-9A-Za-z._+-]{7,80}$ ]]; then
+            echo "::error::chromium_revision must be an exact tag or commit"
+            exit 1
+          fi
+
+          if [[ -n "$SOURCE_SHA256" &&
+                ! "$SOURCE_SHA256" =~ ^[[:xdigit:]]{64}$ ]]; then
+            echo "::error::source_sha256 must be empty or a 64-digit hexadecimal digest"
+            exit 1
+          fi
+
+          mkdir -p \
+            "$INPUT_DIR" \
+            "$PACKAGE_ROOT/out/thorium" \
+            "$PACKAGE_ROOT/chrome/installer/mac" \
+            "$OUTPUT_DIR"
+
+      - name: Download application archive
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern "$SOURCE_ASSET" \
+            --dir "$INPUT_DIR"
+
+          test -f "$INPUT_DIR/$SOURCE_ASSET"
+
+          if [[ -n "$SOURCE_SHA256" ]]; then
+            actual_sha256="$(shasum -a 256 "$INPUT_DIR/$SOURCE_ASSET" | awk '{print $1}')"
+            expected_sha256="$(printf '%s' "$SOURCE_SHA256" | tr '[:upper:]' '[:lower:]')"
+            if [[ "$actual_sha256" != "$expected_sha256" ]]; then
+              echo "::error::Source archive SHA-256 does not match"
+              exit 1
+            fi
+          fi
+
+      - name: Extract and validate Thorium.app
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tar -xzf "$INPUT_DIR/$SOURCE_ASSET" \
+            -C "$PACKAGE_ROOT/out/thorium"
+
+          app="$PACKAGE_ROOT/out/thorium/Thorium.app"
+          plist="$app/Contents/Info.plist"
+          if [[ ! -d "$app" || ! -f "$plist" ]]; then
+            echo "::error::Archive must contain Thorium.app at its root"
+            find "$PACKAGE_ROOT/out/thorium" -maxdepth 3 -print
+            exit 1
+          fi
+
+          executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
+          binary="$app/Contents/MacOS/$executable"
+          if [[ ! -f "$binary" || ! -x "$binary" ]]; then
+            echo "::error::The application executable is missing or is not executable"
+            exit 1
+          fi
+
+          architectures="$(lipo -archs "$binary")"
+          echo "Runner architecture: $RUNNER_ARCH"
+          echo "Application architectures: $architectures"
+
+          case "$TARGET_ARCH" in
+            arm64)
+              expected=(arm64)
+              ;;
+            x64)
+              expected=(x86_64)
+              ;;
+            universal)
+              expected=(arm64 x86_64)
+              ;;
+          esac
+
+          for architecture in "${expected[@]}"; do
+            if [[ " $architectures " != *" $architecture "* ]]; then
+              echo "::error::Application does not contain $architecture"
+              exit 1
+            fi
+          done
+
+          if [[ "$TARGET_ARCH" != universal &&
+                "$(wc -w <<<"$architectures" | tr -d ' ')" != 1 ]]; then
+            echo "::error::A single-architecture package contains unexpected slices"
+            exit 1
+          fi
+
+      - name: Fetch matching Chromium pkg-dmg
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          encoded_pkg_dmg="$RUNNER_TEMP/pkg-dmg.base64"
+          pkg_dmg="$PACKAGE_ROOT/chrome/installer/mac/pkg-dmg"
+          url="https://chromium.googlesource.com/chromium/src/+/$CHROMIUM_REVISION/chrome/installer/mac/pkg-dmg?format=TEXT"
+
+          curl --fail --location --retry 3 --retry-all-errors \
+            --output "$encoded_pkg_dmg" "$url"
+
+          python3 -c \
+            'import base64, pathlib, sys; pathlib.Path(sys.argv[2]).write_bytes(base64.b64decode(pathlib.Path(sys.argv[1]).read_bytes(), validate=True))' \
+            "$encoded_pkg_dmg" "$pkg_dmg"
+          chmod 0755 "$pkg_dmg"
+
+          head -n 1 "$pkg_dmg" | grep -q '^#!/usr/bin/perl'
+
+      - name: Create and verify DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          source_dmg="$PACKAGE_ROOT/out/thorium/Thorium_MacOS.dmg"
+          case "$TARGET_ARCH" in
+            arm64)
+              dmg_name="Thorium_MacOS_ARM64.dmg"
+              ;;
+            x64)
+              dmg_name="Thorium_MacOS_x64.dmg"
+              ;;
+            universal)
+              dmg_name="Thorium_MacOS_Universal.dmg"
+              ;;
+          esac
+
+          for attempt in 1 2 3; do
+            echo "Creating $dmg_name: attempt $attempt of 3"
+            rm -f "$source_dmg"
+            if python3 create_dmg.py \
+                --chromium-src "$PACKAGE_ROOT" \
+                --thorium-root "$GITHUB_WORKSPACE"; then
+              break
+            fi
+
+            if [[ "$attempt" -eq 3 ]]; then
+              echo "::error::DMG creation failed after three attempts"
+              exit 1
+            fi
+            sleep 10
+          done
+
+          test -f "$source_dmg"
+          hdiutil verify "$source_dmg"
+          codesign --verify --deep --strict --verbose=2 \
+            "$PACKAGE_ROOT/out/thorium/Thorium.app"
+
+          mv "$source_dmg" "$OUTPUT_DIR/$dmg_name"
+          (
+            cd "$OUTPUT_DIR"
+            shasum -a 256 "$dmg_name" > "$dmg_name.sha256"
+          )
+
+          {
+            echo "Chromium revision: $CHROMIUM_REVISION"
+            echo "Target architecture: $TARGET_ARCH"
+            echo "Runner architecture: $RUNNER_ARCH"
+            sw_vers
+            xcodebuild -version
+            python3 --version
+          } > "$OUTPUT_DIR/package-info.txt"
+
+          ls -lh "$OUTPUT_DIR"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: thorium-macos-dmg-${{ inputs.target_arch }}
+          path: dmg-output/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload DMG to release
+        if: ${{ inputs.upload_to_release }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh release upload "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            "$OUTPUT_DIR"/*.dmg \
+            "$OUTPUT_DIR"/*.sha256 \
+            --clobber

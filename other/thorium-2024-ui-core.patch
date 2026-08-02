@@ -2241,7 +2241,7 @@ index 09c03d1e87011..c32a8786a5ac6 100644
  
  }  // namespace views
 diff --git a/ui/views/controls/menu/menu_config_mac.mm b/ui/views/controls/menu/menu_config_mac.mm
-index eabfb364890d3..88d9709480c3e 100644
+index eabfb364890d3..32884002c7359 100644
 --- a/ui/views/controls/menu/menu_config_mac.mm
 +++ b/ui/views/controls/menu/menu_config_mac.mm
 @@ -1,17 +1,54 @@
@@ -2272,8 +2272,6 @@ index eabfb364890d3..88d9709480c3e 100644
 +  config->reserve_dedicated_arrow_column = false;
 +  config->icons_in_label = true;
 +  config->icon_label_spacing = 8;
-+  config->corner_radius = 8;
-+  config->auxiliary_corner_radius = 4;
 +  config->item_horizontal_border_padding = 0;
 +}
 +
@@ -2295,6 +2293,8 @@ index eabfb364890d3..88d9709480c3e 100644
 +  if (thorium_2024) {
 +    menu_horizontal_border_size = 1;
 +    use_outer_border = true;
++    corner_radius = 8;
++    auxiliary_corner_radius = 4;
 +    InitMaterialMenuConfig(this);
 +  }
  }
