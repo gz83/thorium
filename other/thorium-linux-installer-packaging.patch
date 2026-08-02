@@ -12,7 +12,7 @@ index a4ad87db54e3c..65a42ceb6409c 100644
      deps = [ "//chrome/installer/linux" ]
    }
 diff --git a/chrome/installer/linux/BUILD.gn b/chrome/installer/linux/BUILD.gn
-index b537b1ac05064..3edb65312952e 100644
+index b537b1ac05064..23dfc645b2290 100644
 --- a/chrome/installer/linux/BUILD.gn
 +++ b/chrome/installer/linux/BUILD.gn
 @@ -1,17 +1,16 @@
@@ -373,8 +373,8 @@ index b537b1ac05064..3edb65312952e 100644
        branding_path_component,
 +      "-n",
 +      _deb_name_suffix,
-+      "--simd-variant",
-+      _simd_variant,
++      # Use the equals form so an empty non-x86 variant remains one argument.
++      "--simd-variant=$_simd_variant",
        "-o",
        rebase_path(root_out_dir, root_build_dir),
 -      "-s",
@@ -418,13 +418,13 @@ index b537b1ac05064..3edb65312952e 100644
  
 -      inputs = packaging_files
 -      outputs = [ "$root_out_dir/${package}-${channel}-${chrome_version_full}-1.${rpm_arch}.rpm" ]
-+      # For x64, the SIMD suffix alone identifies the build variant (drop arch).
-+      # i386 builds are named by arch only, without an SSE2 suffix.
-+      # For all other architectures, keep the arch identifier.
++      # Keep release names profile-based, but spell RPM's aarch64 as arm64.
 +      if (current_cpu == "x64") {
 +        _rpm_name_suffix = _simd_suffix
 +      } else if (current_cpu == "x86" && _simd_suffix == "_SSE2") {
 +        _rpm_name_suffix = "_${rpm_arch}"
++      } else if (current_cpu == "arm64") {
++        _rpm_name_suffix = "_arm64${_simd_suffix}"
 +      } else {
 +        _rpm_name_suffix = "_${rpm_arch}${_simd_suffix}"
 +      }
@@ -440,8 +440,8 @@ index b537b1ac05064..3edb65312952e 100644
          branding_path_component,
 +        "-n",
 +        _rpm_name_suffix,
-+        "--simd-variant",
-+        _simd_variant,
++        # Use the equals form so an empty non-x86 variant remains one argument.
++        "--simd-variant=$_simd_variant",
          "-o",
          rebase_path(root_out_dir, root_build_dir),
          "-t",
