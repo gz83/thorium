@@ -80,7 +80,9 @@ gn args out/thorium
 
 Use [`win_args.gn`](../win_args.gn) for x64, an appropriate file under
 `other/` for SIMD variants, or [`arm/win_ARM_args.gn`](../arm/win_ARM_args.gn)
-for Windows ARM64.
+for Windows ARM64. Thorium's V8 patch automatically selects the Linux x64
+ARM64 simulator snapshot toolchain for the latter; do not add host-specific
+V8 overrides to `args.gn`.
 
 ## Build
 

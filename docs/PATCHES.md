@@ -35,6 +35,7 @@ overlay-derived, or still need separate provenance review.
 | [`llvm-optimized-toolchain-build.patch`](../other/llvm-optimized-toolchain-build.patch) | [RobRich999/Chromium_Clang](https://github.com/RobRich999/Chromium_Clang) LLVM optimized build-script work, adapted to use compatibility-safe tuning instead of an AVX2 ISA requirement |
 | [`disable-vulkan-gpu-log-warnings.patch`](../other/disable-vulkan-gpu-log-warnings.patch) | [RobRich999/Chromium_Clang](https://github.com/RobRich999/Chromium_Clang) Linux patch reference |
 | [`v8-remove-local-sse2-override.patch`](../other/v8-remove-local-sse2-override.patch) | Removes V8's local Win32 `/arch:SSE2` override so target objects inherit Thorium's canonical x86 profile |
+| [`v8-linux-woa-snapshot-toolchain.patch`](../other/v8-linux-woa-snapshot-toolchain.patch) | Generates Windows ARM64 snapshots with the Linux x64 ARM64 simulator toolchain and aligns its V8 control-flow-integrity configuration with the Windows runtime |
 | [`linux-disable-custom-titlebar-default.patch`](../other/linux-disable-custom-titlebar-default.patch) | [saiarcot895/chromium-ubuntu-build](https://github.com/saiarcot895/chromium-ubuntu-build) title-bar default system patch reference |
 | [`content-gpu-vaapi-libva-config.patch`](../other/content-gpu-vaapi-libva-config.patch) | Linux VAAPI/libva behavior adapted from Linux Chromium packaging patch references |
 | [`thorium-sandbox-compat.patch`](../other/thorium-sandbox-compat.patch) | Chromium sandbox compatibility; related to ungoogled/inox sandbox PIE patch family |
@@ -86,6 +87,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-search-engines-data.patch`](../other/thorium-search-engines-data.patch) (apply root: `third_party/search_engines_data/resources`)
 - [`zstd-clang-cl-bmi2-detection.patch`](../other/zstd-clang-cl-bmi2-detection.patch) (apply root: `third_party/zstd/src`) - Keeps clang-cl AVX2 builds on zstd's runtime BMI2 dispatch unless `-mbmi2` is explicitly enabled.
 - [`v8-remove-local-sse2-override.patch`](../other/v8-remove-local-sse2-override.patch) (apply root: `v8`)
+- [`v8-linux-woa-snapshot-toolchain.patch`](../other/v8-linux-woa-snapshot-toolchain.patch) (apply root: `v8`)
 - [`angle-lockfree.patch`](../other/SSE2/angle-lockfree.patch) (apply root: `third_party/angle/src`; condition: `sse2`)
 
 ### 10 - Media, codecs, and third_party-facing browser glue.

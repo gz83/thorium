@@ -18,6 +18,7 @@ third_party/widevine: other/widevine-cdm-support.patch
 third_party/search_engines_data/resources: other/thorium-search-engines-data.patch
 third_party/zstd/src: other/zstd-clang-cl-bmi2-detection.patch
 v8: other/v8-remove-local-sse2-override.patch
+v8: other/v8-linux-woa-snapshot-toolchain.patch
 [sse2] third_party/angle: other/SSE2/angle-lockfree.patch
 
 # 10 - Media, codecs, and third_party-facing browser glue.

@@ -8,7 +8,9 @@ and applicable product settings.
 - Android builds: see [`android/README.md`](android/README.md) and select the
   argument file for the intended architecture.
 - Windows on ARM64 builds: use [`win_ARM_args.gn`](win_ARM_args.gn) as the
-  basis for `args.gn`.
+  basis for `args.gn`. The patch series automatically selects the compatible
+  V8 snapshot toolchain when this target is cross-built on Linux x64; no
+  host-specific override belongs in the args file.
 - macOS ARM64 argument files are located in [`other/Mac`](../other/Mac).
 
 ## Prepare the source tree
