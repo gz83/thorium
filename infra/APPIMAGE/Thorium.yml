@@ -8,6 +8,7 @@ compression: minimum
 script:
   - cp -v -r "$THORIUM_APPIMAGE_PAYLOAD"/. usr/bin/
   - # Install application icons.
+  - mkdir -p usr/share/icons/hicolor/16x16/apps
   - cp -v usr/bin/product_logo_256.png thorium-browser.png
   - cp -v usr/bin/product_logo_16.png usr/share/icons/hicolor/16x16/apps/thorium-browser.png
   - cp -v usr/bin/product_logo_22.png usr/share/icons/hicolor/22x22/apps/thorium-browser.png
