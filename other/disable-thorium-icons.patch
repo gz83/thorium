@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/browser_actions.cc b/chrome/browser/ui/browser_actions.cc
-index bf0f15a54ecfe..7c8286257d0ee 100644
+index bf0f15a54ecfe..c07932c4dcb6e 100644
 --- a/chrome/browser/ui/browser_actions.cc
 +++ b/chrome/browser/ui/browser_actions.cc
 @@ -12,6 +12,7 @@
@@ -10,7 +10,23 @@ index bf0f15a54ecfe..7c8286257d0ee 100644
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
  #include "base/metrics/user_metrics.h"
-@@ -906,6 +907,9 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -748,9 +749,12 @@ void BrowserActions::InitializePageActionIconActions() {
+           .SetActionId(kActionFind)
+           .SetTooltipText(l10n_util::GetStringUTF16(IDS_TOOLTIP_FIND))
+           .SetImage(ui::ImageModel::FromVectorIcon(
+-              features::IsRoundedIconsEnabled()
+-                  ? omnibox::kFindInPageIcon
+-                  : omnibox::kFindInPageChromeRefreshOldIcon))
++              base::CommandLine::ForCurrentProcess()->HasSwitch(
++                  "disable-thorium-icons")
++                  ? (features::IsRoundedIconsEnabled()
++                         ? omnibox::kFindInPageIcon
++                         : omnibox::kFindInPageChromeRefreshOldIcon)
++                  : omnibox::kFindInPageThoriumIcon))
+           .Build());
+ 
+   root_action_item_->AddChild(
+@@ -906,6 +910,9 @@ void BrowserActions::InitializeChromeMenuActions() {
    TabStripModel* const tab_strip_model = bwi_->GetTabStripModel();
    BrowserWindowInterface* const bwi = base::to_address(bwi_);
    const bool is_guest_session = profile->IsGuestSession();
@@ -20,7 +36,7 @@ index bf0f15a54ecfe..7c8286257d0ee 100644
  
    root_action_item_->AddChild(
        ChromeMenuAction(
-@@ -918,8 +922,12 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -918,8 +925,12 @@ void BrowserActions::InitializeChromeMenuActions() {
                profile),
            kActionNewIncognitoWindow, IDS_NEW_INCOGNITO_WINDOW,
            IDS_NEW_INCOGNITO_WINDOW,
@@ -35,7 +51,7 @@ index bf0f15a54ecfe..7c8286257d0ee 100644
            .SetEnabled(IncognitoModePrefs::IsIncognitoAllowed(profile))
            .Build());
  
-@@ -1077,8 +1085,10 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -1077,8 +1088,10 @@ void BrowserActions::InitializeChromeMenuActions() {
                bwi, is_incognito),
            kActionClearBrowsingData, IDS_CLEAR_BROWSING_DATA,
            IDS_CLEAR_BROWSING_DATA,
@@ -48,7 +64,7 @@ index bf0f15a54ecfe..7c8286257d0ee 100644
            .SetEnabled(is_incognito ||
                        (!is_guest_session && !profile->IsSystemProfile()))
            .Build());
-@@ -1293,9 +1303,10 @@ void BrowserActions::InitializeChromeMenuActions() {
+@@ -1293,9 +1306,10 @@ void BrowserActions::InitializeChromeMenuActions() {
                  },
                  bwi),
              kActionShowChromeLabs, IDS_CHROMELABS, IDS_CHROMELABS,
@@ -418,6 +434,78 @@ index d0f3cd61eabe1..27b4c4e5cfb3d 100644
                            kColorExtensionMenuIconDisabled, icon_size)));
  
    if (allow_pinning) {
+diff --git a/chrome/browser/ui/views/find_bar_view.cc b/chrome/browser/ui/views/find_bar_view.cc
+index 8fbbff1653bf7..7b655ca82492c 100644
+--- a/chrome/browser/ui/views/find_bar_view.cc
++++ b/chrome/browser/ui/views/find_bar_view.cc
+@@ -8,6 +8,7 @@
+ #include <string_view>
+ #include <utility>
+ 
++#include "base/command_line.h"
+ #include "base/feature_list.h"
+ #include "base/i18n/number_formatting.h"
+ #include "base/strings/string_util.h"
+@@ -166,6 +167,9 @@ FindBarView::FindBarView(FindBarHost* host) {
+   // that will add up to the right spacing amounts.
+ 
+   ChromeLayoutProvider* layout_provider = ChromeLayoutProvider::Get();
++  const bool disable_thorium_icons =
++      base::CommandLine::ForCurrentProcess()->HasSwitch(
++          "disable-thorium-icons");
+   const auto horizontal_margin =
+       gfx::Insets::VH(0, layout_provider->GetDistanceMetric(
+                              views::DISTANCE_UNRELATED_CONTROL_HORIZONTAL) /
+@@ -312,22 +316,21 @@ FindBarView::FindBarView(FindBarHost* host) {
+               : kKeyboardArrowDownChromeRefreshOldIcon,
+           kColorFindBarButtonIconHovered));
+ 
++  const gfx::VectorIcon& close_icon =
++      features::IsRoundedIconsEnabled()
++          ? kCloseSmallIcon
++          : (disable_thorium_icons ? kCloseChromeRefreshOldIcon
++                                   : kCloseChromeRefreshThoriumIcon);
+   views::SetImageFromVectorIconWithColor(
+-      close_button_,
+-      features::IsRoundedIconsEnabled() ? kCloseSmallIcon
+-                                        : kCloseChromeRefreshOldIcon,
++      close_button_, close_icon,
+       {kColorFindBarButtonIcon, kColorFindBarButtonIconDisabled});
+   close_button_->SetImageModel(
+       views::Button::STATE_HOVERED,
+-      ui::ImageModel::FromVectorIcon(features::IsRoundedIconsEnabled()
+-                                         ? kCloseSmallIcon
+-                                         : kCloseChromeRefreshOldIcon,
++      ui::ImageModel::FromVectorIcon(close_icon,
+                                      kColorFindBarButtonIconHovered));
+   close_button_->SetImageModel(
+       views::Button::STATE_PRESSED,
+-      ui::ImageModel::FromVectorIcon(features::IsRoundedIconsEnabled()
+-                                         ? kCloseSmallIcon
+-                                         : kCloseChromeRefreshOldIcon,
++      ui::ImageModel::FromVectorIcon(close_icon,
+                                      kColorFindBarButtonIconHovered));
+ 
+   SetOrientation(views::BoxLayout::Orientation::kVertical);
+diff --git a/chrome/browser/ui/views/frame/system_menu_model_builder.cc b/chrome/browser/ui/views/frame/system_menu_model_builder.cc
+index 93fbff46961aa..13e68fc3883f8 100644
+--- a/chrome/browser/ui/views/frame/system_menu_model_builder.cc
++++ b/chrome/browser/ui/views/frame/system_menu_model_builder.cc
+@@ -257,8 +257,12 @@ void SystemMenuModelBuilder::BuildSystemMenuForBrowserWindow(
+ #if BUILDFLAG(IS_WIN)
+   if (features::IsMenuSimplificationEnabled()) {
+     model->AddSeparator(ui::NORMAL_SEPARATOR);
+-    AddItemWithIconMaybe(model, IDC_CLOSE_WINDOW, IDS_CLOSE_WINDOW_MENU_WIN,
+-                         kCloseChromeRefreshOldIcon);
++    AddItemWithIconMaybe(
++        model, IDC_CLOSE_WINDOW, IDS_CLOSE_WINDOW_MENU_WIN,
++        base::CommandLine::ForCurrentProcess()->HasSwitch(
++            "disable-thorium-icons")
++            ? kCloseChromeRefreshOldIcon
++            : kCloseChromeRefreshThoriumIcon);
+   }
+ #endif  // BUILDFLAG(IS_WIN)
+ 
 diff --git a/chrome/browser/ui/views/global_media_controls/media_toolbar_button_view.cc b/chrome/browser/ui/views/global_media_controls/media_toolbar_button_view.cc
 index 5e008d4166e48..d1977d97c5fb7 100644
 --- a/chrome/browser/ui/views/global_media_controls/media_toolbar_button_view.cc
@@ -615,6 +703,37 @@ index d0f61863c6dae..22a612cfef457 100644
  }
  
  void ProfileMenuView::MaybeBuildSignoutButton() {
+diff --git a/chrome/browser/ui/views/tabs/projects/projects_panel_controls_view.cc b/chrome/browser/ui/views/tabs/projects/projects_panel_controls_view.cc
+index cd5bd04af0ede..7cf742dc60af8 100644
+--- a/chrome/browser/ui/views/tabs/projects/projects_panel_controls_view.cc
++++ b/chrome/browser/ui/views/tabs/projects/projects_panel_controls_view.cc
+@@ -6,6 +6,7 @@
+ 
+ #include <memory>
+ 
++#include "base/command_line.h"
+ #include "chrome/app/vector_icons/vector_icons.h"
+ #include "chrome/browser/ui/actions/chrome_action_id.h"
+ #include "chrome/browser/ui/browser_element_identifiers.h"
+@@ -41,10 +42,14 @@ ProjectsPanelControlsView::ProjectsPanelControlsView(
+   projects_button_->SetHorizontalAlignment(gfx::ALIGN_RIGHT);
+   projects_button_->SetImageModel(
+       views::Button::ButtonState::STATE_NORMAL,
+-      ui::ImageModel::FromVectorIcon(features::IsRoundedIconsEnabled()
+-                                         ? kCloseSmallIcon
+-                                         : kCloseChromeRefreshOldIcon,
+-                                     ui::kColorIcon));
++      ui::ImageModel::FromVectorIcon(
++          features::IsRoundedIconsEnabled()
++              ? kCloseSmallIcon
++              : (base::CommandLine::ForCurrentProcess()->HasSwitch(
++                     "disable-thorium-icons")
++                     ? kCloseChromeRefreshOldIcon
++                     : kCloseChromeRefreshThoriumIcon),
++          ui::kColorIcon));
+   projects_button_->SetProperty(views::kElementIdentifierKey,
+                                 kProjectsPanelButtonElementId);
+   UpdateTooltipText();
 diff --git a/chrome/browser/ui/views/toolbar/back_forward_button.cc b/chrome/browser/ui/views/toolbar/back_forward_button.cc
 index bbbdc846ef822..b1862af8ef913 100644
 --- a/chrome/browser/ui/views/toolbar/back_forward_button.cc
@@ -826,6 +945,80 @@ index 2f28c96117c4a..20f4be1568f3a 100644
                 kToolbarAvatarButtonElementId, kToolbarAvatarBubbleElementId),
             /*is_section_end=*/false)});
  
+diff --git a/chrome/browser/ui/webui/webui_toolbar/icon_table.cc b/chrome/browser/ui/webui/webui_toolbar/icon_table.cc
+index 4f61f7a11797f..fc7c55247daf2 100644
+--- a/chrome/browser/ui/webui/webui_toolbar/icon_table.cc
++++ b/chrome/browser/ui/webui/webui_toolbar/icon_table.cc
+@@ -116,6 +116,8 @@ const base::flat_map<const gfx::VectorIcon*, IconInfo>& KnownIcons() {
+            {"webui-toolbar:chrome_product", IconType::kIconSet}},
+           {{&omnibox::kHttpChromeRefreshOldIcon},
+            {"webui-toolbar:http_chrome_refresh_old", IconType::kIconSet}},
++          {{&omnibox::kHttpChromeRefreshThoriumIcon},
++           {"webui-toolbar:http_chrome_refresh_old", IconType::kIconSet}},
+           {{&omnibox::kInfoIcon}, {"webui-toolbar:info", IconType::kIconSet}},
+           {{&omnibox::kPageChromeRefreshOldIcon},
+            {"webui-toolbar:page_chrome_refresh_old", IconType::kIconSet}},
+diff --git a/chrome/browser/ui/webui_browser/webui_browser_page_handler.cc b/chrome/browser/ui/webui_browser/webui_browser_page_handler.cc
+index 3ba14e72895ed..e51b32af9eb36 100644
+--- a/chrome/browser/ui/webui_browser/webui_browser_page_handler.cc
++++ b/chrome/browser/ui/webui_browser/webui_browser_page_handler.cc
+@@ -121,9 +121,11 @@ class WebUIBrowserGuestHandler
+                       .location_bar_model()
+                       ->GetVectorIcon();
+     webui_browser::mojom::SecurityIcon icon_type;
+-    if (icon == &(features::IsRoundedIconsEnabled()
+-                      ? omnibox::kInfoIcon
+-                      : omnibox::kHttpChromeRefreshOldIcon)) {
++    if (icon ==
++            &(features::IsRoundedIconsEnabled()
++                  ? omnibox::kInfoIcon
++                  : omnibox::kHttpChromeRefreshOldIcon) ||
++        icon == &omnibox::kHttpChromeRefreshThoriumIcon) {
+       icon_type = webui_browser::mojom::SecurityIcon::HttpChromeRefresh;
+     } else if (icon == &(features::IsRoundedIconsEnabled()
+                              ? omnibox::kPageInfoCustomIcon
+diff --git a/components/omnibox/browser/location_bar_model_util.cc b/components/omnibox/browser/location_bar_model_util.cc
+index e86e784ffe793..fda2c92b1d252 100644
+--- a/components/omnibox/browser/location_bar_model_util.cc
++++ b/components/omnibox/browser/location_bar_model_util.cc
+@@ -4,6 +4,7 @@
+ 
+ #include "components/omnibox/browser/location_bar_model_util.h"
+ 
++#include "base/command_line.h"
+ #include "base/feature_list.h"
+ #include "base/notreached.h"
+ #include "build/build_config.h"
+@@ -32,9 +33,13 @@ const gfx::VectorIcon& GetSecurityVectorIcon(
+ 
+   switch (security_level) {
+     case security_state::NONE:
+-      return features::IsRoundedIconsEnabled()
+-                 ? omnibox::kInfoIcon
+-                 : omnibox::kHttpChromeRefreshOldIcon;
++      if (features::IsRoundedIconsEnabled()) {
++        return omnibox::kInfoIcon;
++      }
++      return base::CommandLine::ForCurrentProcess()->HasSwitch(
++                 "disable-thorium-icons")
++                 ? omnibox::kHttpChromeRefreshOldIcon
++                 : omnibox::kHttpChromeRefreshThoriumIcon;
+     case security_state::SECURE:
+       return features::IsRoundedIconsEnabled()
+                  ? omnibox::kPageInfoCustomIcon
+diff --git a/components/omnibox/browser/location_bar_model_util_unittest.cc b/components/omnibox/browser/location_bar_model_util_unittest.cc
+index 3a4b1145fb0e8..5df728633171e 100644
+--- a/components/omnibox/browser/location_bar_model_util_unittest.cc
++++ b/components/omnibox/browser/location_bar_model_util_unittest.cc
+@@ -22,7 +22,7 @@ TEST(LocationBarModelUtilTest, GetSecurityVectorIconWithNoneLevel) {
+       security_state::SecurityLevel::NONE, &visible_security_state);
+   EXPECT_EQ(icon.name, features::IsRoundedIconsEnabled()
+                            ? omnibox::kInfoIcon.name
+-                           : omnibox::kHttpChromeRefreshOldIcon.name);
++                           : omnibox::kHttpChromeRefreshThoriumIcon.name);
+ }
+ 
+ TEST(LocationBarModelUtilTest, GetSecurityVectorIconWithSecureLevel) {
 diff --git a/ui/views/bubble/bubble_frame_view.cc b/ui/views/bubble/bubble_frame_view.cc
 index 15bdfd36473dd..88ca859b26b82 100644
 --- a/ui/views/bubble/bubble_frame_view.cc
