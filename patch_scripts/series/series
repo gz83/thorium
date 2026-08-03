@@ -173,7 +173,6 @@ other/windows-profile-shortcut-icon-version.patch
 other/disable-aero.patch
 other/android-disable-signin-without-account-manager.patch
 other/android-extensions-support.patch
-other/chrome-web-store-protection.patch
 other/enable-extension-in-incognito.patch
 other/add-quick-extension-toggle-menu.patch
 

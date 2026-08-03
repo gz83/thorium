@@ -67,7 +67,6 @@ overlay-derived, or still need separate provenance review.
 | [`keep-expired-flags.patch`](../other/keep-expired-flags.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) keep expired flags patch |
 | [`allow_manifest_v2_extensions.patch`](../other/allow_manifest_v2_extensions.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) Manifest V2 extension support patch |
 | [`android-extensions-support.patch`](../other/android-extensions-support.patch) | [uazo/Cromite](https://github.com/uazo/cromite) experimental Android extensions support patch |
-| [`chrome-web-store-protection.patch`](../other/chrome-web-store-protection.patch) | [uazo/Cromite](https://github.com/uazo/cromite) Chrome Web Store protection patch |
 | [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch) | [uazo/Cromite](https://github.com/uazo/cromite) enable extension in incognito patch |
 | [`GPC.patch`](../other/GPC.patch) | Global Privacy Control behavior adapted from privacy-focused Chromium patch references |
 | [`disable-middle-click-paste-with-autoscroll.patch`](../other/disable-middle-click-paste-with-autoscroll.patch) | Thorium-maintained Linux behavior fix for disabling selection clipboard paste paths when Blink MiddleClickAutoscroll is enabled |
@@ -250,7 +249,6 @@ overlay-derived, or still need separate provenance review.
 - [`disable-aero.patch`](../other/disable-aero.patch)
 - [`android-disable-signin-without-account-manager.patch`](../other/android-disable-signin-without-account-manager.patch)
 - [`android-extensions-support.patch`](../other/android-extensions-support.patch)
-- [`chrome-web-store-protection.patch`](../other/chrome-web-store-protection.patch)
 - [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch)
 - [`add-quick-extension-toggle-menu.patch`](../other/add-quick-extension-toggle-menu.patch) - Adds a default-off, `chrome://flags`-controlled quick enable/disable section to the extensions menu.
 

@@ -171,10 +171,10 @@ index b7d5efa29693c..63cfee05f2315 100644
                                                          mModalDialogManagerSupplier.get(),
                                                          () -> {
 diff --git a/chrome/browser/extensions/api/developer_private/developer_private_functions.cc b/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
-index 1ae85aa58e80f..062bf4b97e864 100644
+index 7cd5cac0f14a2..068514429d75d 100644
 --- a/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
 +++ b/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
-@@ -1769,9 +1769,12 @@ DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction::Run() {
+@@ -1763,9 +1763,12 @@ DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction::Run() {
    }
  
    Profile* profile = Profile::FromBrowserContext(browser_context());

@@ -56,8 +56,7 @@ Choose a build that matches your CPU. A binary compiled for an unsupported SIMD 
 #### Extensions
 
 - Preinstalls classic uBlock Origin when Chromium's preinstall provider processes a new supported profile. Existing profiles are not force-backfilled, and uninstalling it prevents automatic reinstallation.
-- Keeps pending extension downloads and user-requested updates working, but disables automatic updates of installed extensions by default. Automatic updates can be restored through `thorium://flags/#enable-extension-autoupdate`.
-- Includes Manifest V2 support, increased declarative-net-request limits, a quick extension toggle menu, extension keyboard shortcuts, and controls for Chrome Web Store management APIs.
+- Includes Manifest V2 support, increased declarative-net-request limits, a quick extension toggle menu, and extension keyboard shortcuts.
 - Includes experimental desktop-style extension support on Android and an option to enable extensions in Incognito.
 
 #### Platform Integration and Tools
