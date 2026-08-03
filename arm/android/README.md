@@ -119,3 +119,17 @@ python3 build.py --expect-os android --expect-cpu arm64
 
 Replace `arm64` with `arm`, `x86`, or `x64` when using the corresponding
 configuration.
+
+The release APK filenames identify the actual GN target CPU. Android's `arm`
+target is published as `arm32` to distinguish 32-bit ARM from ARM64:
+
+| GN `target_cpu` | Filename suffix | Example browser APK |
+| --- | --- | --- |
+| `arm` | `arm32` | `Thorium_Public_arm32.apk` |
+| `arm64` | `arm64` | `Thorium_Public_arm64.apk` |
+| `x86` | `x86` | `Thorium_Public_x86.apk` |
+| `x64` | `x64` | `Thorium_Public_x64.apk` |
+
+The same suffix is used by `Thorium_Shell_*.apk` and
+`SystemWebView_*.apk`. Each output directory must still be generated and built
+for only one target CPU; renaming does not create a multi-architecture APK.

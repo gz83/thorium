@@ -1,3 +1,36 @@
+diff --git a/android_webview/BUILD.gn b/android_webview/BUILD.gn
+index 49f4e5682fdb3..bd6d2d0f80967 100644
+--- a/android_webview/BUILD.gn
++++ b/android_webview/BUILD.gn
+@@ -86,9 +86,14 @@ if (_is_default_toolchain) {
+     }
+   }
+ 
++  _thorium_apk_arch = current_cpu
++  if (current_cpu == "arm") {
++    _thorium_apk_arch = "arm32"
++  }
++
+   if (!android_64bit_target_cpu || defined(android_app_secondary_abi)) {
+     standalone_system_webview_apk_tmpl(_main_system_webview_apk_target) {
+-      apk_name = "SystemWebView"
++      apk_name = "SystemWebView_" + _thorium_apk_arch
+       if (android_64bit_target_cpu) {
+         is_64_bit_browser = false
+         include_64_bit_webview = true
+@@ -129,7 +134,11 @@ if (_is_default_toolchain) {
+ 
+   if (android_64bit_target_cpu) {
+     standalone_system_webview_apk_tmpl("system_webview_64_apk") {
+-      apk_name = "SystemWebView64"
++      if (defined(android_app_secondary_abi)) {
++        apk_name = "SystemWebView64"
++      } else {
++        apk_name = "SystemWebView_" + _thorium_apk_arch
++      }
+       is_64_bit_browser = true
+       include_32_bit_webview = false
+       include_64_bit_webview = true
 diff --git a/android_webview/system_webview_apk_tmpl.gni b/android_webview/system_webview_apk_tmpl.gni
 index 44bf6cebe9344..7b17f0f09c61d 100644
 --- a/android_webview/system_webview_apk_tmpl.gni
@@ -11,7 +44,7 @@ index 44bf6cebe9344..7b17f0f09c61d 100644
      if (_is_trichrome) {
        variables +=
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index 0ff13dbee299f..79c599fa7a31f 100644
+index 0ff13dbee299f..6ce5466279f81 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -20,58 +53,23 @@ index 0ff13dbee299f..79c599fa7a31f 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -147,20 +147,14 @@ if (_is_default_toolchain) {
-       "java/res_chromium_base/drawable/themed_app_icon.xml",
-       "java/res_chromium_base/mipmap-hdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-hdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-hdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/mipmap-mdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-mdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-mdpi/layered_app_icon_background.png",
--      "java/res_chromium_base/mipmap-nodpi/layered_app_icon_foreground.xml",
-       "java/res_chromium_base/mipmap-xhdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-xhdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-xhdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/mipmap-xxhdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-xxhdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-xxhdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/mipmap-xxxhdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-xxxhdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-xxxhdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/values/channel_constants.xml",
-     ]
+@@ -2075,9 +2075,14 @@ if (_is_default_toolchain) {
+     }
    }
-@@ -1772,20 +1766,14 @@ if (_is_default_toolchain) {
-       "java/res_chromium_base/drawable/themed_app_icon.xml",
-       "java/res_chromium_base/mipmap-hdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-hdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-hdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/mipmap-mdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-mdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-mdpi/layered_app_icon_background.png",
--      "java/res_chromium_base/mipmap-nodpi/layered_app_icon_foreground.xml",
-       "java/res_chromium_base/mipmap-xhdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-xhdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-xhdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/mipmap-xxhdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-xxhdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-xxhdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/mipmap-xxxhdpi/app_icon.png",
-       "java/res_chromium_base/mipmap-xxxhdpi/layered_app_icon.png",
--      "java/res_chromium_base/mipmap-xxxhdpi/layered_app_icon_background.png",
-       "java/res_chromium_base/values/channel_constants.xml",
-     ]
  
-@@ -2077,7 +2065,7 @@ if (_is_default_toolchain) {
- 
++  _thorium_apk_arch = current_cpu
++  if (current_cpu == "arm") {
++    _thorium_apk_arch = "arm32"
++  }
++
    chrome_public_apk_or_module_tmpl("chrome_public_apk") {
      target_type = "android_apk"
 -    apk_name = "ChromePublic"
-+    apk_name = "Thorium_Public"
++    apk_name = "Thorium_Public_" + _thorium_apk_arch
      if (defined(android_app_secondary_abi)) {
        # Ensure 64-bit chrome does not depend on 32-bit things.
        assert_no_deps =
-@@ -2093,7 +2081,7 @@ if (_is_default_toolchain) {
+@@ -2093,7 +2098,7 @@ if (_is_default_toolchain) {
    }
  
    chrome_public_bundle("chrome_public_bundle") {
@@ -80,7 +78,7 @@ index 0ff13dbee299f..79c599fa7a31f 100644
    }
  
    generate_jni("base_module_jni") {
-@@ -2330,7 +2318,7 @@ if (_is_default_toolchain) {
+@@ -2330,7 +2335,7 @@ if (_is_default_toolchain) {
    # scoped, and do not leave lingering state after execution.
    # TODO(crbug.com/40193330): Set clear rules for what tests can be added here.
    chrome_public_test_apk_tmpl("chrome_public_unit_test_apk") {
@@ -89,7 +87,7 @@ index 0ff13dbee299f..79c599fa7a31f 100644
      deps = [
        ":chrome_unit_test_java",
        "//build/config/android/test/resource_overlay:unit_device_javatests",
-@@ -2402,7 +2390,7 @@ if (_is_default_toolchain) {
+@@ -2402,7 +2407,7 @@ if (_is_default_toolchain) {
  
    # TODO(crbug.com/40193330): Rename to chrome_public_integration_test_apk
    chrome_public_test_apk_tmpl("chrome_public_test_apk") {

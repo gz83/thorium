@@ -1430,10 +1430,10 @@ index bb746dbc448b8..d485393eb6487 100644
  
      /**
 diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java
-index 1412e241a555e..a0b6e95fca1ca 100644
+index 1412e241a555e..409149ba080be 100644
 --- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java
 +++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java
-@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
+@@ -9,9 +9,11 @@ import android.graphics.Bitmap;
  
  import androidx.annotation.VisibleForTesting;
  
@@ -1441,7 +1441,11 @@ index 1412e241a555e..a0b6e95fca1ca 100644
  import org.chromium.base.lifetime.Destroyable;
  import org.chromium.base.supplier.NullableObservableSupplier;
  import org.chromium.build.annotations.NullMarked;
-@@ -51,9 +52,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
++import org.chromium.build.annotations.Nullable;
+ import org.chromium.chrome.browser.extensions.ContextMenuSource;
+ import org.chromium.chrome.browser.profiles.Profile;
+ import org.chromium.chrome.browser.tab.Tab;
+@@ -51,9 +53,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
      private final Runnable mOnReady;
      private final Runnable mOnDismissMenu;
      private final ChromeAndroidTask mTask;
@@ -1452,7 +1456,7 @@ index 1412e241a555e..a0b6e95fca1ca 100644
  
      /**
       * @param context The context to use.
-@@ -80,18 +81,19 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -80,18 +82,19 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
              PropertyModel sitePermissionsPropertyModel,
              Runnable onDismissMenu,
              Runnable onReady,
@@ -1476,7 +1480,7 @@ index 1412e241a555e..a0b6e95fca1ca 100644
  
          mMainPageModel = mainPageModel;
          mSitePermissionsPageModel = sitePermissionsPropertyModel;
-@@ -120,7 +122,11 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -120,7 +123,11 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
  
          ExtensionActionContextMenuBridge contextMenuBridge =
                  new ExtensionActionContextMenuBridge(
@@ -1489,7 +1493,7 @@ index 1412e241a555e..a0b6e95fca1ca 100644
  
          ExtensionActionContextMenuUtils.showContextMenu(
                  mContext,
-@@ -183,7 +189,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -183,7 +190,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
      /** Destroys the mediator. */
      @Override
      public void destroy() {
@@ -1500,7 +1504,7 @@ index 1412e241a555e..a0b6e95fca1ca 100644
      }
  
      /**
-@@ -291,6 +299,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -291,6 +300,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
                      break;
                  }
              }
@@ -1510,7 +1514,7 @@ index 1412e241a555e..a0b6e95fca1ca 100644
              assert oldIndex != -1
                      : "Action model with ID " + entry.id + " should exist in mActionModels.";
  
-@@ -454,6 +465,14 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -454,6 +466,14 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
      private void openUrlFromMenu(String url) {
          mOnDismissMenu.run();
  
@@ -1525,7 +1529,7 @@ index 1412e241a555e..a0b6e95fca1ca 100644
          LoadUrlParams params = new LoadUrlParams(url, PageTransition.AUTO_TOPLEVEL);
          mTabCreator.createNewTab(params, TabLaunchType.FROM_CHROME_UI, null);
      }
-@@ -601,7 +620,7 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -601,7 +621,7 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
              // open web store button present in the zero state view.
              mMainPageModel.set(ExtensionsMenuProperties.DISCOVER_EXTENSIONS_VISIBLE, false);
          } else {

@@ -95,7 +95,7 @@ index 05ec8ec8bcaea..a1cb13b4bec4b 100644
      "//third_party/angle:includes",
    ]
 diff --git a/content/shell/android/BUILD.gn b/content/shell/android/BUILD.gn
-index 7e79de30c48bb..202d82c8684cc 100644
+index 7e79de30c48bb..7217dd05cddf4 100644
 --- a/content/shell/android/BUILD.gn
 +++ b/content/shell/android/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -104,16 +104,23 @@ index 7e79de30c48bb..202d82c8684cc 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -224,7 +224,7 @@ template("content_shell_apk_tmpl") {
+@@ -222,9 +222,14 @@ template("content_shell_apk_tmpl") {
+   }
+ }
  
++_thorium_apk_arch = current_cpu
++if (current_cpu == "arm") {
++  _thorium_apk_arch = "arm32"
++}
++
  content_shell_apk_tmpl("content_shell_apk") {
    target_type = "android_apk"
 -  apk_name = "ContentShell"
-+  apk_name = "Thorium_Shell"
++  apk_name = "Thorium_Shell_" + _thorium_apk_arch
    android_manifest = content_shell_manifest
    android_manifest_dep = ":content_shell_manifest"
    shared_libraries = [ ":libcontent_shell_content_view" ]
-@@ -234,7 +234,7 @@ content_shell_apk_tmpl("content_shell_apk") {
+@@ -234,7 +239,7 @@ content_shell_apk_tmpl("content_shell_apk") {
  
  content_shell_apk_tmpl("content_shell_test_apk") {
    target_type = "instrumentation_test_apk"

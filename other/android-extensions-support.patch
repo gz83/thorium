@@ -1,8 +1,8 @@
 diff --git a/android_webview/BUILD.gn b/android_webview/BUILD.gn
-index 49f4e5682fdb3..d75e4bf14183e 100644
+index bd6d2d0f80967..8ec17a3f68dad 100644
 --- a/android_webview/BUILD.gn
 +++ b/android_webview/BUILD.gn
-@@ -1273,7 +1273,7 @@ declare_args() {
+@@ -1282,7 +1282,7 @@ declare_args() {
        # logic more easily on an emulator, so the decision to use the arm64
        # orderfile for x64 (instead of arm32) is somewhat arbitrary. We just
        # needed to use some real orderfile.
@@ -239,10 +239,10 @@ index ce6e121c9b4bc..865de84c3c10e 100644
               features::kThrottleMainFrameTo60HzDesktopAndroid);
  #else
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index 79c599fa7a31f..3ba5a91dba827 100644
+index 6ce5466279f81..34b198d273eac 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
-@@ -1011,7 +1011,7 @@ if (_is_default_toolchain) {
+@@ -1017,7 +1017,7 @@ if (_is_default_toolchain) {
        "//components/visited_url_ranking/internal:internal_java",
      ]
  
@@ -251,7 +251,7 @@ index 79c599fa7a31f..3ba5a91dba827 100644
        deps +=
            [ "//chrome/browser/ui/android/extensions/windowing/internal:java" ]
      } else {
-@@ -2422,7 +2422,7 @@ if (_is_default_toolchain) {
+@@ -2439,7 +2439,7 @@ if (_is_default_toolchain) {
        "//components/embedder_support/android:virtual_structure_javatests",
      ]
  
@@ -482,6 +482,20 @@ index cfa270abe2a19..ae615d24d987b 100644
      }
  
      @Override
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/init/ProcessInitializationHandler.java b/chrome/android/java/src/org/chromium/chrome/browser/init/ProcessInitializationHandler.java
+index 29235c88fb946..5b1beabd01c38 100644
+--- a/chrome/android/java/src/org/chromium/chrome/browser/init/ProcessInitializationHandler.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/init/ProcessInitializationHandler.java
+@@ -976,7 +976,8 @@ public class ProcessInitializationHandler {
+         // performance manager manages it instead.
+         // TODO(crbug.com/467504869): Remove desktop check once the feature is launched on Android.
+         boolean isProtectRecentlyVisibleTabEnabled =
+-                DeviceInfo.isDesktop() || ChromeFeatureList.sProtectRecentlyVisibleTab.isEnabled();
++                DeviceInfo.isDesktopFalse()
++                        || ChromeFeatureList.sProtectRecentlyVisibleTab.isEnabled();
+         // Moderate binding doesn't apply to low end devices.
+         if (SysUtils.isLowEndDevice() || isProtectRecentlyVisibleTabEnabled) {
+             return;
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/media/document_picture_in_picture_header/DocumentPictureInPictureHeaderMediator.java b/chrome/android/java/src/org/chromium/chrome/browser/media/document_picture_in_picture_header/DocumentPictureInPictureHeaderMediator.java
 index d375e5065262e..491b25b1d9ab0 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/media/document_picture_in_picture_header/DocumentPictureInPictureHeaderMediator.java
@@ -530,6 +544,19 @@ index 8c697cfb48c29..b7f444d0a3f93 100644
          return instanceCount > threshold;
      }
  
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ntp/NewTabPageCoordinator.java b/chrome/android/java/src/org/chromium/chrome/browser/ntp/NewTabPageCoordinator.java
+index 98f8848e08805..d7a3bf43bc426 100644
+--- a/chrome/android/java/src/org/chromium/chrome/browser/ntp/NewTabPageCoordinator.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/ntp/NewTabPageCoordinator.java
+@@ -1145,7 +1145,7 @@ public class NewTabPageCoordinator implements ModuleDelegateHost {
+             SetupListManager.getInstance().maybePrimeCompletionStatus(profile.getOriginalProfile());
+         }
+ 
+-        if (!DeviceInfo.isDesktop() && mHomeModulesCoordinator == null) {
++        if (!DeviceInfo.isDesktopThorium() && mHomeModulesCoordinator == null) {
+             initializeHomeModulesImpl();
+         }
+         if (mHomeModulesCoordinator != null) {
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
 index db587085f68c7..2a0fd4485a1c8 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
@@ -656,6 +683,19 @@ index 8a8d752a07e66..6a552fa8e5944 100644
                      // Desktop uses the synced UserPref.
                      BookmarkBarUtils.toggleUserPrefsShowBookmarksBar(
                              mProfileSupplier.asNonNull().get(), /* fromKeyboardShortcut= */ true);
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeUtil.java b/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeUtil.java
+index 1a88d496481f3..f31c801999bfc 100644
+--- a/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeUtil.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeUtil.java
+@@ -129,7 +129,7 @@ public final class ReturnToChromeUtil {
+             PersistableBundle persistableBundle,
+             ChromeInactivityTracker inactivityTracker) {
+         // If the device is android desktop, don't show a NTP homepage.
+-        if (DeviceInfo.isDesktop()) {
++        if (DeviceInfo.isDesktopThorium()) {
+             return false;
+         }
+ 
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java b/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
 index 17f7465c79133..b7d5efa29693c 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
@@ -772,6 +812,20 @@ index 3e798a0963fbc..89e89c9dad816 100644
  #if BUILDFLAG(ENABLE_EXTENSIONS)
      {"api-contextual-tasks-private",
       flag_descriptions::kApiContextualTasksPrivateName,
+diff --git a/chrome/browser/android/autocomplete/tab_matcher_android.cc b/chrome/browser/android/autocomplete/tab_matcher_android.cc
+index da854f11defcb..5c05914ba75bf 100644
+--- a/chrome/browser/android/autocomplete/tab_matcher_android.cc
++++ b/chrome/browser/android/autocomplete/tab_matcher_android.cc
+@@ -132,7 +132,8 @@ std::vector<TabMatcher::TabWrapper> TabMatcherAndroid::GetOpenTabs(
+ std::vector<int64_t> TabMatcherAndroid::GetOpenAndroidTabs(
+     const AutocompleteInput* input) const {
+   using chrome::android::ActivityType;
+-  static const bool is_desktop = base::android::device_info::is_desktop();
++  static const bool is_desktop =
++      base::android::device_info::is_desktop_false();
+   // Collect tab models that host tabs eligible for SwitchToTab.
+   // Ignore:
+   // - tab models for not matching profile (eg. incognito vs non-incognito)
 diff --git a/chrome/browser/android/metrics/android_atoms_logger.cc b/chrome/browser/android/metrics/android_atoms_logger.cc
 index 88d48eccc5a31..7928cc6a16e27 100644
 --- a/chrome/browser/android/metrics/android_atoms_logger.cc
@@ -1190,7 +1244,7 @@ index 1783d12811ef3..4681742156c63 100644
    registry.AddGlobal<tracked_element::mojom::TrackedElementHandler>(
        base::BindRepeating(&BindTrackedElementHandler));
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index d5923509c1d45..e2d76eb02940e 100644
+index 12b5e1012ee38..e41590be34524 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
 @@ -4424,7 +4424,7 @@ base::OnceClosure ChromeContentBrowserClient::SelectClientCertificate(
@@ -1225,7 +1279,7 @@ index 1d082e6b0a98d..71538a6c01d18 100644
  
      /**
 diff --git a/chrome/browser/devtools/BUILD.gn b/chrome/browser/devtools/BUILD.gn
-index f2a7f5db9ebe4..a549d59d382f7 100644
+index f2a7f5db9ebe4..0e463bbc1d669 100644
 --- a/chrome/browser/devtools/BUILD.gn
 +++ b/chrome/browser/devtools/BUILD.gn
 @@ -374,7 +374,7 @@ static_library("devtools") {
@@ -1237,6 +1291,15 @@ index f2a7f5db9ebe4..a549d59d382f7 100644
      sources += [
        "global_confirm_info_bar.cc",
        "global_confirm_info_bar.h",
+@@ -637,7 +637,7 @@ if (enable_devtools_frontend) {
+       sources += [ "devtools_remote_server_infobar_browsertest.cc" ]
+     }
+ 
+-    if (!is_android || enable_desktop_android_extensions) {
++    if (!is_android || enable_desktop_android_extensions_thorium) {
+       sources += [ "global_confirm_info_bar_browsertest.cc" ]
+     }
+   }
 diff --git a/chrome/browser/download/BUILD.gn b/chrome/browser/download/BUILD.gn
 index c6a53b1843e43..a6318621055f6 100644
 --- a/chrome/browser/download/BUILD.gn
@@ -1648,16 +1711,15 @@ index 9086cf5c263a4..c804f4d8b33ed 100644
    return ExtensionsDisabledViaCommandLine(command_line) ||
           profile->GetPrefs()->GetBoolean(prefs::kDisableExtensions);
 diff --git a/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java b/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java
-index 455f56f857496..d5fef3a6a15f8 100644
+index 455f56f857496..cdcb9ab924e7c 100644
 --- a/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java
 +++ b/chrome/browser/feed/android/java/src/org/chromium/chrome/browser/feed/FeedFeatures.java
-@@ -26,7 +26,8 @@ public final class FeedFeatures {
+@@ -26,7 +26,7 @@ public final class FeedFeatures {
       *     enterprise policy, or by flag. The value returned should not be cached as it may change.
       */
      public static boolean isFeedEnabled(Profile profile) {
 -        return !DeviceInfo.isDesktop()
-+        return (!ChromeFeatureList.sNtpSimplification.isEnabled()
-+                        || !DeviceInfo.isDesktopThorium())
++        return !DeviceInfo.isDesktopThorium()
                  && FeedServiceBridge.isEnabled()
                  && isFeedEnabledByDse(profile);
      }
@@ -1883,6 +1945,19 @@ index 29906af5d46c3..a66149ad8b080 100644
      return std::make_unique<GzippedLogFileWriterFactory>(
          std::make_unique<GzipLogCompressorFactory>(
              std::make_unique<DefaultGzippedSizeEstimator::Factory>()));
+diff --git a/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationMediator.java b/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationMediator.java
+index 55c59468d8648..6001e15ef806d 100644
+--- a/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationMediator.java
++++ b/chrome/browser/ntp_customization/java/src/org/chromium/chrome/browser/ntp_customization/NtpCustomizationMediator.java
+@@ -343,7 +343,7 @@ public class NtpCustomizationMediator implements TemplateUrlServiceObserver {
+         List<Integer> content = new ArrayList<>();
+         content.add(MVT);
+ 
+-        if (!DeviceInfo.isDesktop()) {
++        if (!DeviceInfo.isDesktopThorium()) {
+             content.add(NTP_CARDS);
+         }
+         assumeNonNull(mProfile);
 diff --git a/chrome/browser/open_in_app/android/java/src/org/chromium/chrome/browser/open_in_app/OpenInAppUtils.java b/chrome/browser/open_in_app/android/java/src/org/chromium/chrome/browser/open_in_app/OpenInAppUtils.java
 index 7bffc96c135ee..9594c0288652c 100644
 --- a/chrome/browser/open_in_app/android/java/src/org/chromium/chrome/browser/open_in_app/OpenInAppUtils.java
@@ -1896,11 +1971,24 @@ index 7bffc96c135ee..9594c0288652c 100644
      }
  
      private OpenInAppUtils() {}
+diff --git a/chrome/browser/performance_manager/policies/discard_eligibility_policy.cc b/chrome/browser/performance_manager/policies/discard_eligibility_policy.cc
+index 501ff335606d0..d643292538a4d 100644
+--- a/chrome/browser/performance_manager/policies/discard_eligibility_policy.cc
++++ b/chrome/browser/performance_manager/policies/discard_eligibility_policy.cc
+@@ -186,7 +186,7 @@ CanDiscardResult DiscardEligibilityPolicy::CanDiscard(
+   base::TimeDelta minimum_time_in_background =
+       internal::kNonVisiblePagesUrgentProtectionTime;
+ #if BUILDFLAG(IS_ANDROID)
+-  if (base::android::device_info::is_desktop() ||
++  if (base::android::device_info::is_desktop_false() ||
+       base::FeatureList::IsEnabled(
+           chrome::android::kProtectRecentlyVisibleTab)) {
+     minimum_time_in_background = base::Seconds(
 diff --git a/chrome/browser/performance_manager/policies/process_rank_policy_android.cc b/chrome/browser/performance_manager/policies/process_rank_policy_android.cc
-index 710b74d58ce8f..b69d8c5dafc50 100644
+index 710b74d58ce8f..b1538507cee6d 100644
 --- a/chrome/browser/performance_manager/policies/process_rank_policy_android.cc
 +++ b/chrome/browser/performance_manager/policies/process_rank_policy_android.cc
-@@ -129,7 +129,7 @@ class WebViewUpdater : public PageNodeObserver,
+@@ -129,13 +129,13 @@ class WebViewUpdater : public PageNodeObserver,
  namespace {
  
  bool IsChangeUnfocusedPriorityEnabled() {
@@ -1908,6 +1996,13 @@ index 710b74d58ce8f..b69d8c5dafc50 100644
 +  return base::android::device_info::is_desktop_false() ||
           base::FeatureList::IsEnabled(
               chrome::android::kChangeUnfocusedPriority);
+ }
+ 
+ bool IsProtectRecentlyVisibleTabEnabled() {
+-  return base::android::device_info::is_desktop() ||
++  return base::android::device_info::is_desktop_false() ||
+          base::FeatureList::IsEnabled(
+              chrome::android::kProtectRecentlyVisibleTab);
  }
 diff --git a/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc b/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
 index faa78dde106bd..98a5a1f29384d 100644
@@ -3511,6 +3606,19 @@ index 6e9922af171d7..f9bebfe07fdc1 100644
    // Returns a pointer to a controller host that sends media commands related to
    // mirroring within a route.
    virtual MirroringMediaControllerHost* GetMirroringMediaControllerHost(
+diff --git a/components/omnibox/browser/autocomplete_classifier.cc b/components/omnibox/browser/autocomplete_classifier.cc
+index 7322b014de0f2..b886eecbda1b6 100644
+--- a/components/omnibox/browser/autocomplete_classifier.cc
++++ b/components/omnibox/browser/autocomplete_classifier.cc
+@@ -93,7 +93,7 @@ int AutocompleteClassifier::DefaultOmniboxProviders(bool is_low_memory_device) {
+       AutocompleteProvider::TYPE_ZERO_SUGGEST_LOCAL_HISTORY |
+       (base::FeatureList::IsEnabled(omnibox::kDocumentProvider)
+ #if BUILDFLAG(IS_ANDROID)
+-               && base::android::device_info::is_desktop()
++               && base::android::device_info::is_desktop_false()
+ #endif
+            ? AutocompleteProvider::TYPE_DOCUMENT
+            : 0) |
 diff --git a/components/omnibox/browser/autocomplete_controller.cc b/components/omnibox/browser/autocomplete_controller.cc
 index 22af8003c7e09..ea96402e7a29a 100644
 --- a/components/omnibox/browser/autocomplete_controller.cc

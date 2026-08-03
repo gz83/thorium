@@ -54,7 +54,9 @@ Run these commands from the Thorium repository root. You may pass
 
 On Android, Thorium's normal build flow directly builds the upstream
 `content_shell_apk` target; the branding patch changes its produced APK name to
-`Thorium_Shell.apk`. The `thorium_shell` GN group also depends on that APK.
+`Thorium_Shell_<architecture>.apk`. The `thorium_shell` GN group also depends
+on that APK. The suffix is `arm32`, `arm64`, `x86`, or `x64`, matching the
+selected Android output configuration.
 
 Expected branded products are:
 
@@ -63,7 +65,7 @@ Expected branded products are:
 | Linux | `thorium_shell`, with the packaged `thorium-shell` launcher |
 | Windows | `thorium_shell.exe` |
 | macOS | `Thorium Shell.app` |
-| Android | `Thorium_Shell.apk` |
+| Android | `Thorium_Shell_arm32.apk`, `Thorium_Shell_arm64.apk`, `Thorium_Shell_x86.apk`, or `Thorium_Shell_x64.apk` |
 
 ## Run
 
