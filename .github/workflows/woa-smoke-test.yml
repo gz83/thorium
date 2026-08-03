@@ -14,7 +14,7 @@ on:
         default: true
         type: boolean
       source_run_id:
-        description: Run ID containing the artifact; empty means the caller run
+        description: Run ID containing the artifact; used when current_run_artifact is false
         required: false
         default: ""
         type: string
@@ -90,15 +90,11 @@ permissions:
   actions: read
   contents: read
 
-concurrency:
-  group: woa-smoke-${{ github.run_id }}-${{ github.run_attempt }}
-  cancel-in-progress: false
-
 jobs:
   smoke-test:
     name: Install and run on Windows ARM64
     runs-on: windows-11-arm
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       INPUT_DIRECTORY: ${{ github.workspace }}\woa-input
       RESULT_DIRECTORY: ${{ github.workspace }}\woa-smoke-results
@@ -180,5 +176,5 @@ jobs:
         with:
           name: woa-smoke-report-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.RESULT_DIRECTORY }}
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14

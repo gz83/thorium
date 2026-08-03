@@ -45,6 +45,10 @@ $crashRoot = Join-Path $resultRoot 'crash-dumps'
 $werDumpDirectory = Join-Path $crashRoot 'wer'
 $uninstallerStdout = Join-Path $resultRoot 'uninstaller.stdout.txt'
 $uninstallerStderr = Join-Path $resultRoot 'uninstaller.stderr.txt'
+$cleanupUninstallerStdout =
+    Join-Path $resultRoot 'cleanup-uninstaller.stdout.txt'
+$cleanupUninstallerStderr =
+    Join-Path $resultRoot 'cleanup-uninstaller.stderr.txt'
 
 $result = [ordered]@{
   SchemaVersion = 6
@@ -71,8 +75,10 @@ $result = [ordered]@{
 }
 $script:result = $result
 $failed = $null
+$transcriptStarted = $false
 $installRoot = Join-Path $env:LOCALAPPDATA 'Thorium\Application'
 $browser = Join-Path $installRoot 'thorium.exe'
+$testPage = Join-Path $env:RUNNER_TEMP 'thorium-woa-smoke.html'
 $profile = Join-Path $env:RUNNER_TEMP 'thorium-woa-smoke-profile'
 $noSandboxProfile = Join-Path $env:RUNNER_TEMP 'thorium-woa-no-sandbox-profile'
 $noExtensionsProfile = Join-Path $env:RUNNER_TEMP 'thorium-woa-no-extensions-profile'
@@ -81,6 +87,7 @@ $werRegistryRoot =
     'HKCU:\Software\Microsoft\Windows\Windows Error Reporting\LocalDumps'
 $werRegistryPath = Join-Path $werRegistryRoot 'thorium.exe'
 $werConfigurationCreated = $false
+$werRegistryRootCreated = $false
 $uninstaller = $null
 $uninstallCompleted = $false
 $headlessError = $null
@@ -297,7 +304,10 @@ function Enable-WerLocalDumps {
   if (Test-Path -LiteralPath $werRegistryPath) {
     throw "Refusing to overwrite an existing WER LocalDumps configuration: $werRegistryPath"
   }
-  New-Item -Path $werRegistryRoot -Force | Out-Null
+  if (-not (Test-Path -LiteralPath $werRegistryRoot)) {
+    New-Item -Path $werRegistryRoot -Force | Out-Null
+    $script:werRegistryRootCreated = $true
+  }
   New-Item -Path $werRegistryPath -Force | Out-Null
   $script:werConfigurationCreated = $true
   New-ItemProperty `
@@ -326,6 +336,22 @@ function Disable-WerLocalDumps {
     Remove-Item -LiteralPath $werRegistryPath -Recurse -Force
   }
   $script:werConfigurationCreated = $false
+  if ($script:werRegistryRootCreated -and
+      (Test-Path -LiteralPath $werRegistryRoot)) {
+    $rootKey = Get-Item -LiteralPath $werRegistryRoot
+    try {
+      $hasValues = @($rootKey.GetValueNames()).Count -ne 0
+    } finally {
+      $rootKey.Dispose()
+    }
+    $hasSubkeys = @(
+      Get-ChildItem -LiteralPath $werRegistryRoot -ErrorAction Stop
+    ).Count -ne 0
+    if (-not $hasSubkeys -and -not $hasValues) {
+      Remove-Item -LiteralPath $werRegistryRoot -Force
+    }
+  }
+  $script:werRegistryRootCreated = $false
 }
 
 function Invoke-CapturedProcess {
@@ -422,8 +448,87 @@ function Invoke-CapturedProcess {
   }
 }
 
-Start-Transcript -Path $transcriptPath -Force | Out-Null
+function Invoke-HeadlessProbe {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$BrowserPath,
+    [Parameter(Mandatory = $true)]
+    [string]$ProfileDirectory,
+    [Parameter(Mandatory = $true)]
+    [string]$TestUrl,
+    [Parameter(Mandatory = $true)]
+    [string[]]$CommonArguments,
+    [string[]]$AdditionalArguments = @(),
+    [Parameter(Mandatory = $true)]
+    [int]$TimeoutSeconds,
+    [Parameter(Mandatory = $true)]
+    [string]$StandardOutputPath,
+    [Parameter(Mandatory = $true)]
+    [string]$StandardErrorPath,
+    [Parameter(Mandatory = $true)]
+    [string]$CrashDumpDirectory
+  )
+
+  if (Test-Path -LiteralPath $ProfileDirectory) {
+    Remove-Item -LiteralPath $ProfileDirectory -Recurse -Force
+  }
+  $arguments = @(
+    $CommonArguments
+    $AdditionalArguments
+    "--user-data-dir=$ProfileDirectory"
+    '--dump-dom'
+    $TestUrl
+  )
+  $processResult = Invoke-CapturedProcess `
+    -FilePath $BrowserPath `
+    -Arguments $arguments `
+    -TimeoutSeconds $TimeoutSeconds `
+    -StandardOutputPath $StandardOutputPath `
+    -StandardErrorPath $StandardErrorPath `
+    -CrashDumpDirectory $CrashDumpDirectory
+  $rendered = [System.IO.File]::ReadAllText(
+    $StandardOutputPath
+  ).Contains('THORIUM_WOA_SMOKE_OK')
+  return [pscustomobject]@{
+    Process = $processResult
+    Rendered = $rendered
+    Diagnostic = [ordered]@{
+      Rendered = $rendered
+      TimedOut = $processResult.TimedOut
+      ExitCode = $processResult.ExitCode
+      CrashDetected = $processResult.CrashDetected
+      CrashDumpReady = $processResult.CrashDumpReady
+      RendererTerminationDetected =
+          $processResult.RendererTerminationDetected
+      RendererExitCode = $processResult.RendererExitCode
+      ProbableRendererNtStatus = $processResult.ProbableRendererNtStatus
+    }
+  }
+}
+
+function Remove-TemporaryPath {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path,
+    [Parameter(Mandatory = $true)]
+    [string]$Description
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) {
+    return
+  }
+  try {
+    Remove-Item -LiteralPath $Path -Recurse -Force
+  } catch {
+    $script:result.CleanupWarnings.Add(
+      "Could not remove ${Description}: $($_.Exception.Message)"
+    )
+  }
+}
+
 try {
+  Start-Transcript -Path $transcriptPath -Force | Out-Null
+  $transcriptStarted = $true
   if ($env:PROCESSOR_ARCHITECTURE -ne 'ARM64') {
     throw "The smoke test must run natively on Windows ARM64; got $env:PROCESSOR_ARCHITECTURE."
   }
@@ -437,7 +542,10 @@ try {
     throw "Expected exactly one installer matching '$InstallerPattern' under '$artifactRoot'; found $($installers.Count)."
   }
   $installer = $installers[0]
-  $result.Installer = $installer.FullName
+  $result.Installer = [System.IO.Path]::GetRelativePath(
+    $artifactRoot,
+    $installer.FullName
+  ).Replace('\', '/')
   $null = Assert-Arm64Pe `
     -Files @($installer) `
     -CheckName 'Installer architecture'
@@ -517,10 +625,6 @@ try {
   }
   $uninstaller = $uninstallers[0].FullName
 
-  if (Test-Path -LiteralPath $profile) {
-    Remove-Item -LiteralPath $profile -Recurse -Force
-  }
-  $testPage = Join-Path $env:RUNNER_TEMP 'thorium-woa-smoke.html'
   $testPageContents = @'
 <!doctype html>
 <meta charset="utf-8">
@@ -566,93 +670,46 @@ try {
     '--no-default-browser-check',
     '--enable-logging=stderr'
   )
-  $browserProcess = Invoke-CapturedProcess `
-    -FilePath $browser `
-    -Arguments @(
-      $commonHeadlessArguments
-      "--user-data-dir=$profile",
-      '--dump-dom',
-      $testUrl
-    ) `
+  $headlessProbe = Invoke-HeadlessProbe `
+    -BrowserPath $browser `
+    -ProfileDirectory $profile `
+    -TestUrl $testUrl `
+    -CommonArguments $commonHeadlessArguments `
     -TimeoutSeconds $BrowserTimeoutSeconds `
     -StandardOutputPath $browserStdout `
     -StandardErrorPath $browserStderr `
     -CrashDumpDirectory (Join-Path $crashRoot 'headless')
-  $browserOutput = [System.IO.File]::ReadAllText($browserStdout)
-  $browserRendered = $browserOutput.Contains('THORIUM_WOA_SMOKE_OK')
-  $result.HeadlessDiagnostic = [ordered]@{
-    Rendered = $browserRendered
-    TimedOut = $browserProcess.TimedOut
-    ExitCode = $browserProcess.ExitCode
-    CrashDetected = $browserProcess.CrashDetected
-    CrashDumpReady = $browserProcess.CrashDumpReady
-    RendererTerminationDetected =
-        $browserProcess.RendererTerminationDetected
-    RendererExitCode = $browserProcess.RendererExitCode
-    ProbableRendererNtStatus = $browserProcess.ProbableRendererNtStatus
-  }
+  $browserProcess = $headlessProbe.Process
+  $browserRendered = $headlessProbe.Rendered
+  $result.HeadlessDiagnostic = $headlessProbe.Diagnostic
   if (-not $browserRendered) {
-    if (Test-Path -LiteralPath $noExtensionsProfile) {
-      Remove-Item -LiteralPath $noExtensionsProfile -Recurse -Force
-    }
-    $noExtensionsProcess = Invoke-CapturedProcess `
-      -FilePath $browser `
-      -Arguments @(
-        $commonHeadlessArguments
-        '--disable-extensions'
-        "--user-data-dir=$noExtensionsProfile"
-        '--dump-dom'
-        $testUrl
-      ) `
+    $noExtensionsProbe = Invoke-HeadlessProbe `
+      -BrowserPath $browser `
+      -ProfileDirectory $noExtensionsProfile `
+      -TestUrl $testUrl `
+      -CommonArguments $commonHeadlessArguments `
+      -AdditionalArguments @('--disable-extensions') `
       -TimeoutSeconds $BrowserTimeoutSeconds `
       -StandardOutputPath $noExtensionsStdout `
       -StandardErrorPath $noExtensionsStderr `
       -CrashDumpDirectory (Join-Path $crashRoot 'no-extensions')
-    $noExtensionsOutput = [System.IO.File]::ReadAllText($noExtensionsStdout)
-    $noExtensionsRendered = $noExtensionsOutput.Contains('THORIUM_WOA_SMOKE_OK')
-    $result.HeadlessNoExtensionsDiagnostic = [ordered]@{
-      Rendered = $noExtensionsRendered
-      TimedOut = $noExtensionsProcess.TimedOut
-      ExitCode = $noExtensionsProcess.ExitCode
-      CrashDetected = $noExtensionsProcess.CrashDetected
-      CrashDumpReady = $noExtensionsProcess.CrashDumpReady
-      RendererTerminationDetected =
-          $noExtensionsProcess.RendererTerminationDetected
-      RendererExitCode = $noExtensionsProcess.RendererExitCode
-      ProbableRendererNtStatus =
-          $noExtensionsProcess.ProbableRendererNtStatus
-    }
+    $noExtensionsProcess = $noExtensionsProbe.Process
+    $noExtensionsRendered = $noExtensionsProbe.Rendered
+    $result.HeadlessNoExtensionsDiagnostic = $noExtensionsProbe.Diagnostic
 
-    if (Test-Path -LiteralPath $noSandboxProfile) {
-      Remove-Item -LiteralPath $noSandboxProfile -Recurse -Force
-    }
-    $noSandboxProcess = Invoke-CapturedProcess `
-      -FilePath $browser `
-      -Arguments @(
-        $commonHeadlessArguments
-        '--no-sandbox'
-        "--user-data-dir=$noSandboxProfile"
-        '--dump-dom'
-        $testUrl
-      ) `
+    $noSandboxProbe = Invoke-HeadlessProbe `
+      -BrowserPath $browser `
+      -ProfileDirectory $noSandboxProfile `
+      -TestUrl $testUrl `
+      -CommonArguments $commonHeadlessArguments `
+      -AdditionalArguments @('--no-sandbox') `
       -TimeoutSeconds $BrowserTimeoutSeconds `
       -StandardOutputPath $noSandboxStdout `
       -StandardErrorPath $noSandboxStderr `
       -CrashDumpDirectory (Join-Path $crashRoot 'no-sandbox')
-    $noSandboxOutput = [System.IO.File]::ReadAllText($noSandboxStdout)
-    $noSandboxRendered = $noSandboxOutput.Contains('THORIUM_WOA_SMOKE_OK')
-    $result.HeadlessNoSandboxDiagnostic = [ordered]@{
-      Rendered = $noSandboxRendered
-      TimedOut = $noSandboxProcess.TimedOut
-      ExitCode = $noSandboxProcess.ExitCode
-      CrashDetected = $noSandboxProcess.CrashDetected
-      CrashDumpReady = $noSandboxProcess.CrashDumpReady
-      RendererTerminationDetected =
-          $noSandboxProcess.RendererTerminationDetected
-      RendererExitCode = $noSandboxProcess.RendererExitCode
-      ProbableRendererNtStatus =
-          $noSandboxProcess.ProbableRendererNtStatus
-    }
+    $noSandboxProcess = $noSandboxProbe.Process
+    $noSandboxRendered = $noSandboxProbe.Rendered
+    $result.HeadlessNoSandboxDiagnostic = $noSandboxProbe.Diagnostic
 
     if (-not $noSandboxRendered -and -not $noExtensionsRendered -and
         -not $browserProcess.CrashDetected -and
@@ -713,7 +770,7 @@ try {
     } elseif ($noSandboxRendered) {
       $headlessError = 'Sandboxed Thorium did not render the local page, while the diagnostic --no-sandbox run did. The artifact failed the release test because its sandboxed renderer path is not functional.'
     } elseif ($noExtensionsRendered) {
-      $headlessError = 'Thorium did not render the local page with its normal extension set, while the diagnostic --disable-extensions run succeeded. The installed extension configuration is breaking the renderer path.'
+      $headlessError = 'Thorium did not render the local page through its normal extension-enabled startup path, while the diagnostic --disable-extensions run succeeded. The extension-enabled startup path is breaking the renderer.'
     } elseif ($browserProcess.CrashDetected) {
       $headlessError = 'Thorium generated a Crashpad dump before rendering the local page; the --disable-extensions and --no-sandbox diagnostics also failed. The artifact has a broader renderer or child-process crash.'
     } elseif ($browserProcess.RendererTerminationDetected) {
@@ -729,9 +786,9 @@ try {
       }
       $headlessError = "Thorium reported an abnormal renderer termination$exitDetail before rendering the local page; the --disable-extensions and --no-sandbox diagnostics also failed."
     } elseif ($browserProcess.TimedOut) {
-      $headlessError = "Thorium headless timed out after $BrowserTimeoutSeconds seconds without rendering the local page; the diagnostic --no-sandbox run also failed."
+      $headlessError = "Thorium headless timed out after $BrowserTimeoutSeconds seconds without rendering the local page; the diagnostic --disable-extensions and --no-sandbox runs also failed."
     } else {
-      $headlessError = "Thorium headless exited with code $($browserProcess.ExitCode) without rendering the local page; the diagnostic --no-sandbox run also failed."
+      $headlessError = "Thorium headless exited with code $($browserProcess.ExitCode) without rendering the local page; the diagnostic --disable-extensions and --no-sandbox runs also failed."
     }
     $result.HeadlessError = $headlessError
   } else {
@@ -843,8 +900,8 @@ try {
         -FilePath $uninstaller `
         -Arguments @('--uninstall', '--force-uninstall', '--verbose-logging') `
         -TimeoutSeconds $InstallerTimeoutSeconds `
-        -StandardOutputPath $uninstallerStdout `
-        -StandardErrorPath $uninstallerStderr
+        -StandardOutputPath $cleanupUninstallerStdout `
+        -StandardErrorPath $cleanupUninstallerStderr
       if ($cleanupProcess.TimedOut) {
         $result.CleanupWarnings.Add("Best-effort uninstall timed out after $InstallerTimeoutSeconds seconds.")
       } elseif ($cleanupProcess.ExitCode -ne 19) {
@@ -854,35 +911,22 @@ try {
       $result.CleanupWarnings.Add("Best-effort uninstall failed: $($_.Exception.Message)")
     }
   }
-  if (Test-Path -LiteralPath $profile) {
-    try {
-      Remove-Item -LiteralPath $profile -Recurse -Force
-    } catch {
-      $result.CleanupWarnings.Add("Could not remove the temporary profile: $($_.Exception.Message)")
-    }
-  }
-  if (Test-Path -LiteralPath $noSandboxProfile) {
-    try {
-      Remove-Item -LiteralPath $noSandboxProfile -Recurse -Force
-    } catch {
-      $result.CleanupWarnings.Add("Could not remove the no-sandbox diagnostic profile: $($_.Exception.Message)")
-    }
-  }
-  if (Test-Path -LiteralPath $noExtensionsProfile) {
-    try {
-      Remove-Item -LiteralPath $noExtensionsProfile -Recurse -Force
-    } catch {
-      $result.CleanupWarnings.Add("Could not remove the no-extensions diagnostic profile: $($_.Exception.Message)")
-    }
-  }
-  if (Test-Path -LiteralPath $werProfile) {
-    try {
-      Remove-Item -LiteralPath $werProfile -Recurse -Force
-    } catch {
-      $result.CleanupWarnings.Add("Could not remove the WER diagnostic profile: $($_.Exception.Message)")
-    }
-  }
-  if ($werConfigurationCreated) {
+  Remove-TemporaryPath `
+    -Path $testPage `
+    -Description 'the temporary test page'
+  Remove-TemporaryPath `
+    -Path $profile `
+    -Description 'the temporary profile'
+  Remove-TemporaryPath `
+    -Path $noExtensionsProfile `
+    -Description 'the no-extensions diagnostic profile'
+  Remove-TemporaryPath `
+    -Path $noSandboxProfile `
+    -Description 'the no-sandbox diagnostic profile'
+  Remove-TemporaryPath `
+    -Path $werProfile `
+    -Description 'the WER diagnostic profile'
+  if ($werConfigurationCreated -or $werRegistryRootCreated) {
     try {
       Disable-WerLocalDumps
     } catch {
@@ -891,11 +935,27 @@ try {
       )
     }
   }
-  Write-Utf8File -Path $resultPath -Contents ($result | ConvertTo-Json -Depth 6)
+  if ($transcriptStarted) {
+    try {
+      Stop-Transcript | Out-Null
+    } catch {
+      $result.CleanupWarnings.Add(
+        "Could not stop the transcript cleanly: $($_.Exception.Message)"
+      )
+      Write-Warning "Could not stop the transcript cleanly: $($_.Exception.Message)"
+    }
+    $transcriptStarted = $false
+  }
   try {
-    Stop-Transcript | Out-Null
+    Write-Utf8File `
+      -Path $resultPath `
+      -Contents ($result | ConvertTo-Json -Depth 6)
   } catch {
-    Write-Warning "Could not stop the transcript cleanly: $($_.Exception.Message)"
+    if (-not $failed) {
+      $failed = $_
+    } else {
+      Write-Warning "Could not write the smoke-test report: $($_.Exception.Message)"
+    }
   }
 }
 

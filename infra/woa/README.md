@@ -33,10 +33,11 @@ returns `19` (`UNINSTALL_SUCCESSFUL`).
 
 Thorium currently bundles `pak_mingw32.exe` and `pak_mingw64.exe` so users can
 inspect and rebuild PAK resources. They are packaging tools, not browser runtime
-components, and cannot be ARM64 because their retained public filenames denote
-their target architectures. The architecture check requires these two exact
-files directly under the installed version directory, with PE machines `0x014C`
-and `0x8664` respectively. A missing or incorrectly built PAK tool, or any other
+components. They are intentionally retained as IA-32 and x64 executables for
+compatibility with the existing public filenames, installer layout, and
+packaging workflows. The architecture check requires these two exact files
+directly under the installed version directory, with PE machines `0x014C` and
+`0x8664` respectively. A missing or incorrectly built PAK tool, or any other
 non-ARM64 EXE or DLL, still fails the test.
 
 The headless probe primarily verifies successful native startup, JavaScript
@@ -57,12 +58,12 @@ runs after the primary headless probe has already failed.
 
 When the normal headless probe cannot render, the harness runs two diagnostic
 comparisons and records their results in separate logs. `--disable-extensions`
-isolates the installed extension configuration, while `--no-sandbox` isolates
-the Windows sandbox and sandboxed child-process path. These are diagnosis only:
-the release test still fails if either comparison renders successfully because
-the default installed configuration must work without weakening its sandbox.
-Failure in all three runs points to a broader renderer, child-process, or
-payload problem.
+isolates the extension-enabled startup path in a fresh temporary profile, while
+`--no-sandbox` isolates the Windows sandbox and sandboxed child-process path.
+These are diagnosis only: the release test still fails if either comparison
+renders successfully because the default installed configuration must work
+without disabling extensions or weakening its sandbox. Failure in all three
+runs points to a broader renderer, child-process, or payload problem.
 
 When all three headless probes fail without producing a Crashpad minidump, the
 harness performs one additional diagnostic run with Crashpad disabled and a
