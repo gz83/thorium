@@ -134,7 +134,7 @@ other/add-flag-for-custom-ntp.patch
 other/add-flag-for-tab-hover-cards.patch
 other/force-disable-tab-outlines.patch
 other/quiet-notification-defaults.patch
-other/disable-thorium-dns-config.patch
+other/secure-doh-without-system-dns-config.patch
 other/secure-dns-defaults.patch
 other/add-flag-for-encrypted-client-hello.patch
 other/reduce-doh-request-headers.patch

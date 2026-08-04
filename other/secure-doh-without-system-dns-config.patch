@@ -1,0 +1,85 @@
+diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
+index 12b5e1012ee38..73b502a211ff3 100644
+--- a/chrome/browser/chrome_content_browser_client.cc
++++ b/chrome/browser/chrome_content_browser_client.cc
+@@ -397,6 +397,7 @@
+ #include "media/mojo/mojom/speech_recognizer.mojom.h"
+ #include "mojo/public/cpp/bindings/remote.h"
+ #include "net/base/data_url.h"
++#include "net/base/switches.h"
+ #include "net/base/url_util.h"
+ #include "net/cookies/cookie_setting_override.h"
+ #include "net/cookies/site_for_cookies.h"
+@@ -3162,6 +3163,12 @@ void ChromeContentBrowserClient::AppendExtraCommandLineSwitches(
+ 
+     command_line->CopySwitchesFrom(browser_command_line, kSwitchNames);
+ #endif
++    static const char* const kThoriumNetworkSwitchNames[] = {
++        net::switches::kDisableThoriumDohWithoutSystemConfig,
++    };
++    command_line->CopySwitchesFrom(browser_command_line,
++                                   kThoriumNetworkSwitchNames);
++
+     MaybeAppendSecureOriginsAllowlistSwitch(command_line);
+   } else if (process_type == switches::kZygoteProcess) {
+ #if BUILDFLAG(IS_CHROMEOS)
+diff --git a/net/base/switches.h b/net/base/switches.h
+index 790ba0261e675..dd34f18889aaa 100644
+--- a/net/base/switches.h
++++ b/net/base/switches.h
+@@ -9,6 +9,9 @@
+ 
+ namespace net::switches {
+ 
++inline constexpr char kDisableThoriumDohWithoutSystemConfig[] =
++    "disable-thorium-dns-config";
++
+ inline constexpr char kLogNetLog[] = "log-net-log";
+ 
+ }  // namespace net::switches
+diff --git a/net/dns/dns_client.cc b/net/dns/dns_client.cc
+index 1d3c4855111be..d48e52b49dce4 100644
+--- a/net/dns/dns_client.cc
++++ b/net/dns/dns_client.cc
+@@ -10,6 +10,7 @@
+ #include <string>
+ #include <utility>
+ 
++#include "base/command_line.h"
+ #include "base/feature_list.h"
+ #include "base/functional/bind.h"
+ #include "base/logging.h"
+@@ -22,6 +23,7 @@
+ #include "net/base/features.h"
+ #include "net/base/ip_address.h"
+ #include "net/base/ip_endpoint.h"
++#include "net/base/switches.h"
+ #include "net/dns/address_sorter.h"
+ #include "net/dns/dns_session.h"
+ #include "net/dns/dns_transaction.h"
+@@ -334,11 +336,21 @@ class DnsClientImpl : public DnsClient {
+     DnsConfig config;
+     if (config_overrides_.OverridesEverything()) {
+       config = config_overrides_.ApplyOverrides(DnsConfig());
+-    } else {
+-      if (!system_config_)
+-        return std::nullopt;
+-
++    } else if (system_config_) {
++      // Preserve system search domains, ndots, hosts, and other fields when
++      // applying a partial DoH override.
+       config = config_overrides_.ApplyOverrides(system_config_.value());
++    } else if (!base::CommandLine::ForCurrentProcess()->HasSwitch(
++                   switches::kDisableThoriumDohWithoutSystemConfig) &&
++               config_overrides_.dns_over_https_config &&
++               !config_overrides_.dns_over_https_config->servers().empty() &&
++               config_overrides_.secure_dns_mode == SecureDnsMode::kSecure) {
++      // Thorium permits an explicitly configured Secure DoH resolver to work
++      // while the platform DNS configuration is unavailable. This fallback
++      // must not replace a system configuration when one exists.
++      config = config_overrides_.ApplyOverrides(DnsConfig());
++    } else {
++      return std::nullopt;
+     }
+ 
+     UpdateConfigForDohUpgrade(&config);

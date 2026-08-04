@@ -102,10 +102,10 @@
      "Allows setting the default tab width, in DIP. Normally 1 DIP = 1 Pixel, and the standard width for tabs is 240.",
      kOsAll, MULTI_VALUE_TYPE(kCustomTabWidthChoices)},
     {"disable-thorium-dns-config",
-     "Disable Thorium Custom DNS Config",
-     "Disables the custom DNS configuration used by default in Thorium. Useful when this config breaks something, "
-     "due to external apps or a non-standard system DNS config setting.",
-     kOsDesktop, SINGLE_VALUE_TYPE("disable-thorium-dns-config")},
+     "Disable Thorium Secure DNS Fallback",
+     "Disables Thorium's fallback that keeps explicitly configured Secure DNS-over-HTTPS available when the platform DNS configuration is unavailable. "
+     "Automatic Secure DNS and normal system DNS configuration merging are not affected.",
+     kOsAll, SINGLE_VALUE_TYPE("disable-thorium-dns-config")},
     {"encrypted-client-hello",
      "Encrypted ClientHello",
      "Controls whether Thorium allows TLS Encrypted ClientHello. Enabled still requires server support and usable HTTPS/SVCB DNS records.",

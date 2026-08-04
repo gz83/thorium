@@ -209,7 +209,7 @@ overlay-derived, or still need separate provenance review.
 - [`add-flag-for-tab-hover-cards.patch`](../other/add-flag-for-tab-hover-cards.patch)
 - [`force-disable-tab-outlines.patch`](../other/force-disable-tab-outlines.patch)
 - [`quiet-notification-defaults.patch`](../other/quiet-notification-defaults.patch)
-- [`disable-thorium-dns-config.patch`](../other/disable-thorium-dns-config.patch)
+- [`secure-doh-without-system-dns-config.patch`](../other/secure-doh-without-system-dns-config.patch) — Preserves Chromium's normal system DNS merge while allowing an explicitly configured Secure DoH resolver to remain available when the platform DNS configuration is unavailable. Automatic and Off modes retain Chromium's behavior. The `#disable-thorium-dns-config` escape hatch disables only this Secure DoH fallback.
 - [`secure-dns-defaults.patch`](../other/secure-dns-defaults.patch)
 - [`add-flag-for-encrypted-client-hello.patch`](../other/add-flag-for-encrypted-client-hello.patch)
 - [`reduce-doh-request-headers.patch`](../other/reduce-doh-request-headers.patch)
