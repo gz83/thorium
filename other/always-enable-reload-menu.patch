@@ -11,3 +11,26 @@ index 9f7fcc1d66f0a..147d2b1184919 100644
  }
  
  void ReloadButton::ShowDropDownMenu(ui::mojom::MenuSourceType source_type) {
+diff --git a/chrome/browser/ui/views/toolbar/webui_reload_control.cc b/chrome/browser/ui/views/toolbar/webui_reload_control.cc
+index f1d6ffd6aa29f..7e1a5149751c7 100644
+--- a/chrome/browser/ui/views/toolbar/webui_reload_control.cc
++++ b/chrome/browser/ui/views/toolbar/webui_reload_control.cc
+@@ -61,7 +61,7 @@ void WebUIReloadControl::SetDevToolsStatus(bool is_dev_tools_connected) {
+ bool WebUIReloadControl::HandleContextMenu(views::Widget* widget,
+                                            const gfx::Rect& screen_rect,
+                                            ui::mojom::MenuSourceType source) {
+-  if (is_dev_tools_connected_) {
++  if (mode_ == ReloadControl::Mode::kReload) {
+     menu_runner_->RunMenuAt(widget, nullptr, screen_rect,
+                             views::MenuAnchorPosition::kTopLeft, source);
+     UpdateState();
+@@ -103,8 +103,7 @@ void WebUIReloadControl::SetDoubleClickIntervalForTesting(
+ void WebUIReloadControl::UpdateState() {
+   auto state = toolbar_ui_api::mojom::ReloadControlState::New();
+   state->double_click_interval = double_click_interval_;
+-  state->can_show_menu =
+-      is_dev_tools_connected_ && (mode_ == ReloadControl::Mode::kReload);
++  state->can_show_menu = (mode_ == ReloadControl::Mode::kReload);
+   state->is_navigation_loading = (mode_ == ReloadControl::Mode::kStop);
+   state->is_context_menu_visible = menu_runner_->IsRunning();
+   state->state_token = state_token_;
