@@ -21,10 +21,10 @@ index e48fbf29760fb..0cb25d08d5f6c 100644
  
    std::string_view suffix;
 diff --git a/chrome/browser/extensions/api/messaging/launch_context_win.cc b/chrome/browser/extensions/api/messaging/launch_context_win.cc
-index b4757546d8fc2..39eb4cf98d6d7 100644
+index 45e4f100d5659..ae13eaac43c2c 100644
 --- a/chrome/browser/extensions/api/messaging/launch_context_win.cc
 +++ b/chrome/browser/extensions/api/messaging/launch_context_win.cc
-@@ -62,7 +62,7 @@ bool GetManifestPathWithFlags(HKEY root_key,
+@@ -63,7 +63,7 @@ bool GetManifestPathWithFlags(HKEY root_key,
                                std::wstring* result) {
  #if BUILDFLAG(CHROMIUM_BRANDING)
    static constexpr wchar_t kChromiumNativeMessagingRegistryKey[] =

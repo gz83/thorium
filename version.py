@@ -16,7 +16,7 @@ from typing import Sequence
 
 
 EXIT_FAILURE = 111
-THORIUM_VERSION = "151.0.7922.72"
+THORIUM_VERSION = "152.0.7977.55"
 
 
 class VersionError(RuntimeError):

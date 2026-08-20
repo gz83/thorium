@@ -11,7 +11,6 @@
 # 05 - Child repositories and generated third_party data.
 third_party/ffmpeg: other/add-hevc-ffmpeg-decoder-parser.patch
 third_party/ffmpeg: other/add-ac3-eac3-ffmpeg-decoders.patch
-third_party/ffmpeg: other/change-libavcodec-header.patch
 third_party/ffmpeg: other/fix-ffmpeg-android-x86-disable-hevc-nasm.patch
 third_party/ffmpeg: other/ffmpeg-branding.patch
 third_party/widevine: other/widevine-cdm-support.patch

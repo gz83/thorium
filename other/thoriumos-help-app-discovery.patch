@@ -1,5 +1,5 @@
 diff --git a/ash/webui/help_app_ui/help_app_untrusted_ui.cc b/ash/webui/help_app_ui/help_app_untrusted_ui.cc
-index ae69f5f9fc8f3..2cd2930953a1d 100644
+index a7f8f9d9ea9f0..470989e84aa64 100644
 --- a/ash/webui/help_app_ui/help_app_untrusted_ui.cc
 +++ b/ash/webui/help_app_ui/help_app_untrusted_ui.cc
 @@ -32,6 +32,8 @@ void CreateAndAddHelpAppUntrustedDataSource(

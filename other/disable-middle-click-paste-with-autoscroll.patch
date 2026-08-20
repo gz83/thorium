@@ -1,16 +1,16 @@
 diff --git a/chrome/browser/renderer_preferences_util.cc b/chrome/browser/renderer_preferences_util.cc
-index 3d982971f49a5..c69e422b1287c 100644
+index c127fc6ff56ea..1ccb0b21072f8 100644
 --- a/chrome/browser/renderer_preferences_util.cc
 +++ b/chrome/browser/renderer_preferences_util.cc
-@@ -34,6 +34,7 @@
- #include "third_party/blink/public/public_buildflags.h"
+@@ -35,6 +35,7 @@
  #include "third_party/skia/include/core/SkColor.h"
  #include "ui/accessibility/platform/ax_platform.h"
+ #include "ui/base/accelerators/command.h"
 +#include "ui/base/clipboard/clipboard.h"
  #include "ui/base/ui_base_features.h"
  #include "ui/native_theme/native_theme.h"
  
-@@ -141,8 +142,9 @@ void UpdateFromSystemSettings(blink::RendererPreferences* prefs,
+@@ -142,8 +143,9 @@ void UpdateFromSystemSettings(blink::RendererPreferences* prefs,
  #endif  // BUILDFLAG(USE_AURA)
  
  #if BUILDFLAG(IS_LINUX)
@@ -23,10 +23,10 @@ index 3d982971f49a5..c69e422b1287c 100644
  #endif
    prefs->caret_blink_interval =
 diff --git a/chrome/browser/ui/browser_commands.cc b/chrome/browser/ui/browser_commands.cc
-index 11843846786b4..e3d5445f2229d 100644
+index 111a3896bc914..3b35557cfa3c7 100644
 --- a/chrome/browser/ui/browser_commands.cc
 +++ b/chrome/browser/ui/browser_commands.cc
-@@ -1262,7 +1262,8 @@ void NewTabToRight(BrowserWindowInterface* browser) {
+@@ -1311,7 +1311,8 @@ void NewTabToRight(BrowserWindowInterface* browser) {
  void NewTabFromClipboardURL(BrowserWindowInterface* browser) {
  #if BUILDFLAG(IS_LINUX)
    if (ui::Clipboard::IsSupportedClipboardBuffer(
@@ -63,7 +63,7 @@ index 7f3c1b638ee24..286fc1748f71c 100644
    if (auto* settings = frame_->GetSettings();
        settings && !settings->GetMiddleClickPasteAllowed()) {
 diff --git a/ui/base/clipboard/clipboard.cc b/ui/base/clipboard/clipboard.cc
-index db3cd03998742..e253b6639f957 100644
+index da1757e967597..fcdc376ba96d4 100644
 --- a/ui/base/clipboard/clipboard.cc
 +++ b/ui/base/clipboard/clipboard.cc
 @@ -12,11 +12,13 @@

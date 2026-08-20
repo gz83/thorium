@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index ef9fdf81ee48a..60da616aef2a5 100644
+index 327c4ac313d36..4326e7f6cbc65 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -4169,9 +4169,12 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
+@@ -4110,9 +4110,12 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
      preferred_root_scrollbar_color_scheme = preferred_color_scheme;
    }
  #else  // !BUILDFLAG(IS_ANDROID)
@@ -98,10 +98,10 @@ index bf9cb4c809b32..af360e8270036 100644
    // color_mode.
    if (is_incognito) {
 diff --git a/chrome/browser/ui/views/frame/browser_widget.cc b/chrome/browser/ui/views/frame/browser_widget.cc
-index 582e4ccaf8879..29c5971cfe63c 100644
+index 22318133c1b29..c86b9f40dbd84 100644
 --- a/chrome/browser/ui/views/frame/browser_widget.cc
 +++ b/chrome/browser/ui/views/frame/browser_widget.cc
-@@ -564,5 +564,10 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
+@@ -567,5 +567,10 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
  }
  
  bool BrowserWidget::IsIncognitoBrowser() const {
@@ -110,7 +110,7 @@ index 582e4ccaf8879..29c5971cfe63c 100644
 +    return false;
 +  }
 +
-   return browser_view_->browser()->profile()->IsIncognitoProfile();
+   return browser_view_->browser()->GetProfile()->IsIncognitoProfile();
  }
 diff --git a/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc b/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
 index 0341bc90744a3..93c8a5a48d3a7 100644

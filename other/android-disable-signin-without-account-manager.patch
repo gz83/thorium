@@ -1,8 +1,8 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
-index 9e8f69363dcbc..34801e1593bd0 100644
+index 222d401ebcbfa..1b41e6baf3d0b 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
-@@ -353,10 +353,12 @@ public class SigninAndHistorySyncActivity extends FullscreenSigninAndHistorySync
+@@ -354,10 +354,12 @@ public class SigninAndHistorySyncActivity extends FullscreenSigninAndHistorySync
                                  return;
                              }
                              if (intent == null) {
@@ -19,12 +19,12 @@ index 9e8f69363dcbc..34801e1593bd0 100644
                              }
                              SigninMetricsUtils.logAddAccountStateHistogram(State.STARTED);
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-index d793d542426c9..da33e598793bd 100644
+index 02dd021d77782..e8c198b3df26a 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-@@ -144,6 +144,9 @@ final class SigninBridge {
-             boolean isWebSignin,
-             @SigninAccessPoint int accessPoint) {
+@@ -141,6 +141,9 @@ final class SigninBridge {
+             AccountPickerBottomSheetCoordinatorFactory factory,
+             String extensionName) {
          ThreadUtils.assertOnUiThread();
 +        if (!AccountManagerFacadeProvider.hasAccountManagerDelegate()) {
 +            return;
@@ -77,10 +77,10 @@ index 7856ee7547972..a20086cc0dfc7 100644
                                      // to open settings instead.
                                      SigninUtils.openSettingsForAllAccounts(getActivity());
 diff --git a/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java b/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
-index fedb75c9c6162..2155e0e4ff46f 100644
+index ddbd4c72e4a74..1c993ac4e02a2 100644
 --- a/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
 +++ b/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
-@@ -225,6 +225,9 @@ class SigninManagerImpl implements SigninManager, AccountsChangeObserver {
+@@ -228,6 +228,9 @@ class SigninManagerImpl implements SigninManager, AccountsChangeObserver {
  
      @Override
      public boolean isSigninSupported(boolean requireUpdatedPlayServices) {
@@ -91,10 +91,10 @@ index fedb75c9c6162..2155e0e4ff46f 100644
              return ExternalAuthUtils.getInstance().canUseGooglePlayServices();
          }
 diff --git a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
-index 5daf104dd2821..c390cf469cc43 100644
+index 81234eac72675..fce72c34e633b 100644
 --- a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
 +++ b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
-@@ -369,7 +369,8 @@ public class FullscreenSigninMediator
+@@ -371,7 +371,8 @@ public class FullscreenSigninMediator
      }
  
      private boolean isSigninSupported(Profile profile) {
@@ -105,10 +105,10 @@ index 5daf104dd2821..c390cf469cc43 100644
                  && !mConfig.shouldDisableSignin;
      }
 diff --git a/components/signin/internal/identity_manager/primary_account_manager.cc b/components/signin/internal/identity_manager/primary_account_manager.cc
-index e6ef4ee147774..ee10efb5e5c93 100644
+index 3f8997799d313..b78797dff39d1 100644
 --- a/components/signin/internal/identity_manager/primary_account_manager.cc
 +++ b/components/signin/internal/identity_manager/primary_account_manager.cc
-@@ -368,7 +368,11 @@ void PrimaryAccountManager::RegisterProfilePrefs(PrefRegistrySimple* registry) {
+@@ -391,7 +391,11 @@ void PrimaryAccountManager::RegisterProfilePrefs(PrefRegistrySimple* registry) {
        prefs::kGoogleServicesSyncingUsernameMigratedToSignedIn, std::string());
    registry->RegisterIntegerPref(prefs::kGoogleServicesSyncingUserMigrationType,
                                  /*SyncToSigninMigrationType::kUnknown=*/0);

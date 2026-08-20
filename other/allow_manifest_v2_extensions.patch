@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/extensions/api/developer_private/extension_info_generator.cc b/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
-index 4aec8139d3fc8..3688b4db565a5 100644
+index 64c57f2ca2148..15a942664e68b 100644
 --- a/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
 +++ b/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
 @@ -47,7 +47,6 @@
@@ -18,7 +18,7 @@ index 4aec8139d3fc8..3688b4db565a5 100644
  #include "extensions/common/install_warning.h"
  #include "extensions/common/manifest.h"
  #include "extensions/common/manifest_handlers/background_info.h"
-@@ -871,17 +869,6 @@ void ExtensionInfoGenerator::FillExtensionInfo(const Extension& extension,
+@@ -872,17 +870,6 @@ void ExtensionInfoGenerator::FillExtensionInfo(const Extension& extension,
          toolbar_actions_model->IsActionPinned(extension.id());
    }
  
@@ -37,10 +37,10 @@ index 4aec8139d3fc8..3688b4db565a5 100644
        AccountExtensionTracker::Get(profile)->CanUploadAsAccountExtension(
            extension)
 diff --git a/chrome/browser/ui/webui/extensions/extensions_ui.cc b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-index b8bec16f630e5..021de4de1eeb2 100644
+index 0a0eb5d94e971..38e4db931580f 100644
 --- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
 +++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-@@ -484,9 +484,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
+@@ -488,9 +488,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
        "enableUserPermittedSites",
        base::FeatureList::IsEnabled(
            extensions_features::kExtensionsMenuAccessControlWithPermittedSites));
@@ -52,10 +52,10 @@ index b8bec16f630e5..021de4de1eeb2 100644
  
    // MV2 deprecation.
 diff --git a/extensions/browser/manifest_v2_handler.cc b/extensions/browser/manifest_v2_handler.cc
-index 9f7c55596044b..bff5f2b625ff4 100644
+index 5841d3dfbc888..e0fb4e06b97bc 100644
 --- a/extensions/browser/manifest_v2_handler.cc
 +++ b/extensions/browser/manifest_v2_handler.cc
-@@ -108,12 +108,7 @@ bool ManifestV2HandlerFactory::ServiceIsCreatedWithBrowserContext() const {
+@@ -109,12 +109,7 @@ bool ManifestV2HandlerFactory::ServiceIsCreatedWithBrowserContext() const {
  
  // Returns true if legacy extensions should be disabled.
  bool ShouldDisableLegacyExtensions() {
@@ -70,7 +70,7 @@ index 9f7c55596044b..bff5f2b625ff4 100644
  
  }  // namespace
 diff --git a/extensions/common/extension.cc b/extensions/common/extension.cc
-index 7e3abea6cb2d5..80ac5a82fe242 100644
+index 9413abec978e1..060eb46371fa5 100644
 --- a/extensions/common/extension.cc
 +++ b/extensions/common/extension.cc
 @@ -1,4 +1,4 @@
@@ -79,7 +79,7 @@ index 7e3abea6cb2d5..80ac5a82fe242 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -100,12 +100,6 @@ bool IsManifestSupported(int manifest_version,
+@@ -97,12 +97,6 @@ bool IsManifestSupported(int manifest_version,
    // Supported versions are always safe.
    if (manifest_version >= kMinimumSupportedManifestVersion &&
        manifest_version <= kMaximumSupportedManifestVersion) {

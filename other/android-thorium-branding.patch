@@ -1,5 +1,5 @@
 diff --git a/android_webview/BUILD.gn b/android_webview/BUILD.gn
-index 49f4e5682fdb3..bd6d2d0f80967 100644
+index 50f087dc6a2a8..0cdb08a6bf3aa 100644
 --- a/android_webview/BUILD.gn
 +++ b/android_webview/BUILD.gn
 @@ -86,9 +86,14 @@ if (_is_default_toolchain) {
@@ -32,7 +32,7 @@ index 49f4e5682fdb3..bd6d2d0f80967 100644
        include_32_bit_webview = false
        include_64_bit_webview = true
 diff --git a/android_webview/system_webview_apk_tmpl.gni b/android_webview/system_webview_apk_tmpl.gni
-index 44bf6cebe9344..7b17f0f09c61d 100644
+index d8b6c3b43ce92..d0d83f6c88cee 100644
 --- a/android_webview/system_webview_apk_tmpl.gni
 +++ b/android_webview/system_webview_apk_tmpl.gni
 @@ -89,6 +89,7 @@ template("system_webview_apk_or_module_tmpl") {
@@ -44,7 +44,7 @@ index 44bf6cebe9344..7b17f0f09c61d 100644
      if (_is_trichrome) {
        variables +=
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index 0ff13dbee299f..6ce5466279f81 100644
+index 7f91346de723c..34893fa98070f 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -53,7 +53,7 @@ index 0ff13dbee299f..6ce5466279f81 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -2075,9 +2075,14 @@ if (_is_default_toolchain) {
+@@ -2074,9 +2074,14 @@ if (_is_default_toolchain) {
      }
    }
  
@@ -69,7 +69,7 @@ index 0ff13dbee299f..6ce5466279f81 100644
      if (defined(android_app_secondary_abi)) {
        # Ensure 64-bit chrome does not depend on 32-bit things.
        assert_no_deps =
-@@ -2093,7 +2098,7 @@ if (_is_default_toolchain) {
+@@ -2092,7 +2097,7 @@ if (_is_default_toolchain) {
    }
  
    chrome_public_bundle("chrome_public_bundle") {
@@ -78,7 +78,7 @@ index 0ff13dbee299f..6ce5466279f81 100644
    }
  
    generate_jni("base_module_jni") {
-@@ -2330,7 +2335,7 @@ if (_is_default_toolchain) {
+@@ -2334,7 +2339,7 @@ if (_is_default_toolchain) {
    # scoped, and do not leave lingering state after execution.
    # TODO(crbug.com/40193330): Set clear rules for what tests can be added here.
    chrome_public_test_apk_tmpl("chrome_public_unit_test_apk") {
@@ -87,7 +87,7 @@ index 0ff13dbee299f..6ce5466279f81 100644
      deps = [
        ":chrome_unit_test_java",
        "//build/config/android/test/resource_overlay:unit_device_javatests",
-@@ -2402,7 +2407,7 @@ if (_is_default_toolchain) {
+@@ -2407,7 +2412,7 @@ if (_is_default_toolchain) {
  
    # TODO(crbug.com/40193330): Rename to chrome_public_integration_test_apk
    chrome_public_test_apk_tmpl("chrome_public_test_apk") {
@@ -97,7 +97,7 @@ index 0ff13dbee299f..6ce5466279f81 100644
        ":chrome_test_apk_template_resources",
        ":chrome_test_java",
 diff --git a/chrome/android/chrome_public_apk_tmpl.gni b/chrome/android/chrome_public_apk_tmpl.gni
-index a1aaf65079c51..87d3ac86d09f1 100644
+index d53e82f026ac7..68d7c3d37b582 100644
 --- a/chrome/android/chrome_public_apk_tmpl.gni
 +++ b/chrome/android/chrome_public_apk_tmpl.gni
 @@ -1,4 +1,4 @@

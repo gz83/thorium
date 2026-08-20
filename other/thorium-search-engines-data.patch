@@ -1,5 +1,5 @@
 diff --git a/definitions/prepopulated_engines.json b/definitions/prepopulated_engines.json
-index c899bcb..8ab180a 100644
+index d6de467..7f3fc35 100644
 --- a/definitions/prepopulated_engines.json
 +++ b/definitions/prepopulated_engines.json
 @@ -1,4 +1,4 @@
@@ -12,8 +12,8 @@ index c899bcb..8ab180a 100644
      // existing data should get a new version. Otherwise, existing data may
      // continue to be used and updates made here will not always appear.
      // Also then run tools/search_engine_choice/generate_search_engine_icons.py.
--    "kCurrentDataVersion": 209
-+    "kCurrentDataVersion": 210
+-    "kCurrentDataVersion": 210
++    "kCurrentDataVersion": 211
    },
  
    // The following engines are included in country lists and are added to the
@@ -36,7 +36,7 @@ index c899bcb..8ab180a 100644
        "favicon_url": "https://panda-search.org/favicon.ico",
        "base_builtin_resource_id": "SEARCH_ENGINE_PANDA",
 diff --git a/definitions/regional_settings.json b/definitions/regional_settings.json
-index 3dbadbd..51ad356 100644
+index d65472d..454b600 100644
 --- a/definitions/regional_settings.json
 +++ b/definitions/regional_settings.json
 @@ -370,7 +370,10 @@
@@ -62,18 +62,17 @@ index 3dbadbd..51ad356 100644
        ]
      },
      "HN": {
-@@ -1135,7 +1140,9 @@
-         "&google",
-         "&bing",
+@@ -1135,7 +1140,8 @@
+         "&yandex_ru",
          "&duckduckgo",
--        "&mail_ru"
-+        "&mail_ru",
-+        "&brave",
+         "&brave",
+-        "&bing"
++        "&bing",
 +        "&ecosia"
        ]
      },
      "SA": {
-@@ -1369,7 +1376,8 @@
+@@ -1369,7 +1375,8 @@
          "&bing",
          "&brave",
          "&you",
@@ -83,7 +82,7 @@ index 3dbadbd..51ad356 100644
        ]
      },
      "VN": {
-@@ -1421,7 +1429,10 @@
+@@ -1421,7 +1428,10 @@
        "search_engines": [
          "&google",
          "&bing",

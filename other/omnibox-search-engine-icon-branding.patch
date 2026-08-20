@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/omnibox/omnibox_view.cc b/chrome/browser/ui/omnibox/omnibox_view.cc
-index 7e3598c69ed60..fde844bca19dc 100644
+index ae11b7b2690bb..25e3e5023a56c 100644
 --- a/chrome/browser/ui/omnibox/omnibox_view.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_view.cc
 @@ -1,4 +1,4 @@
@@ -15,8 +15,8 @@ index 7e3598c69ed60..fde844bca19dc 100644
 -#include "components/search/search.h"
  #include "components/search_engines/template_url_service.h"
  #include "extensions/buildflags/buildflags.h"
- #include "ui/base/window_open_disposition.h"
-@@ -123,24 +122,9 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
+ #include "url/url_constants.h"
+@@ -100,24 +99,9 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
                                       ->GetTemplateURLService()
                                       ->GetTemplateURLForKeyword(match.keyword)
                                 : nullptr;
@@ -44,7 +44,7 @@ index 7e3598c69ed60..fde844bca19dc 100644
        // If the search engine is enterprise search aggregator, return the icon
        // from the bitmap instead of favicon.
        const SkBitmap* bitmap =
-@@ -157,10 +141,10 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
+@@ -134,10 +118,10 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
          return ui::ImageModel::FromImage(icon);
        }
      }

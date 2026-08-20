@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/download/chrome_download_manager_delegate.cc b/chrome/browser/download/chrome_download_manager_delegate.cc
-index f02af613fc8be..a56a6adf13fdd 100644
+index 27be7a3c72f69..a11af47e3cb53 100644
 --- a/chrome/browser/download/chrome_download_manager_delegate.cc
 +++ b/chrome/browser/download/chrome_download_manager_delegate.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index f02af613fc8be..a56a6adf13fdd 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -2152,8 +2152,12 @@ bool ChromeDownloadManagerDelegate::IsOpenInBrowserPreferredForFile(
+@@ -2189,8 +2189,12 @@ bool ChromeDownloadManagerDelegate::IsOpenInBrowserPreferredForFile(
  bool ChromeDownloadManagerDelegate::ShouldBlockFile(
      download::DownloadItem* item,
      download::DownloadDangerType danger_type) const {
@@ -22,7 +22,7 @@ index f02af613fc8be..a56a6adf13fdd 100644
      return false;
    }
  
-@@ -2207,44 +2211,14 @@ bool ChromeDownloadManagerDelegate::ShouldBlockFile(
+@@ -2244,44 +2248,14 @@ bool ChromeDownloadManagerDelegate::ShouldBlockFile(
  void ChromeDownloadManagerDelegate::MaybeSendDangerousDownloadOpenedReport(
      DownloadItem* download,
      bool show_download_in_folder) {
@@ -70,7 +70,7 @@ index f02af613fc8be..a56a6adf13fdd 100644
      const content::WebContents::Getter& web_contents_getter,
      const GURL& url,
 diff --git a/chrome/browser/download/download_target_determiner.cc b/chrome/browser/download/download_target_determiner.cc
-index 6c4f979795979..c966f19b5ec91 100644
+index 99b1b597116b1..49410d2abfe9f 100644
 --- a/chrome/browser/download/download_target_determiner.cc
 +++ b/chrome/browser/download/download_target_determiner.cc
 @@ -1,4 +1,4 @@
@@ -87,7 +87,7 @@ index 6c4f979795979..c966f19b5ec91 100644
  #include "base/files/file_path.h"
  #include "base/functional/bind.h"
  #include "base/location.h"
-@@ -1236,6 +1237,14 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
+@@ -1238,6 +1239,14 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
      PriorVisitsToReferrer visits) const {
    DCHECK_CURRENTLY_ON(BrowserThread::UI);
  

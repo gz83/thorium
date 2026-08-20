@@ -64,7 +64,7 @@ index c55f6a97871c2..ff0f1678c3742 100644
      widevine_cdm_binary_files += [ "${widevine_cdm_root}/${cdm_file_name}.sig" ]
    }
 diff --git a/cdm/widevine.gni b/cdm/widevine.gni
-index 53fe6db5958ce..b941aed2e4e4c 100644
+index e8427c4843230..d09e8876112c7 100644
 --- a/cdm/widevine.gni
 +++ b/cdm/widevine.gni
 @@ -1,4 +1,4 @@
@@ -90,16 +90,7 @@ index 53fe6db5958ce..b941aed2e4e4c 100644
  }
  
  # Widevine CDM is available as a library CDM on the following platforms and
-@@ -25,7 +24,7 @@ if (is_chromeos && !is_chromeos_device) {
- # supported via Android MediaDrm API.
- library_widevine_cdm_available =
-     (is_chromeos &&
--     (target_cpu == "x64" || target_cpu == "arm" || target_cpu == "arm64")) ||
-+     (target_cpu == "x64" || target_cpu == "arm64")) ||
-     (target_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) ||
-     (target_os == "mac" && (target_cpu == "x64" || target_cpu == "arm64")) ||
-     (target_os == "win" &&
-@@ -54,6 +53,13 @@ declare_args() {
+@@ -53,6 +52,13 @@ declare_args() {
    widevine_root = "."
  }
  
@@ -113,7 +104,7 @@ index 53fe6db5958ce..b941aed2e4e4c 100644
  # Enable Widevine CDM host verification, which will sign additional binaries
  # with Widevine certs and copy signature files as needed.
  enable_widevine_cdm_host_verification =
-@@ -66,7 +72,7 @@ declare_args() {
+@@ -65,7 +71,7 @@ declare_args() {
    # For developers building with "is_official_build" locally without Widevine
    # signing certs, please manually set `ignore_missing_widevine_signing_cert`
    # to true to suppress the error.

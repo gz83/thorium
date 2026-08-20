@@ -12,7 +12,7 @@ index 6f1f293bacaef..2e72603400dc4 100644
  }
  
 diff --git a/components/webui/version/resources/about_version.css b/components/webui/version/resources/about_version.css
-index 474768656bdae..0c107cb134ecb 100644
+index 33e926a18ce3c..248e18ac02d7e 100644
 --- a/components/webui/version/resources/about_version.css
 +++ b/components/webui/version/resources/about_version.css
 @@ -1,4 +1,4 @@
@@ -44,7 +44,7 @@ index 474768656bdae..0c107cb134ecb 100644
    font-family: monospace;
  }
 diff --git a/components/webui/version/resources/about_version.html b/components/webui/version/resources/about_version.html
-index 3b689206909bf..80dd4436fb4c9 100644
+index 664cb15bf7ee5..320ec60444a0f 100644
 --- a/components/webui/version/resources/about_version.html
 +++ b/components/webui/version/resources/about_version.html
 @@ -3,6 +3,7 @@
@@ -110,8 +110,8 @@ index 3b689206909bf..80dd4436fb4c9 100644
                <span>$i18n{update_cohort_name}</span>
    </if>
              </span>
--            <button id="copy-to-clipboard" aria-label="$i18n{copy_label}">
-+            <button id="copy-to-clipboard" title="$i18n{copy_label}" aria-label="$i18n{copy_label}">
+-            <button id="copy-to-clipboard" class="copy-button" aria-label="$i18n{copy_label}">
++            <button id="copy-to-clipboard" class="copy-button" title="$i18n{copy_label}" aria-label="$i18n{copy_label}">
                <div id="copy-to-clipboard-icon"></div>
              </button>
            </td>

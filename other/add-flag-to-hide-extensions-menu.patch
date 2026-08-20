@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/extensions/extensions_toolbar_desktop.cc b/chrome/browser/ui/views/extensions/extensions_toolbar_desktop.cc
-index ed070ae05ec4b..2796b308c14c6 100644
+index c4f0e629af273..791aefef95caa 100644
 --- a/chrome/browser/ui/views/extensions/extensions_toolbar_desktop.cc
 +++ b/chrome/browser/ui/views/extensions/extensions_toolbar_desktop.cc
 @@ -7,6 +7,7 @@
@@ -10,15 +10,7 @@ index ed070ae05ec4b..2796b308c14c6 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
-@@ -41,6 +42,7 @@
- #include "chrome/browser/ui/views/frame/toolbar_button_provider.h"
- #include "chrome/browser/ui/views/side_panel/extensions/extension_side_panel_coordinator.h"
- #include "chrome/browser/ui/views/toolbar/toolbar_action_hover_card_controller.h"
-+#include "chrome/browser/ui/views/toolbar/toolbar_view.h"
- #include "chrome/common/pref_names.h"
- #include "chrome/grit/generated_resources.h"
- #include "components/feature_engagement/public/event_constants.h"
-@@ -57,6 +59,7 @@
+@@ -59,6 +60,7 @@
  #include "ui/base/metadata/metadata_impl_macros.h"
  #include "ui/base/models/image_model.h"
  #include "ui/base/ui_base_features.h"
@@ -26,7 +18,7 @@ index ed070ae05ec4b..2796b308c14c6 100644
  #include "ui/views/layout/animating_layout_manager.h"
  #include "ui/views/layout/flex_layout.h"
  #include "ui/views/layout/flex_layout_types.h"
-@@ -469,6 +472,20 @@ void ExtensionsToolbarDesktop::AnchorAndShowWidgetImmediately(
+@@ -582,6 +584,20 @@ void ExtensionsToolbarDesktop::AnchorAndShowWidgetImmediately(
    widget->widget_delegate()->AsBubbleDialogDelegate()->SetAnchorView(
        anchor_view && anchor_view->GetVisible() ? anchor_view
                                                 : GetExtensionsButton());
@@ -47,7 +39,7 @@ index ed070ae05ec4b..2796b308c14c6 100644
    widget->Show();
  }
  
-@@ -980,6 +997,10 @@ void ExtensionsToolbarDesktop::UpdateContainerVisibility() {
+@@ -1098,6 +1114,10 @@ void ExtensionsToolbarDesktop::UpdateContainerVisibility() {
  }
  
  bool ExtensionsToolbarDesktop::ShouldContainerBeVisible() const {

@@ -79,7 +79,7 @@ index 99d9e7e89e5e7..f11d09eafda05 100755
  
    # Work around an Ubuntu dependency issue.
 diff --git a/build/toolchain/apple/linker_driver.py b/build/toolchain/apple/linker_driver.py
-index e5163d91889f0..7f72e8f205563 100755
+index 828849a51909f..e8907bccda735 100755
 --- a/build/toolchain/apple/linker_driver.py
 +++ b/build/toolchain/apple/linker_driver.py
 @@ -1,6 +1,6 @@

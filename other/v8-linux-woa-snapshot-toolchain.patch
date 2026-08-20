@@ -1,8 +1,8 @@
 diff --git a/BUILD.gn b/BUILD.gn
-index 0b93e144a76..9b96e949c04 100644
+index 4f81805c89f..f6d58f9634d 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
-@@ -346,7 +346,14 @@ declare_args() {
+@@ -353,7 +353,14 @@ declare_args() {
    # ARM64. Enable it by default for simulator builds and when native code
    # supports it as well. On Mac, control-flow integrity does not work so we
    # avoid enabling it when using the simulator.

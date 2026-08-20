@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/browser_commands.cc b/chrome/browser/ui/browser_commands.cc
-index 83efe1922093d..3d4d6385f6edd 100644
+index 294487f786479..a016a2484f827 100644
 --- a/chrome/browser/ui/browser_commands.cc
 +++ b/chrome/browser/ui/browser_commands.cc
 @@ -1,4 +1,4 @@
@@ -16,7 +16,7 @@ index 83efe1922093d..3d4d6385f6edd 100644
  #include "extensions/buildflags/buildflags.h"
  #include "pdf/buildflags.h"
  #include "printing/buildflags/buildflags.h"
-@@ -783,11 +782,6 @@ int GetContentRestrictions(const BrowserWindowInterface* browser) {
+@@ -813,11 +812,6 @@ int GetContentRestrictions(const BrowserWindowInterface* browser) {
      CoreTabHelper* core_tab_helper =
          CoreTabHelper::FromWebContents(current_tab);
      content_restrictions = core_tab_helper->content_restrictions();
@@ -28,7 +28,7 @@ index 83efe1922093d..3d4d6385f6edd 100644
    }
    return content_restrictions;
  }
-@@ -2235,8 +2229,7 @@ bool CanSavePage(const BrowserWindowInterface* browser) {
+@@ -2300,8 +2294,7 @@ bool CanSavePage(const BrowserWindowInterface* browser) {
        policy::DownloadRestriction::ALL_FILES) {
      return false;
    }

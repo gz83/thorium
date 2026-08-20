@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index 585b1027ca382..8e6aedbbbb635 100644
+index 0d15d3e76dbcd..c90349d854592 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
 @@ -234,6 +234,7 @@ Tab::Tab(tabs::TabHandle handle, TabSlotController* controller)
@@ -10,7 +10,7 @@ index 585b1027ca382..8e6aedbbbb635 100644
  
    SetEventTargeter(std::make_unique<views::ViewTargeter>(this));
  
-@@ -914,6 +915,7 @@ void Tab::ActiveStateChanged() {
+@@ -917,6 +918,7 @@ void Tab::ActiveStateChanged() {
    icon_->SetActiveState(IsActive());
    alert_indicator_button_->OnParentTabButtonColorChanged();
    alert_indicator_button_->UpdateEnabledForMuteToggle();
@@ -19,7 +19,7 @@ index 585b1027ca382..8e6aedbbbb635 100644
  }
  
 diff --git a/chrome/browser/ui/views/tabs/tab_style_views.cc b/chrome/browser/ui/views/tabs/tab_style_views.cc
-index 83b5a9e136d80..f89f51f496122 100644
+index e65c106f7e634..8282c1ca20111 100644
 --- a/chrome/browser/ui/views/tabs/tab_style_views.cc
 +++ b/chrome/browser/ui/views/tabs/tab_style_views.cc
 @@ -9,6 +9,7 @@
@@ -38,7 +38,7 @@ index 83b5a9e136d80..f89f51f496122 100644
  #include "ui/views/widget/widget.h"
  
  namespace {
-@@ -70,6 +72,7 @@ class TabStyleViewsImpl : public TabStyleViews {
+@@ -66,6 +68,7 @@ class TabStyleViewsImpl : public TabStyleViews {
    bool IsApparentlyActive() const override;
    float GetCurrentActiveOpacity() const override;
    TabStyle::TabColors CalculateTargetColors() const override;
@@ -46,7 +46,7 @@ index 83b5a9e136d80..f89f51f496122 100644
    void ShowHover(TabStyle::ShowHoverStyle style) override;
    void HideHover(TabStyle::HideHoverStyle style) override;
  
-@@ -168,6 +171,9 @@ class TabStyleViewsImpl : public TabStyleViews {
+@@ -164,6 +167,9 @@ class TabStyleViewsImpl : public TabStyleViews {
    const raw_ptr<const Tab> tab_;
  
    std::unique_ptr<GlowHoverController> hover_controller_;
@@ -56,7 +56,7 @@ index 83b5a9e136d80..f89f51f496122 100644
  };
  
  // TabStyleViewsImpl ----------------------------------------------------------
-@@ -176,7 +182,11 @@ TabStyleViewsImpl::TabStyleViewsImpl(Tab* tab)
+@@ -172,7 +178,11 @@ TabStyleViewsImpl::TabStyleViewsImpl(Tab* tab)
      : tab_(tab),
        hover_controller_((tab && gfx::Animation::ShouldRenderRichAnimation())
                              ? new GlowHoverController(tab)
@@ -69,7 +69,7 @@ index 83b5a9e136d80..f89f51f496122 100644
    // `tab_` must not be nullptr.
    CHECK(tab_);
    // TODO(dfried): create a new STYLE_PROMINENT or similar to use instead of
-@@ -603,6 +613,18 @@ TabStyle::TabColors TabStyleViewsImpl::CalculateTargetColors() const {
+@@ -599,6 +609,18 @@ TabStyle::TabColors TabStyleViewsImpl::CalculateTargetColors() const {
        tab()->GetColorProvider());
  }
  

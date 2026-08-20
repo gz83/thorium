@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/tabs/BUILD.gn b/chrome/browser/ui/tabs/BUILD.gn
-index 32c261f368604..f69e563efb6a7 100644
+index df7d4c4086627..742f4363f4500 100644
 --- a/chrome/browser/ui/tabs/BUILD.gn
 +++ b/chrome/browser/ui/tabs/BUILD.gn
 @@ -51,7 +51,10 @@ if (!is_android) {
@@ -15,7 +15,7 @@ index 32c261f368604..f69e563efb6a7 100644
  
    source_set("tab_menu") {
 diff --git a/chrome/browser/ui/tabs/features.cc b/chrome/browser/ui/tabs/features.cc
-index 483be333e73a5..7dac0c26031de 100644
+index 198d0de3b05be..a6c75d6d5b7d7 100644
 --- a/chrome/browser/ui/tabs/features.cc
 +++ b/chrome/browser/ui/tabs/features.cc
 @@ -5,6 +5,7 @@
@@ -35,10 +35,10 @@ index 483be333e73a5..7dac0c26031de 100644
 +
  BASE_FEATURE(kVerticalTabs, base::FEATURE_DISABLED_BY_DEFAULT);
  
- BASE_FEATURE(kVerticalTabsLaunch, base::FEATURE_DISABLED_BY_DEFAULT);
-@@ -102,6 +106,14 @@ BASE_FEATURE(kBackToOpener, base::FEATURE_DISABLED_BY_DEFAULT);
- BASE_FEATURE(kMigrateEverythingMenuPinnedToTabstrip,
-              base::FEATURE_DISABLED_BY_DEFAULT);
+ BASE_FEATURE(kVerticalTabsLaunch,
+@@ -113,6 +117,14 @@ bool IsSplitViewHorizontalIndirectAccessEnabled() {
+          !kSplitViewHorizontalDirectAccess.Get();
+ }
  
 +bool IsTabStripComboButtonBeforeTabStrip() {
 +  // Views mirror child layout in RTL. Convert Thorium's physical-side
@@ -52,7 +52,7 @@ index 483be333e73a5..7dac0c26031de 100644
    return base::FeatureList::IsEnabled(kVerticalTabs) ||
           base::FeatureList::IsEnabled(kVerticalTabsLaunch);
 diff --git a/chrome/browser/ui/tabs/features.h b/chrome/browser/ui/tabs/features.h
-index c1b051dfa8bb9..b6dd0175e88e0 100644
+index a1fd71c6fcbc8..2da1f1a9e0d41 100644
 --- a/chrome/browser/ui/tabs/features.h
 +++ b/chrome/browser/ui/tabs/features.h
 @@ -33,6 +33,10 @@ BASE_DECLARE_FEATURE(kSplitViewTabRestore);
@@ -66,9 +66,9 @@ index c1b051dfa8bb9..b6dd0175e88e0 100644
  // This feature will be used for the LE rollout of Vertical Tabs. It will have
  // an earlier min version than kVerticalTabsLaunch.
  BASE_DECLARE_FEATURE(kVerticalTabs);
-@@ -96,6 +100,10 @@ BASE_DECLARE_FEATURE(kTabStripUnification);
+@@ -98,6 +102,10 @@ BASE_DECLARE_FEATURE(kMigrateEverythingMenuPinnedToTabstrip);
  
- BASE_DECLARE_FEATURE(kMigrateEverythingMenuPinnedToTabstrip);
+ bool IsSplitViewHorizontalIndirectAccessEnabled();
  
 +// Returns whether the horizontal combo button should be inserted before the
 +// tab strip in logical child order.
@@ -78,10 +78,10 @@ index c1b051dfa8bb9..b6dd0175e88e0 100644
  
  bool IsVerticalTabsExpandOnHoverFeatureEnabled();
 diff --git a/chrome/browser/ui/tabs/tab_strip_prefs.cc b/chrome/browser/ui/tabs/tab_strip_prefs.cc
-index 642edd40ab259..cb92a907abb3c 100644
+index 24873dd76bd28..618d42e1e0d08 100644
 --- a/chrome/browser/ui/tabs/tab_strip_prefs.cc
 +++ b/chrome/browser/ui/tabs/tab_strip_prefs.cc
-@@ -83,7 +83,9 @@ TabSearchPosition GetTabSearchPosition(
+@@ -82,7 +82,9 @@ TabSearchPosition GetTabSearchPosition(
        return TabSearchPosition::kVerticalTabstrip;
      }
    }
@@ -105,19 +105,11 @@ index 010bccd89c323..9142b883efa25 100644
  };
  
 diff --git a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
-index 7c991f9d6181a..d6e6b476c450f 100644
+index f994a992e8eaa..4248dcc88a35d 100644
 --- a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
 +++ b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
-@@ -21,6 +21,7 @@
- #include "chrome/browser/ui/frame/window_frame_util.h"
- #include "chrome/browser/ui/immersive/immersive_mode_controller.h"
- #include "chrome/browser/ui/layout_constants.h"
-+#include "chrome/browser/ui/tabs/features.h"
- #include "chrome/browser/ui/tabs/tab_menu_model.h"
- #include "chrome/browser/ui/tabs/tab_strip_model.h"
- #include "chrome/browser/ui/tabs/tab_strip_prefs.h"
-@@ -170,6 +171,8 @@ std::unique_ptr<TabStrip> CreateTabStrip(
- HorizontalTabStripRegionView::HorizontalTabStripRegionView(
+@@ -165,6 +165,8 @@ std::unique_ptr<TabStrip> CreateTabStrip(
+ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
      BrowserView* browser_view)
      : browser_view_(browser_view),
 +      render_combo_button_before_tab_strip_(
@@ -125,7 +117,7 @@ index 7c991f9d6181a..d6e6b476c450f 100644
        action_view_controller_(std::make_unique<views::ActionViewController>()) {
    views::SetCascadingColorProviderColor(
        this, views::kCascadingBackgroundColor,
-@@ -180,13 +183,17 @@ HorizontalTabStripRegionView::HorizontalTabStripRegionView(
+@@ -175,13 +177,17 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
  
    BrowserWindowInterface* const browser = browser_view->browser();
  
@@ -148,7 +140,7 @@ index 7c991f9d6181a..d6e6b476c450f 100644
    }
  
    if (base::FeatureList::IsEnabled(features::kTabGroupsFocusing)) {
-@@ -270,10 +277,20 @@ HorizontalTabStripRegionView::HorizontalTabStripRegionView(
+@@ -265,10 +271,20 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
  
    SetProperty(views::kElementIdentifierKey, kTabStripRegionElementId);
  
@@ -168,8 +160,8 @@ index 7c991f9d6181a..d6e6b476c450f 100644
 +  }
    UpdateTabStripMargin();
  }
- HorizontalTabStripRegionView::~HorizontalTabStripRegionView() {
-@@ -360,9 +377,9 @@ views::View::Views HorizontalTabStripRegionView::GetChildrenInZOrder() {
+ 
+@@ -356,9 +372,9 @@ views::View::Views HorizontalTabStripRegionViewOld::GetChildrenInZOrder() {
    return children;
  }
  
@@ -179,10 +171,10 @@ index 7c991f9d6181a..d6e6b476c450f 100644
 +// A leading TabStripComboButton needs bounds that overlap the tab strip, which
 +// FlexLayout doesn't currently support. Its bounds are therefore calculated
 +// manually.
- void HorizontalTabStripRegionView::Layout(PassKey) {
+ void HorizontalTabStripRegionViewOld::Layout(PassKey) {
    if (!tab_strip_set_) {
      return;
-@@ -379,7 +396,7 @@ void HorizontalTabStripRegionView::Layout(PassKey) {
+@@ -374,7 +390,7 @@ void HorizontalTabStripRegionViewOld::Layout(PassKey) {
                        GetLayoutConstant(LayoutConstant::kTabStripPadding);
    }
  
@@ -191,17 +183,17 @@ index 7c991f9d6181a..d6e6b476c450f 100644
      AdjustViewBoundsRect(combo_button_, leading_offset);
    }
  
-@@ -600,7 +617,8 @@ HorizontalTabStripRegionView::GetExpandOnHoverLock(
+@@ -589,7 +605,8 @@ HorizontalTabStripRegionViewOld::GetExpandOnHoverLock(
  }
  
- bool HorizontalTabStripRegionView::HasLeadingButtons() const {
+ bool HorizontalTabStripRegionViewOld::HasLeadingButtons() const {
 -  if (combo_button_ && combo_button_->GetVisible() &&
 +  if (render_combo_button_before_tab_strip_ && combo_button_ &&
 +      combo_button_->GetVisible() &&
        ((combo_button_->start_button() &&
          combo_button_->start_button()->GetVisible()) ||
         (combo_button_->end_button() &&
-@@ -693,10 +711,11 @@ void HorizontalTabStripRegionView::UpdateTabStripMargin() {
+@@ -682,10 +699,11 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
          GetLayoutConstant(LayoutConstant::kTabStripPadding);
    }
  
@@ -217,11 +209,21 @@ index 7c991f9d6181a..d6e6b476c450f 100644
      combo_button_->SetPaintToLayer();
      combo_button_->layer()->SetFillsBoundsOpaquely(false);
      combo_button_->SetProperty(views::kViewIgnoredByLayoutKey, true);
+@@ -895,7 +913,8 @@ gfx::Point HorizontalTabStripRegionViewNew::GetLinkDropArrowPosition(
+ }
+ 
+ void HorizontalTabStripRegionViewNew::OnTabStripViewSet() {
+-  const size_t index = combo_button_ ? 1 : 0;
++  const size_t index =
++      combo_button_ && tabs::IsTabStripComboButtonBeforeTabStrip() ? 1 : 0;
+   ReorderChildView(tab_strip_view(), index);
+ }
+ 
 diff --git a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
-index 774e58392efa7..64f837ce82213 100644
+index eb35127aad902..05e37d2258453 100644
 --- a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
 +++ b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
-@@ -138,6 +138,8 @@ class HorizontalTabStripRegionView final : public TabStripRegionView {
+@@ -129,6 +129,8 @@ class HorizontalTabStripRegionViewOld : public TabStripRegionView {
    raw_ptr<views::Button> new_tab_button_ = nullptr;
    raw_ptr<TabStripControlButton> unfocus_button_ = nullptr;
  

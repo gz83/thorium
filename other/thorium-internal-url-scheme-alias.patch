@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 6a8c485a1e752..f89b010dbdab4 100644
+index 3238d0351ffe5..fa7f48fc77220 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -863,6 +863,8 @@ source_set("core") {
+@@ -870,6 +870,8 @@ source_set("core") {
      "startup_data.cc",
      "thorium_flag_choices.h",
      "thorium_flag_entries.h",
@@ -12,7 +12,7 @@ index 6a8c485a1e752..f89b010dbdab4 100644
      "unexpire_flags.h",
      "universal_web_contents_observers.cc",
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index cbac8ed6171b7..ef9fdf81ee48a 100644
+index 8436913e6145a..327c4ac313d36 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
 @@ -178,6 +178,7 @@
@@ -23,7 +23,7 @@ index cbac8ed6171b7..ef9fdf81ee48a 100644
  #include "chrome/browser/tracing/chrome_tracing_delegate.h"
  #include "chrome/browser/translate/translate_service.h"
  #include "chrome/browser/ui/blocked_content/blocked_window_params.h"
-@@ -5150,6 +5151,8 @@ bool ChromeContentBrowserClient::
+@@ -5100,6 +5101,8 @@ bool ChromeContentBrowserClient::
  
  void ChromeContentBrowserClient::BrowserURLHandlerCreated(
      BrowserURLHandler* handler) {
@@ -366,7 +366,7 @@ index 50c2903b4ff3a..9e6218c19c13c 100644
    typedef std::pair<URLHandler, URLHandler> HandlerPair;
    std::vector<HandlerPair> url_handlers_;
 diff --git a/content/browser/renderer_host/navigation_controller_impl.cc b/content/browser/renderer_host/navigation_controller_impl.cc
-index fbb1a45f48bbc..ac48d230d36e1 100644
+index b02d351c569ca..c02fa53551382 100644
 --- a/content/browser/renderer_host/navigation_controller_impl.cc
 +++ b/content/browser/renderer_host/navigation_controller_impl.cc
 @@ -456,9 +456,9 @@ void RewriteUrlForNavigation(const GURL& original_url,
@@ -431,7 +431,7 @@ index 151eadaae94d5..e623e047866d7 100644
    //
    // Note that normally, the reverse handler is only used if the modified URL is
 diff --git a/content/public/common/url_constants.h b/content/public/common/url_constants.h
-index 6c03bc3be9d3c..30eda10cc6472 100644
+index b29447008d283..3eaed1a950894 100644
 --- a/content/public/common/url_constants.h
 +++ b/content/public/common/url_constants.h
 @@ -19,6 +19,9 @@ namespace content {

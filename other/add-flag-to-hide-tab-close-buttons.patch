@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
-index 90f5a8d76af2b..42c551b09d331 100644
+index a8bd4658c9737..5f1bded41396b 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
-@@ -841,6 +841,11 @@ bool TabView::IsChildVisible(const views::View* child_view,
+@@ -854,6 +854,11 @@ bool TabView::IsChildVisible(const views::View* child_view,
        return false;
      }
  
@@ -15,10 +15,10 @@ index 90f5a8d76af2b..42c551b09d331 100644
      // button on active non-hovered tabs a little bit sooner than reaching the
      // uncollapsed min width, because otherwise the close buttons in a grouped
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index ef33409d6b549..a3eb789db93ef 100644
+index 83558de4690ec..eb5056f82a4d3 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -1196,6 +1196,10 @@ void Tab::UpdateIconVisibility() {
+@@ -1199,6 +1199,10 @@ void Tab::UpdateIconVisibility() {
      // Close button is shown on active tabs regardless of the size.
      showing_close_button_ = true;
  #endif  // BUILDFLAG(IS_CHROMEOS)
@@ -29,7 +29,7 @@ index ef33409d6b549..a3eb789db93ef 100644
  
      if (features::IsTabStripDeclutterEnabled() && showing_close_button_) {
        const bool alert_fits_without_close =
-@@ -1254,6 +1258,8 @@ void Tab::UpdateIconVisibility() {
+@@ -1257,6 +1261,8 @@ void Tab::UpdateIconVisibility() {
          features::IsTabStripDeclutterEnabled() &&
          available_width <= TabStyle::kTabStripDeclutterMaxTabWidthForCloseHide;
      showing_close_button_ =

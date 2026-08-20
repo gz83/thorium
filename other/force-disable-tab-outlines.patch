@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/views/frame/browser_view.cc b/chrome/browser/ui/views/frame/browser_view.cc
-index a24bb10309206..332216c05ce71 100644
+index 25e20102b1714..5e93d689ddde3 100644
 --- a/chrome/browser/ui/views/frame/browser_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_view.cc
-@@ -1339,8 +1339,11 @@ bool BrowserView::GetTabStripVisible() const {
+@@ -1338,8 +1338,11 @@ bool BrowserView::GetTabStripVisible() const {
  }
  
  bool BrowserView::ShouldDrawTabStrokes() const {
@@ -15,7 +15,7 @@ index a24bb10309206..332216c05ce71 100644
  #else   // BUILDFLAG(IS_CHROMEOS)
  
    if (web_app::AppBrowserController::From(browser()) &&
-@@ -1362,7 +1365,7 @@ bool BrowserView::ShouldDrawTabStrokes() const {
+@@ -1361,7 +1364,7 @@ bool BrowserView::ShouldDrawTabStrokes() const {
          theme_service->UsingSystemTheme();
    }
  
@@ -24,7 +24,7 @@ index a24bb10309206..332216c05ce71 100644
      // Strokes are only supported for system themes.
      return false;
    }
-@@ -1380,7 +1383,8 @@ bool BrowserView::ShouldDrawTabStrokes() const {
+@@ -1379,7 +1382,8 @@ bool BrowserView::ShouldDrawTabStrokes() const {
        GetFrameView()->GetFrameColor(BrowserFrameActiveState::kActive);
    const float contrast_ratio =
        color_utils::GetContrastRatio(background_color, frame_color);

@@ -1,5 +1,5 @@
 diff --git a/chrome/app/chromium_strings.grd b/chrome/app/chromium_strings.grd
-index 12a62d6803668..221f9d9ff7901 100644
+index eb7dcad69aa3f..87d39a8485f49 100644
 --- a/chrome/app/chromium_strings.grd
 +++ b/chrome/app/chromium_strings.grd
 @@ -731,6 +731,21 @@ Chromium is unable to recover your settings.
@@ -25,7 +25,7 @@ index 12a62d6803668..221f9d9ff7901 100644
            An operating system error occurred during installation. Please download Chromium again.
          </message>
 diff --git a/chrome/installer/mini_installer/BUILD.gn b/chrome/installer/mini_installer/BUILD.gn
-index 7128e8164e866..4ef24397c0da1 100644
+index ce1f5a5711eeb..cebb79715bd24 100644
 --- a/chrome/installer/mini_installer/BUILD.gn
 +++ b/chrome/installer/mini_installer/BUILD.gn
 @@ -1,8 +1,9 @@
@@ -66,21 +66,20 @@ index 7128e8164e866..4ef24397c0da1 100644
      "mini_installer_resource.h",
      "mini_string.cc",
      "mini_string.h",
-@@ -69,19 +76,24 @@ source_set("lib") {
-     "write_to_disk.h",
+@@ -70,21 +77,24 @@ source_set("lib") {
    ]
  
--  deps = [ "//build:branding_buildflags" ]
--
+   deps = [
++    ":mini_installer_product_version",
+     "//base:compiler_specific",
+     "//build:branding_buildflags",
++    "//chrome/installer/util:strings",
+   ]
+ 
 -  # Initialization may insert unexpected memset calls.
 -  configs -= [ "//build/config/compiler:default_init_stack_vars" ]
 -  configs += [ ":mini_installer_compiler_flags" ]
-+  deps = [
-+    ":mini_installer_product_version",
-+    "//build:branding_buildflags",
-+    "//chrome/installer/util:strings",
-+  ]
- 
+-
 -  # Because it changes the stack protector.
 -  use_libcxx_modules = false
 +  # This executable is the CPU compatibility gate for setup and the browser.
@@ -101,7 +100,7 @@ index 7128e8164e866..4ef24397c0da1 100644
  }
  
  source_set("unit_tests") {
-@@ -148,7 +160,7 @@ action("mini_installer_archive") {
+@@ -151,7 +161,7 @@ action("mini_installer_archive") {
    inputs = [
      "$root_out_dir/chrome.dll",
      "$root_out_dir/chrome_elf.dll",
@@ -110,7 +109,7 @@ index 7128e8164e866..4ef24397c0da1 100644
      "$root_out_dir/locales/en-US.pak",
      "$root_out_dir/setup.exe",
      "//chrome/tools/build/win/makecab.py",
-@@ -180,9 +192,6 @@ action("mini_installer_archive") {
+@@ -183,9 +193,6 @@ action("mini_installer_archive") {
      rebase_path(setup_runtime_deps, root_build_dir),
      "--build_time",
      build_timestamp,
@@ -120,11 +119,12 @@ index 7128e8164e866..4ef24397c0da1 100644
    ]
  
    deps = [
-@@ -255,13 +264,11 @@ source_set("mini_installer_sources") {
+@@ -258,14 +265,11 @@ source_set("mini_installer_sources") {
    sources = [ "mini_installer_exe_main.cc" ]
    deps = [
      ":lib",
 -    "//base:clang_profiling_buildflags",
+-    "//base:compiler_specific",
 +    "//chrome/installer/util:thorium_cpu_features",
    ]
 -  configs -= [ "//build/config/compiler:default_init_stack_vars" ]
@@ -138,7 +138,7 @@ index 7128e8164e866..4ef24397c0da1 100644
  }
  
  copy("copy_signing") {
-@@ -272,66 +279,73 @@ copy("copy_signing") {
+@@ -276,66 +280,73 @@ copy("copy_signing") {
  # Generates a mini_installer executable containing the resources provided in the
  # caller's `rc_file`.
  template("generate_mini_installer") {
@@ -175,12 +175,6 @@ index 7128e8164e866..4ef24397c0da1 100644
 -    configs += [
 -      "//build/config/win:sdk_link",
 -      "//build/config/win:windowed",
--    ]
--
--    ldflags = [
--      "/FIXED:NO",
--      "/ignore:4199",
--      "/NXCOMPAT",
 +    configs += [ "//build/config/win:windowed" ]
 +
 +    # The Thorium installer UI uses the CRT, C++ standard library, and task
@@ -191,6 +185,12 @@ index 7128e8164e866..4ef24397c0da1 100644
 +      "setupapi.lib",
      ]
  
+-    ldflags = [
+-      "/FIXED:NO",
+-      "/ignore:4199",
+-      "/NXCOMPAT",
+-    ]
+-
 -    libs = [ "setupapi.lib" ]
 -
      deps = [
@@ -248,7 +248,7 @@ index 7128e8164e866..4ef24397c0da1 100644
    }
  }
  
-@@ -358,14 +372,14 @@ if (!(is_component_build && is_debug && target_cpu == "x86") &&
+@@ -362,14 +373,14 @@ if (!(is_component_build && is_debug && target_cpu == "x86") &&
              root_out_dir)
      inputs = [
        "$root_out_dir/" + alternate_version_generator_rel_path,
@@ -266,7 +266,7 @@ index 7128e8164e866..4ef24397c0da1 100644
        "$target_name.exe",
        "--path_7za",
 diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index 5add215198e87..0789bbe0524c2 100644
+index cf4c3fa1816ed..a662799fadaac 100644
 --- a/chrome/installer/mini_installer/chrome.release
 +++ b/chrome/installer/mini_installer/chrome.release
 @@ -1,4 +1,4 @@
@@ -357,10 +357,10 @@ index 5add215198e87..0789bbe0524c2 100644
  [FFMPEG]
  ffmpeg.dll: %(VersionDir)s\
 diff --git a/chrome/installer/mini_installer/configuration.cc b/chrome/installer/mini_installer/configuration.cc
-index f247568ff0331..0db96f0532cde 100644
+index c23d61dfd8376..52b1b8d04c003 100644
 --- a/chrome/installer/mini_installer/configuration.cc
 +++ b/chrome/installer/mini_installer/configuration.cc
-@@ -18,7 +18,6 @@
+@@ -14,7 +14,6 @@
  #include "build/branding_buildflags.h"
  #include "chrome/installer/mini_installer/appid.h"
  #include "chrome/installer/mini_installer/mini_installer_constants.h"
@@ -368,7 +368,7 @@ index f247568ff0331..0db96f0532cde 100644
  #include "chrome/installer/mini_installer/mini_string.h"
  #include "chrome/installer/mini_installer/regkey.h"
  
-@@ -64,6 +63,8 @@ void Configuration::Clear() {
+@@ -60,6 +59,8 @@ void Configuration::Clear() {
    command_line_ = nullptr;
    argument_count_ = 0;
    is_system_level_ = false;
@@ -377,38 +377,17 @@ index f247568ff0331..0db96f0532cde 100644
    has_invalid_switch_ = false;
    should_delete_extracted_files_ = true;
  }
-@@ -78,20 +79,25 @@ bool Configuration::ParseCommandLine(const wchar_t* command_line) {
-     return false;
- 
+@@ -76,6 +77,10 @@ bool Configuration::ParseCommandLine(const wchar_t* command_line) {
    for (int i = 1; i < argument_count_; ++i) {
--    if (0 == ::lstrcmpi(args_[i], L"--system-level"))
-+    if (0 == ::lstrcmpi(args_[i], L"--system-level")) {
+     if (0 == ::lstrcmpi(UNSAFE_TODO(args_[i]), L"--system-level")) {
        is_system_level_ = true;
-+    } else if (0 == ::lstrcmpi(args_[i], L"--silent")) {
++    } else if (0 == ::lstrcmpi(UNSAFE_TODO(args_[i]), L"--silent")) {
 +      is_silent_install_ = true;
-+    } else if (0 == ::lstrcmpi(args_[i], L"--do-not-launch-chrome")) {
++    } else if (0 == ::lstrcmpi(UNSAFE_TODO(args_[i]), L"--do-not-launch-chrome")) {
 +      should_not_launch_chrome_ = true;
+     }
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
--    else if (0 == ::lstrcmpi(args_[i], L"--chrome-beta"))
-+    } else if (0 == ::lstrcmpi(args_[i], L"--chrome-beta")) {
-       chrome_app_guid_ = google_update::kBetaAppGuid;
--    else if (0 == ::lstrcmpi(args_[i], L"--chrome-dev"))
-+    } else if (0 == ::lstrcmpi(args_[i], L"--chrome-dev")) {
-       chrome_app_guid_ = google_update::kDevAppGuid;
--    else if (0 == ::lstrcmpi(args_[i], L"--chrome-sxs"))
-+    } else if (0 == ::lstrcmpi(args_[i], L"--chrome-sxs")) {
-       chrome_app_guid_ = google_update::kSxSAppGuid;
- #endif
--    else if (0 == ::lstrcmpi(args_[i], L"--cleanup"))
-+    } else if (0 == ::lstrcmpi(args_[i], L"--cleanup")) {
-       has_invalid_switch_ = true;
--    else if (0 == ::lstrcmpi(args_[i], L"--chrome-frame"))
-+    } else if (0 == ::lstrcmpi(args_[i], L"--chrome-frame")) {
-       has_invalid_switch_ = true;
-+    }
-   }
- 
-   if (!is_system_level_)
+     else if (0 == ::lstrcmpi(UNSAFE_TODO(args_[i]), L"--chrome-beta")) {
 diff --git a/chrome/installer/mini_installer/configuration.h b/chrome/installer/mini_installer/configuration.h
 index e2b6155fe43fc..7f1816e579e9c 100644
 --- a/chrome/installer/mini_installer/configuration.h
@@ -449,20 +428,15 @@ index fc23ed716a20e..e18eec1993f04 100644
  
  }  // namespace mini_installer
 diff --git a/chrome/installer/mini_installer/mini_installer.cc b/chrome/installer/mini_installer/mini_installer.cc
-index 6aae112356a1a..7b61c392957e4 100644
+index 6c1cf196a2fbe..7b61c392957e4 100644
 --- a/chrome/installer/mini_installer/mini_installer.cc
 +++ b/chrome/installer/mini_installer/mini_installer.cc
-@@ -1,33 +1,21 @@
+@@ -1,29 +1,20 @@
 -// Copyright 2012 The Chromium Authors
 +// Copyright 2026 The Chromium Authors and Alex313031
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
--#ifdef UNSAFE_BUFFERS_BUILD
--// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
--#pragma allow_unsafe_buffers
--#endif
--
 -// mini_installer.exe is the first exe that is run when chrome is being
 -// installed or upgraded. It is designed to be extremely small (~5KB with no
 -// extra resources linked) and it has two main jobs:
@@ -487,13 +461,13 @@ index 6aae112356a1a..7b61c392957e4 100644
  
  #include <windows.h>
  
+-#include "base/compiler_specific.h"
 +#include <commctrl.h>
 +#include <process.h>
-+
+ 
  // #define needed to link in RtlGenRandom(), a.k.a. SystemFunction036.  See the
  // "Community Additions" comment on MSDN here:
- // http://msdn.microsoft.com/en-us/library/windows/desktop/aa387694.aspx
-@@ -42,7 +30,12 @@
+@@ -39,7 +30,12 @@
  #include <stdlib.h>
  
  #include <algorithm>
@@ -506,7 +480,7 @@ index 6aae112356a1a..7b61c392957e4 100644
  
  #include "build/branding_buildflags.h"
  #include "chrome/installer/mini_installer/appid.h"
-@@ -53,6 +46,10 @@
+@@ -50,6 +46,10 @@
  #include "chrome/installer/mini_installer/memory_range.h"
  #include "chrome/installer/mini_installer/mini_file.h"
  #include "chrome/installer/mini_installer/mini_installer_constants.h"
@@ -517,20 +491,20 @@ index 6aae112356a1a..7b61c392957e4 100644
  #include "chrome/installer/mini_installer/regkey.h"
  #include "chrome/installer/mini_installer/write_to_disk.h"
  
-@@ -213,41 +210,29 @@ void AppendCommandLineFlags(const wchar_t* command_line,
+@@ -210,41 +210,29 @@ void AppendCommandLineFlags(const wchar_t* command_line,
    // GetCommandLine). See
    // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
    // for gory details regarding how CommandLineToArgvW works.
 -  wchar_t a_char = 0;
 -  if (*command_line == L'"') {
 -    // Scan forward past the closing double quote.
--    ++command_line;
+-    UNSAFE_TODO(++command_line);
 -    while (true) {
 -      a_char = *command_line;
 -      if (!a_char) {
 -        break;
 -      }
--      ++command_line;
+-      UNSAFE_TODO(++command_line);
 -      if (a_char == L'"') {
 -        a_char = *command_line;
 -        break;
@@ -551,7 +525,7 @@ index 6aae112356a1a..7b61c392957e4 100644
 -      if (!a_char || a_char == L' ' || a_char == L'\t') {
 -        break;
 -      }
--      ++command_line;
+-      UNSAFE_TODO(++command_line);
 -    }  // postcondition: |a_char| contains the character at *command_line.
 +    flags_offset = command_line_view.find_first_of(L" \t");
    }
@@ -574,7 +548,7 @@ index 6aae112356a1a..7b61c392957e4 100644
  }
  
  namespace {
-@@ -469,7 +454,8 @@ ProcessExitResult UnpackBinaryResources(HMODULE module,
+@@ -466,7 +454,8 @@ ProcessExitResult UnpackBinaryResources(HMODULE module,
  ProcessExitResult RunSetup(const Configuration& configuration,
                             const wchar_t* archive_path,
                             const wchar_t* setup_path,
@@ -584,7 +558,7 @@ index 6aae112356a1a..7b61c392957e4 100644
    // Get the path to setup.exe.
    PathString setup_exe;
    if (!setup_exe.assign(setup_path)) {
-@@ -499,6 +485,14 @@ ProcessExitResult RunSetup(const Configuration& configuration,
+@@ -496,6 +485,14 @@ ProcessExitResult RunSetup(const Configuration& configuration,
    // on to setup.exe
    AppendCommandLineFlags(configuration.command_line(), &cmd_line);
  
@@ -599,11 +573,11 @@ index 6aae112356a1a..7b61c392957e4 100644
    return RunProcessAndWait(setup_exe.get(), cmd_line.get(),
                             RUN_SETUP_FAILED_FILE_NOT_FOUND,
                             RUN_SETUP_FAILED_PATH_NOT_FOUND,
-@@ -668,8 +662,11 @@ bool CreateWorkDir(const wchar_t* base_path,
+@@ -665,8 +662,11 @@ bool CreateWorkDir(const wchar_t* base_path,
      // because of little endianness, but we don't care since it's just
      // a name. Since we checked capaity at the front end, we don't need to
      // duplicate it here.
--    HexEncode(&id, sizeof(id), work_dir->get() + end,
+-    HexEncode(&id, sizeof(id), UNSAFE_TODO(work_dir->get() + end),
 -              work_dir->capacity() - end);
 +    wchar_t encoded_id[sizeof(id) * 2 + 1];
 +    if (!HexEncode(&id, sizeof(id), encoded_id, std::size(encoded_id)) ||
@@ -613,7 +587,7 @@ index 6aae112356a1a..7b61c392957e4 100644
  
      // We only want the first 5 digits to remain within the 8.3 file name
      // format (compliant with previous implementation).
-@@ -709,21 +706,301 @@ bool GetWorkDir(HMODULE module,
+@@ -706,21 +706,301 @@ bool GetWorkDir(HMODULE module,
           CreateWorkDir(base_path.get(), work_dir, exit_code);
  }
  
@@ -664,8 +638,8 @@ index 6aae112356a1a..7b61c392957e4 100644
 +  if (!command_line.assign(L"\"") || !command_line.append(executable.get()) ||
 +      !command_line.append(L"\" --from-installer")) {
 +    return false;
-   }
- 
++  }
++
 +  STARTUPINFOW startup_info = {sizeof(startup_info)};
 +  PROCESS_INFORMATION process_info = {};
 +  if (!::CreateProcessW(executable.get(), command_line.get(), nullptr, nullptr,
@@ -763,8 +737,8 @@ index 6aae112356a1a..7b61c392957e4 100644
 +      }
 +      state->result_message.append(error_code);
 +    }
-+  }
-+
+   }
+ 
 +  TASKDIALOGCONFIG& page = state->result_page;
 +  page.cbSize = sizeof(page);
 +  page.hwndParent = state->dialog;
@@ -925,7 +899,7 @@ index 6aae112356a1a..7b61c392957e4 100644
    // First get a path where we can extract payload
    PathString base_path;
    if (!GetWorkDir(module, &base_path, &exit_code)) {
-@@ -746,7 +1023,8 @@ ProcessExitResult WMain(HMODULE module) {
+@@ -743,7 +1023,8 @@ ProcessExitResult WMain(HMODULE module) {
  
    if (exit_code.IsSuccess()) {
      exit_code = RunSetup(configuration, archive_path.get(), setup_path.get(),
@@ -935,7 +909,7 @@ index 6aae112356a1a..7b61c392957e4 100644
    }
  
    if (configuration.should_delete_extracted_files()) {
-@@ -771,4 +1049,22 @@ ProcessExitResult WMain(HMODULE module) {
+@@ -768,4 +1049,22 @@ ProcessExitResult WMain(HMODULE module) {
    return exit_code;
  }
  
@@ -1043,27 +1017,24 @@ index 0000000000000..a275d7f9f9c57
 +  </asmv3:application>
 +</assembly>
 diff --git a/chrome/installer/mini_installer/mini_installer_exe_main.cc b/chrome/installer/mini_installer/mini_installer_exe_main.cc
-index aff0370044046..e0d98de9436fa 100644
+index ba2febbbbb2b0..e0d98de9436fa 100644
 --- a/chrome/installer/mini_installer/mini_installer_exe_main.cc
 +++ b/chrome/installer/mini_installer/mini_installer_exe_main.cc
-@@ -1,75 +1,128 @@
+@@ -1,71 +1,128 @@
 -// Copyright 2017 The Chromium Authors
 +// Copyright 2026 The Chromium Authors and Alex313031
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
--#ifdef UNSAFE_BUFFERS_BUILD
--// TODO(crbug.com/40285824): Remove this and convert code to safer constructs.
--#pragma allow_unsafe_buffers
--#endif
 +#include <windows.h>
- 
++
 +#include <intrin.h>
 +#include <shellapi.h>
  #include <stdint.h>
 +#include <span>
  
 -#include "base/clang_profiling_buildflags.h"
+-#include "base/compiler_specific.h"
  #include "build/build_config.h"
  #include "chrome/installer/mini_installer/mini_installer.h"
 +#include "chrome/installer/mini_installer/mini_installer_localization.h"
@@ -1194,7 +1165,7 @@ index aff0370044046..e0d98de9436fa 100644
 -void* memset(void* dest, int c, size_t count) {
 -  uint8_t* scan = reinterpret_cast<uint8_t*>(dest);
 -  while (count--)
--    *scan++ = static_cast<uint8_t>(c);
+-    *UNSAFE_TODO(scan++) = static_cast<uint8_t>(c);
 -  return dest;
 +  bool is_silent = false;
 +  const std::span<wchar_t*> argument_span(
@@ -1218,7 +1189,7 @@ index aff0370044046..e0d98de9436fa 100644
 -  auto* dst = reinterpret_cast<uint8_t*>(destination);
 -  auto* src = reinterpret_cast<const uint8_t*>(source);
 -  while (count--)
--    *dst++ = *src++;
+-    *UNSAFE_TODO(dst++) = *UNSAFE_TODO(src++);
 -  return destination;
 +}  // namespace
 +
@@ -1928,7 +1899,7 @@ index 623618d3b784b..109b6961f4041 100644
    return true;
  #else
 diff --git a/chrome/installer/util/BUILD.gn b/chrome/installer/util/BUILD.gn
-index 4c37f697b72e5..accbe2188c02c 100644
+index 798db1ade36ce..1433c5927623c 100644
 --- a/chrome/installer/util/BUILD.gn
 +++ b/chrome/installer/util/BUILD.gn
 @@ -7,6 +7,10 @@ import("//build/config/chrome_build.gni")

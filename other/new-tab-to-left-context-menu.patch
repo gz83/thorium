@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/tabs/tab_menu_model.cc b/chrome/browser/ui/tabs/tab_menu_model.cc
-index 1baf7a072c6fd..86616617c2737 100644
+index 068736f07f054..7b893dd2150dc 100644
 --- a/chrome/browser/ui/tabs/tab_menu_model.cc
 +++ b/chrome/browser/ui/tabs/tab_menu_model.cc
-@@ -270,6 +270,10 @@ void TabMenuModel::Build(int index) {
+@@ -262,6 +262,10 @@ void TabMenuModel::Build(int index) {
    }
    SetElementIdentifierAt(GetItemCount() - 1, kAddNewTabAdjacentMenuItem);
  
@@ -14,10 +14,10 @@ index 1baf7a072c6fd..86616617c2737 100644
      if (tab_strip_->GetActiveTab()->IsSplit()) {
        swap_with_split_submenu_ =
 diff --git a/chrome/browser/ui/tabs/tab_strip_model.cc b/chrome/browser/ui/tabs/tab_strip_model.cc
-index e45f2404bd018..249d4428bccac 100644
+index 5807c30e140fb..fae59cdb0ee71 100644
 --- a/chrome/browser/ui/tabs/tab_strip_model.cc
 +++ b/chrome/browser/ui/tabs/tab_strip_model.cc
-@@ -2400,6 +2400,7 @@ bool TabStripModel::IsContextMenuCommandEnabled(
+@@ -2441,6 +2441,7 @@ bool TabStripModel::IsContextMenuCommandEnabled(
    }
  
    switch (command_id) {
@@ -25,7 +25,7 @@ index e45f2404bd018..249d4428bccac 100644
      case CommandNewTabToRight:
      case CommandCloseTab:
        return true;
-@@ -2508,6 +2509,15 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
+@@ -2549,6 +2550,15 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
      return;
    }
    switch (command_id) {
@@ -42,10 +42,10 @@ index e45f2404bd018..249d4428bccac 100644
        base::UmaHistogramCounts1000(
            "Tab.ContextMenu.NewTabToRight.SelectedTabsCount",
 diff --git a/chrome/browser/ui/tabs/tab_strip_model.h b/chrome/browser/ui/tabs/tab_strip_model.h
-index cf144a90c3a88..5b246ed822001 100644
+index 87ad841b0a938..fe49a1f550be1 100644
 --- a/chrome/browser/ui/tabs/tab_strip_model.h
 +++ b/chrome/browser/ui/tabs/tab_strip_model.h
-@@ -740,6 +740,7 @@ class TabStripModel {
+@@ -748,6 +748,7 @@ class TabStripModel {
    // for entries in the 'Add to existing group' submenu.
    enum ContextMenuCommand {
      CommandFirst,

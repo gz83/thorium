@@ -1,5 +1,5 @@
 diff --git a/ui/views/controls/menu/menu_config_mac.mm b/ui/views/controls/menu/menu_config_mac.mm
-index 32884002c7359..7775225628590 100644
+index a4c8e33535fc9..d417a6a51fe53 100644
 --- a/ui/views/controls/menu/menu_config_mac.mm
 +++ b/ui/views/controls/menu/menu_config_mac.mm
 @@ -38,9 +38,9 @@ void MenuConfig::InitPlatform() {
@@ -15,7 +15,7 @@ index 32884002c7359..7775225628590 100644
    if (thorium_2024) {
      menu_horizontal_border_size = 1;
 diff --git a/ui/views/controls/menu/menu_config_win.cc b/ui/views/controls/menu/menu_config_win.cc
-index 0c02bb10cb17e..12752fea723b6 100644
+index 3b7bfe91f15f6..b8fa6cde2fd89 100644
 --- a/ui/views/controls/menu/menu_config_win.cc
 +++ b/ui/views/controls/menu/menu_config_win.cc
 @@ -20,10 +20,14 @@ void MenuConfig::InitPlatform() {

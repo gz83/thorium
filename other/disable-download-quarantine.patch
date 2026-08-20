@@ -187,7 +187,7 @@ index d46c5c570d6cf..4a4c518e33de6 100644
  
    base::WeakPtrFactory<BaseFile> weak_factory_{this};
 diff --git a/content/browser/BUILD.gn b/content/browser/BUILD.gn
-index 2c3a21e01a602..ba1a0f118240b 100644
+index 7b194eabd7b0b..6cf1038e36bba 100644
 --- a/content/browser/BUILD.gn
 +++ b/content/browser/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -196,7 +196,7 @@ index 2c3a21e01a602..ba1a0f118240b 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -165,7 +165,6 @@ source_set("browser") {
+@@ -179,7 +179,6 @@ source_set("browser") {
      "//components/power_monitor",
      "//components/schema_org/common:mojom",
      "//components/services/filesystem:lib",
@@ -205,7 +205,7 @@ index 2c3a21e01a602..ba1a0f118240b 100644
      "//components/services/storage:filesystem_proxy_factory",
      "//components/services/storage/dom_storage/leveldb:local_storage_proto",
 diff --git a/content/browser/file_system_access/file_system_access_safe_move_helper.cc b/content/browser/file_system_access/file_system_access_safe_move_helper.cc
-index 1710b3bdd73b2..31bbf63b084fd 100644
+index 3ee586f42449c..23f5a77b879e5 100644
 --- a/content/browser/file_system_access/file_system_access_safe_move_helper.cc
 +++ b/content/browser/file_system_access/file_system_access_safe_move_helper.cc
 @@ -1,4 +1,4 @@
@@ -230,7 +230,7 @@ index 1710b3bdd73b2..31bbf63b084fd 100644
  #include "net/base/io_buffer.h"
  #include "net/base/net_errors.h"
  #include "storage/browser/file_system/copy_or_move_hook_delegate.h"
-@@ -283,22 +281,9 @@ void FileSystemAccessSafeMoveHelper::DidAfterWriteCheck(
+@@ -284,22 +282,9 @@ void FileSystemAccessSafeMoveHelper::DidAfterWriteCheck(
    // not exist anymore. In case of error, the source file URL will point to a
    // valid filesystem location.
    base::OnceCallback<void(base::File::Error)> result_callback;
@@ -256,7 +256,7 @@ index 1710b3bdd73b2..31bbf63b084fd 100644
    manager_->DoFileSystemOperation(
        FROM_HERE, &storage::FileSystemOperationRunner::Move,
        std::move(result_callback), source_url(), dest_url(), options_,
-@@ -315,7 +300,6 @@ void FileSystemAccessSafeMoveHelper::DidFileSkipQuarantine(
+@@ -316,7 +301,6 @@ void FileSystemAccessSafeMoveHelper::DidFileSkipQuarantine(
  void FileSystemAccessSafeMoveHelper::DidFileDoQuarantine(
      const storage::FileSystemURL& target_url,
      const GURL& referrer_url,
@@ -264,7 +264,7 @@ index 1710b3bdd73b2..31bbf63b084fd 100644
      base::File::Error result) {
    DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
  
-@@ -346,40 +330,9 @@ void FileSystemAccessSafeMoveHelper::DidFileDoQuarantine(
+@@ -347,40 +331,9 @@ void FileSystemAccessSafeMoveHelper::DidFileDoQuarantine(
        referrer_url.is_valid() && referrer_url.SchemeIsHTTPOrHTTPS()
            ? referrer_url
            : GURL();

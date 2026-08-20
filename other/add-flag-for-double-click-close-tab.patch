@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
-index 30c8d9158b58e..3d75e66900805 100644
+index 635f4e7d1f6f7..155d06481bf87 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
 @@ -7,6 +7,7 @@
@@ -10,7 +10,7 @@ index 30c8d9158b58e..3d75e66900805 100644
  #include "base/functional/callback_helpers.h"
  #include "base/metrics/histogram_functions.h"
  #include "base/metrics/user_metrics.h"
-@@ -389,7 +390,10 @@ void TabView::OnMouseReleased(const ui::MouseEvent& event) {
+@@ -400,7 +401,10 @@ void TabView::OnMouseReleased(const ui::MouseEvent& event) {
  
    auto* controller = collection_node_->GetController();
    base::WeakPtr<TabView> self = weak_ptr_factory_.GetWeakPtr();
@@ -23,7 +23,7 @@ index 30c8d9158b58e..3d75e66900805 100644
        controller->CloseTab(GetTabInterface());
      }
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index 8e6aedbbbb635..fb23193e100d9 100644
+index c90349d854592..a496717cb3d0e 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
 @@ -12,6 +12,7 @@
@@ -34,7 +34,7 @@ index 8e6aedbbbb635..fb23193e100d9 100644
  #include "base/functional/bind.h"
  #include "base/memory/raw_ptr.h"
  #include "base/metrics/user_metrics.h"
-@@ -645,7 +646,10 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
+@@ -644,7 +645,10 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
    // Close tab on middle click, but only if the button is released over the tab
    // (normal windows behavior is to discard presses of a UI element where the
    // releases happen off the element).

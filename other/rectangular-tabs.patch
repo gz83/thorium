@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/tabs/tab_style.cc b/chrome/browser/ui/tabs/tab_style.cc
-index 6f58e50c84858..19f8af9e512b7 100644
+index 5ffc9dffac40e..717a9bd4f1d2b 100644
 --- a/chrome/browser/ui/tabs/tab_style.cc
 +++ b/chrome/browser/ui/tabs/tab_style.cc
-@@ -122,10 +122,20 @@ int TabStyle::GetMinimumInactiveWidth() const {
+@@ -126,10 +126,20 @@ int TabStyle::GetMinimumInactiveWidth() const {
  }
  
  int TabStyle::GetTopCornerRadius() const {
@@ -24,7 +24,7 @@ index 6f58e50c84858..19f8af9e512b7 100644
  }
  
 diff --git a/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc b/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
-index ee64772b32f63..f279127701458 100644
+index 8d03f502576ae..db86bcef3146a 100644
 --- a/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
 +++ b/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
 @@ -4,6 +4,7 @@
@@ -35,7 +35,7 @@ index ee64772b32f63..f279127701458 100644
  #include "base/i18n/rtl.h"
  #include "base/metrics/user_metrics.h"
  #include "base/metrics/user_metrics_action.h"
-@@ -107,6 +108,10 @@ TabStripComboButton::TabStripComboButton(BrowserWindowInterface* browser,
+@@ -108,6 +109,10 @@ TabStripComboButton::TabStripComboButton(BrowserWindowInterface* browser,
      end_button_->SetUseThorium2024Style(true);
      end_button_->SetIconSize(kThorium2024TabSearchIconSize);
    }

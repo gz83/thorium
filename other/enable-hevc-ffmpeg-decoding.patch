@@ -48,7 +48,7 @@ index 90e3bdabfed94..087c1e89a977f 100644
    }
  #endif  // BUILDFLAG(ENABLE_FFMPEG_VIDEO_DECODERS) &&
 diff --git a/media/ffmpeg/ffmpeg_common.cc b/media/ffmpeg/ffmpeg_common.cc
-index be9b8980592e2..e008949d5d8fd 100644
+index 280dce68853c1..6b021822da201 100644
 --- a/media/ffmpeg/ffmpeg_common.cc
 +++ b/media/ffmpeg/ffmpeg_common.cc
 @@ -1,4 +1,4 @@
@@ -57,7 +57,7 @@ index be9b8980592e2..e008949d5d8fd 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -70,7 +70,7 @@ VideoColorSpace GetGuessedColorSpace(const VideoColorSpace& color_space) {
+@@ -69,7 +69,7 @@ VideoColorSpace GetGuessedColorSpace(const VideoColorSpace& color_space) {
  const char* GetAllowedVideoDecoders() {
    // This should match the configured lists in //third_party/ffmpeg.
  #if BUILDFLAG(USE_PROPRIETARY_CODECS) && BUILDFLAG(ENABLE_FFMPEG_VIDEO_DECODERS)
@@ -67,7 +67,7 @@ index be9b8980592e2..e008949d5d8fd 100644
    return "";
  #endif
 diff --git a/media/filters/ffmpeg_video_decoder.cc b/media/filters/ffmpeg_video_decoder.cc
-index eaf9f1c3c4490..39c65ed89018d 100644
+index 3e351538d12f0..d1feb70cab362 100644
 --- a/media/filters/ffmpeg_video_decoder.cc
 +++ b/media/filters/ffmpeg_video_decoder.cc
 @@ -1,4 +1,4 @@

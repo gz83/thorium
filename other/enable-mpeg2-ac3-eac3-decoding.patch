@@ -26,10 +26,10 @@ index 087c1e89a977f..d69c6e6fdf450 100644
        return false;
    }
 diff --git a/media/ffmpeg/ffmpeg_common.cc b/media/ffmpeg/ffmpeg_common.cc
-index e008949d5d8fd..eb6716f9e0c9f 100644
+index 6b021822da201..c17a74ba02418 100644
 --- a/media/ffmpeg/ffmpeg_common.cc
 +++ b/media/ffmpeg/ffmpeg_common.cc
-@@ -186,6 +186,12 @@ AVCodecID AudioCodecToCodecID(AudioCodec audio_codec,
+@@ -185,6 +185,12 @@ AVCodecID AudioCodecToCodecID(AudioCodec audio_codec,
    switch (audio_codec) {
      case AudioCodec::kAAC:
        return AV_CODEC_ID_AAC;
@@ -42,7 +42,7 @@ index e008949d5d8fd..eb6716f9e0c9f 100644
      case AudioCodec::kALAC:
        return AV_CODEC_ID_ALAC;
      case AudioCodec::kMP3:
-@@ -1113,7 +1119,7 @@ int32_t HashCodecName(const char* codec_name) {
+@@ -1119,7 +1125,7 @@ int32_t HashCodecName(const char* codec_name) {
  
  const char* GetAllowedAudioDecoders() {
  #if BUILDFLAG(USE_PROPRIETARY_CODECS)

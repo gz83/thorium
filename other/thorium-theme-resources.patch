@@ -1,8 +1,8 @@
 diff --git a/chrome/app/theme/theme_resources.grd b/chrome/app/theme/theme_resources.grd
-index 345b2d72c12bb..ad5523311d2d2 100644
+index 1613917dbde6a..1a8fa2faed410 100644
 --- a/chrome/app/theme/theme_resources.grd
 +++ b/chrome/app/theme/theme_resources.grd
-@@ -165,7 +165,6 @@
+@@ -175,7 +175,6 @@
        </if>
        <structure type="chrome_scaled_image" name="IDR_PLUGINS_FAVICON" file="common/favicon_plugins.png" />
        <structure type="chrome_scaled_image" name="IDR_PRERENDER" file="common/prerender_succeed_icon.png" />
@@ -10,7 +10,7 @@ index 345b2d72c12bb..ad5523311d2d2 100644
        <if expr="not is_android">
            <structure type="chrome_scaled_image" name="IDR_PRICE_TRACKING_ON_IOS_ICON" file="common/price_tracking_on_ios.png" />
        </if>
-@@ -174,11 +173,13 @@
+@@ -184,11 +183,13 @@
            <if expr="is_linux">
              <then>
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_16" file="${branding_path_component}/linux/product_logo_16.png" />
@@ -24,7 +24,7 @@ index 345b2d72c12bb..ad5523311d2d2 100644
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_32_BETA" file="${branding_path_component}/product_logo_32_beta.png" />
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_32_DEV" file="${branding_path_component}/product_logo_32_dev.png" />
              </else>
-@@ -195,9 +196,11 @@
+@@ -205,9 +206,11 @@
            <if expr="is_linux">
              <then>
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_16" file="${branding_path_component}/linux/product_logo_16.png" />
@@ -36,7 +36,7 @@ index 345b2d72c12bb..ad5523311d2d2 100644
              </else>
            </if> <!-- is_linux -->
            <if expr="_is_chrome_for_testing_branded">
-@@ -208,6 +211,14 @@
+@@ -218,6 +221,14 @@
              <else> <!-- not _is_chrome_for_testing_branded -->
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_NAME_22" file="${branding_path_component}/product_logo_name_22.png" />
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_NAME_22_WHITE" file="${branding_path_component}/product_logo_name_22_white.png" />

@@ -1,5 +1,5 @@
 diff --git a/build/config/BUILDCONFIG.gn b/build/config/BUILDCONFIG.gn
-index f44478e5f9621..2d64b4aadf818 100644
+index 2bd205bd7e85f..af7ae9011452e 100644
 --- a/build/config/BUILDCONFIG.gn
 +++ b/build/config/BUILDCONFIG.gn
 @@ -1,4 +1,4 @@
@@ -33,7 +33,7 @@ index f44478e5f9621..2d64b4aadf818 100644
  assert(!(is_debug && is_official_build), "Can't do official debug builds")
  assert(!(current_os == "ios" && is_component_build),
         "Can't use component build on iOS")
-@@ -214,7 +232,13 @@ if (host_toolchain == "") {
+@@ -222,7 +240,13 @@ if (host_toolchain == "") {
    # no toolchain omitted host_toolchain from its toolchain_args().
  
    if (host_os == "linux") {
@@ -48,7 +48,7 @@ index f44478e5f9621..2d64b4aadf818 100644
        host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
      } else if (is_clang) {
        host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
-@@ -433,6 +457,9 @@ if (current_os == "zos") {
+@@ -441,6 +465,9 @@ if (current_os == "zos") {
    default_compiler_configs += [ "//build/config/zos:compiler" ]
  }
  
@@ -59,7 +59,7 @@ index f44478e5f9621..2d64b4aadf818 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index 7df3e18c4c93a..b45a82c0b5206 100644
+index dc3d9ec5a4f43..9c3feb15ea11d 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -91,7 +91,7 @@ index 7df3e18c4c93a..b45a82c0b5206 100644
  
      if (!is_clang) {
        # Use pipes for communicating between sub-processes. Faster.
-@@ -652,7 +653,10 @@ config("compiler") {
+@@ -654,7 +655,10 @@ config("compiler") {
      }
  
      # TODO(crbug.com/40192287): Investigate why/if this should be needed.
@@ -103,7 +103,7 @@ index 7df3e18c4c93a..b45a82c0b5206 100644
        cflags += [ "/clang:-ffp-contract=off" ]
      } else {
        cflags += [ "-ffp-contract=off" ]
-@@ -805,6 +809,10 @@ config("compiler") {
+@@ -807,6 +811,10 @@ config("compiler") {
      # [1]: https://pinpoint-dot-chromeperf.appspot.com/job/11984a18be0000
      # [2]: https://ci.chromium.org/ui/p/chromium/builders/try/android-binary-size/1848442
      import_instr_limit = 30
@@ -114,7 +114,7 @@ index 7df3e18c4c93a..b45a82c0b5206 100644
  
      if (is_win) {
        ldflags += [
-@@ -1262,14 +1270,45 @@ config("disallow_unstable_features") {
+@@ -1264,14 +1272,45 @@ config("disallow_unstable_features") {
    rustflags = [ "-Zallow-features=" ]
  }
  
@@ -162,7 +162,7 @@ index 7df3e18c4c93a..b45a82c0b5206 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1304,7 +1343,59 @@ config("thinlto_optimize_max") {
+@@ -1306,7 +1345,59 @@ config("thinlto_optimize_max") {
      }
  
      if (is_win) {
@@ -222,7 +222,7 @@ index 7df3e18c4c93a..b45a82c0b5206 100644
      } else {
        ldflags = [ "-Wl,--lto-O" + lto_opt_level ]
      }
-@@ -1341,7 +1432,10 @@ config("compiler_cpu_abi") {
+@@ -1343,7 +1434,10 @@ config("compiler_cpu_abi") {
  # for particular Chromium code or for working around particular
  # compiler bugs (or the combination of the two).
  config("compiler_codegen") {
@@ -234,7 +234,7 @@ index 7df3e18c4c93a..b45a82c0b5206 100644
    cflags = []
    ldflags = []
  
-@@ -2424,6 +2518,31 @@ config("no_incompatible_pointer_warnings") {
+@@ -2431,6 +2525,31 @@ config("no_incompatible_pointer_warnings") {
    }
  }
  
@@ -266,7 +266,7 @@ index 7df3e18c4c93a..b45a82c0b5206 100644
  # Optimization -----------------------------------------------------------------
  #
  # The BUILDCONFIG file sets the "default_optimization" config on targets by
-@@ -2660,9 +2779,18 @@ config("optimize_max") {
+@@ -2667,9 +2786,18 @@ config("optimize_max") {
    if (is_win) {
      # Favor speed over size, /O2 must be before the common flags.
      # /O2 implies /Ot, /Oi, and /GF.
@@ -574,10 +574,10 @@ index 069432bbae2ff..f287524c4cc50 100644
  
    # arflags apply only to static_libraries. The normal linker configs are only
 diff --git a/build/toolchain/gcc_toolchain.gni b/build/toolchain/gcc_toolchain.gni
-index d8457bfa53a4e..74f8848706d11 100644
+index eb1d2a4ec1a1c..92ae6c841334a 100644
 --- a/build/toolchain/gcc_toolchain.gni
 +++ b/build/toolchain/gcc_toolchain.gni
-@@ -916,6 +916,7 @@ template("gcc_rust_host_build_tools_toolchain") {
+@@ -920,6 +920,7 @@ template("gcc_rust_host_build_tools_toolchain") {
      toolchain_args = {
        # Populate toolchain args from the invoker.
        forward_variables_from(invoker.toolchain_args, "*")

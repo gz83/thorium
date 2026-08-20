@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/webui/BUILD.gn b/chrome/browser/ui/webui/BUILD.gn
-index 9ad30f708e9cb..da9e3425e1a15 100644
+index 9623fff2d1efc..4b52030b4df76 100644
 --- a/chrome/browser/ui/webui/BUILD.gn
 +++ b/chrome/browser/ui/webui/BUILD.gn
 @@ -33,6 +33,7 @@ source_set("configs") {
@@ -11,7 +11,7 @@ index 9ad30f708e9cb..da9e3425e1a15 100644
  
    configs += [ "//build/config/compiler:wexit_time_destructors" ]
 diff --git a/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
-index 184305a45acc2..2413a9d29d6f1 100644
+index a574524816991..0aaf5ba94b01a 100644
 --- a/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 +++ b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 @@ -54,6 +54,7 @@
@@ -292,10 +292,10 @@ index 0000000000000..e183c1f64b82a
 +
 +#endif  // THORIUM_EASTER_EGGS_H_
 diff --git a/chrome/common/webui_url_constants.cc b/chrome/common/webui_url_constants.cc
-index 4c12bc642955f..4b60deca0d790 100644
+index 3aaa4aaa4b1de..1202aadda3370 100644
 --- a/chrome/common/webui_url_constants.cc
 +++ b/chrome/common/webui_url_constants.cc
-@@ -124,6 +124,9 @@ base::span<const base::cstring_view> ChromeURLHosts() {
+@@ -123,6 +123,9 @@ base::span<const base::cstring_view> ChromeURLHosts() {
        kChromeUIAboutHost,
        kChromeUIAccessibilityHost,
        kChromeUIActorInternalsHost,
@@ -306,7 +306,7 @@ index 4c12bc642955f..4b60deca0d790 100644
        kChromeUIAppServiceInternalsHost,
  #endif
 diff --git a/chrome/common/webui_url_constants.h b/chrome/common/webui_url_constants.h
-index 497865b22520b..72979f1562259 100644
+index bc26ce3751cbc..fe1e1e4f18478 100644
 --- a/chrome/common/webui_url_constants.h
 +++ b/chrome/common/webui_url_constants.h
 @@ -33,6 +33,12 @@ namespace chrome {
@@ -334,10 +334,10 @@ index 5096175e285c1..6d4a41ab2815f 100644
 +    <a href="{{thorium_link}}">here</a>. Chromium source code is available <a href="{{opensource_link}}">here</a>.
  </div>
 diff --git a/tools/licenses/licenses.py b/tools/licenses/licenses.py
-index a96f5c1531cd2..ef68ccff45e4a 100755
+index 466e6a1751bde..a2f61cd4c6101 100755
 --- a/tools/licenses/licenses.py
 +++ b/tools/licenses/licenses.py
-@@ -1114,6 +1114,8 @@ def GenerateCredits(args, metadatas):
+@@ -1117,6 +1117,8 @@ def GenerateCredits(args, metadatas):
    entries_contents = '\n'.join([entry['content'] for entry in entries])
  
    reciprocal_contents = EvaluateTemplate(reciprocal_template, {
@@ -347,7 +347,7 @@ index a96f5c1531cd2..ef68ccff45e4a 100755
        'opensource_link': 'https://source.chromium.org/chromium'
    },
 diff --git a/ui/webui/resources/BUILD.gn b/ui/webui/resources/BUILD.gn
-index cafa406b7d8d7..204e2c65b3bc2 100644
+index c42f55eaef464..180cc9276ed7d 100644
 --- a/ui/webui/resources/BUILD.gn
 +++ b/ui/webui/resources/BUILD.gn
 @@ -38,6 +38,7 @@ generate_grd("build_grd") {

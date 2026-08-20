@@ -79,7 +79,6 @@ overlay-derived, or still need separate provenance review.
 
 - [`add-hevc-ffmpeg-decoder-parser.patch`](../other/add-hevc-ffmpeg-decoder-parser.patch) (apply root: `third_party/ffmpeg`)
 - [`add-ac3-eac3-ffmpeg-decoders.patch`](../other/add-ac3-eac3-ffmpeg-decoders.patch) (apply root: `third_party/ffmpeg`)
-- [`change-libavcodec-header.patch`](../other/change-libavcodec-header.patch) (apply root: `third_party/ffmpeg`)
 - [`fix-ffmpeg-android-x86-disable-hevc-nasm.patch`](../other/fix-ffmpeg-android-x86-disable-hevc-nasm.patch) (apply root: `third_party/ffmpeg`)
 - [`ffmpeg-branding.patch`](../other/ffmpeg-branding.patch) (apply root: `third_party/ffmpeg`)
 - [`widevine-cdm-support.patch`](../other/widevine-cdm-support.patch) (apply root: `third_party/widevine`)

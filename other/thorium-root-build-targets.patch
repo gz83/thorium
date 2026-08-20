@@ -1,5 +1,5 @@
 diff --git a/BUILD.gn b/BUILD.gn
-index eed288d37fbf4..867bb39d1b572 100644
+index 0bd5d40ff7086..1597ccafdc87c 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -115,16 +115,16 @@ index eed288d37fbf4..867bb39d1b572 100644
  # The `gn_all` target is used to list all of the main targets in the build, so
  # that we can figure out which BUILD.gn files to process, following the process
  # described at the top of this file.
-@@ -196,7 +296,7 @@ group("gn_all") {
+@@ -194,7 +294,7 @@ group("gn_all") {
+         "//components/url_formatter/tools:format_url",
          "//components/viz:viz_perftests",
          "//components/viz:viz_unittests",
-         "//content/browser/interest_group/tools:adjustable_auction",
 -        "//content/shell:content_shell",
 +        "//content/shell:thorium_shell",
          "//content/test:content_browsertests",
          "//content/test:content_unittests",
          "//device:device_unittests",
-@@ -318,7 +418,7 @@ group("gn_all") {
+@@ -316,7 +416,7 @@ group("gn_all") {
          "//ui/views:views_unittests",
          "//ui/views/examples:views_examples",
          "//ui/views/examples:views_examples_unittests",
@@ -133,7 +133,7 @@ index eed288d37fbf4..867bb39d1b572 100644
        ]
      }
  
-@@ -1205,7 +1305,7 @@ if (use_blink && !is_cronet_build) {
+@@ -1232,7 +1332,7 @@ if (use_blink && !is_cronet_build) {
      data_deps = [
        ":layout_test_data_mojo_bindings",
        ":layout_test_data_mojo_bindings_lite",
@@ -142,7 +142,7 @@ index eed288d37fbf4..867bb39d1b572 100644
        "//content/test:mojo_bindings_web_test_mojom_js_data_deps",
        "//content/test:mojo_web_test_bindings_js_data_deps",
        "//device/bluetooth/public/mojom:fake_bluetooth_interfaces_js_data_deps",
-@@ -1510,9 +1610,9 @@ if (use_blink && !is_cronet_build) {
+@@ -1537,9 +1637,9 @@ if (use_blink && !is_cronet_build) {
  # modulemaps requires building targets on linux-x86
  if (!running_modularize) {
    # TODO(cassew): Add more OS's that don't support x86.
@@ -155,7 +155,7 @@ index eed288d37fbf4..867bb39d1b572 100644
  
    # Note: v8_target_cpu == arm allows using the V8 arm simulator on x86 for
    # fuzzing.
-@@ -1575,7 +1675,7 @@ if (!is_ios && !is_android && !is_castos && !is_cronet_build) {
+@@ -1602,7 +1702,7 @@ if (!is_ios && !is_android && !is_castos && !is_cronet_build) {
      write_runtime_deps = "${root_out_dir}/${target_name}.runtime_deps"
  
      data_deps = [

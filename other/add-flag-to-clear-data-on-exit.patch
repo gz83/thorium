@@ -25,7 +25,7 @@ index 5a009faf7bdde..74ac64bebd2ee 100644
  #if BUILDFLAG(IS_LINUX)
  BASE_DECLARE_FEATURE(kDbusSecretPortal);
 diff --git a/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc b/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc
-index d548f5037d659..faa93b12a1497 100644
+index 3bd4ce172829d..633b3d673c77c 100644
 --- a/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc
 +++ b/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc
 @@ -19,6 +19,7 @@
@@ -36,7 +36,7 @@ index d548f5037d659..faa93b12a1497 100644
  #include "chrome/browser/browsing_data/chrome_browsing_data_remover_constants.h"
  #include "chrome/browser/browsing_data/chrome_browsing_data_remover_delegate.h"
  #include "chrome/browser/lifetime/browser_shutdown.h"
-@@ -147,6 +148,21 @@ class BrowsingDataRemoverObserver
+@@ -148,6 +149,21 @@ class BrowsingDataRemoverObserver
  #endif
  };
  
@@ -58,7 +58,7 @@ index d548f5037d659..faa93b12a1497 100644
  uint64_t GetOriginTypeMask(const base::ListValue& data_types) {
    uint64_t result = 0;
    for (const auto& data_type : data_types) {
-@@ -328,9 +344,11 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
+@@ -329,9 +345,11 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
    const base::ListValue& data_types = profile_->GetPrefs()->GetList(
        browsing_data::prefs::kClearBrowsingDataOnExitList);
  
@@ -72,7 +72,7 @@ index d548f5037d659..faa93b12a1497 100644
      profile_->GetPrefs()->SetBoolean(
          browsing_data::prefs::kClearBrowsingDataOnExitDeletionPending, true);
      auto* remover = profile_->GetBrowsingDataRemover();
-@@ -341,8 +359,10 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
+@@ -342,8 +360,10 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
        DCHECK(keep_browser_alive);
  #endif
      remover->RemoveAndReply(base::Time(), base::Time::Max(),

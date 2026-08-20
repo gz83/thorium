@@ -31,7 +31,7 @@ index 570369d1febfe..f80502ac392de 100644
    position: relative;
    width: 100%;
 diff --git a/components/dom_distiller/core/dom_distiller_features.cc b/components/dom_distiller/core/dom_distiller_features.cc
-index e4fcf51e5f4fa..bbdd0fb456b7d 100644
+index fcec9a6a83570..d1274a027ce72 100644
 --- a/components/dom_distiller/core/dom_distiller_features.cc
 +++ b/components/dom_distiller/core/dom_distiller_features.cc
 @@ -1,4 +1,4 @@
@@ -40,7 +40,7 @@ index e4fcf51e5f4fa..bbdd0fb456b7d 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -21,47 +21,38 @@
+@@ -21,13 +21,19 @@
  namespace dom_distiller {
  
  bool IsDomDistillerEnabled() {
@@ -61,47 +61,8 @@ index e4fcf51e5f4fa..bbdd0fb456b7d 100644
 +         kReaderModeDesktop;
  }
  
--BASE_FEATURE(kReaderModeUseReadability, base::FEATURE_ENABLED_BY_DEFAULT);
-+BASE_FEATURE(kReaderModeUseReadability, base::FEATURE_DISABLED_BY_DEFAULT);
  
- #if !BUILDFLAG(IS_IOS)
- constexpr base::FeatureParam<bool> kReaderModeUseReadabilityUseDistiller{
-     &kReaderModeUseReadability, /*name=*/"use_distiller",
--    /*default_value=*/true};
-+    /*default_value=*/false};
- #endif
- constexpr base::FeatureParam<int> kReaderModeUseReadabilityHeuristicMinScore{
-     &kReaderModeUseReadability, /*name=*/"heuristic_min_score",
--#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_IOS)
--    /*default_value=*/50
--#else
--    /*default_value=*/100
--#endif  // BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_IOS)
--};
-+    /*default_value=*/50};
- constexpr base::FeatureParam<int>
-     kReaderModeUseReadabilityHeuristicMinContentLength{
-         &kReaderModeUseReadability, /*name=*/"heuristic_min_content_length",
--#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_IOS)
--        /*default_value=*/160
--#else
--        /*default_value=*/200
--#endif  // BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_IOS)
--    };
-+        /*default_value=*/160};
- constexpr base::FeatureParam<int> kReaderModeUseReadabilityMinContentLength{
-     &kReaderModeUseReadability, /*name=*/"min_content_length",
--#if !BUILDFLAG(IS_ANDROID)
--    /*default_value=*/0
--#else
--    /*default_value=*/100
--#endif
--};
-+    /*default_value=*/100};
- 
- bool ShouldUseReadabilityDistiller() {
- #if BUILDFLAG(IS_IOS)
-@@ -98,7 +89,7 @@ BASE_FEATURE(kReaderModeBlurTransitionAnimation,
+@@ -43,7 +49,7 @@ BASE_FEATURE(kReaderModeBlurTransitionAnimation,
  BASE_FEATURE(kReaderModeDelayBottomSheetPeek,
               base::FEATURE_DISABLED_BY_DEFAULT);
  

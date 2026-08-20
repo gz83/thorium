@@ -22,7 +22,7 @@ index c78bb18ef2703..4e9f3eeeba689 100644
 +  return !base::CommandLine::ForCurrentProcess()->HasSwitch("disable-aero");
  }
 diff --git a/ui/views/win/hwnd_message_handler.cc b/ui/views/win/hwnd_message_handler.cc
-index 6b5028dac5838..9367f4a965d44 100644
+index 019f0d2a3e724..746e159cb3783 100644
 --- a/ui/views/win/hwnd_message_handler.cc
 +++ b/ui/views/win/hwnd_message_handler.cc
 @@ -1048,7 +1048,7 @@ void HWNDMessageHandler::FrameTypeChanged() {

@@ -1,5 +1,5 @@
 diff --git a/components/omnibox/browser/BUILD.gn b/components/omnibox/browser/BUILD.gn
-index db8b0850a30ce..c338e96ef2a26 100644
+index 66b93310a4820..dc55566bd9561 100644
 --- a/components/omnibox/browser/BUILD.gn
 +++ b/components/omnibox/browser/BUILD.gn
 @@ -114,6 +114,13 @@ aggregate_vector_icons("omnibox_vector_icons") {
@@ -17,7 +17,7 @@ index db8b0850a30ce..c338e96ef2a26 100644
      sources += [
        "ios_share.icon",
 diff --git a/components/vector_icons/BUILD.gn b/components/vector_icons/BUILD.gn
-index d6d391fa6bac3..05ff2298b0839 100644
+index 33d25f74926d9..4b93fb1087626 100644
 --- a/components/vector_icons/BUILD.gn
 +++ b/components/vector_icons/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -26,7 +26,7 @@ index d6d391fa6bac3..05ff2298b0839 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -521,6 +521,24 @@ if (current_toolchain == default_toolchain) {
+@@ -522,6 +522,24 @@ if (current_toolchain == default_toolchain) {
        "work_old.icon",
      ]
  

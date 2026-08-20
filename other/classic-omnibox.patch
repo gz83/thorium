@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/layout_constants.cc b/chrome/browser/ui/layout_constants.cc
-index 8eb294114e009..23c0474eadb9c 100644
+index 59b0b4387517b..6a3381e1e2c1f 100644
 --- a/chrome/browser/ui/layout_constants.cc
 +++ b/chrome/browser/ui/layout_constants.cc
 @@ -4,6 +4,7 @@
@@ -29,10 +29,10 @@ index 8eb294114e009..23c0474eadb9c 100644
        return 16;
      case LayoutConstant::kLocationBarChipPadding:
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 6df138710641f..f5fc1d4ea5732 100644
+index 564135f23f28b..f4a1fd33f8973 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-@@ -11,6 +11,7 @@
+@@ -10,6 +10,7 @@
  #include <utility>
  
  #include "base/containers/adapters.h"
@@ -40,7 +40,7 @@ index 6df138710641f..f5fc1d4ea5732 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
-@@ -274,7 +275,11 @@ LocationBarView::LocationBarView(Browser* browser,
+@@ -249,7 +250,11 @@ LocationBarView::LocationBarView(Browser* browser,
            }));
        views::FocusRing::Get(this)->SetOutsetFocusRingDisabled(true);
      }
@@ -53,7 +53,7 @@ index 6df138710641f..f5fc1d4ea5732 100644
  
  #if BUILDFLAG(OS_LEVEL_GEOLOCATION_PERMISSION_SUPPORTED)
      if (features::IsOsLevelGeolocationPermissionSupportEnabled()) {
-@@ -637,6 +642,11 @@ bool LocationBarView::IsInitialized() const {
+@@ -542,6 +547,11 @@ bool LocationBarView::IsInitialized() const {
  }
  
  int LocationBarView::GetBorderRadius() const {
@@ -65,7 +65,7 @@ index 6df138710641f..f5fc1d4ea5732 100644
    return ComputeBorderRadius(size());
  }
  
-@@ -1595,6 +1605,12 @@ void LocationBarView::RefreshBackground() {
+@@ -1499,6 +1509,12 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;
@@ -79,7 +79,7 @@ index 6df138710641f..f5fc1d4ea5732 100644
    // The custom focus border is disabled on macOS to avoid conflicting with
    // native omnibox rendering.
 diff --git a/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc b/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
-index 29daf84c09d4e..0cad65bccd004 100644
+index f9f45c65757a4..23f8f94893b21 100644
 --- a/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
 +++ b/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
 @@ -6,6 +6,7 @@
@@ -90,7 +90,7 @@ index 29daf84c09d4e..0cad65bccd004 100644
  #include "base/functional/bind.h"
  #include "base/memory/raw_ptr.h"
  #include "chrome/browser/ui/color/chrome_color_id.h"
-@@ -303,7 +304,10 @@ class OmniboxSuggestionRowButton : public views::MdTextButton {
+@@ -299,7 +300,10 @@ class OmniboxSuggestionRowButton : public views::MdTextButton {
      SetImageLabelSpacing(8);
      SetCustomPadding(ChromeLayoutProvider::Get()->GetInsetsMetric(
          INSETS_OMNIBOX_PILL_BUTTON));

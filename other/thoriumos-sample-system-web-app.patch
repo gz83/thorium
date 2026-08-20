@@ -1,16 +1,15 @@
 diff --git a/ash/webui/sample_system_web_app_ui/BUILD.gn b/ash/webui/sample_system_web_app_ui/BUILD.gn
-index 42f3aa192abda..55c05ed871ca6 100644
+index ce44da67bb222..9f647e8ab4bda 100644
 --- a/ash/webui/sample_system_web_app_ui/BUILD.gn
 +++ b/ash/webui/sample_system_web_app_ui/BUILD.gn
-@@ -1,13 +1,12 @@
+@@ -1,12 +1,11 @@
 -# Copyright 2019 The Chromium Authors
 +# Copyright 2026 The Chromium Authors and Alex313031
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
 +import("//build/config/chromeos/ui_mode.gni")
- import("//chrome/test/base/ash/js2gtest.gni")
- import("//third_party/closure_compiler/compile_js.gni")
+ import("//tools/typescript/ts_library.gni")
  
 -assert(is_chromeos, "Sample System Web App is ChromeOS only")
 -assert(!is_official_build,
@@ -127,12 +126,12 @@ index 1c4952ef447da..a20b39920c956 100644
  namespace content {
  class WebUI;
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index f89b010dbdab4..0d8c587b6922f 100644
+index fa7f48fc77220..c89b3f71791b2 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -4049,12 +4049,10 @@ source_set("browser") {
-       deps += [ "//chrome/browser/nearby_sharing/internal/icons:vector_icons" ]
-     }
+@@ -4056,12 +4056,10 @@ source_set("browser") {
+       "//ui/wm/public",
+     ]
  
 -    if (!is_official_build) {
 -      deps += [
@@ -148,10 +147,10 @@ index f89b010dbdab4..0d8c587b6922f 100644
      if (enable_server_based_recognition) {
        deps += [ "//chrome/services/speech/internal:lib" ]
 diff --git a/chrome/browser/ash/system_web_apps/apps/BUILD.gn b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
-index d515dd5303f39..4399792651ad3 100644
+index 28485e4a1d934..b02d5855e06ab 100644
 --- a/chrome/browser/ash/system_web_apps/apps/BUILD.gn
 +++ b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
-@@ -185,17 +185,15 @@ static_library("apps") {
+@@ -186,17 +186,15 @@ static_library("apps") {
      "//url",
    ]
  
@@ -255,10 +254,10 @@ index 0e3e1cfd7bd05..819f8567dfa5d 100644
  
  }  // namespace chrome::internal
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 15ab6991cac12..08196bad95695 100644
+index 8ef8ef80a99b1..84436bc8ed0a7 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -3207,9 +3207,7 @@ static_library("ui") {
+@@ -3208,9 +3208,7 @@ static_library("ui") {
        ]
      }
  
@@ -308,7 +307,7 @@ index b564b12f102af..1cd846325a0c1 100644
  
  }  // namespace ash
 diff --git a/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc b/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc
-index 546e1e84a86e7..4cc3755d94210 100644
+index c587ab3bc8a9a..6eb6cd079e1ce 100644
 --- a/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc
 +++ b/chrome/browser/ui/webui/ash/config/chrome_web_ui_configs_chromeos.cc
 @@ -118,9 +118,7 @@
@@ -321,7 +320,7 @@ index 546e1e84a86e7..4cc3755d94210 100644
  
  namespace content {
  class WebUI;
-@@ -349,8 +347,8 @@ void RegisterAshChromeWebUIConfigs() {
+@@ -348,8 +346,8 @@ void RegisterAshChromeWebUIConfigs() {
        base::BindRepeating(vc_background_ui::CreateVcBackgroundUI)));
    map.AddWebUIConfig(std::make_unique<GrowthInternalsUIConfig>());
    map.AddWebUIConfig(std::make_unique<FloatingWorkspaceUIConfig>());
