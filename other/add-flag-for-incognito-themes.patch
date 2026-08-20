@@ -81,6 +81,22 @@ index 6d7b24b67ff1f..ff0250adf59a5 100644
    overflow: auto;
  }
  
+diff --git a/chrome/browser/themes/theme_service.cc b/chrome/browser/themes/theme_service.cc
+index bf9cb4c809b32..af360e8270036 100644
+--- a/chrome/browser/themes/theme_service.cc
++++ b/chrome/browser/themes/theme_service.cc
+@@ -688,7 +688,10 @@ ui::ColorProviderKey ThemeService::GetColorProviderKey(
+   DCHECK_EQ(profile->GetOriginalProfile(), profile_);
+ 
+   ui::ColorProviderKey key = base_key;
+-  const bool is_incognito = profile->IsIncognitoProfile();
++  const bool is_incognito =
++      profile->IsIncognitoProfile() &&
++      !base::CommandLine::ForCurrentProcess()->HasSwitch(
++          "enable-incognito-themes");
+ 
+   // color_mode.
+   if (is_incognito) {
 diff --git a/chrome/browser/ui/views/frame/browser_widget.cc b/chrome/browser/ui/views/frame/browser_widget.cc
 index 582e4ccaf8879..29c5971cfe63c 100644
 --- a/chrome/browser/ui/views/frame/browser_widget.cc

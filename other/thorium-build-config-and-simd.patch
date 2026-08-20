@@ -59,7 +59,7 @@ index f44478e5f9621..2d64b4aadf818 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index 7df3e18c4c93a..17c08652d9775 100644
+index 7df3e18c4c93a..b45a82c0b5206 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -76,6 +76,21 @@ index 7df3e18c4c93a..17c08652d9775 100644
  import("//build/config/coverage/coverage.gni")
  import("//build/config/cronet/config.gni")
  import("//build/config/dcheck_always_on.gni")
+@@ -529,10 +530,10 @@ config("compiler") {
+   # Linux/Android/Fuchsia common flags setup.
+   # ---------------------------------
+   if (is_linux || is_chromeos || is_android || is_fuchsia) {
+-    asmflags += [ "-fPIC" ]
+-    cflags += [ "-fPIC" ]
+-    ldflags += [ "-fPIC" ]
+-    rustflags += [ "-Crelocation-model=pic" ]
++    asmflags += [ "-fPIC", "-w", ]
++    cflags += [ "-fPIC", "-w", ]
++    ldflags += [ "-fPIC", "-w", ]
++    rustflags += [ "-Crelocation-model=pic", "-Awarnings", ]
+ 
+     if (!is_clang) {
+       # Use pipes for communicating between sub-processes. Faster.
 @@ -652,7 +653,10 @@ config("compiler") {
      }
  
