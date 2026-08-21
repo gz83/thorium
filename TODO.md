@@ -7,11 +7,9 @@ whether or not they already have a dedicated issue.
 
 ## Product decisions
 
-- [ ] Decide whether macOS DMG filenames should include the Chromium version
-  and architecture. `create_dmg.py` currently produces `Thorium_MacOS.dmg`.
-
 - [ ] Re-evaluate SSD Restore behavior
-  ([Thorium issue #61](https://github.com/Alex313031/thorium/issues/61)).
+  despite [Thorium issue #61](https://github.com/Alex313031/thorium/issues/61)
+  being closed as not planned.
   Measure the current Chromium baseline's Session Restore write frequency
   before deciding whether to adjust the save interval or offer an option that
   disables persistent session writes.
@@ -25,6 +23,9 @@ whether or not they already have a dedicated issue.
   current Chromium baseline and document the result.
 
 ## Implementation
+
+- [ ] Make `create_dmg.py` include the application architecture in Thorium DMG
+  filenames, using distinct names for x64, ARM64, and universal builds.
 
 - [ ] Synchronize ThoriumOS Shortcuts app metadata with
   `keyboard_shortcuts.patch` in the
@@ -48,24 +49,23 @@ whether or not they already have a dedicated issue.
   the top and item separators remain continuous during window resizing and
   transitions between normal, warning, and deep-scanning modes.
 
-- [ ] Add a Restart Thorium desktop app-menu command that uses
-  `chrome::AttemptRestart()` and retains Chromium's normal session-restoration
-  semantics.
-
-- [ ] Add a Report issue desktop app-menu command that opens Thorium's GitHub
-  issue template.
-
-- [ ] Add a What's new desktop app-menu command that opens Thorium release
-  notes rather than Google Chrome-branded content.
+- [ ] Add Thorium-specific desktop app-menu commands:
+  - Restart Thorium using `chrome::AttemptRestart()` while retaining Chromium's
+    normal session-restoration semantics;
+  - Report issue, opening Thorium's GitHub issue template;
+  - What's new, opening Thorium release notes rather than Google Chrome-branded
+    content.
 
 ## Verification and benchmarking
 
-- [ ] Reproduce and verify the Omnibox outline and bookmark bar underline with
-  custom themes, with Thorium 2024 enabled and disabled. If the issue still
-  exists, record the affected platform, theme, and expected appearance before
-  changing the current color and border handling. Record the tested Thorium
-  version, platform, display scale, and result; open a dedicated issue with
-  screenshots for any failure.
+- [ ] Visually verify the Omnibox and bookmark bar with Thorium 2024 enabled and
+  disabled. Cover the Omnibox outline, input icon and text, Views suggestion
+  popup alignment, and bookmark bar underline with custom themes, keyword mode,
+  permission chips, `classic-omnibox`, and 100%/125%/150% display scaling. If
+  an issue exists, record the tested Thorium version, platform, theme, display
+  scale, expected appearance, and result before changing the current color,
+  border, or alignment handling; open a dedicated issue with screenshots for
+  any failure.
 
 - [ ] Establish a reproducible benchmark comparing non-optimized Thorium,
   optimized Thorium, Chromium, and Google Chrome based on the same full
@@ -81,12 +81,6 @@ whether or not they already have a dedicated issue.
   caption buttons remain vertically aligned and that the top edge remains
   resizable.
 
-- [ ] Visually verify Omnibox input icon, text, and Views suggestion popup
-  alignment with Thorium 2024 enabled and disabled, including keyword mode,
-  permission chips, `classic-omnibox`, and 125%/150% display scaling. Record
-  the tested Thorium version, platform, display scale, and result; open a
-  dedicated issue with screenshots for any failure.
-
 - [ ] Verify and document Thorium's `--no-autoplay` behavior against
   [Supermium issue #1412](https://github.com/win32ss/supermium/issues/1412) on
   every platform where Thorium distributes the switch:
@@ -96,5 +90,4 @@ whether or not they already have a dedicated issue.
   - confirm that an explicit `--autoplay-policy` takes precedence;
   - document that desktop WebAudio remains allowed by
     `allow-webaudio-autoplay.patch`, or decide separately whether it should
-    honor `--no-autoplay`;
-  - confirm that the Profile Picker remains stable.
+    honor `--no-autoplay`.
