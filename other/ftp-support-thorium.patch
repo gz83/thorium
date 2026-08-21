@@ -5343,22 +5343,25 @@ index a9d5281da7d26..0bac6e059a633 100644
      "mixed_content.cc",
 diff --git a/third_party/blink/renderer/platform/loader/ftp_directory_listing.cc b/third_party/blink/renderer/platform/loader/ftp_directory_listing.cc
 new file mode 100644
-index 0000000000000..b4f0298928737
+index 0000000000000..5a2d34837a138
 --- /dev/null
 +++ b/third_party/blink/renderer/platform/loader/ftp_directory_listing.cc
-@@ -0,0 +1,110 @@
+@@ -0,0 +1,117 @@
 +// Copyright 2018 The Chromium Authors
 +// Use of this source code is governed by a BSD-style license that can be
 +// found in the LICENSE file.
 +
 +#include "third_party/blink/renderer/platform/loader/ftp_directory_listing.h"
 +
++#include <optional>
 +#include <string>
 +#include <vector>
 +
++#include "base/byte_size.h"
 +#include "base/containers/span.h"
 +#include "base/i18n/encoding_detection.h"
 +#include "base/i18n/icu_string_conversions.h"
++#include "base/numerics/safe_conversions.h"
 +#include "base/strings/escape.h"
 +#include "base/strings/string_util.h"
 +#include "base/strings/sys_string_conversions.h"
@@ -5380,8 +5383,9 @@ index 0000000000000..b4f0298928737
 +std::u16string ConvertPathToUTF16(const std::string& path) {
 +  // Per RFC 2640, FTP servers should use UTF-8 or its proper subset ASCII,
 +  // but many old FTP servers use legacy encodings. Try UTF-8 first.
-+  if (base::IsStringUTF8(path))
++  if (base::IsStringUTF8(path)) {
 +    return base::UTF8ToUTF16(path);
++  }
 +
 +  // Try detecting the encoding. The sample is rather small though, so it may
 +  // fail.
@@ -5441,13 +5445,16 @@ index 0000000000000..b4f0298928737
 +    // Skip the current and parent directory entries in the listing.
 +    // net::GetParentDirectoryLink() takes care of them.
 +    if (base::EqualsASCII(entry.name, ".") ||
-+        base::EqualsASCII(entry.name, ".."))
++        base::EqualsASCII(entry.name, "..")) {
 +      continue;
++    }
 +
 +    bool is_directory =
 +        (entry.type == net::FtpDirectoryListingEntry::DIRECTORY);
-+    base::ByteCount size(
-+        entry.type == net::FtpDirectoryListingEntry::FILE ? entry.size : 0);
++    std::optional<base::ByteSize> size;
++    if (entry.type == net::FtpDirectoryListingEntry::FILE) {
++      size = base::ByteSize(base::as_unsigned(entry.size));
++    }
 +    std::string entry_string = net::GetDirectoryListingEntry(
 +        entry.name, entry.raw_name, is_directory, size, entry.last_modified);
 +    output->Append(base::as_byte_span(entry_string));

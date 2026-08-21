@@ -563,15 +563,15 @@ index 586d4eba50f6f..c33c1355b7cc5 100644
    // the use of Clear Key key system which is always allowed as required by the
    // spec.
 diff --git a/third_party/blink/renderer/core/exported/web_view_impl.cc b/third_party/blink/renderer/core/exported/web_view_impl.cc
-index 09171e03df2d7..97f92921bc446 100644
+index 09171e03df2d7..98587bd52a331 100644
 --- a/third_party/blink/renderer/core/exported/web_view_impl.cc
 +++ b/third_party/blink/renderer/core/exported/web_view_impl.cc
 @@ -3810,6 +3810,9 @@ void WebViewImpl::UpdateRendererPreferences(
    GetSettings()->SetCaretBrowsingEnabled(
        renderer_preferences_.caret_browsing_enabled);
  
-+  WebRuntimeFeatures::EnableGlobalPrivacyControl(
-+      renderer_preferences_.enable_gpc);
++  WebRuntimeFeatures::EnableFeatureFromString("GlobalPrivacyControl",
++                                              renderer_preferences_.enable_gpc);
 +
  #if BUILDFLAG(IS_OZONE)
    GetSettings()->SetSelectionClipboardBufferAvailable(

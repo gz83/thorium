@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/frame/browser_view.cc b/chrome/browser/ui/views/frame/browser_view.cc
-index 25e20102b1714..5e93d689ddde3 100644
+index ed86b6e38bfa5..159811e1ee1ea 100644
 --- a/chrome/browser/ui/views/frame/browser_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_view.cc
 @@ -1338,8 +1338,11 @@ bool BrowserView::GetTabStripVisible() const {

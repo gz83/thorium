@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/browser_actions.cc b/chrome/browser/ui/browser_actions.cc
-index b0a261cd12430..206fdde8b71b9 100644
+index b0a261cd12430..500f26ccdbd01 100644
 --- a/chrome/browser/ui/browser_actions.cc
 +++ b/chrome/browser/ui/browser_actions.cc
 @@ -12,6 +12,7 @@
@@ -74,7 +74,7 @@ index b0a261cd12430..206fdde8b71b9 100644
 +                ? (features::IsRoundedIconsEnabled()
 +                       ? vector_icons::kScienceIcon
 +                       : vector_icons::kScienceOldIcon)
-+                : vector_icons::kScienceThoriumIcon)
++                : kScienceThoriumIcon)
              .SetVisible(ShouldShowChromeLabsUI(profile))
              .Build());
    }

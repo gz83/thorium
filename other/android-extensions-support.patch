@@ -1373,6 +1373,95 @@ index 6df055df9399c..58f3b9e35f83f 100644
  
  namespace extensions {
  
+diff --git a/chrome/browser/extensions/api/identity/identity_get_auth_token_function.cc b/chrome/browser/extensions/api/identity/identity_get_auth_token_function.cc
+index e807383cac0a6..4d16e66ece70e 100644
+--- a/chrome/browser/extensions/api/identity/identity_get_auth_token_function.cc
++++ b/chrome/browser/extensions/api/identity/identity_get_auth_token_function.cc
+@@ -122,7 +122,7 @@ CoreAccountInfo GetSigninPrimaryAccount(Profile* profile) {
+       signin::ConsentLevel::kSignin);
+ }
+ 
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+ bool IsAccountInCookieJar(const signin::AccountsInCookieJarInfo& cookie_info,
+                           const CoreAccountInfo& account_info) {
+   if (!cookie_info.AreAccountsFresh()) {
+@@ -154,7 +154,7 @@ class IdentityGetAuthTokenFunction::RefreshTokensLoadedWaiter
+       identity_manager_observation_{this};
+ };
+ 
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+ class IdentityGetAuthTokenFunction::AccountsInCookieUpdatedWaiter
+     : public signin::IdentityManager::Observer {
+  public:
+@@ -402,7 +402,7 @@ void IdentityGetAuthTokenFunction::GetAuthTokenForAccount(
+   }
+ }
+ 
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+ bool IdentityGetAuthTokenFunction::ShouldDelayRemoteConsent() {
+   signin::IdentityManager* identity_manager =
+       IdentityManagerFactory::GetForProfile(GetProfile());
+@@ -951,7 +951,7 @@ void IdentityGetAuthTokenFunction::OnIdentityAPIShutdown() {
+   token_key_account_access_token_fetcher_.reset();
+   refresh_tokens_loaded_waiter_.reset();
+   scoped_identity_manager_observation_.Reset();
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+   accounts_in_cookie_updated_waiter_.reset();
+ #endif
+   extensions::IdentityAPI::GetFactoryInstance()
+@@ -1026,7 +1026,7 @@ void IdentityGetAuthTokenFunction::ShowExtensionLoginPrompt() {
+ #endif
+ 
+ void IdentityGetAuthTokenFunction::ShowRemoteConsentDialog() {
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+   // On Android, Gaia session cookies are reconciled asynchronously after
+   // sign-in. Defer showing the remote consent dialog until cookies are
+   // ready in the cookie jar to prevent loading a blank consent page.
+@@ -1183,7 +1183,7 @@ void IdentityGetAuthTokenFunction::RefreshTokensLoadedWaiter::
+   std::move(callback_).Run();
+ }
+ 
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+ IdentityGetAuthTokenFunction::AccountsInCookieUpdatedWaiter::
+     AccountsInCookieUpdatedWaiter(signin::IdentityManager& identity_manager,
+                                   const CoreAccountInfo& account_info,
+diff --git a/chrome/browser/extensions/api/identity/identity_get_auth_token_function.h b/chrome/browser/extensions/api/identity/identity_get_auth_token_function.h
+index 53bdc5b2e63b4..8e69dc63c89c0 100644
+--- a/chrome/browser/extensions/api/identity/identity_get_auth_token_function.h
++++ b/chrome/browser/extensions/api/identity/identity_get_auth_token_function.h
+@@ -146,7 +146,7 @@ class IdentityGetAuthTokenFunction : public ExtensionFunction,
+   FRIEND_TEST_ALL_PREFIXES(GetAuthTokenFunctionTest, NoninteractiveShutdown);
+ 
+   class RefreshTokensLoadedWaiter;
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+   class AccountsInCookieUpdatedWaiter;
+ #endif
+   enum class InteractionType { kSignin, kConsent };
+@@ -159,7 +159,7 @@ class IdentityGetAuthTokenFunction : public ExtensionFunction,
+   // might be started.
+   void GetAuthTokenForAccount(const GaiaId& gaia_id);
+ 
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+   void OnCookiesUpdatedForRemoteConsent(bool success);
+   bool ShouldDelayRemoteConsent();
+   void StartWaitingForCookies();
+@@ -272,7 +272,7 @@ class IdentityGetAuthTokenFunction : public ExtensionFunction,
+   // a permissions prompt will be popped up to the user.
+   RemoteConsentResolutionData resolution_data_;
+   std::unique_ptr<RefreshTokensLoadedWaiter> refresh_tokens_loaded_waiter_;
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+   std::unique_ptr<AccountsInCookieUpdatedWaiter>
+       accounts_in_cookie_updated_waiter_;
+ #endif
 diff --git a/chrome/browser/extensions/api/identity/web_auth_flow.cc b/chrome/browser/extensions/api/identity/web_auth_flow.cc
 index 03e0d65fd3bdd..121ecb70dbfe7 100644
 --- a/chrome/browser/extensions/api/identity/web_auth_flow.cc
@@ -2057,9 +2146,18 @@ index 8bde96c228859..7e613425962b5 100644
        "discards:resources",
        "management:resources",
 diff --git a/chrome/browser/resources/contextual_tasks/app.ts b/chrome/browser/resources/contextual_tasks/app.ts
-index 37cb179c7bcd2..848377bf90502 100644
+index 37cb179c7bcd2..dcb113b34c5e0 100644
 --- a/chrome/browser/resources/contextual_tasks/app.ts
 +++ b/chrome/browser/resources/contextual_tasks/app.ts
+@@ -415,7 +415,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+   // Whether the composebox jump fix is enabled. This fix hides the composebox
+   // until the server gives the embedded page gives the initial bounds for the
+   // composebox.
+-  // <if expr="not is_android or is_desktop_android">
++  // <if expr="not is_android or is_desktop_android_thorium">
+   private enableComposeboxJumpFix_: boolean =
+       loadTimeData.getBoolean('enableComposeboxJumpFix');
+   // </if>
 @@ -837,7 +837,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
            }
          });
@@ -2078,6 +2176,15 @@ index 37cb179c7bcd2..848377bf90502 100644
      // On standard mobile Android phones, since guest-to-host script
      // communication is not supported, must set isDomContentLoaded_ on
      // loadcommit rather than waiting for a domContentLoaded message.
+@@ -1349,7 +1349,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+     // forcedcomposeboxBounds are set. No-op if the feature flag is not enabled.
+     // On standard mobile Android, since we have no guest-to-host script
+     // communication the bounds will never be set, so we must not hide the composebox.
+-    // <if expr="not is_android or is_desktop_android">
++    // <if expr="not is_android or is_desktop_android_thorium">
+     if (this.enableComposeboxJumpFix_ && this.isAiPage_ && !this.isZeroState_ &&
+         !this.forcedComposeboxBounds_) {
+       return true;
 diff --git a/chrome/browser/resources/discards/BUILD.gn b/chrome/browser/resources/discards/BUILD.gn
 index d3f6092e823cc..8725dffbb9dbb 100644
 --- a/chrome/browser/resources/discards/BUILD.gn
@@ -3763,6 +3870,19 @@ index 675528e3785d4..996df466e3ec2 100644
      : policies_to_merge_(std::move(policies_to_merge)){}
  #else
      : policies_to_merge_(std::move(policies_to_merge)),
+diff --git a/components/signin/public/base/signin_switches.cc b/components/signin/public/base/signin_switches.cc
+index c6e8f8b1cdac4..e1123b88ac88b 100644
+--- a/components/signin/public/base/signin_switches.cc
++++ b/components/signin/public/base/signin_switches.cc
+@@ -325,7 +325,7 @@ const base::FeatureParam<bool> kAccountPreviewDataPersistAccounts{
+ // enable activityless signin by default on this new userless entrypoint to
+ // avoid implementing the legacy flow which will never be shipped.
+ BASE_FEATURE(kEnableActivitylessSigninAllEntryPoint,
+-#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS)
++#if BUILDFLAG(ENABLE_DESKTOP_ANDROID_EXTENSIONS_THORIUM)
+              base::FEATURE_ENABLED_BY_DEFAULT
+ #else
+              base::FEATURE_DISABLED_BY_DEFAULT
 diff --git a/components/webapps/browser/installable/installable_icon_fetcher.cc b/components/webapps/browser/installable/installable_icon_fetcher.cc
 index 4e2c9a41d0b09..bd6419873bd9e 100644
 --- a/components/webapps/browser/installable/installable_icon_fetcher.cc
