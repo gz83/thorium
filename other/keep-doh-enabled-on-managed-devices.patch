@@ -1,22 +1,3 @@
-diff --git a/chrome/browser/net/default_dns_over_https_config_source.cc b/chrome/browser/net/default_dns_over_https_config_source.cc
-index e5a2aadcc85f6..3ce7e0d2088fd 100644
---- a/chrome/browser/net/default_dns_over_https_config_source.cc
-+++ b/chrome/browser/net/default_dns_over_https_config_source.cc
-@@ -1,4 +1,4 @@
--// Copyright 2024 The Chromium Authors
-+// Copyright 2026 The Chromium Authors and Alex313031
- // Use of this source code is governed by a BSD-style license that can be
- // found in the LICENSE file.
- 
-@@ -29,7 +29,7 @@ DefaultDnsOverHttpsConfigSource::DefaultDnsOverHttpsConfigSource(
-   if (set_up_pref_defaults) {
-     local_state->SetDefaultPrefValue(prefs::kDnsOverHttpsMode,
-                                      base::Value(SecureDnsConfig::ModeToString(
--                                         net::SecureDnsMode::kAutomatic)));
-+                                         net::SecureDnsMode::kSecure)));
-   }
- }
- 
 diff --git a/chrome/browser/net/stub_resolver_config_reader.cc b/chrome/browser/net/stub_resolver_config_reader.cc
 index d855df0c5ea08..0843195792999 100644
 --- a/chrome/browser/net/stub_resolver_config_reader.cc

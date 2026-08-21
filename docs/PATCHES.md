@@ -40,7 +40,7 @@ overlay-derived, or still need separate provenance review.
 | [`content-gpu-vaapi-libva-config.patch`](../other/content-gpu-vaapi-libva-config.patch) | Linux VAAPI/libva behavior adapted from Linux Chromium packaging patch references |
 | [`thorium-sandbox-compat.patch`](../other/thorium-sandbox-compat.patch) | Chromium sandbox compatibility; related to ungoogled/inox sandbox PIE patch family |
 | [`omnibox-search-engine-icon-branding.patch`](../other/omnibox-search-engine-icon-branding.patch) | [ungoogled-software/contrib](https://github.com/ungoogled-software/contrib) default search icon tweak |
-| [`secure-dns-defaults.patch`](../other/secure-dns-defaults.patch) | [uazo/Cromite](https://github.com/uazo/cromite) DoH improvements reference |
+| [`keep-doh-enabled-on-managed-devices.patch`](../other/keep-doh-enabled-on-managed-devices.patch) | [uazo/Cromite](https://github.com/uazo/cromite) keeps DoH available unless explicitly disabled by policy, including on managed devices and systems with parental controls |
 | [`reduce-doh-request-headers.patch`](../other/reduce-doh-request-headers.patch) | [uazo/Cromite](https://github.com/uazo/cromite) reduce DoH request headers patch |
 | [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) core privacy sandbox disable patch |
 | [`disable-fetching-field-trials.patch`](../other/disable-fetching-field-trials.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) / Bromite disable field-trials fetching patch |
@@ -209,7 +209,7 @@ overlay-derived, or still need separate provenance review.
 - [`force-disable-tab-outlines.patch`](../other/force-disable-tab-outlines.patch)
 - [`quiet-notification-defaults.patch`](../other/quiet-notification-defaults.patch)
 - [`secure-doh-without-system-dns-config.patch`](../other/secure-doh-without-system-dns-config.patch) — Preserves Chromium's normal system DNS merge while allowing an explicitly configured Secure DoH resolver to remain available when the platform DNS configuration is unavailable. Automatic and Off modes retain Chromium's behavior. The `#disable-thorium-dns-config` escape hatch disables only this Secure DoH fallback.
-- [`secure-dns-defaults.patch`](../other/secure-dns-defaults.patch)
+- [`keep-doh-enabled-on-managed-devices.patch`](../other/keep-doh-enabled-on-managed-devices.patch) — Prevents device-management and parental-control detection from implicitly disabling DoH; an explicit managed `DnsOverHttpsMode` policy remains authoritative.
 - [`add-flag-for-encrypted-client-hello.patch`](../other/add-flag-for-encrypted-client-hello.patch)
 - [`reduce-doh-request-headers.patch`](../other/reduce-doh-request-headers.patch)
 - [`disable-alternate-error-pages-by-default.patch`](../other/disable-alternate-error-pages-by-default.patch)
