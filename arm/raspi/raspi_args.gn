@@ -41,6 +41,7 @@ clang_use_chrome_plugins = true
 enable_ffmpeg_video_decoders = true
 is_component_ffmpeg = false
 use_vaapi = true
+use_v4l2_codec = true
 enable_library_cdms = true
 enable_widevine = true
 bundle_widevine_cdm = false
