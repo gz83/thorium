@@ -93,9 +93,7 @@ gn args out/thorium
 gn ls out/thorium
 ```
 
-Use [`raspi/raspi_args.gn`](raspi/raspi_args.gn) for Raspberry Pi ARM64 or
-[`raspi/raspi_v4l2_args.gn`](raspi/raspi_v4l2_args.gn) for the V4L2-only
-ARM64 variant,
+Use [`raspi/raspi_args.gn`](raspi/raspi_args.gn) for Raspberry Pi ARM64,
 [`win_ARM_args.gn`](win_ARM_args.gn) for Windows on ARM64, or the appropriate
 file documented in [`android/README.md`](android/README.md) for Android.
 
