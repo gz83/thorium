@@ -19,8 +19,9 @@ python3 infra/APPIMAGE/appimage.py build \
   /path/to/chromium/src/out/thorium/thorium-browser_VERSION_SSE3.deb
 ```
 
-Alternatively, place one matching `thorium-browser_*.deb` package in
-`infra/APPIMAGE` and let the script detect it:
+Alternatively, place one matching `thorium-browser_*.deb` or
+`thorium-browser-v4l2_*.deb` package in `infra/APPIMAGE` and let the script
+detect it:
 
 ```shell
 cd infra/APPIMAGE
@@ -28,7 +29,8 @@ python3 appimage.py build
 ```
 
 The resulting AppImage is written to `out/` and named after the DEB, for
-example `out/Thorium_Browser_VERSION_SSE3.AppImage`.
+example `out/Thorium_Browser_VERSION_SSE3.AppImage`. A V4L2 input is named
+`out/Thorium_Browser_V4L2_VERSION_arm64.AppImage`.
 
 The automatically selected package must be the only matching DEB in the
 directory. When more than one package exists, pass the intended path

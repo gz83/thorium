@@ -63,6 +63,7 @@ other/linux-obsolete-system-policy.patch
 other/linux-memory-details-branding.patch
 other/linux-shell-integration-branding.patch
 other/thorium-linux-installer-packaging.patch
+other/linux-v4l2-package-naming.patch
 other/thorium-ui-debug-shell.patch
 other/thorium-webui-image-resources.patch
 other/thorium-browser-resource-branding.patch

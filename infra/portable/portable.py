@@ -498,7 +498,12 @@ def default_output(
     if platform_name == "windows":
         name = f"Thorium_{release_variant}_{version}.zip"
     elif platform_name == "linux":
-        name = f"thorium-browser_{version}_{release_variant}.zip"
+        product = (
+            "thorium-browser-v4l2"
+            if package.name.startswith("thorium-browser-v4l2_")
+            else "thorium-browser"
+        )
+        name = f"{product}_{version}_{release_variant}.zip"
     else:
         raise PortableError("could not determine a release-style output name")
     return package.parent / name

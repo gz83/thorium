@@ -1,0 +1,121 @@
+diff --git a/chrome/installer/linux/BUILD.gn b/chrome/installer/linux/BUILD.gn
+index e9c0cda539575..4b589958aa412 100644
+--- a/chrome/installer/linux/BUILD.gn
++++ b/chrome/installer/linux/BUILD.gn
+@@ -13,6 +13,7 @@ import("//build/util/lastchange.gni")
+ import("//build/util/process_version.gni")
+ import("//chrome/version.gni")
+ import("//components/optimization_guide/features.gni")
++import("//media/gpu/args.gni")
+ import("//services/on_device_model/on_device_model.gni")
+ import("//third_party/angle/gni/angle.gni")
+ import("//third_party/widevine/cdm/widevine.gni")
+@@ -68,6 +69,12 @@ if (current_cpu == "x86") {
+ _simd_suffix = thorium_linux_package_suffix
+ _simd_variant = string_replace(_simd_suffix, "_", "")
+ _package_vulkan = angle_shared_libvulkan && !is_chromeos
++_package_variant = ""
++_package_name_suffix = ""
++if (!use_vaapi && use_v4l2_codec) {
++  _package_variant = "v4l2"
++  _package_name_suffix = "-v4l2"
++}
+ 
+ thorium_package_generated_inputs = [
+   "$root_out_dir/content_shell.pak",
+@@ -581,9 +588,7 @@ template("linux_package") {
+     }
+ 
+     inputs = packaging_files + thorium_package_generated_inputs
+-    outputs = [
+-      "$root_out_dir/${package}_${chrome_version_full}${_deb_name_suffix}.deb",
+-    ]
++    outputs = [ "$root_out_dir/${package}${_package_name_suffix}_${chrome_version_full}${_deb_name_suffix}.deb" ]
+ 
+     args = [
+       "-a",
+@@ -599,6 +604,7 @@ template("linux_package") {
+ 
+       # Use the equals form so an empty non-x86 variant remains one argument.
+       "--simd-variant=$_simd_variant",
++      "--package-variant=$_package_variant",
+       "-o",
+       rebase_path(root_out_dir, root_build_dir),
+       "-t",
+@@ -648,7 +654,7 @@ template("linux_package") {
+       }
+ 
+       inputs = packaging_files + thorium_package_generated_inputs
+-      outputs = [ "$root_out_dir/${package}_${chrome_version_full}${_rpm_name_suffix}.rpm" ]
++      outputs = [ "$root_out_dir/${package}${_package_name_suffix}_${chrome_version_full}${_rpm_name_suffix}.rpm" ]
+ 
+       args = [
+         "-a",
+@@ -664,6 +670,7 @@ template("linux_package") {
+ 
+         # Use the equals form so an empty non-x86 variant remains one argument.
+         "--simd-variant=$_simd_variant",
++        "--package-variant=$_package_variant",
+         "-o",
+         rebase_path(root_out_dir, root_build_dir),
+         "-t",
+diff --git a/chrome/installer/linux/debian/build.py b/chrome/installer/linux/debian/build.py
+index 73cb33d908d9f..cbe52fe92ce67 100755
+--- a/chrome/installer/linux/debian/build.py
++++ b/chrome/installer/linux/debian/build.py
+@@ -30,6 +30,12 @@ def parse_args():
+         "-n", "--name-suffix", default="", help="package filename suffix")
+     parser.add_argument(
+         "--simd-variant", default="", help="SIMD variant shown by the browser")
++    parser.add_argument(
++        "--package-variant",
++        choices=("", "v4l2"),
++        default="",
++        help="release filename variant",
++    )
+     parser.add_argument(
+         "--clearkey-cdm-path", help="relative path to the stripped ClearKey CDM")
+     parser.add_argument(
+@@ -283,8 +289,11 @@ def main():
+             cwd=tmp_file_dir,
+         )
+ 
++    filename_package = inst.context["PACKAGE_ORIG"]
++    if args.package_variant:
++        filename_package += f"-{args.package_variant}"
+     final_package_path = output_dir / (
+-        f"{inst.context['PACKAGE_ORIG']}_{inst.context['VERSION']}"
++        f"{filename_package}_{inst.context['VERSION']}"
+         f"{args.name_suffix}.deb")
+     shutil.move(package_path, final_package_path)
+ 
+diff --git a/chrome/installer/linux/rpm/build.py b/chrome/installer/linux/rpm/build.py
+index 5d46dff1de592..0c052f6f3919f 100755
+--- a/chrome/installer/linux/rpm/build.py
++++ b/chrome/installer/linux/rpm/build.py
+@@ -31,6 +31,12 @@ def parse_args():
+         "-n", "--name-suffix", default="", help="package filename suffix")
+     parser.add_argument(
+         "--simd-variant", default="", help="SIMD variant shown by the browser")
++    parser.add_argument(
++        "--package-variant",
++        choices=("", "v4l2"),
++        default="",
++        help="release filename variant",
++    )
+     parser.add_argument(
+         "--clearkey-cdm-path", help="relative path to the stripped ClearKey CDM")
+     parser.add_argument(
+@@ -258,8 +264,11 @@ def main():
+                 f"{inst.context['PACKAGE_RELEASE']}")
+     rpm_file = f"{pkg_name}.{args.arch}.rpm"
+     src_rpm = rpmbuild_dir / f"RPMS/{args.arch}/{rpm_file}"
++    filename_package = inst.context["PACKAGE_ORIG"]
++    if args.package_variant:
++        filename_package += f"-{args.package_variant}"
+     dst_rpm = output_dir / (
+-        f"{inst.context['PACKAGE_ORIG']}_{inst.context['VERSION']}"
++        f"{filename_package}_{inst.context['VERSION']}"
+         f"{args.name_suffix}.rpm")
+ 
+     shutil.move(src_rpm, dst_rpm)

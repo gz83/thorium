@@ -16,7 +16,7 @@ from typing import Sequence
 
 
 MINIMUM_PYTHON = (3, 11)
-PACKAGE_GLOB = "thorium-browser_*.deb"
+PACKAGE_GLOBS = ("thorium-browser_*.deb", "thorium-browser-v4l2_*.deb")
 APPIMAGE_GLOB = "Thorium*.AppImage"
 
 
@@ -86,13 +86,24 @@ def find_package(base_dir: Path, requested: Path | None) -> Path:
             raise AppImageError(f"not a DEB package: {package}")
         return package
 
-    matches = [path for path in base_dir.glob(PACKAGE_GLOB) if path.is_file()]
-    return select_single(matches, f"DEB matching {PACKAGE_GLOB}")
+    matches = [
+        path
+        for pattern in PACKAGE_GLOBS
+        for path in base_dir.glob(pattern)
+        if path.is_file()
+    ]
+    patterns = " or ".join(PACKAGE_GLOBS)
+    return select_single(matches, f"DEB matching {patterns}")
 
 
 def package_output_name(package: Path) -> str:
-    stem = package.stem.removeprefix("thorium-browser_")
-    return f"Thorium_Browser_{stem}.AppImage"
+    if package.name.startswith("thorium-browser-v4l2_"):
+        stem = package.stem.removeprefix("thorium-browser-v4l2_")
+        return f"Thorium_Browser_V4L2_{stem}.AppImage"
+    if package.name.startswith("thorium-browser_"):
+        stem = package.stem.removeprefix("thorium-browser_")
+        return f"Thorium_Browser_{stem}.AppImage"
+    raise AppImageError(f"unsupported Thorium DEB filename: {package.name}")
 
 
 def copy_payload(extracted: Path, payload: Path, resources: Path) -> None:

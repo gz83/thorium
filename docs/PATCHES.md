@@ -135,6 +135,7 @@ overlay-derived, or still need separate provenance review.
 - [`linux-memory-details-branding.patch`](../other/linux-memory-details-branding.patch)
 - [`linux-shell-integration-branding.patch`](../other/linux-shell-integration-branding.patch)
 - [`thorium-linux-installer-packaging.patch`](../other/thorium-linux-installer-packaging.patch)
+- [`linux-v4l2-package-naming.patch`](../other/linux-v4l2-package-naming.patch)
 - [`thorium-ui-debug-shell.patch`](../other/thorium-ui-debug-shell.patch)
 - [`thorium-webui-image-resources.patch`](../other/thorium-webui-image-resources.patch)
 - [`thorium-browser-resource-branding.patch`](../other/thorium-browser-resource-branding.patch)
