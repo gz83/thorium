@@ -12,6 +12,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Sequence
 
 
@@ -128,31 +129,126 @@ def create_dmg(chromium_src: Path, thorium_root: Path, product: str) -> None:
         raise DmgError(f"DMG output path is not a regular file: {output}")
     xattr = find_command("xattr")
     codesign = find_command("codesign")
+    hdiutil = find_command("hdiutil")
 
     print(f"\nBuilding {volume_name} macOS disk image.")
     run([xattr, "-csr", str(app)], chromium_src)
     run([codesign, "--force", "--deep", "--sign", "-", str(app)], chromium_src)
-    run(
-        [
-            str(pkg_dmg),
-            "--sourcefile",
-            "--source",
-            str(app),
-            "--target",
-            str(output),
-            "--volname",
-            volume_name,
-            "--symlink",
-            "/Applications:/Applications",
-            "--format",
-            "UDBZ",
-            "--verbosity",
-            "2",
-        ],
-        chromium_src,
-    )
+    with tempfile.TemporaryDirectory(
+        prefix=f".{output.stem}.", dir=output.parent
+    ) as working_dir_name:
+        working_dir = Path(working_dir_name)
+        packaged_image = working_dir / "packaged.dmg"
+        writable_image = working_dir / "writable.dmg"
+        mount_point = working_dir / "mount"
+        mount_point.mkdir()
+
+        # makehybrid can add FinderInfo that breaks strict code-signing checks.
+        # Convert its output to UDRW, sanitize the app, then recompress it.
+        run(
+            [
+                str(pkg_dmg),
+                "--sourcefile",
+                "--source",
+                str(app),
+                "--target",
+                str(packaged_image),
+                "--volname",
+                volume_name,
+                "--symlink",
+                "/Applications:/Applications",
+                "--format",
+                "UDBZ",
+                "--verbosity",
+                "2",
+            ],
+            chromium_src,
+        )
+        require_file(packaged_image, "pkg-dmg disk image")
+        run(
+            [
+                hdiutil,
+                "convert",
+                "-format",
+                "UDRW",
+                "-ov",
+                str(packaged_image),
+                "-o",
+                str(writable_image),
+            ],
+            chromium_src,
+        )
+        require_file(writable_image, "writable disk image")
+
+        attached = False
+        try:
+            run(
+                [
+                    hdiutil,
+                    "attach",
+                    "-nobrowse",
+                    "-owners",
+                    "on",
+                    "-mountpoint",
+                    str(mount_point),
+                    str(writable_image),
+                ],
+                chromium_src,
+            )
+            attached = True
+            mounted_app = mount_point / app_name
+            require_directory(mounted_app, f"mounted {volume_name} application")
+            run([xattr, "-csr", str(mounted_app)], chromium_src)
+            run(
+                [
+                    codesign,
+                    "--force",
+                    "--deep",
+                    "--sign",
+                    "-",
+                    str(mounted_app),
+                ],
+                chromium_src,
+            )
+            run(
+                [
+                    codesign,
+                    "--verify",
+                    "--deep",
+                    "--strict",
+                    "--verbose=2",
+                    str(mounted_app),
+                ],
+                chromium_src,
+            )
+        except BaseException:
+            if attached:
+                subprocess.run(
+                    [hdiutil, "detach", "-force", str(mount_point)],
+                    cwd=chromium_src,
+                    check=False,
+                )
+            raise
+        else:
+            run([hdiutil, "detach", str(mount_point)], chromium_src)
+
+        run(
+            [
+                hdiutil,
+                "convert",
+                "-format",
+                "UDBZ",
+                "-imagekey",
+                "bzip2-level=9",
+                "-ov",
+                str(writable_image),
+                "-o",
+                str(output),
+            ],
+            chromium_src,
+        )
     if output.is_symlink() or not output.is_file():
-        raise DmgError(f"pkg-dmg did not create a regular output file: {output}")
+        raise DmgError(f"DMG packaging did not create a regular file: {output}")
 
     if logo is not None:
         try:
