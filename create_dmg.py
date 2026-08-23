@@ -199,17 +199,7 @@ def create_dmg(chromium_src: Path, thorium_root: Path, product: str) -> None:
             mounted_app = mount_point / app_name
             require_directory(mounted_app, f"mounted {volume_name} application")
             run([xattr, "-csr", str(mounted_app)], chromium_src)
-            run(
-                [
-                    codesign,
-                    "--force",
-                    "--deep",
-                    "--sign",
-                    "-",
-                    str(mounted_app),
-                ],
-                chromium_src,
-            )
+            # Extended attributes are outside the signed file contents.
             run(
                 [
                     codesign,
