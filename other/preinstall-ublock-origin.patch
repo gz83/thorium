@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/extensions/preinstalled_extensions.cc b/chrome/browser/extensions/preinstalled_extensions.cc
-index 0d681e3a260a1..4c18149eb628b 100644
+index 0d681e3a260a1..0a0249393b725 100644
 --- a/chrome/browser/extensions/preinstalled_extensions.cc
 +++ b/chrome/browser/extensions/preinstalled_extensions.cc
 @@ -11,14 +11,18 @@
@@ -94,7 +94,16 @@ index 0d681e3a260a1..4c18149eb628b 100644
        profile_(profile) {
    DCHECK(profile);
    // See SetPrefs() below.
-@@ -199,12 +221,22 @@ void Provider::VisitRegisteredExtension() {
+@@ -185,6 +207,8 @@ Provider::Provider(Profile* profile,
+   InitProfileState();
+ }
+ 
++Provider::~Provider() = default;
++
+ void Provider::VisitRegisteredExtension() {
+   if (!preinstalled_extensions_enabled_) {
+     // If pre-installed apps aren't enabled for the profile, we short-circuit
+@@ -199,12 +223,22 @@ void Provider::VisitRegisteredExtension() {
  void Provider::SetPrefs(base::DictValue prefs) {
    DCHECK(preinstalled_extensions_enabled_);
  
@@ -118,7 +127,7 @@ index 0d681e3a260a1..4c18149eb628b 100644
      AddExtension(extension_misc::kDocsOfflineExtensionId, prefs);
    }
  #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
-@@ -274,11 +306,41 @@ void Provider::SetPrefs(base::DictValue prefs) {
+@@ -274,11 +308,41 @@ void Provider::SetPrefs(base::DictValue prefs) {
    }
  #endif  // BUILDFLAG(ENABLE_PLATFORM_APPS)
  
@@ -161,7 +170,7 @@ index 0d681e3a260a1..4c18149eb628b 100644
                          extension_urls::GetWebstoreUpdateUrl().spec());
  }
 diff --git a/chrome/browser/extensions/preinstalled_extensions.h b/chrome/browser/extensions/preinstalled_extensions.h
-index 399a7f4b8dbb1..de1b63293c704 100644
+index 399a7f4b8dbb1..4d54d1b78a53d 100644
 --- a/chrome/browser/extensions/preinstalled_extensions.h
 +++ b/chrome/browser/extensions/preinstalled_extensions.h
 @@ -5,8 +5,10 @@
@@ -175,7 +184,16 @@ index 399a7f4b8dbb1..de1b63293c704 100644
  #include "base/values.h"
  #include "chrome/browser/extensions/external_provider_impl.h"
  #include "extensions/buildflags/buildflags.h"
-@@ -71,6 +73,8 @@ class Provider : public extensions::ExternalProviderImpl {
+@@ -51,6 +53,8 @@ class Provider : public extensions::ExternalProviderImpl {
+   Provider(const Provider&) = delete;
+   Provider& operator=(const Provider&) = delete;
+ 
++  ~Provider() override;
++
+   // ExternalProviderImpl overrides:
+   void VisitRegisteredExtension() override;
+   void SetPrefs(base::DictValue prefs) override;
+@@ -71,6 +75,8 @@ class Provider : public extensions::ExternalProviderImpl {
    // Adds an extension to the provided `prefs`.
    void AddExtension(const std::string& extension_id, base::DictValue& prefs);
  
@@ -184,7 +202,7 @@ index 399a7f4b8dbb1..de1b63293c704 100644
    // The associated profile.
    raw_ptr<Profile> profile_ = nullptr;
    // Whether default extensions are enabled for the profile.
-@@ -80,6 +84,8 @@ class Provider : public extensions::ExternalProviderImpl {
+@@ -80,6 +86,8 @@ class Provider : public extensions::ExternalProviderImpl {
    // Whether this class should perform a new installation, such as for a
    // new profile.
    bool perform_new_installation_ = false;
@@ -224,7 +242,7 @@ index eb9d625d1c5e7..494f08cb1820a 100644
      if (is_chromeos) {
        inputs += [
 diff --git a/chrome/browser/resources/component_extension_resources.grd b/chrome/browser/resources/component_extension_resources.grd
-index 37f5f7edf273e..0063d58151273 100644
+index 37f5f7edf273e..c23c42f6218aa 100644
 --- a/chrome/browser/resources/component_extension_resources.grd
 +++ b/chrome/browser/resources/component_extension_resources.grd
 @@ -69,6 +69,9 @@
@@ -232,7 +250,7 @@ index 37f5f7edf273e..0063d58151273 100644
          <include name="IDR_ARC_SUPPORT_UI_JS" file="chromeos/arc_support/ui.js" type="chrome_html" />
        </if>
 +      <if expr="not is_chromeos">
-+        <include name="IDR_THORIUM_UBLOCK_ORIGIN_CRX" file="${root_gen_dir}/chrome/browser/resources/ublock_origin/uBlock0_1.74.0.crx" use_base_dir="false" type="BINDATA" />
++        <include name="IDR_THORIUM_UBLOCK_ORIGIN_CRX" file="${root_gen_dir}/chrome/browser/resources/ublock_origin/uBlock0_1.74.0.crx" use_base_dir="false" resource_path="ublock_origin/uBlock0_1.74.0.crx" type="BINDATA" />
 +      </if>
      </includes>
  
