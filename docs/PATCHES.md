@@ -250,9 +250,11 @@ overlay-derived, or still need separate provenance review.
 - [`windows-profile-shortcut-icon-version.patch`](../other/windows-profile-shortcut-icon-version.patch)
 - [`disable-aero.patch`](../other/disable-aero.patch)
 - [`android-disable-signin-without-account-manager.patch`](../other/android-disable-signin-without-account-manager.patch)
-- [`android-extensions-support.patch`](../other/android-extensions-support.patch) — Adapts Android extension support to M154’s bookmark helpers, inline switches and locale validation API. Retains the extension toggle and depends on the following `enable-extension-in-incognito.patch` for shared toolbar bridges.
+- [`android-extensions-support.patch`](../other/android-extensions-support.patch) — Adapts Android extension support to M154’s bookmark helpers, inline switches and locale validation API. Updates GN, C++ and Java platform selectors, enabling extension support while preserving mobile UI behavior. Retains the extension toggle and depends on the following `enable-extension-in-incognito.patch` for shared toolbar bridges.
 - [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch) — Preserves Android extension bridge switching between regular and incognito profiles. Adapts M154 popup parameters, Web App toolbar calls and `ScopedTab` ownership; avoids invalidated iterators during tab collection cleanup.
 - [`add-quick-extension-toggle-menu.patch`](../other/add-quick-extension-toggle-menu.patch) - Adds a default-off, `chrome://flags`-controlled quick enable/disable section to the extensions menu. Keeps the menu open when disabling the last extension so it can be re-enabled.
+
+- [`enable-android-devtools-frontend.patch`](../other/enable-android-devtools-frontend.patch) — Ports [Cromite’s Android DevTools frontend patch](https://github.com/uazo/cromite/blob/master/build/patches/Enable-Android-DevTools-Frontend.patch). Enables DevTools and Task Manager on phones, adds More tools to the mobile menu, and allows touch submenus. Uses native feature defaults and follows the Android extension patches.
 
 ### 95 - Conditional / platform-specific overlays that are still active.
 

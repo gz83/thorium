@@ -174,6 +174,7 @@ other/android-disable-signin-without-account-manager.patch
 other/android-extensions-support.patch
 other/enable-extension-in-incognito.patch
 other/add-quick-extension-toggle-menu.patch
+other/enable-android-devtools-frontend.patch
 
 # 95 - Conditional / platform-specific overlays that are still active.
 [raspi] other/linux-widevine-cdm-locations.patch

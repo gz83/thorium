@@ -1,5 +1,5 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
-index 5aaf6f264a25b..35d783e9e0445 100644
+index f68e5b129edf0..62dd1e10c4f6e 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
 @@ -126,6 +126,7 @@ import org.chromium.chrome.browser.contextmenu.ChromeContextMenuPopulator;
