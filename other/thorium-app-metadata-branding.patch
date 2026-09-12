@@ -134,7 +134,7 @@ index f8363d5b294fe..b06454a1f97c8 100644
  MAC_CREATOR_CODE=Cr24
  MAC_TEAM_ID=
 diff --git a/chrome/browser/resources/pdf/manifest.json b/chrome/browser/resources/pdf/manifest.json
-index 04e1e8868ef79..4644ea31cb39d 100644
+index f1e84d4470a74..d7a0e8055b313 100644
 --- a/chrome/browser/resources/pdf/manifest.json
 +++ b/chrome/browser/resources/pdf/manifest.json
 @@ -3,8 +3,8 @@

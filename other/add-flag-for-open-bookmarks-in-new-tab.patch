@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc b/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
-index b59a2e7807a33..ab3aea9e4a15b 100644
+index ca9f835120e8e..898514268c1ed 100644
 --- a/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
 +++ b/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
 @@ -8,6 +8,7 @@
@@ -10,7 +10,7 @@ index b59a2e7807a33..ab3aea9e4a15b 100644
  #include "base/functional/bind.h"
  #include "base/functional/callback.h"
  #include "base/memory/raw_ptr.h"
-@@ -597,6 +598,20 @@ void OpenAllIfAllowed(
+@@ -385,6 +386,20 @@ void OpenAllIfAllowed(
      page_load_metrics::NavigationHandleUserData::InitiatorLocation
          navigation_type,
      std::optional<BookmarkLaunchAction> launch_action) {
@@ -32,10 +32,10 @@ index b59a2e7807a33..ab3aea9e4a15b 100644
        nodes, initial_disposition == WindowOpenDisposition::OFF_THE_RECORD);
  
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 1b74619736e19..c4dfa43b09aab 100644
+index 40b71717411fb..34b4976ea156e 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -188,6 +188,16 @@ BASE_FEATURE_PARAM(int,
+@@ -196,6 +196,16 @@ BASE_FEATURE_PARAM(int,
                     "hover_delay_ms",
                     500);
  
@@ -53,16 +53,16 @@ index 1b74619736e19..c4dfa43b09aab 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index d6ef942146de2..e344ccdd90644 100644
+index d449d9b106b82..420d99dbe58b9 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -400,6 +400,9 @@ BASE_DECLARE_FEATURE(kRightClickToCloseTab);
+@@ -388,6 +388,9 @@ BASE_DECLARE_FEATURE(kRightClickToCloseTab);
  BASE_DECLARE_FEATURE(kHoverActivateTab);
  BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
  
 +BASE_DECLARE_FEATURE(kOpenBookmarksInNewTab);
 +BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
 +
- BASE_DECLARE_FEATURE(kVerticalTabsGrabHandleRemoval);
- BASE_DECLARE_FEATURE_PARAM(bool, kVerticalTabsGrabHandleRemovalAlways);
+ BASE_DECLARE_FEATURE(kTabGroupRibbon);
+ bool IsTabGroupRibbonEnabled();
  

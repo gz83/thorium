@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/themes/theme_helper_win.cc b/chrome/browser/themes/theme_helper_win.cc
-index c78bb18ef2703..4e9f3eeeba689 100644
+index b80fd78c52bab..68372419ad469 100644
 --- a/chrome/browser/themes/theme_helper_win.cc
 +++ b/chrome/browser/themes/theme_helper_win.cc
-@@ -1,9 +1,10 @@
+@@ -1,14 +1,15 @@
 -// Copyright 2016 The Chromium Authors
 +// Copyright 2026 The Chromium Authors and Alex313031
  // Use of this source code is governed by a BSD-style license that can be
@@ -13,8 +13,7 @@ index c78bb18ef2703..4e9f3eeeba689 100644
 +#include "base/command_line.h"
  #include "chrome/browser/themes/custom_theme_supplier.h"
  #include "chrome/browser/themes/theme_properties.h"
- #include "chrome/browser/win/mica_titlebar.h"
-@@ -19,5 +20,5 @@ int ThemeHelperWin::GetDefaultDisplayProperty(int id) const {
+ #include "chrome/grit/theme_resources.h"
  
  bool ThemeHelperWin::ShouldUseNativeFrame(
      const CustomThemeSupplier* theme_supplier) const {
@@ -22,10 +21,10 @@ index c78bb18ef2703..4e9f3eeeba689 100644
 +  return !base::CommandLine::ForCurrentProcess()->HasSwitch("disable-aero");
  }
 diff --git a/ui/views/win/hwnd_message_handler.cc b/ui/views/win/hwnd_message_handler.cc
-index 019f0d2a3e724..746e159cb3783 100644
+index 42fd0087319f0..1c51b40618b15 100644
 --- a/ui/views/win/hwnd_message_handler.cc
 +++ b/ui/views/win/hwnd_message_handler.cc
-@@ -1048,7 +1048,7 @@ void HWNDMessageHandler::FrameTypeChanged() {
+@@ -1057,7 +1057,7 @@ void HWNDMessageHandler::FrameTypeChanged() {
    if (!custom_window_region_.is_valid() && IsFrameSystemDrawn()) {
      dwm_transition_desired_ = true;
    }

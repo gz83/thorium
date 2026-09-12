@@ -42,7 +42,7 @@ overlay-derived, or still need separate provenance review.
 | [`omnibox-search-engine-icon-branding.patch`](../other/omnibox-search-engine-icon-branding.patch) | [ungoogled-software/contrib](https://github.com/ungoogled-software/contrib) default search icon tweak |
 | [`keep-doh-enabled-on-managed-devices.patch`](../other/keep-doh-enabled-on-managed-devices.patch) | [uazo/Cromite](https://github.com/uazo/cromite) keeps DoH available unless explicitly disabled by policy, including on managed devices and systems with parental controls |
 | [`reduce-doh-request-headers.patch`](../other/reduce-doh-request-headers.patch) | [uazo/Cromite](https://github.com/uazo/cromite) reduce DoH request headers patch |
-| [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) core privacy sandbox disable patch |
+| [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) | [Ahrotahn/ungoogled-chromium](https://github.com/Ahrotahn/ungoogled-chromium/blob/major/patches/core/ungoogled-chromium/disable-privacy-sandbox.patch) Privacy Sandbox preload dependency removal |
 | [`disable-fetching-field-trials.patch`](../other/disable-fetching-field-trials.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) / Bromite disable field-trials fetching patch |
 | [`disable-encryption.patch`](../other/disable-encryption.patch) | [ungoogled-chromium-windows](https://github.com/ungoogled-software/ungoogled-chromium-windows) portable encryption/machine-id patches plus Supermium portable-profile reversion commits |
 | [`enable-saving-pages-from-all-schemes.patch`](../other/enable-saving-pages-from-all-schemes.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) enable page saving on more schemes patch |
@@ -111,7 +111,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-app-metadata-branding.patch`](../other/thorium-app-metadata-branding.patch)
 - [`thorium-theme-resources.patch`](../other/thorium-theme-resources.patch)
 - [`thorium-app-vector-icons.patch`](../other/thorium-app-vector-icons.patch)
-- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Registers classic uBlock Origin in Chromium's first-profile preinstalled-extension provider without packaged `default_apps` data; locale restrictions remain limited to Chromium's own preinstalled extensions.
+- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Downloads and verifies the upstream uBlock Origin 1.74.0 GitHub CRX at build time, then bundles it for offline installation in new profiles without Chrome Web Store access.
 - [`bookmark-default-prefs.patch`](../other/bookmark-default-prefs.patch)
 - [`bookmark-dialog-default-folder.patch`](../other/bookmark-dialog-default-folder.patch)
 - [`increase-bookmark-open-prompt-threshold.patch`](../other/increase-bookmark-open-prompt-threshold.patch)
@@ -125,7 +125,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-chrome-build-targets.patch`](../other/thorium-chrome-build-targets.patch)
 - [`thorium-build-config-and-simd.patch`](../other/thorium-build-config-and-simd.patch)
 - [`enable-xnnpack-arm-fp16-vector.patch`](../other/enable-xnnpack-arm-fp16-vector.patch)
-- [`thorium-build-platform-tools.patch`](../other/thorium-build-platform-tools.patch)
+- [`thorium-build-platform-tools.patch`](../other/thorium-build-platform-tools.patch) — Adds Linux build dependencies and adapts Windows import reordering to `thorium.exe`; uses upstream Windows toolchain selection and Apple linker argument handling.
 - [`llvm-optimized-toolchain-build.patch`](../other/llvm-optimized-toolchain-build.patch)
 
 ### 40 - Linux/platform integration, UI debug tools, and shared resource branding.
@@ -135,8 +135,10 @@ overlay-derived, or still need separate provenance review.
 - [`linux-memory-details-branding.patch`](../other/linux-memory-details-branding.patch)
 - [`linux-shell-integration-branding.patch`](../other/linux-shell-integration-branding.patch)
 - [`thorium-linux-installer-packaging.patch`](../other/thorium-linux-installer-packaging.patch)
+  Preserves Thorium's stable DEB/RPM packaging; Flatpak is unsupported and explicitly disabled.
 - [`thorium-ui-debug-shell.patch`](../other/thorium-ui-debug-shell.patch)
 - [`thorium-webui-image-resources.patch`](../other/thorium-webui-image-resources.patch)
+  Legacy WebUI icon overlays use `_old.svg`; corresponding unsuffixed icons retain Chromium's rounded designs.
 - [`thorium-browser-resource-branding.patch`](../other/thorium-browser-resource-branding.patch)
 
 ### 50 - UI defaults, flags, WebUI, policy, FTP, and broad UI restoration.
@@ -161,6 +163,7 @@ overlay-derived, or still need separate provenance review.
 - [`fix-policy-templates.patch`](../other/fix-policy-templates.patch)
 - [`ftp-support-thorium.patch`](../other/ftp-support-thorium.patch)
 - [`GPC.patch`](../other/GPC.patch)
+  Keeps Thorium's default-enabled `enable_gpc` preference and settings UI, using M154's shared GPC predicate for headers and Navigator APIs, including workers. The API remains exposed when disabled and reports the effective signal state.
 - [`add-flag-for-close-confirmation.patch`](../other/add-flag-for-close-confirmation.patch)
 - [`thorium-debug-mode.patch`](../other/thorium-debug-mode.patch)
 - [`thorium-first-run-welcome.patch`](../other/thorium-first-run-welcome.patch)
@@ -208,7 +211,7 @@ overlay-derived, or still need separate provenance review.
 - [`add-flag-for-tab-hover-cards.patch`](../other/add-flag-for-tab-hover-cards.patch)
 - [`force-disable-tab-outlines.patch`](../other/force-disable-tab-outlines.patch)
 - [`quiet-notification-defaults.patch`](../other/quiet-notification-defaults.patch)
-- [`secure-doh-without-system-dns-config.patch`](../other/secure-doh-without-system-dns-config.patch) — Preserves Chromium's normal system DNS merge while allowing an explicitly configured Secure DoH resolver to remain available when the platform DNS configuration is unavailable. Automatic and Off modes retain Chromium's behavior. The `#disable-thorium-dns-config` escape hatch disables only this Secure DoH fallback.
+- [`secure-doh-without-system-dns-config.patch`](../other/secure-doh-without-system-dns-config.patch) — M154 already supports DoH overrides without a system DNS configuration. Retains the `#disable-thorium-dns-config` escape hatch for explicitly configured Secure DoH in that case; system DNS merges, complete overrides, and Automatic/Off modes retain upstream behavior.
 - [`keep-doh-enabled-on-managed-devices.patch`](../other/keep-doh-enabled-on-managed-devices.patch) — Prevents device-management and parental-control detection from implicitly disabling DoH; an explicit managed `DnsOverHttpsMode` policy remains authoritative.
 - [`add-flag-for-encrypted-client-hello.patch`](../other/add-flag-for-encrypted-client-hello.patch)
 - [`reduce-doh-request-headers.patch`](../other/reduce-doh-request-headers.patch)
@@ -239,7 +242,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium_webui.patch`](../other/thorium_webui.patch)
 - [`keyboard_shortcuts.patch`](../other/keyboard_shortcuts.patch)
 - [`keep-expired-flags.patch`](../other/keep-expired-flags.patch)
-- [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch)
+- [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) — Matches the upstream patch’s three attestation preload dependency removals in `chrome/BUILD.gn` and `chrome/browser/resources/BUILD.gn`, with context adapted for Thorium. Other packaging paths, component registration and runtime settings remain unchanged.
 - [`disable-encryption.patch`](../other/disable-encryption.patch)
 - [`disable-feature-promos.patch`](../other/disable-feature-promos.patch)
 - [`thorium-install-static-branding.patch`](../other/thorium-install-static-branding.patch)
@@ -247,9 +250,9 @@ overlay-derived, or still need separate provenance review.
 - [`windows-profile-shortcut-icon-version.patch`](../other/windows-profile-shortcut-icon-version.patch)
 - [`disable-aero.patch`](../other/disable-aero.patch)
 - [`android-disable-signin-without-account-manager.patch`](../other/android-disable-signin-without-account-manager.patch)
-- [`android-extensions-support.patch`](../other/android-extensions-support.patch)
-- [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch)
-- [`add-quick-extension-toggle-menu.patch`](../other/add-quick-extension-toggle-menu.patch) - Adds a default-off, `chrome://flags`-controlled quick enable/disable section to the extensions menu.
+- [`android-extensions-support.patch`](../other/android-extensions-support.patch) — Adapts Android extension support to M154’s bookmark helpers, inline switches and locale validation API. Retains the extension toggle and depends on the following `enable-extension-in-incognito.patch` for shared toolbar bridges.
+- [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch) — Preserves Android extension bridge switching between regular and incognito profiles. Adapts M154 popup parameters, Web App toolbar calls and `ScopedTab` ownership; avoids invalidated iterators during tab collection cleanup.
+- [`add-quick-extension-toggle-menu.patch`](../other/add-quick-extension-toggle-menu.patch) - Adds a default-off, `chrome://flags`-controlled quick enable/disable section to the extensions menu. Keeps the menu open when disabling the last extension so it can be re-enabled.
 
 ### 95 - Conditional / platform-specific overlays that are still active.
 

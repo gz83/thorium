@@ -1,9 +1,9 @@
 diff --git a/ffmpeg_generated.gni b/ffmpeg_generated.gni
-index 35224c0d34..492c63c1a3 100644
+index 25de40fef8..5a68108f5d 100644
 --- a/ffmpeg_generated.gni
 +++ b/ffmpeg_generated.gni
-@@ -381,20 +381,22 @@ if ((current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
-     "libavcodec/x86/fmtconvert_init.c",
+@@ -380,19 +380,21 @@ if ((current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
+     "libavcodec/x86/ac3dsp_init.c",
    ]
  
 -  ffmpeg_asm_sources += [
@@ -18,7 +18,6 @@ index 35224c0d34..492c63c1a3 100644
 -    "libavcodec/x86/h26x/h2656_inter.asm",
 -    "libavcodec/x86/ac3dsp.asm",
 -    "libavcodec/x86/ac3dsp_downmix.asm",
--    "libavcodec/x86/fmtconvert.asm",
 -  ]
 +  if (!(is_android && current_cpu == "x86")) {
 +    ffmpeg_asm_sources += [
@@ -33,7 +32,6 @@ index 35224c0d34..492c63c1a3 100644
 +      "libavcodec/x86/h26x/h2656_inter.asm",
 +      "libavcodec/x86/ac3dsp.asm",
 +      "libavcodec/x86/ac3dsp_downmix.asm",
-+      "libavcodec/x86/fmtconvert.asm",
 +    ]
 +  }
  

@@ -1,5 +1,5 @@
 diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
-index 493b239f0048d..7a12f5a5a12a1 100644
+index 726f8324481e0..438d0fa748339 100644
 --- a/chrome/BUILD.gn
 +++ b/chrome/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -39,7 +39,7 @@ index 493b239f0048d..7a12f5a5a12a1 100644
    }
  
    executable("chrome_initial") {
-@@ -1749,7 +1751,11 @@ if (is_linux || is_chromeos) {
+@@ -1880,7 +1882,11 @@ if (is_linux || is_chromeos) {
        ]
      }
      extract_symbols("chrome_symbols") {

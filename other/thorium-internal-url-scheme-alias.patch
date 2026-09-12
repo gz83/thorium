@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 3238d0351ffe5..fa7f48fc77220 100644
+index 242cb6d654118..1ca6ffab7dc63 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -870,6 +870,8 @@ source_set("core") {
+@@ -874,6 +874,8 @@ source_set("core") {
      "startup_data.cc",
      "thorium_flag_choices.h",
      "thorium_flag_entries.h",
@@ -12,18 +12,18 @@ index 3238d0351ffe5..fa7f48fc77220 100644
      "unexpire_flags.h",
      "universal_web_contents_observers.cc",
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 8436913e6145a..327c4ac313d36 100644
+index 92e1a5aa484ba..c398ef5092586 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -178,6 +178,7 @@
+@@ -192,6 +192,7 @@
+ #include "chrome/browser/subresource_filter/subresource_filter_navigation_download_policy.h"
  #include "chrome/browser/tab_group_sync/tab_group_sync_utils.h"
- #include "chrome/browser/task_manager/sampling/task_manager_impl.h"
  #include "chrome/browser/task_manager/task_manager_interface.h"
 +#include "chrome/browser/thorium_url_utils.h"
  #include "chrome/browser/tracing/chrome_tracing_delegate.h"
  #include "chrome/browser/translate/translate_service.h"
  #include "chrome/browser/ui/blocked_content/blocked_window_params.h"
-@@ -5100,6 +5101,8 @@ bool ChromeContentBrowserClient::
+@@ -4990,6 +4991,8 @@ bool ChromeContentBrowserClient::
  
  void ChromeContentBrowserClient::BrowserURLHandlerCreated(
      BrowserURLHandler* handler) {
@@ -33,10 +33,10 @@ index 8436913e6145a..327c4ac313d36 100644
    // URL handlers below. Also register it before the "parts" handlers, so the
    // NTP policy takes precedence over extensions that override the NTP.
 diff --git a/chrome/browser/extensions/extension_tab_util.cc b/chrome/browser/extensions/extension_tab_util.cc
-index 6238051f9a215..cbc8416dde6c8 100644
+index 285481f45a49b..8c5d4eb134df6 100644
 --- a/chrome/browser/extensions/extension_tab_util.cc
 +++ b/chrome/browser/extensions/extension_tab_util.cc
-@@ -1044,7 +1044,8 @@ bool ExtensionTabUtil::IsKillURL(const GURL& url) {
+@@ -1050,7 +1050,8 @@ bool ExtensionTabUtil::IsKillURL(const GURL& url) {
      return true;
    }
  
@@ -366,7 +366,7 @@ index 50c2903b4ff3a..9e6218c19c13c 100644
    typedef std::pair<URLHandler, URLHandler> HandlerPair;
    std::vector<HandlerPair> url_handlers_;
 diff --git a/content/browser/renderer_host/navigation_controller_impl.cc b/content/browser/renderer_host/navigation_controller_impl.cc
-index b02d351c569ca..c02fa53551382 100644
+index fb322aad4dd20..effa0ae15bdb0 100644
 --- a/content/browser/renderer_host/navigation_controller_impl.cc
 +++ b/content/browser/renderer_host/navigation_controller_impl.cc
 @@ -456,9 +456,9 @@ void RewriteUrlForNavigation(const GURL& original_url,
@@ -431,7 +431,7 @@ index 151eadaae94d5..e623e047866d7 100644
    //
    // Note that normally, the reverse handler is only used if the modified URL is
 diff --git a/content/public/common/url_constants.h b/content/public/common/url_constants.h
-index b29447008d283..3eaed1a950894 100644
+index 75eb817c98106..629a0eaee1c1a 100644
 --- a/content/public/common/url_constants.h
 +++ b/content/public/common/url_constants.h
 @@ -19,6 +19,9 @@ namespace content {

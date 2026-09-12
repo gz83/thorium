@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 327c4ac313d36..4326e7f6cbc65 100644
+index c398ef5092586..e1bcf962215d2 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -4110,9 +4110,12 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
+@@ -3989,9 +3989,12 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
      preferred_root_scrollbar_color_scheme = preferred_color_scheme;
    }
  #else  // !BUILDFLAG(IS_ANDROID)
@@ -82,10 +82,10 @@ index 6d7b24b67ff1f..ff0250adf59a5 100644
  }
  
 diff --git a/chrome/browser/themes/theme_service.cc b/chrome/browser/themes/theme_service.cc
-index bf9cb4c809b32..af360e8270036 100644
+index cb1dd91e6d83b..d5b4e2ee7d2e9 100644
 --- a/chrome/browser/themes/theme_service.cc
 +++ b/chrome/browser/themes/theme_service.cc
-@@ -688,7 +688,10 @@ ui::ColorProviderKey ThemeService::GetColorProviderKey(
+@@ -722,7 +722,10 @@ ui::ColorProviderKey ThemeService::GetColorProviderKey(
    DCHECK_EQ(profile->GetOriginalProfile(), profile_);
  
    ui::ColorProviderKey key = base_key;
@@ -94,14 +94,14 @@ index bf9cb4c809b32..af360e8270036 100644
 +      profile->IsIncognitoProfile() &&
 +      !base::CommandLine::ForCurrentProcess()->HasSwitch(
 +          "enable-incognito-themes");
+   const bool is_isolated = profile->IsEnterpriseIsolatedModeProfile();
  
    // color_mode.
-   if (is_incognito) {
 diff --git a/chrome/browser/ui/views/frame/browser_widget.cc b/chrome/browser/ui/views/frame/browser_widget.cc
-index 22318133c1b29..c86b9f40dbd84 100644
+index 7482e34aa43f9..a44a007bf67d2 100644
 --- a/chrome/browser/ui/views/frame/browser_widget.cc
 +++ b/chrome/browser/ui/views/frame/browser_widget.cc
-@@ -567,5 +567,10 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
+@@ -611,6 +611,11 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
  }
  
  bool BrowserWidget::IsIncognitoBrowser() const {
@@ -112,11 +112,12 @@ index 22318133c1b29..c86b9f40dbd84 100644
 +
    return browser_view_->browser()->GetProfile()->IsIncognitoProfile();
  }
+ 
 diff --git a/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc b/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
-index 0341bc90744a3..93c8a5a48d3a7 100644
+index 89d369aef4c79..29166e4565be6 100644
 --- a/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
 +++ b/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
-@@ -371,8 +371,22 @@ void NTPResourceCache::CreateNewTabIncognitoCSS(
+@@ -453,8 +453,22 @@ void NTPResourceCache::CreateNewTabIncognitoCSS(
  
    // Colors.
    const ui::ColorProvider& cp = web_contents->GetColorProvider();

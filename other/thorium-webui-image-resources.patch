@@ -1,5 +1,5 @@
 diff --git a/ui/webui/resources/images/BUILD.gn b/ui/webui/resources/images/BUILD.gn
-index 76ed20b8680e7..b5891fdd297d1 100644
+index 3bb8b5d1df3b3..49bf5b6f87feb 100644
 --- a/ui/webui/resources/images/BUILD.gn
 +++ b/ui/webui/resources/images/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,19 +8,19 @@ index 76ed20b8680e7..b5891fdd297d1 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -25,6 +25,7 @@ generate_grd("build_grdp") {
+@@ -26,6 +26,7 @@ generate_grd("build_grdp") {
      "error.svg",
      "error_yellow900.svg",
      "extension.svg",
 +    "hazard.svg",
      "icon_arrow_dropdown.svg",
+     "icon_arrow_dropdown_old.svg",
      "icon_cancel.svg",
-     "icon_copy_content.svg",
-@@ -34,6 +35,7 @@ generate_grd("build_grdp") {
-     "icon_tab.svg",
-     "icon_refresh.svg",
+@@ -41,6 +42,7 @@ generate_grd("build_grdp") {
+     "icon_refresh_old.svg",
      "icon_search.svg",
+     "icon_tab.svg",
 +    "infra.png",
      "open_in_new.svg",
+     "open_in_new_old.svg",
      "select.png",
-     "throbber_medium.svg",

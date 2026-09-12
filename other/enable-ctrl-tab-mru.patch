@@ -1,10 +1,10 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 05e8b37464557..0f382a92d220b 100644
+index aa39154c2005b..5138f1098955d 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -46,7 +46,7 @@ BASE_FEATURE(kCompositorLoadingThrobber, base::FEATURE_DISABLED_BY_DEFAULT);
- BASE_FEATURE(kCreateNewTabGroupAppMenuTopLevel,
-              base::FEATURE_DISABLED_BY_DEFAULT);
+@@ -44,7 +44,7 @@ BASE_FEATURE(kAllowEyeDropperWGCScreenCapture,
+ BASE_FEATURE(kCompositorLoadingThrobber, base::FEATURE_DISABLED_BY_DEFAULT);
+ 
  
 -BASE_FEATURE(kCtrlTabMru, base::FEATURE_DISABLED_BY_DEFAULT);
 +BASE_FEATURE(kCtrlTabMru, base::FEATURE_ENABLED_BY_DEFAULT);

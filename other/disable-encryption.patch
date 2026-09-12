@@ -82,7 +82,7 @@ index 937cd3b1e4b84..5951f1dc7e59e 100644
                                                  base::BlockingType::MAY_BLOCK);
  
 diff --git a/components/os_crypt/async/browser/dpapi_key_provider.cc b/components/os_crypt/async/browser/dpapi_key_provider.cc
-index 0bfbac71afa1c..462aab460d765 100644
+index 66dbfffe9d83a..f30ab94a148cc 100644
 --- a/components/os_crypt/async/browser/dpapi_key_provider.cc
 +++ b/components/os_crypt/async/browser/dpapi_key_provider.cc
 @@ -1,4 +1,4 @@
@@ -91,7 +91,7 @@ index 0bfbac71afa1c..462aab460d765 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -10,6 +10,7 @@
+@@ -9,6 +9,7 @@
  #include <wincrypt.h>
  
  #include "base/base64.h"
@@ -99,7 +99,7 @@ index 0bfbac71afa1c..462aab460d765 100644
  #include "base/compiler_specific.h"
  #include "base/logging.h"
  #include "base/metrics/histogram_functions.h"
-@@ -38,6 +39,13 @@ constexpr uint8_t kDPAPIKeyPrefix[] = {'D', 'P', 'A', 'P', 'I'};
+@@ -37,6 +38,13 @@ constexpr uint8_t kDPAPIKeyPrefix[] = {'D', 'P', 'A', 'P', 'I'};
  
  std::optional<std::vector<uint8_t>> DecryptKeyWithDPAPI(
      base::span<const uint8_t> ciphertext) {

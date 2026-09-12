@@ -32,7 +32,7 @@ index 78ba37b940137..0733416f0981c 100644
  GoogleApiKeysInfoBarDelegate::GoogleApiKeysInfoBarDelegate() = default;
  
 diff --git a/chrome/browser/ui/startup/infobar_utils.cc b/chrome/browser/ui/startup/infobar_utils.cc
-index 4907b9a951040..f48cf677c7aee 100644
+index 598e361a29886..71ab56335711c 100644
 --- a/chrome/browser/ui/startup/infobar_utils.cc
 +++ b/chrome/browser/ui/startup/infobar_utils.cc
 @@ -1,4 +1,4 @@
@@ -41,7 +41,7 @@ index 4907b9a951040..f48cf677c7aee 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -182,20 +182,6 @@ void AddInfoBarsIfNecessary(BrowserWindowInterface* browser,
+@@ -250,41 +250,6 @@ void AddInfoBarsIfNecessary(BrowserWindowInterface* browser,
      ShowBadFlagsPrompt(web_contents);
    }
  
@@ -49,16 +49,37 @@ index 4907b9a951040..f48cf677c7aee 100644
 -      infobars::ContentInfoBarManager::FromWebContents(web_contents);
 -
 -  if (!google_apis::HasAPIKeyConfigured()) {
--    GoogleApiKeysInfoBarDelegate::Create(infobar_manager);
+-    if (infobars::IsInfoBarMigrated(
+-            infobars::InfoBarDelegate::GOOGLE_API_KEYS_INFOBAR_DELEGATE)) {
+-      if (auto* manager =
+-              infobars::BrowserInfoBarManager::From(g_browser_process)) {
+-        manager->Show(
+-            tabs::TabInterface::GetFromContents(web_contents),
+-            infobars::InfoBarDelegate::GOOGLE_API_KEYS_INFOBAR_DELEGATE);
+-      }
+-    } else {
+-      GoogleApiKeysInfoBarDelegate::Create(infobar_manager);
+-    }
 -  }
 -
 -  if (ObsoleteSystem::IsObsoleteNowOrSoon()) {
 -    PrefService* local_state = g_browser_process->local_state();
 -    if (!local_state ||
 -        !local_state->GetBoolean(prefs::kSuppressUnsupportedOSWarning)) {
--      ObsoleteSystemInfoBarDelegate::Create(infobar_manager);
+-      if (infobars::IsInfoBarMigrated(
+-              infobars::InfoBarDelegate::OBSOLETE_SYSTEM_INFOBAR_DELEGATE)) {
+-        if (auto* manager =
+-                infobars::BrowserInfoBarManager::From(g_browser_process)) {
+-          manager->Show(
+-              tabs::TabInterface::GetFromContents(web_contents),
+-              infobars::InfoBarDelegate::OBSOLETE_SYSTEM_INFOBAR_DELEGATE);
+-        }
+-      } else {
+-        ObsoleteSystemInfoBarDelegate::Create(infobar_manager);
+-      }
 -    }
 -  }
+-
+   MaybeShowOSCryptAsyncAvailabilityInfoBar(browser);
  
-   OSCryptAsyncAvailabilityInfoBarDelegate::MaybeCreate(browser);
- 
+ #if BUILDFLAG(IS_WIN)

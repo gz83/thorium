@@ -1,5 +1,5 @@
 diff --git a/components/webui/flags/resources/app.css b/components/webui/flags/resources/app.css
-index f44a4d947b324..219f86694e0b0 100644
+index 9e7cfc8d38a49..822b2917fc229 100644
 --- a/components/webui/flags/resources/app.css
 +++ b/components/webui/flags/resources/app.css
 @@ -70,6 +70,20 @@
@@ -23,7 +23,7 @@ index f44a4d947b324..219f86694e0b0 100644
  a {
    color: var(--link-color);
    font-size: .8125rem;
-@@ -300,7 +314,7 @@ cr-tabs {
+@@ -304,7 +318,7 @@ cr-tabs {
    box-sizing: border-box;
    left: 0;
    opacity: 0;
@@ -33,7 +33,7 @@ index f44a4d947b324..219f86694e0b0 100644
    transform: translateY(300px);
    transition: all 225ms var(--ease-in-out);
 diff --git a/components/webui/flags/resources/app.html.ts b/components/webui/flags/resources/app.html.ts
-index c07f0715239fd..ad68bd63da994 100644
+index bbf3b825cac13..9c0a4e0d38e70 100644
 --- a/components/webui/flags/resources/app.html.ts
 +++ b/components/webui/flags/resources/app.html.ts
 @@ -1,4 +1,4 @@

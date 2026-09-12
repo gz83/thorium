@@ -21,7 +21,7 @@ index e48fbf29760fb..0cb25d08d5f6c 100644
  
    std::string_view suffix;
 diff --git a/chrome/browser/extensions/api/messaging/launch_context_win.cc b/chrome/browser/extensions/api/messaging/launch_context_win.cc
-index 45e4f100d5659..ae13eaac43c2c 100644
+index d4b7dd25cc1d9..1ab5820d6bc0e 100644
 --- a/chrome/browser/extensions/api/messaging/launch_context_win.cc
 +++ b/chrome/browser/extensions/api/messaging/launch_context_win.cc
 @@ -63,7 +63,7 @@ bool GetManifestPathWithFlags(HKEY root_key,
@@ -53,7 +53,7 @@ index f6bcb3cc8e8d6..b0bc8c2a0db93 100644
  }
  #endif  // BUILDFLAG(IS_LINUX)
 diff --git a/chrome/common/chrome_constants.cc b/chrome/common/chrome_constants.cc
-index 6e30ef11474c4..904dc62c7bcb5 100644
+index 1a6b899b4bc3a..1b5159d3fec19 100644
 --- a/chrome/common/chrome_constants.cc
 +++ b/chrome/common/chrome_constants.cc
 @@ -1,4 +1,4 @@

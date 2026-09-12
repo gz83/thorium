@@ -1,5 +1,5 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
-index 222d401ebcbfa..1b41e6baf3d0b 100644
+index ae3ce667f878d..c5997883fab47 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
 @@ -354,10 +354,12 @@ public class SigninAndHistorySyncActivity extends FullscreenSigninAndHistorySync
@@ -19,10 +19,10 @@ index 222d401ebcbfa..1b41e6baf3d0b 100644
                              }
                              SigninMetricsUtils.logAddAccountStateHistogram(State.STARTED);
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-index 02dd021d77782..e8c198b3df26a 100644
+index 5ba86824cc17f..dd29b28d23440 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-@@ -141,6 +141,9 @@ final class SigninBridge {
+@@ -149,6 +149,9 @@ final class SigninBridge {
              AccountPickerBottomSheetCoordinatorFactory factory,
              String extensionName) {
          ThreadUtils.assertOnUiThread();
@@ -33,10 +33,10 @@ index 02dd021d77782..e8c198b3df26a 100644
          if (windowAndroid == null || !tab.isUserInteractable()) {
              // The page is opened in the background, ignore the header. See
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java
-index cbe570e2e7251..c0610e801be41 100644
+index 6862188a56395..81012c99adfae 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java
-@@ -200,9 +200,11 @@ public class SigninFirstRunFragment extends Fragment
+@@ -206,9 +206,11 @@ public class SigninFirstRunFragment extends Fragment
                                  return;
                              }
  
@@ -52,10 +52,10 @@ index cbe570e2e7251..c0610e801be41 100644
      }
  
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java b/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
-index 7856ee7547972..a20086cc0dfc7 100644
+index 3982e87ee0472..7d40000009d90 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
-@@ -292,7 +292,9 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
+@@ -293,7 +293,9 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
                  accountsCategory.addPreference(createAccountPreference(account));
              }
          }
@@ -66,7 +66,7 @@ index 7856ee7547972..a20086cc0dfc7 100644
          notifyPreferencesUpdated();
      }
  
-@@ -363,7 +365,8 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
+@@ -364,7 +366,8 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
  
                                  if (intent != null) {
                                      startActivity(intent);
@@ -77,10 +77,10 @@ index 7856ee7547972..a20086cc0dfc7 100644
                                      // to open settings instead.
                                      SigninUtils.openSettingsForAllAccounts(getActivity());
 diff --git a/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java b/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
-index ddbd4c72e4a74..1c993ac4e02a2 100644
+index 2e4946010c874..4f3efbf532ace 100644
 --- a/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
 +++ b/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
-@@ -228,6 +228,9 @@ class SigninManagerImpl implements SigninManager, AccountsChangeObserver {
+@@ -229,6 +229,9 @@ class SigninManagerImpl implements SigninManager, AccountsChangeObserver {
  
      @Override
      public boolean isSigninSupported(boolean requireUpdatedPlayServices) {
@@ -91,10 +91,10 @@ index ddbd4c72e4a74..1c993ac4e02a2 100644
              return ExternalAuthUtils.getInstance().canUseGooglePlayServices();
          }
 diff --git a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
-index 81234eac72675..fce72c34e633b 100644
+index bc424bf7a782e..c9be6e60ebe5e 100644
 --- a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
 +++ b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
-@@ -371,7 +371,8 @@ public class FullscreenSigninMediator
+@@ -401,7 +401,8 @@ public class FullscreenSigninMediator
      }
  
      private boolean isSigninSupported(Profile profile) {

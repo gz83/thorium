@@ -37,10 +37,10 @@ index 64c57f2ca2148..15a942664e68b 100644
        AccountExtensionTracker::Get(profile)->CanUploadAsAccountExtension(
            extension)
 diff --git a/chrome/browser/ui/webui/extensions/extensions_ui.cc b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-index 0a0eb5d94e971..38e4db931580f 100644
+index c9e85f3caae89..5d0f76a680140 100644
 --- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
 +++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-@@ -488,9 +488,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
+@@ -501,9 +501,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
        "enableUserPermittedSites",
        base::FeatureList::IsEnabled(
            extensions_features::kExtensionsMenuAccessControlWithPermittedSites));
@@ -70,7 +70,7 @@ index 5841d3dfbc888..e0fb4e06b97bc 100644
  
  }  // namespace
 diff --git a/extensions/common/extension.cc b/extensions/common/extension.cc
-index 9413abec978e1..060eb46371fa5 100644
+index 28a3cac3756c7..471422ff9c9e5 100644
 --- a/extensions/common/extension.cc
 +++ b/extensions/common/extension.cc
 @@ -1,4 +1,4 @@

@@ -75,7 +75,7 @@ index 532ec4748b885..20076040c3526 100644
  
      if (base::FeatureList::IsEnabled(features::kUIDebugTools)) {
 diff --git a/chrome/browser/ui/cocoa/accelerators_cocoa.mm b/chrome/browser/ui/cocoa/accelerators_cocoa.mm
-index 66a181082ea93..02c3720478c58 100644
+index 12d6be60e250e..baa983d136eca 100644
 --- a/chrome/browser/ui/cocoa/accelerators_cocoa.mm
 +++ b/chrome/browser/ui/cocoa/accelerators_cocoa.mm
 @@ -1,4 +1,4 @@

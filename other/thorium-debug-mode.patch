@@ -1,8 +1,8 @@
 diff --git a/base/BUILD.gn b/base/BUILD.gn
-index ddcc03bf9bec0..6c7ecd8c36fd5 100644
+index 4606d8c6a1131..414beb233348e 100644
 --- a/base/BUILD.gn
 +++ b/base/BUILD.gn
-@@ -1181,6 +1181,7 @@ component("base") {
+@@ -1195,6 +1195,7 @@ component("base") {
      "//build:chromecast_buildflags",
      "//build:robolectric_buildflags",
      "//third_party/abseil-cpp:absl",
@@ -10,7 +10,7 @@ index ddcc03bf9bec0..6c7ecd8c36fd5 100644
    ]
  
    sources += [
-@@ -2953,6 +2954,7 @@ buildflag_header("debugging_buildflags") {
+@@ -2981,6 +2982,7 @@ buildflag_header("debugging_buildflags") {
      "ENABLE_ALLOCATION_TRACE_RECORDER_FULL_REPORTING=$build_allocation_trace_recorder_full_reporting",
      "PRINT_UNSYMBOLIZED_STACK_TRACES=$print_unsymbolized_stack_traces",
      "ENABLE_CHECK_ELISION_WARNING=$enable_check_elision_warning",
@@ -186,10 +186,10 @@ index 2d72f112e9b9f..567503f15f329 100644
  BASE_EXPORT bool ShouldCreateLogMessage(int severity);
  
 diff --git a/content/browser/renderer_host/render_process_host_impl.cc b/content/browser/renderer_host/render_process_host_impl.cc
-index c905e5535e15d..5184d4eb5cc47 100644
+index 0d96dedc4dfeb..c4fd984f39dee 100644
 --- a/content/browser/renderer_host/render_process_host_impl.cc
 +++ b/content/browser/renderer_host/render_process_host_impl.cc
-@@ -4056,7 +4056,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
+@@ -4080,7 +4080,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
      }
    }
  

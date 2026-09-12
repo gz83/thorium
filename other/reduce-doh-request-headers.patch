@@ -38,7 +38,7 @@ index 1f049eb708cd2..32184d34ccb6c 100644
    request_->set_isolation_info(GetDohIsolationInfo());
  }
 diff --git a/net/url_request/url_request_http_job.cc b/net/url_request/url_request_http_job.cc
-index e029de5a2abe7..afe31e9061650 100644
+index 30923eb35ebfb..505fb74aa1d6a 100644
 --- a/net/url_request/url_request_http_job.cc
 +++ b/net/url_request/url_request_http_job.cc
 @@ -1,4 +1,4 @@

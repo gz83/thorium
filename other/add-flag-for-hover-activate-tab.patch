@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index a64cbee876bfe..1b74619736e19 100644
+index c987877959bab..40b71717411fb 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -178,6 +178,16 @@ BASE_FEATURE(kPressAndHoldEscToExitBrowserFullscreen,
+@@ -186,6 +186,16 @@ BASE_FEATURE(kPressAndHoldEscToExitBrowserFullscreen,
  BASE_FEATURE(kRightClickToCloseTab,
               base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -20,24 +20,24 @@ index a64cbee876bfe..1b74619736e19 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 5a16d457f36f6..d6ef942146de2 100644
+index ad4bd01adb0b7..d449d9b106b82 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -397,6 +397,9 @@ BASE_DECLARE_FEATURE_PARAM(bool, kTabGroupsFocusingPinnedTabs);
+@@ -385,6 +385,9 @@ bool IsTabGroupsFocusFreezingEnabled();
  // Enables closing tabs with a right click. Shift+right-click opens the menu.
  BASE_DECLARE_FEATURE(kRightClickToCloseTab);
  
 +BASE_DECLARE_FEATURE(kHoverActivateTab);
 +BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
 +
- BASE_DECLARE_FEATURE(kVerticalTabsGrabHandleRemoval);
- BASE_DECLARE_FEATURE_PARAM(bool, kVerticalTabsGrabHandleRemovalAlways);
+ BASE_DECLARE_FEATURE(kTabGroupRibbon);
+ bool IsTabGroupRibbonEnabled();
  
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
-index da1336ec1e023..a8bd4658c9737 100644
+index d6ca8e04b3c27..432fa3e843903 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
-@@ -494,6 +494,14 @@ void TabView::OnMouseEntered(const ui::MouseEvent& event) {
+@@ -710,6 +710,14 @@ void TabView::OnMouseEntered(const ui::MouseEvent& event) {
    CHECK(collection_node_);
    UpdateHoverCard(this, TabSlotController::HoverCardUpdateType::kHover);
  
@@ -52,7 +52,7 @@ index da1336ec1e023..a8bd4658c9737 100644
    // Hover state is handled by the parent if it is split.
    if (split_) {
      return;
-@@ -510,6 +518,8 @@ void TabView::OnMouseEntered(const ui::MouseEvent& event) {
+@@ -726,6 +734,8 @@ void TabView::OnMouseEntered(const ui::MouseEvent& event) {
  void TabView::OnMouseExited(const ui::MouseEvent& event) {
    CHECK(collection_node_);
  
@@ -61,7 +61,7 @@ index da1336ec1e023..a8bd4658c9737 100644
    // Hover state is handled by the parent if it is split.
    if (split_) {
      return;
-@@ -518,6 +528,20 @@ void TabView::OnMouseExited(const ui::MouseEvent& event) {
+@@ -734,6 +744,20 @@ void TabView::OnMouseExited(const ui::MouseEvent& event) {
    UpdateHovered(false);
  }
  
@@ -83,10 +83,10 @@ index da1336ec1e023..a8bd4658c9737 100644
    // Protect against key presses when the tab is animating out. Drag events may
    // call this function after the node has been deleted.
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.h b/chrome/browser/ui/views/tabs/common/tab_view.h
-index f5f1da998eb8c..df0769547a5a5 100644
+index e673d8ab8c40c..e06c58812053a 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.h
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.h
-@@ -11,6 +11,7 @@
+@@ -12,6 +12,7 @@
  #include "base/callback_list.h"
  #include "base/memory/raw_ptr.h"
  #include "base/scoped_observation.h"
@@ -94,7 +94,7 @@ index f5f1da998eb8c..df0769547a5a5 100644
  #include "chrome/browser/ui/tabs/tab_data.h"
  #include "chrome/browser/ui/tabs/tab_style.h"
  #include "chrome/browser/ui/tabs/vertical_tab_strip_state_controller.h"
-@@ -195,6 +196,9 @@ class TabView : public views::View,
+@@ -186,6 +187,9 @@ class TabView : public views::View,
    void CloseButtonPressed(const ui::Event& event);
    void RecordMousePressedInTab();
  
@@ -104,7 +104,7 @@ index f5f1da998eb8c..df0769547a5a5 100644
    void UpdateHoverCard(HoverCardAnchorTarget* target,
                         int hover_card_update_type);
  
-@@ -250,6 +254,9 @@ class TabView : public views::View,
+@@ -239,6 +243,9 @@ class TabView : public views::View,
    // enabled and the gesture should not open the tab context menu.
    bool suppress_context_menu_ = false;
  
@@ -115,10 +115,10 @@ index f5f1da998eb8c..df0769547a5a5 100644
    float hover_opacity_min_;
    float hover_opacity_max_;
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index 2db84f925ed98..83558de4690ec 100644
+index 7090fd128eadf..d0afedf25815a 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -745,9 +745,19 @@ void Tab::OnMouseMoved(const ui::MouseEvent& event) {
+@@ -885,9 +885,19 @@ void Tab::OnMouseMoved(const ui::MouseEvent& event) {
  
  void Tab::OnMouseEntered(const ui::MouseEvent& event) {
    MaybeUpdateHoverStatus(event);
@@ -138,7 +138,7 @@ index 2db84f925ed98..83558de4690ec 100644
    if (!mouse_hovered_) {
      return;
    }
-@@ -755,6 +765,14 @@ void Tab::OnMouseExited(const ui::MouseEvent& event) {
+@@ -895,6 +905,14 @@ void Tab::OnMouseExited(const ui::MouseEvent& event) {
    controller_->HideHover(this, TabStyle::HideHoverStyle::kGradual);
  }
  
@@ -154,7 +154,7 @@ index 2db84f925ed98..83558de4690ec 100644
    controller_->UpdateHoverCard(nullptr,
                                 TabSlotController::HoverCardUpdateType::kEvent);
 diff --git a/chrome/browser/ui/views/tabs/tab.h b/chrome/browser/ui/views/tabs/tab.h
-index 302c0c71785bc..4eee7407d9cad 100644
+index b099d55611205..a89cd64eeda5a 100644
 --- a/chrome/browser/ui/views/tabs/tab.h
 +++ b/chrome/browser/ui/views/tabs/tab.h
 @@ -11,6 +11,7 @@
@@ -165,7 +165,7 @@ index 302c0c71785bc..4eee7407d9cad 100644
  #include "chrome/browser/ui/tabs/tab_data.h"
  #include "chrome/browser/ui/tabs/tab_enums.h"
  #include "chrome/browser/ui/views/tabs/hovercard/hover_card_anchor_target.h"
-@@ -269,6 +270,9 @@ class Tab : public gfx::AnimationDelegate,
+@@ -291,6 +292,9 @@ class Tab : public gfx::AnimationDelegate,
    // events are disabled because of touch input, this is a no-op.
    void MaybeUpdateHoverStatus(const ui::MouseEvent& event);
  
@@ -175,7 +175,7 @@ index 302c0c71785bc..4eee7407d9cad 100644
    void CloseButtonPressed(const ui::Event& event);
  
    void OnTabDataChanged(TabChangeType tab_change_type,
-@@ -344,6 +348,9 @@ class Tab : public gfx::AnimationDelegate,
+@@ -372,6 +376,9 @@ class Tab : public gfx::AnimationDelegate,
    // enabled and the gesture should not open the tab context menu.
    bool suppress_context_menu_ = false;
  

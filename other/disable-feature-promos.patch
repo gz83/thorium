@@ -1,5 +1,5 @@
 diff --git a/components/user_education/common/feature_promo/impl/feature_promo_controller_impl.cc b/components/user_education/common/feature_promo/impl/feature_promo_controller_impl.cc
-index 50644378ce205..44664a1a1e17d 100644
+index b9041afc79417..09d1576f17e4c 100644
 --- a/components/user_education/common/feature_promo/impl/feature_promo_controller_impl.cc
 +++ b/components/user_education/common/feature_promo/impl/feature_promo_controller_impl.cc
 @@ -1,4 +1,4 @@

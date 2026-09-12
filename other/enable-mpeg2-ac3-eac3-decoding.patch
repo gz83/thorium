@@ -1,5 +1,5 @@
 diff --git a/media/base/supported_types.cc b/media/base/supported_types.cc
-index 087c1e89a977f..d69c6e6fdf450 100644
+index 49f9e7b3fcba1..303a43616749d 100644
 --- a/media/base/supported_types.cc
 +++ b/media/base/supported_types.cc
 @@ -305,7 +305,9 @@ bool IsDecoderDolbyVisionProfileSupported(const VideoType& type) {
@@ -13,7 +13,7 @@ index 087c1e89a977f..d69c6e6fdf450 100644
      (BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC))
    return GetSupplementalDecoderAudioTypeCache()->IsProfileSupported(type);
  #else
-@@ -456,9 +458,10 @@ bool IsDefaultDecoderSupportedVideoType(const VideoType& type) {
+@@ -448,9 +450,10 @@ bool IsDefaultDecoderSupportedVideoType(const VideoType& type) {
        return IsDecoderHevcProfileSupported(type);
      case VideoCodec::kDolbyVision:
        return IsDecoderDolbyVisionProfileSupported(type);

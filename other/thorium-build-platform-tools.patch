@@ -1,5 +1,5 @@
 diff --git a/build/install-build-deps.py b/build/install-build-deps.py
-index 99d9e7e89e5e7..f11d09eafda05 100755
+index 27fe9bb8d37d2..2de5a4749473a 100755
 --- a/build/install-build-deps.py
 +++ b/build/install-build-deps.py
 @@ -1,6 +1,6 @@
@@ -10,142 +10,76 @@ index 99d9e7e89e5e7..f11d09eafda05 100755
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -215,6 +215,7 @@ def apt_update(options):
+@@ -242,6 +242,7 @@ def apt_update(options):
  # Packages needed for development
  def dev_list():
-   packages = [
-+      "advancecomp",
-       "autoconf",
-       "binutils",
-       "bison",
-@@ -229,6 +230,7 @@ def dev_list():
-       "flex",
-       "git-core",
-       "gperf",
-+      "icoutils",
-       "libasound2-dev",
-       "libatspi2.0-dev",
-       "libbrlapi-dev",
-@@ -270,15 +272,18 @@ def dev_list():
-       "lighttpd",
-       "locales",
-       "openbox",
-+      "optipng",
-       "p7zip",
-       "patch",
-       "perl",
-       "pkgconf",
-+      "pngcrush",
-       "ripgrep",
-       "rpm",
-       "ruby",
-       "uuid-dev",
-       "wdiff",
-+      "wget",
-       "x11-utils",
-       "xcompmgr",
-       "xz-utils",
-@@ -382,12 +387,14 @@ def lib_list():
-       "libpango-1.0-0",
-       "libpangocairo-1.0-0",
-       "libpci3",
-+      "libpcre3",
-       "libpixman-1-0",
-       "libspeechd2",
-       "libstdc++6",
-       "libsqlite3-0",
-       "libuuid1",
-       "libwayland-egl1",
-+      "libwayland-egl1-mesa",
-       "libx11-6",
-       "libx11-xcb1",
-       "libxau6",
-@@ -503,6 +510,7 @@ def lib32_list(options):
-       "zlib1g:i386",
-       # 32-bit libraries needed e.g. to compile V8 snapshot for Android or armhf
-       "linux-libc-dev:i386",
-+      "linux-libc-dev-i386-cross",
-       "libexpat1:i386",
-       "libpci3:i386",
-   ]
-@@ -706,7 +714,9 @@ def arm_list(options):
-       "g++-arm-linux-gnueabihf",
-       "gcc-arm-linux-gnueabihf",
-       "libc6-dev-armhf-cross",
-+      "libc6-dev-arm64-cross",
-       "linux-libc-dev-armhf-cross",
-+      "linux-libc-dev-arm64-cross",
-   ]
+     packages = [
++        "advancecomp",
+         "autoconf",
+         "binutils",
+         "bison",
+@@ -256,6 +257,7 @@ def dev_list():
+         "flex",
+         "git-core",
+         "gperf",
++        "icoutils",
+         "libasound2-dev",
+         "libatspi2.0-dev",
+         "libbrlapi-dev",
+@@ -297,15 +299,18 @@ def dev_list():
+         "lighttpd",
+         "locales",
+         "openbox",
++        "optipng",
+         "p7zip",
+         "patch",
+         "perl",
+         "pkgconf",
++        "pngcrush",
+         "ripgrep",
+         "rpm",
+         "ruby",
+         "uuid-dev",
+         "wdiff",
++        "wget",
+         "x11-utils",
+         "xcompmgr",
+         "xz-utils",
+@@ -411,12 +416,14 @@ def lib_list():
+         "libpango-1.0-0",
+         "libpangocairo-1.0-0",
+         "libpci3",
++        "libpcre3",
+         "libpixman-1-0",
+         "libspeechd2",
+         "libstdc++6",
+         "libsqlite3-0",
+         "libuuid1",
+         "libwayland-egl1",
++        "libwayland-egl1-mesa",
+         "libx11-6",
+         "libx11-xcb1",
+         "libxau6",
+@@ -532,6 +539,7 @@ def lib32_list(options):
+         "zlib1g:i386",
+         # 32-bit libraries needed e.g. to compile V8 snapshot for Android or armhf
+         "linux-libc-dev:i386",
++        "linux-libc-dev-i386-cross",
+         "libexpat1:i386",
+         "libpci3:i386",
+     ]
+@@ -736,7 +744,9 @@ def arm_list(options):
+         "g++-arm-linux-gnueabihf",
+         "gcc-arm-linux-gnueabihf",
+         "libc6-dev-armhf-cross",
++        "libc6-dev-arm64-cross",
+         "linux-libc-dev-armhf-cross",
++        "linux-libc-dev-arm64-cross",
+     ]
  
-   # Work around an Ubuntu dependency issue.
-diff --git a/build/toolchain/apple/linker_driver.py b/build/toolchain/apple/linker_driver.py
-index 828849a51909f..e8907bccda735 100755
---- a/build/toolchain/apple/linker_driver.py
-+++ b/build/toolchain/apple/linker_driver.py
-@@ -1,6 +1,6 @@
- #!/usr/bin/env python3
- 
--# Copyright 2016 The Chromium Authors
-+# Copyright 2026 The Chromium Authors, midzer, and Alex313031
- # Use of this source code is governed by a BSD-style license that can be
- # found in the LICENSE file.
- 
-@@ -150,19 +150,23 @@ class LinkerDriver(object):
-         self._linker_driver_pre_actions = {}
-         self._compiler_driver_args = []
-         for index, arg in enumerate(self._args[1:]):
-+            BAD_RUSTC_ARGS = '-Wl,-plugin-opt=O[0-9],-plugin-opt=mcpu=.*'
-             if arg.startswith(LINKER_DRIVER_COMPILER_ARG_PREFIX):
-                 assert not self._driver_path
-                 self._driver_path = arg[len(LINKER_DRIVER_COMPILER_ARG_PREFIX
-                                             ):]
-+                if not re.match(BAD_RUSTC_ARGS, arg):
-+                    self._compiler_driver_args.append(arg)
-             elif arg.startswith(LINKER_DRIVER_ARG_PREFIX):
-                 # Convert driver actions into a map of name => lambda to invoke.
-                 self._process_driver_arg(arg)
-+                if not re.match(BAD_RUSTC_ARGS, arg):
-+                    self._compiler_driver_args.append(arg)
-             else:
-                 # TODO(crbug.com/40268754): On Apple, the linker command line
-                 # produced by rustc for LTO includes these arguments, but the
-                 # Apple linker doesn't accept them.
-                 # Upstream bug: https://github.com/rust-lang/rust/issues/60059
--                BAD_RUSTC_ARGS = '-Wl,-plugin-opt=O[0-9],-plugin-opt=mcpu=.*'
-                 if not re.match(BAD_RUSTC_ARGS, arg):
-                     self._compiler_driver_args.append(arg)
- 
-diff --git a/build/vs_toolchain.py b/build/vs_toolchain.py
-index 7c62254219ca5..c0d81104f39de 100755
---- a/build/vs_toolchain.py
-+++ b/build/vs_toolchain.py
-@@ -1,5 +1,5 @@
- #!/usr/bin/env python3
--# Copyright 2014 The Chromium Authors
-+# Copyright 2026 The Chromium Authors, Alex313031, and gz83
- # Use of this source code is governed by a BSD-style license that can be
- # found in the LICENSE file.
- 
-@@ -17,7 +17,7 @@ import sys
- 
- from gn_helpers import ToGNString
- 
--# VS 2026 18 with 10.0.26100.7705 SDK with ARM64 libraries and UWP support.
-+# VS 2026 18.7.2 with 10.1.26100.8249 SDK with ARM64 libraries and UWP support.
- # See go/win-toolchain-reference for instructions about how to update the
- # toolchain.
- #
-@@ -59,7 +59,7 @@ from gn_helpers import ToGNString
- # * docs/windows_build_instructions.md
- #   Make sure any version numbers in the documentation match the code.
- #
--TOOLCHAIN_HASH = 'e66617bc68'
-+TOOLCHAIN_HASH = 'c66aaf5eb2'
- SDK_VERSION = '10.0.26100.0'
- 
- # Visual Studio versions are listed in descending order of priority.
+     # Work around an Ubuntu dependency issue.
 diff --git a/build/win/reorder-imports.py b/build/win/reorder-imports.py
-index 88851609d4be0..54267a51272df 100755
+index 11602df2777ec..d0195fbe1e500 100755
 --- a/build/win/reorder-imports.py
 +++ b/build/win/reorder-imports.py
 @@ -1,5 +1,5 @@
@@ -155,35 +89,45 @@ index 88851609d4be0..54267a51272df 100755
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -24,8 +24,8 @@ def reorder_imports(input_dir, output_dir, architecture):
-   # correct executable in the first place, so that this script
-   # only needs to verify that and not write a whole new exe.
+@@ -19,7 +19,7 @@ import pefile
  
--  input_image = os.path.join(input_dir, 'chrome.exe')
--  output_image = os.path.join(output_dir, 'chrome.exe')
-+  input_image = os.path.join(input_dir, 'thorium.exe')
-+  output_image = os.path.join(output_dir, 'thorium.exe')
  
-   # pefile mmap()s the whole executable, and then parses parts of
-   # it into python data structures for ease of processing.
-@@ -73,7 +73,7 @@ def reorder_imports(input_dir, output_dir, architecture):
+ def reorder_imports(input_dir, output_dir, architecture):
+-    """Swap chrome_elf.dll to be the first import of chrome.exe.
++    """Swap chrome_elf.dll to be the first import of thorium.exe.
+     Also copy over any related files that might be needed
+     (pdbs, manifests etc.).
+     """
+@@ -27,8 +27,8 @@ def reorder_imports(input_dir, output_dir, architecture):
+     # correct executable in the first place, so that this script
+     # only needs to verify that and not write a whole new exe.
  
-   pe.write(filename=output_image)
+-    input_image = os.path.join(input_dir, 'chrome.exe')
+-    output_image = os.path.join(output_dir, 'chrome.exe')
++    input_image = os.path.join(input_dir, 'thorium.exe')
++    output_image = os.path.join(output_dir, 'thorium.exe')
  
--  for fname in glob.iglob(os.path.join(input_dir, 'chrome.exe.*')):
-+  for fname in glob.iglob(os.path.join(input_dir, 'thorium.exe.*')):
-     shutil.copy(fname, os.path.join(output_dir, os.path.basename(fname)))
-   return 0
+     # pefile mmap()s the whole executable, and then parses parts of
+     # it into python data structures for ease of processing.
+@@ -90,7 +90,7 @@ def reorder_imports(input_dir, output_dir, architecture):
  
-@@ -81,9 +81,9 @@ def reorder_imports(input_dir, output_dir, architecture):
- def main(argv):
-   usage = 'reorder_imports.py -i <input_dir> -o <output_dir> -a <target_arch>'
-   parser = optparse.OptionParser(usage=usage)
--  parser.add_option('-i', '--input', help='reorder chrome.exe in DIR',
-+  parser.add_option('-i', '--input', help='reorder thorium.exe in DIR',
-       metavar='DIR')
--  parser.add_option('-o', '--output', help='write new chrome.exe to DIR',
-+  parser.add_option('-o', '--output', help='write new thorium.exe to DIR',
-       metavar='DIR')
-   parser.add_option('-a', '--arch', help='architecture of build (optional)',
-       default='ia32')
+     pe.write(filename=output_image)
+ 
+-    for fname in glob.iglob(os.path.join(input_dir, 'chrome.exe.*')):
++    for fname in glob.iglob(os.path.join(input_dir, 'thorium.exe.*')):
+         shutil.copy(fname, os.path.join(output_dir, os.path.basename(fname)))
+     return 0
+ 
+@@ -99,10 +99,10 @@ def main(argv):
+     usage = 'reorder_imports.py -i <input_dir> -o <output_dir> -a <target_arch>'
+     parser = optparse.OptionParser(usage=usage)
+     parser.add_option(
+-        '-i', '--input', help='reorder chrome.exe in DIR', metavar='DIR'
++        '-i', '--input', help='reorder thorium.exe in DIR', metavar='DIR'
+     )
+     parser.add_option(
+-        '-o', '--output', help='write new chrome.exe to DIR', metavar='DIR'
++        '-o', '--output', help='write new thorium.exe to DIR', metavar='DIR'
+     )
+     parser.add_option(
+         '-a', '--arch', help='architecture of build (optional)', default='ia32'

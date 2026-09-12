@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/resources/downloads/item.css b/chrome/browser/resources/downloads/item.css
-index 7e38038946592..77cde1ad94857 100644
+index 71ae0c1a7626d..e785d05249cd8 100644
 --- a/chrome/browser/resources/downloads/item.css
 +++ b/chrome/browser/resources/downloads/item.css
 @@ -275,6 +275,12 @@ cr-button {
@@ -25,10 +25,10 @@ index 7e38038946592..77cde1ad94857 100644
    margin-inline-start: 12px;
    margin-inline-end: 12px;
 diff --git a/chrome/browser/resources/downloads/item.html.ts b/chrome/browser/resources/downloads/item.html.ts
-index 330adf125d7ab..37847d491232e 100644
+index d07c2cf8f5d8d..81216c983f839 100644
 --- a/chrome/browser/resources/downloads/item.html.ts
 +++ b/chrome/browser/resources/downloads/item.html.ts
-@@ -48,6 +48,9 @@ export function getHtml(this: DownloadsItemElement) {
+@@ -45,6 +45,9 @@ export function getHtml(this: DownloadsItemElement) {
          <div id="initiator-origin">
            ${this.computeInitiatorOriginText_()}
          </div>
@@ -38,11 +38,12 @@ index 330adf125d7ab..37847d491232e 100644
        </div>
  
        <div class="description" role="gridcell"
-@@ -95,7 +98,6 @@ export function getHtml(this: DownloadsItemElement) {
-             focus-row-control focus-type="copyDownloadLink">
+@@ -91,7 +94,7 @@ export function getHtml(this: DownloadsItemElement) {
+             focus-type="copyDownloadLink">
          </cr-icon-button>
          <cr-icon-button id="more-actions" iron-icon="cr:more-vert"
--            ?hidden="${!this.computeShowActionMenu_()}"
-             class="dropdown-trigger" title="$i18n{moreActions}"
-             @click="${this.onMoreActionsClick_}" aria-haspopup="menu"
-             focus-row-control focus-type="actionMenuButton">
+-            ?hidden="${!this.computeShowActionMenu_()}" class="dropdown-trigger"
++            class="dropdown-trigger"
+             title="$i18n{moreActions}" @click="${this.onMoreActionsClick_}"
+             aria-haspopup="menu" focus-row-control
+             focus-type="actionMenuButton">

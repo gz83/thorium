@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index 3d2da0a0ce112..893fccd55dca9 100644
+index 21fc236fc0328..1a011d2c626be 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 @@ -1,4 +1,4 @@
@@ -8,8 +8,8 @@ index 3d2da0a0ce112..893fccd55dca9 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -61,7 +61,7 @@ public abstract class ChromeFeatureList {
-      * |kFeaturesExposedToJava| in chrome/browser/flags/android/chrome_feature_list.cc
+@@ -65,7 +65,7 @@ public abstract class ChromeFeatureList {
+      *     instead.
       */
      public static String getFieldTrialParamByFeature(String featureName, String paramName) {
 -        return ChromeFeatureMap.getInstance().getFieldTrialParamByFeature(featureName, paramName);
@@ -17,7 +17,7 @@ index 3d2da0a0ce112..893fccd55dca9 100644
      }
  
      /**
-@@ -73,8 +73,7 @@ public abstract class ChromeFeatureList {
+@@ -80,8 +80,7 @@ public abstract class ChromeFeatureList {
       */
      public static boolean getFieldTrialParamByFeatureAsBoolean(
              String featureName, String paramName, boolean defaultValue) {
@@ -27,7 +27,7 @@ index 3d2da0a0ce112..893fccd55dca9 100644
      }
  
      /**
-@@ -86,8 +85,7 @@ public abstract class ChromeFeatureList {
+@@ -109,8 +108,7 @@ public abstract class ChromeFeatureList {
       */
      public static int getFieldTrialParamByFeatureAsInt(
              String featureName, String paramName, int defaultValue) {
@@ -37,7 +37,7 @@ index 3d2da0a0ce112..893fccd55dca9 100644
      }
  
      /**
-@@ -99,8 +97,7 @@ public abstract class ChromeFeatureList {
+@@ -137,8 +135,7 @@ public abstract class ChromeFeatureList {
       */
      public static double getFieldTrialParamByFeatureAsDouble(
              String featureName, String paramName, double defaultValue) {
@@ -48,7 +48,7 @@ index 3d2da0a0ce112..893fccd55dca9 100644
  
      /**
 diff --git a/components/variations/service/variations_service.cc b/components/variations/service/variations_service.cc
-index c2cc6866eb756..a54c7ee0b30fc 100644
+index 52cdcea1c685a..eaaa6aff97962 100644
 --- a/components/variations/service/variations_service.cc
 +++ b/components/variations/service/variations_service.cc
 @@ -1,4 +1,4 @@
@@ -57,7 +57,7 @@ index c2cc6866eb756..a54c7ee0b30fc 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -235,22 +235,7 @@ bool GetInstanceManipulations(const net::HttpResponseHeaders* headers,
+@@ -268,22 +268,7 @@ bool GetInstanceManipulations(const net::HttpResponseHeaders* headers,
  // Variations seed fetching is only enabled in official Chrome builds, if a URL
  // is specified on the command line, and for testing.
  bool IsFetchingEnabled() {

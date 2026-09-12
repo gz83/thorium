@@ -1,5 +1,5 @@
 diff --git a/media/base/supported_types.cc b/media/base/supported_types.cc
-index 90e3bdabfed94..087c1e89a977f 100644
+index efc7246c8cd3e..49f9e7b3fcba1 100644
 --- a/media/base/supported_types.cc
 +++ b/media/base/supported_types.cc
 @@ -1,4 +1,4 @@
@@ -38,7 +38,7 @@ index 90e3bdabfed94..087c1e89a977f 100644
  }
  
  bool IsDecoderVp9ProfileSupported(const VideoType& type) {
-@@ -588,7 +575,7 @@ bool IsEncoderOptionalVideoType(const media::VideoType& type) {
+@@ -580,7 +567,7 @@ bool IsEncoderOptionalVideoType(const media::VideoType& type) {
  
  bool IsDecoderBuiltInVideoCodec(VideoCodec codec) {
  #if BUILDFLAG(ENABLE_FFMPEG_VIDEO_DECODERS) && BUILDFLAG(USE_PROPRIETARY_CODECS)

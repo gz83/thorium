@@ -1,5 +1,5 @@
 diff --git a/media/base/media_switches.cc b/media/base/media_switches.cc
-index 179e14dfddf5b..13b8132044868 100644
+index 6576dae682f87..bb76670b224db 100644
 --- a/media/base/media_switches.cc
 +++ b/media/base/media_switches.cc
 @@ -1,4 +1,4 @@
@@ -8,46 +8,24 @@ index 179e14dfddf5b..13b8132044868 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -411,7 +411,7 @@ BASE_FEATURE(kRustMpegAudioDataParser, base::FEATURE_ENABLED_BY_DEFAULT);
- BASE_FEATURE(kEnableHighChannelLayouts, base::FEATURE_DISABLED_BY_DEFAULT);
- 
- // Enables user control over muting tab audio from the tab strip.
--BASE_FEATURE(kEnableTabMuting, base::FEATURE_DISABLED_BY_DEFAULT);
-+BASE_FEATURE(kEnableTabMuting, base::FEATURE_ENABLED_BY_DEFAULT);
- 
- #if BUILDFLAG(ENABLE_PLATFORM_HEVC)
- // Enables HEVC hardware accelerated decoding.
-@@ -818,10 +818,10 @@ BASE_FEATURE(kAcceleratedVideoDecodeLinuxGL, base::FEATURE_ENABLED_BY_DEFAULT);
- 
- BASE_FEATURE(kAcceleratedVideoEncodeLinux,
-              "AcceleratedVideoEncoder",
--             base::FEATURE_DISABLED_BY_DEFAULT);
-+             base::FEATURE_ENABLED_BY_DEFAULT);
- 
- // Ignore the non-intel driver blacklist for VaapiVideoDecoder implementations.
--// Intended for manual usage only in order to gague the status of newer driver
-+// Intended for manual usage only in order to gauge the status of newer driver
- // implementations.
- BASE_FEATURE(kVaapiIgnoreDriverChecks, base::FEATURE_DISABLED_BY_DEFAULT);
- 
-@@ -1149,6 +1149,7 @@ BASE_FEATURE(kH264IDRKeyframeRequiresParameterSets,
+@@ -392,6 +392,7 @@ BASE_FEATURE(kAutoPictureInPictureSurveys, base::FEATURE_DISABLED_BY_DEFAULT);
  BASE_FEATURE(kAutoplayBypassForMicCamera, base::FEATURE_ENABLED_BY_DEFAULT);
  
  // Whether we should show a setting to disable autoplay policy.
 +// TODO: Alex313031 Possibly re-disable? Causes Profile picker crash
  BASE_FEATURE(kAutoplayDisableSettings, base::FEATURE_DISABLED_BY_DEFAULT);
  
- // Whether we should allow color space changes to flush AcceleratedVideoDecoder.
-@@ -1415,7 +1416,7 @@ BASE_FEATURE(kPlatformEncryptedDolbyVision,
- #if BUILDFLAG(IS_WIN)
-              base::FEATURE_ENABLED_BY_DEFAULT
- #else
--             base::FEATURE_DISABLED_BY_DEFAULT
-+             base::FEATURE_ENABLED_BY_DEFAULT
- #endif
- );
+ // Enables the Enterprise Autoplay policies (AutoplayAllowed and
+@@ -551,7 +552,7 @@ BASE_FEATURE(kDocumentPictureInPictureReparenting,
+ BASE_FEATURE(kEnableRtcpReporting, base::FEATURE_ENABLED_BY_DEFAULT);
  
-@@ -1427,7 +1428,7 @@ BASE_FEATURE(kPlatformEncryptedDolbyVision,
+ // Enables user control over muting tab audio from the tab strip.
+-BASE_FEATURE(kEnableTabMuting, base::FEATURE_DISABLED_BY_DEFAULT);
++BASE_FEATURE(kEnableTabMuting, base::FEATURE_ENABLED_BY_DEFAULT);
+ 
+ // Enables tracking the occlusion of HW secure encrypted video elements.
+ // The HW secure check is OS agnostic, but this switch is currently only
+@@ -1199,7 +1200,7 @@ BASE_FEATURE(kOpenH264SoftwareEncoder, base::FEATURE_ENABLED_BY_DEFAULT);
  // Otherwise, this feature has no effect and neither encrypted nor clear Dolby
  // Vision is allowed.
  BASE_FEATURE(kAllowClearDolbyVisionInMseWhenPlatformEncryptedDvEnabled,
@@ -56,7 +34,25 @@ index 179e14dfddf5b..13b8132044868 100644
  
  // Enables clear Dolby Vision playback through a pure MFT processor in the GPU
  // process, working together with the D3D11 video decoder.
-@@ -1501,7 +1502,9 @@ std::string GetEffectiveAutoplayPolicy(const base::CommandLine& command_line) {
+@@ -1212,7 +1213,7 @@ BASE_FEATURE(kPlatformEncryptedDolbyVision,
+ #if BUILDFLAG(IS_WIN)
+              base::FEATURE_ENABLED_BY_DEFAULT
+ #else
+-             base::FEATURE_DISABLED_BY_DEFAULT
++             base::FEATURE_ENABLED_BY_DEFAULT
+ #endif
+ );
+ 
+@@ -1495,7 +1496,7 @@ BASE_FEATURE(kAcceleratedVideoDecodeLinuxGL, base::FEATURE_ENABLED_BY_DEFAULT);
+ 
+ BASE_FEATURE(kAcceleratedVideoEncodeLinux,
+              "AcceleratedVideoEncoder",
+-             base::FEATURE_DISABLED_BY_DEFAULT);
++             base::FEATURE_ENABLED_BY_DEFAULT);
+ 
+ BASE_FEATURE(kPreferV4L2VideoAcceleration, base::FEATURE_DISABLED_BY_DEFAULT);
+ 
+@@ -1773,7 +1774,9 @@ std::string GetEffectiveAutoplayPolicy(const base::CommandLine& command_line) {
      return command_line.GetSwitchValueASCII(switches::kAutoplayPolicy);
    }
  

@@ -1,5 +1,5 @@
 diff --git a/components/download/internal/common/base_file.cc b/components/download/internal/common/base_file.cc
-index 185b2b86e3d8a..fbcea2125190f 100644
+index 459f6cb657138..2ce3d3c7f6e97 100644
 --- a/components/download/internal/common/base_file.cc
 +++ b/components/download/internal/common/base_file.cc
 @@ -1,4 +1,4 @@
@@ -16,7 +16,7 @@ index 185b2b86e3d8a..fbcea2125190f 100644
  #include "crypto/hash.h"
  #include "crypto/secure_hash.h"
  
-@@ -573,94 +572,10 @@ DownloadInterruptReason BaseFile::PublishDownload() {
+@@ -585,106 +584,12 @@ DownloadInterruptReason BaseFile::PublishDownload() {
  }
  #endif  // BUILDFLAG(IS_ANDROID)
  
@@ -63,8 +63,10 @@ index 185b2b86e3d8a..fbcea2125190f 100644
 -}  // namespace
 -
  // static
- GURL BaseFile::GetEffectiveAuthorityURL(const GURL& source_url,
-                                         const GURL& referrer_url) {
+ GURL BaseFile::GetEffectiveAuthorityURL(
+     const GURL& source_url,
+     const GURL& referrer_url,
+     const std::optional<url::Origin>& request_initiator) {
 -  if (source_url.is_valid()) {
 -    // http{,s} has an authority and are supported.
 -    if (source_url.SchemeIsHTTPOrHTTPS())
@@ -84,6 +86,16 @@ index 185b2b86e3d8a..fbcea2125190f 100644
 -
 -    if (source_url.SchemeIs(url::kBlobScheme))
 -      return url::Origin::Create(source_url).GetURL();
+-  }
+-
+-  // The request initiator is validated by the browser process, so prefer it
+-  // over the referrer (which may have been supplied by the renderer) when the
+-  // source URL itself doesn't carry a usable authority. If an initiator was
+-  // provided but isn't HTTP/S (e.g. it is opaque), the referrer from the same
+-  // requesting context won't be a more reliable signal, so skip it as well.
+-  if (request_initiator) {
+-    GURL initiator_url = request_initiator->GetURL();
+-    return initiator_url.SchemeIsHTTPOrHTTPS() ? initiator_url : GURL();
 -  }
 -
 -  if (referrer_url.is_valid() && referrer_url.SchemeIsHTTPOrHTTPS())
@@ -112,11 +124,12 @@ index 185b2b86e3d8a..fbcea2125190f 100644
  }
  
  void BaseFile::AnnotateWithSourceInformation(
-@@ -670,32 +585,7 @@ void BaseFile::AnnotateWithSourceInformation(
+@@ -694,33 +599,7 @@ void BaseFile::AnnotateWithSourceInformation(
      const std::optional<url::Origin>& request_initiator,
      mojo::PendingRemote<quarantine::mojom::Quarantine> remote_quarantine,
      OnAnnotationDoneCallback on_annotation_done_callback) {
--  GURL authority_url = GetEffectiveAuthorityURL(source_url, referrer_url);
+-  GURL authority_url =
+-      GetEffectiveAuthorityURL(source_url, referrer_url, request_initiator);
 -  if (!remote_quarantine) {
 -#if BUILDFLAG(IS_WIN)
 -    quarantine::mojom::QuarantineFileResult result =
@@ -147,10 +160,10 @@ index 185b2b86e3d8a..fbcea2125190f 100644
  
  }  // namespace download
 diff --git a/components/download/public/common/base_file.h b/components/download/public/common/base_file.h
-index d46c5c570d6cf..4a4c518e33de6 100644
+index d162c097d6e5f..310d5c770fb9e 100644
 --- a/components/download/public/common/base_file.h
 +++ b/components/download/public/common/base_file.h
-@@ -26,7 +26,6 @@
+@@ -27,7 +27,6 @@
  #include "components/services/quarantine/public/mojom/quarantine.mojom.h"
  #include "crypto/secure_hash.h"
  #include "mojo/public/cpp/bindings/pending_remote.h"
@@ -158,7 +171,7 @@ index d46c5c570d6cf..4a4c518e33de6 100644
  #include "net/base/net_errors.h"
  #include "url/gurl.h"
  #include "url/origin.h"
-@@ -271,14 +270,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
+@@ -281,14 +280,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
                                               int os_error,
                                               DownloadInterruptReason reason);
  
@@ -173,7 +186,7 @@ index d46c5c570d6cf..4a4c518e33de6 100644
    // Full path to the file including the file name.
    base::FilePath full_path_;
  
-@@ -306,12 +297,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
+@@ -316,12 +307,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
    // ID of the download, used for trace events.
    uint32_t download_id_;
  
@@ -187,7 +200,7 @@ index d46c5c570d6cf..4a4c518e33de6 100644
  
    base::WeakPtrFactory<BaseFile> weak_factory_{this};
 diff --git a/content/browser/BUILD.gn b/content/browser/BUILD.gn
-index 7b194eabd7b0b..6cf1038e36bba 100644
+index 4e9e52469939b..247b949d29378 100644
 --- a/content/browser/BUILD.gn
 +++ b/content/browser/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -196,7 +209,7 @@ index 7b194eabd7b0b..6cf1038e36bba 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -179,7 +179,6 @@ source_set("browser") {
+@@ -178,7 +178,6 @@ source_set("browser") {
      "//components/power_monitor",
      "//components/schema_org/common:mojom",
      "//components/services/filesystem:lib",

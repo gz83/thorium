@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
-index 8181a594d25be..0898247cbf7b1 100644
+index 783e58a5f1938..12fa5aac53f47 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
 @@ -4,6 +4,7 @@
@@ -10,7 +10,7 @@ index 8181a594d25be..0898247cbf7b1 100644
  #include "base/task/single_thread_task_runner.h"
  #include "build/build_config.h"
  #include "build/buildflag.h"
-@@ -572,7 +573,10 @@ void TabGroupHeaderView::OnDataChanged(
+@@ -581,7 +582,10 @@ void TabGroupHeaderView::OnDataChanged(
    UpdateIsCollapsed();
    UpdateAccessibleName();
  
@@ -23,10 +23,10 @@ index 8181a594d25be..0898247cbf7b1 100644
    } else {
      UpdateTooltipText();
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
-index 5f1bded41396b..67197c4aa4c1a 100644
+index 432fa3e843903..462a67438451c 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
-@@ -47,6 +47,7 @@
+@@ -51,6 +51,7 @@
  #include "chrome/browser/ui/views/tabs/tab/alert_indicator_button.h"
  #include "chrome/browser/ui/views/tabs/tab/glow_hover_controller.h"
  #include "chrome/browser/ui/views/tabs/tab/tab_accessibility.h"
@@ -34,7 +34,7 @@ index 5f1bded41396b..67197c4aa4c1a 100644
  #include "chrome/browser/ui/views/tabs/tab/tab_close_button.h"
  #include "chrome/browser/ui/views/tabs/tab/tab_icon.h"
  #include "chrome/browser/ui/views/tabs/tab/tab_title.h"
-@@ -607,6 +608,16 @@ void TabView::OnGestureEvent(ui::GestureEvent* event) {
+@@ -822,6 +823,16 @@ void TabView::OnGestureEvent(ui::GestureEvent* event) {
    }
  }
  
@@ -52,26 +52,26 @@ index 5f1bded41396b..67197c4aa4c1a 100644
    // Split pinned tabs have a merged background that is rendered in
    // `SplitTabView`.
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.h b/chrome/browser/ui/views/tabs/common/tab_view.h
-index df0769547a5a5..642b72eb189bd 100644
+index e06c58812053a..7d8c7021bad3d 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.h
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.h
-@@ -6,6 +6,7 @@
- #define CHROME_BROWSER_UI_VIEWS_TABS_COMMON_TAB_VIEW_H_
+@@ -7,6 +7,7 @@
  
+ #include <memory>
  #include <optional>
 +#include <string>
  #include <vector>
  
  #include "base/callback_list.h"
-@@ -24,6 +25,7 @@
+@@ -26,6 +27,7 @@
  #include "third_party/skia/include/core/SkScalar.h"
  #include "ui/base/metadata/metadata_header_macros.h"
  #include "ui/gfx/canvas.h"
 +#include "ui/gfx/geometry/point.h"
  #include "ui/views/context_menu_controller.h"
- #include "ui/views/layout/delegating_layout_manager.h"
- #include "ui/views/layout/flex_layout.h"
-@@ -110,6 +112,7 @@ class TabView : public views::View,
+ #include "ui/views/layout/layout_manager_base.h"
+ #include "ui/views/masked_targeter_delegate.h"
+@@ -139,6 +141,7 @@ class TabView : public views::View,
    void OnMouseExited(const ui::MouseEvent& event) override;
    bool OnMouseDragged(const ui::MouseEvent& event) override;
    void OnGestureEvent(ui::GestureEvent* event) override;
@@ -80,10 +80,10 @@ index df0769547a5a5..642b72eb189bd 100644
    void AddedToWidget() override;
    void RemovedFromWidget() override;
 diff --git a/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc b/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
-index aee23c12a297b..52d7e7f0c9131 100644
+index e9b830d6bc64b..a10a64ea4d428 100644
 --- a/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
 +++ b/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
-@@ -301,6 +301,10 @@ bool TabHoverCardController::IsHoverCardShowingForTab(
+@@ -299,6 +299,10 @@ bool TabHoverCardController::IsHoverCardShowingForTab(
  void TabHoverCardController::UpdateHoverCard(
      HoverCardAnchorTarget* anchor_target,
      TabSlotController::HoverCardUpdateType update_type) {
@@ -95,11 +95,11 @@ index aee23c12a297b..52d7e7f0c9131 100644
      anchor_target = nullptr;
      update_type = TabSlotController::HoverCardUpdateType::kAnimating;
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index eb5056f82a4d3..25424f731a6c3 100644
+index c382d26c38252..db7dbc14e462c 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -1066,6 +1066,16 @@ void Tab::HideHover(TabStyle::HideHoverStyle style) {
-   DeprecatedLayoutImmediately();
+@@ -1304,6 +1304,16 @@ float Tab::GetZValue() const {
+   return sort_value;
  }
  
 +std::u16string Tab::GetRenderedTooltipText(const gfx::Point& p) const {
@@ -116,10 +116,10 @@ index eb5056f82a4d3..25424f731a6c3 100644
  std::u16string Tab::GetTooltipText(const std::u16string& title,
                                     std::optional<tabs::TabAlert> alert_state) {
 diff --git a/chrome/browser/ui/views/tabs/tab.h b/chrome/browser/ui/views/tabs/tab.h
-index 4eee7407d9cad..9505948a4b8dc 100644
+index a89cd64eeda5a..e2980da5d451b 100644
 --- a/chrome/browser/ui/views/tabs/tab.h
 +++ b/chrome/browser/ui/views/tabs/tab.h
-@@ -108,6 +108,7 @@ class Tab : public gfx::AnimationDelegate,
+@@ -110,6 +110,7 @@ class Tab : public gfx::AnimationDelegate,
    void OnMouseEntered(const ui::MouseEvent& event) override;
    void OnMouseExited(const ui::MouseEvent& event) override;
    void OnGestureEvent(ui::GestureEvent* event) override;

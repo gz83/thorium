@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc b/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
-index 44cca32acbe48..b59a2e7807a33 100644
+index 4c556c7db1a52..ca9f835120e8e 100644
 --- a/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
 +++ b/chrome/browser/ui/bookmarks/bookmark_utils_desktop.cc
-@@ -64,7 +64,7 @@ using bookmarks::BookmarkNode;
+@@ -65,7 +65,7 @@ using bookmarks::BookmarkNode;
  
  namespace bookmarks {
  

@@ -1,8 +1,8 @@
 diff --git a/chrome/android/chrome_java_resources.gni b/chrome/android/chrome_java_resources.gni
-index 043d17bcb0d28..82ece55fe504d 100644
+index 503af026fd70c..54e887013995d 100644
 --- a/chrome/android/chrome_java_resources.gni
 +++ b/chrome/android/chrome_java_resources.gni
-@@ -653,6 +653,7 @@ chrome_java_resources = [
+@@ -673,6 +673,7 @@ chrome_java_resources = [
    "java/res/xml/developer_preferences.xml",
    "java/res/xml/do_not_track_preferences.xml",
    "java/res/xml/google_services_preferences.xml",
@@ -11,10 +11,10 @@ index 043d17bcb0d28..82ece55fe504d 100644
    "java/res/xml/legal_information_preferences.xml",
    "java/res/xml/main_preferences.xml",
 diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java_sources.gni
-index 7b0f6e4682444..7078aeb987d7a 100644
+index 1a541dcb256ac..b012d3bc92724 100644
 --- a/chrome/android/chrome_java_sources.gni
 +++ b/chrome/android/chrome_java_sources.gni
-@@ -1011,6 +1011,7 @@ chrome_java_sources = [
+@@ -1035,6 +1035,7 @@ chrome_java_sources = [
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditor.java",
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditorBridge.java",
    "java/src/org/chromium/chrome/browser/privacy/settings/DoNotTrackSettings.java",
@@ -44,10 +44,10 @@ index 0000000000000..b35a997967485
 +
 +</PreferenceScreen>
 diff --git a/chrome/android/java/res/xml/privacy_preferences.xml b/chrome/android/java/res/xml/privacy_preferences.xml
-index 1f4c79ab791ef..cf0a26f1a8cd3 100644
+index 5c4464c45d620..c41d883f4dc46 100644
 --- a/chrome/android/java/res/xml/privacy_preferences.xml
 +++ b/chrome/android/java/res/xml/privacy_preferences.xml
-@@ -32,6 +32,10 @@ found in the LICENSE file.
+@@ -28,6 +28,10 @@ found in the LICENSE file.
          android:key="do_not_track"
          android:title="@string/do_not_track_title"
          android:fragment="org.chromium.chrome.browser.privacy.settings.DoNotTrackSettings" />
@@ -55,9 +55,9 @@ index 1f4c79ab791ef..cf0a26f1a8cd3 100644
 +        android:key="gpc"
 +        android:title="@string/gpc_title"
 +        android:fragment="org.chromium.chrome.browser.privacy.settings.GpcSettings" />
-     <Preference
-         android:key="preload_pages"
-         android:title="@string/preload_pages_title"
+     <org.chromium.components.browser_ui.settings.ChromeBasePreference
+         android:key="universal_opt_out"
+         android:title="@string/universal_opt_out_title"
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/GpcSettings.java b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/GpcSettings.java
 new file mode 100644
 index 0000000000000..484572ab2db9c
@@ -122,10 +122,10 @@ index 0000000000000..484572ab2db9c
 +    }
 +}
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
-index 7105205ab38dc..7263d67d34e97 100644
+index a87bc4d56b382..8ee4d1128f395 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
-@@ -95,6 +95,7 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
+@@ -93,6 +93,7 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
      private static final String PREF_HTTPS_FIRST_MODE_LEGACY = "https_first_mode_legacy";
      private static final String PREF_SECURE_DNS = "secure_dns";
      private static final String PREF_USAGE_STATS = "usage_stats_reporting";
@@ -133,8 +133,8 @@ index 7105205ab38dc..7263d67d34e97 100644
      private static final String PREF_SAFE_BROWSING = "safe_browsing";
      private static final String PREF_PASSWORD_LEAK_DETECTION = "password_leak_detection";
      private static final String PREF_SYNC_AND_SERVICES_LINK = "sync_and_services_link";
-@@ -436,6 +437,14 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
-                             : R.string.text_off);
+@@ -405,6 +406,14 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
+             }
          }
  
 +        Preference gpcPref = findPreference(PREF_GPC);
@@ -149,12 +149,12 @@ index 7105205ab38dc..7263d67d34e97 100644
          if (preloadPagesPreference != null) {
              preloadPagesPreference.setSummary(
 diff --git a/chrome/app/settings_strings.grdp b/chrome/app/settings_strings.grdp
-index f1e1c55ad17ba..cb6feffe9ebe5 100644
+index 884e32a5f21f4..e85dc72dfab14 100644
 --- a/chrome/app/settings_strings.grdp
 +++ b/chrome/app/settings_strings.grdp
-@@ -1903,6 +1903,18 @@
-     <message name="IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_LEARN_MORE_ACCESSIBILITY_LABEL" desc="The accessibility label for a link to learn more about Do Not Track">
-       Learn more about Do Not Track
+@@ -1744,6 +1744,18 @@
+     <message name="IDS_SETTINGS_UNIVERSAL_OPT_OUT_SUB_LABEL" desc="Subtitle of a setting. It appears below the title: ‘Send an opt-out request to sites regarding use of your data’. Users choose whether they want to send a request to sites about how to treat their user data. This string explains that sites may not respond to the user’s request even when this toggle is on; and, even when they do respond, sites may handle opt-out requests differently based on regional laws. On desktop computers, this string appears in the ‘Site requests’ section of the ‘Third-party cookies and site data’ page. On mobile devices, this string appears on its own subpage. The tone should be informative.">
+       The sites you visit, including Google, are responsible for determining how they respond to this request. Depending on the laws in your region, sites may respond by limiting the sale and sharing of your data or its use for personalized ads.
      </message>
 +    <message name="IDS_SETTINGS_ENABLE_GPC" desc="">
 +      Global Privacy Control (Sec-GPC)
@@ -172,43 +172,43 @@ index f1e1c55ad17ba..cb6feffe9ebe5 100644
        Controls what information sites can use and show (location, camera, pop-ups, and more)
      </message>
 diff --git a/chrome/browser/extensions/api/settings_private/prefs_util.cc b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-index 43ba004cc63da..671e4f9267603 100644
+index 2363c9ba7de85..a5d5965f58c11 100644
 --- a/chrome/browser/extensions/api/settings_private/prefs_util.cc
 +++ b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-@@ -486,6 +486,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
-   (*s_allowlist)[::prefs::kBlockAll3pcToggleEnabled] =
-       settings_api::PrefType::kBoolean;
+@@ -493,6 +493,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
    (*s_allowlist)[::prefs::kEnableDoNotTrack] = settings_api::PrefType::kBoolean;
+   (*s_allowlist)[universal_optout::prefs::kUniversalOptOutEnabled] =
+       settings_api::PrefType::kBoolean;
 +  (*s_allowlist)[::prefs::kEnableGPC] = settings_api::PrefType::kBoolean;
  
    // Sync and personalization page.
    (*s_allowlist)[::prefs::kSearchSuggestEnabled] =
 diff --git a/chrome/browser/renderer_preferences_util.cc b/chrome/browser/renderer_preferences_util.cc
-index 032b72f851e79..c127fc6ff56ea 100644
+index 2b542a4814ddc..3b61122e40519 100644
 --- a/chrome/browser/renderer_preferences_util.cc
 +++ b/chrome/browser/renderer_preferences_util.cc
-@@ -25,6 +25,7 @@
+@@ -26,6 +26,7 @@
  #include "components/language/core/browser/language_prefs.h"
  #include "components/language/core/browser/pref_names.h"
  #include "components/prefs/pref_service.h"
 +#include "components/privacy_sandbox/privacy_sandbox_prefs.h"
+ #include "components/universal_optout/features.h"
+ #include "components/universal_optout/prefs.h"
  #include "content/public/browser/renderer_preferences_util.h"
- #include "media/media_buildflags.h"
- #include "third_party/blink/public/common/peerconnection/webrtc_ip_handling_policy.h"
-@@ -150,6 +151,7 @@ void UpdateFromSystemSettings(blink::RendererPreferences* prefs,
+@@ -155,6 +156,7 @@ void UpdateFromSystemSettings(blink::RendererPreferences* prefs,
    prefs->enable_referrers = pref_service->GetBoolean(prefs::kEnableReferrers);
    prefs->enable_do_not_track =
        pref_service->GetBoolean(prefs::kEnableDoNotTrack);
 +  prefs->enable_gpc = pref_service->GetBoolean(prefs::kEnableGPC);
-   prefs->enable_encrypted_media =
-       pref_service->GetBoolean(prefs::kEnableEncryptedMedia);
- 
+   // TODO(crbug.com/40745270): Clean up kGlobalPrivacyControlForce &
+   // kGlobalPrivacyControlDevToolsOverridest.
+   if (base::FeatureList::IsEnabled(
 diff --git a/chrome/browser/resources/settings/BUILD.gn b/chrome/browser/resources/settings/BUILD.gn
-index 24115ed25cc91..a36b69cb873b7 100644
+index 041905516f82d..ee52414436c7d 100644
 --- a/chrome/browser/resources/settings/BUILD.gn
 +++ b/chrome/browser/resources/settings/BUILD.gn
-@@ -117,6 +117,7 @@ build_webui("build") {
-     "performance_page/tab_discard/exception_tabbed_add_dialog.ts",
+@@ -103,6 +103,7 @@ build_webui("build") {
+     "glic_page/glic_subpage.ts",
      "privacy_page/cookies_page.ts",
      "privacy_page/do_not_track_toggle.ts",
 +    "privacy_page/gpc_toggle.ts",
@@ -216,20 +216,20 @@ index 24115ed25cc91..a36b69cb873b7 100644
      "privacy_page/privacy_guide/privacy_guide_completion_fragment.ts",
      "privacy_page/privacy_guide/privacy_guide_cookies_fragment.ts",
 diff --git a/chrome/browser/resources/settings/privacy_page/cookies_page.html b/chrome/browser/resources/settings/privacy_page/cookies_page.html
-index bbd90e2f0ccb4..392221beb8527 100644
+index e78b7e20543cb..c42923fd57fe3 100644
 --- a/chrome/browser/resources/settings/privacy_page/cookies_page.html
 +++ b/chrome/browser/resources/settings/privacy_page/cookies_page.html
-@@ -138,6 +138,8 @@
-     </h2>
-     <settings-do-not-track-toggle id="doNotTrack" prefs="{{prefs}}">
-     </settings-do-not-track-toggle>
+@@ -157,6 +157,8 @@
+           sub-label="$i18n{universalOptOutSubLabel}">
+       </settings-toggle-button>
+     </template>
 +    <settings-gpc-toggle id="gpc" prefs="{{prefs}}">
 +    </settings-gpc-toggle>
      <cr-link-row id="siteDataTrigger" class="hr"
          on-click="onSiteDataClick_" label="$i18n{cookiePageAllSitesLink}"
          role-description="$i18n{subpageArrowRoleDescription}">
 diff --git a/chrome/browser/resources/settings/privacy_page/cookies_page.ts b/chrome/browser/resources/settings/privacy_page/cookies_page.ts
-index c3dfe0a1a0b8b..de019e5f2999a 100644
+index 7fe9ca2df6467..9af04185552fe 100644
 --- a/chrome/browser/resources/settings/privacy_page/cookies_page.ts
 +++ b/chrome/browser/resources/settings/privacy_page/cookies_page.ts
 @@ -22,6 +22,7 @@ import '../settings_page/settings_subpage.js';
@@ -404,12 +404,12 @@ index 0000000000000..d4c2ddde9d163
 +customElements.define(
 +  SettingsGpcToggleElement.is, SettingsGpcToggleElement);
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-index 5354653bf6ab9..801d0bb770219 100644
+index efeb9f81eb8e2..092dac23423e8 100644
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1042,6 +1042,12 @@ For more settings that use data to improve your Chrome experience, go to <ph nam
- 
- For example, some websites may respond to this request by showing you ads that aren’t based on other websites you’ve visited. Many websites will still collect and use your browsing data — for example to improve security, to provide content, ads and recommendations, and to generate reporting statistics.
+@@ -1057,6 +1057,12 @@ For example, some websites may respond to this request by showing you ads that a
+       <message name="IDS_UNIVERSAL_OPT_OUT_INFO_TEXT" desc="Subtitle of a setting. It appears below the title: ‘Send an opt-out request to sites regarding use of your data’. Users choose whether they want to send a request to sites about how to treat their user data. This string explains that sites may not respond to the user’s request even when this toggle is on; and, even when they do respond, sites may handle opt-out requests differently based on regional laws. This string appears on its own subpage. The tone should be informative. Clicking on Learn more link opens a help center article, the link tag should not be translated but the 'learn more' text inside the link tag should be translated.">
+         The sites you visit, including Google, are responsible for determining how they respond to this request. Depending on the laws in your region, sites may respond by limiting the sale and sharing of your data or its use for personalized ads. <ph name="BEGIN_LINK">&lt;link&gt;</ph>Learn more<ph name="END_LINK">&lt;/link&gt;</ph>
        </message>
 +      <message name="IDS_GPC_TITLE" desc="">
 +        Global Privacy Control (Sec-GPC)
@@ -421,7 +421,7 @@ index 5354653bf6ab9..801d0bb770219 100644
          Access payment methods
        </message>
 diff --git a/chrome/browser/ui/prefs/pref_watcher.cc b/chrome/browser/ui/prefs/pref_watcher.cc
-index dfdb678c22c66..b51cbf0af0ac9 100644
+index 7b02f5e7a3649..f46f5c7008b00 100644
 --- a/chrome/browser/ui/prefs/pref_watcher.cc
 +++ b/chrome/browser/ui/prefs/pref_watcher.cc
 @@ -24,6 +24,7 @@
@@ -429,22 +429,22 @@ index dfdb678c22c66..b51cbf0af0ac9 100644
  #include "components/live_caption/pref_names.h"
  #include "components/prefs/pref_change_registrar.h"
 +#include "components/privacy_sandbox/privacy_sandbox_prefs.h"
+ #include "components/universal_optout/prefs.h"
  #include "content/public/browser/browser_context.h"
  #include "mojo/public/cpp/bindings/pending_remote.h"
- #include "third_party/blink/public/common/renderer_preferences/renderer_preferences.h"
-@@ -153,6 +154,7 @@ PrefWatcher::PrefWatcher(Profile* profile) : profile_(profile) {
+@@ -154,6 +155,7 @@ PrefWatcher::PrefWatcher(Profile* profile) : profile_(profile) {
                                       renderer_callback);
    profile_pref_change_registrar_.Add(prefs::kEnableDoNotTrack,
                                       renderer_callback);
 +  profile_pref_change_registrar_.Add(prefs::kEnableGPC, renderer_callback);
    profile_pref_change_registrar_.Add(
-       autofill::prefs::kAutofillAtMemoryTriggerInfo, renderer_callback);
- 
+       universal_optout::prefs::kUniversalOptOutEnabled, renderer_callback);
+   profile_pref_change_registrar_.Add(
 diff --git a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-index c4d16f149080a..00fdff0fef18b 100644
+index e8a171fb21f5a..d5f30478a363f 100644
 --- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 +++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-@@ -2495,6 +2495,11 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
+@@ -2554,6 +2554,11 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
        {"doNotTrackDialogMessage", IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_TEXT},
        {"doNotTrackDialogLearnMoreA11yLabel",
         IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_LEARN_MORE_ACCESSIBILITY_LABEL},
@@ -457,63 +457,49 @@ index c4d16f149080a..00fdff0fef18b 100644
        {"securityPageTitle", IDS_SETTINGS_SECURITY},
        {"securityPageDescription", IDS_SETTINGS_SECURITY_DESCRIPTION},
 diff --git a/components/privacy_sandbox/privacy_sandbox_prefs.cc b/components/privacy_sandbox/privacy_sandbox_prefs.cc
-index c58d4cb4a9e53..51c4d9b781ec5 100644
+index 3fad8a7681bca..ddd5171328e3c 100644
 --- a/components/privacy_sandbox/privacy_sandbox_prefs.cc
 +++ b/components/privacy_sandbox/privacy_sandbox_prefs.cc
-@@ -71,6 +71,7 @@ void RegisterProfilePrefs(PrefRegistrySimple* registry) {
-   registry->RegisterBooleanPref(
-       prefs::kBlockAll3pcToggleEnabled, false,
-       user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
-+  registry->RegisterBooleanPref(prefs::kEnableGPC, true);
-   registry->RegisterBooleanPref(prefs::kTrackingProtection3pcdEnabled, false);
- }
+@@ -13,6 +13,7 @@
+ namespace privacy_sandbox {
  
+ void RegisterProfilePrefs(PrefRegistrySimple* registry) {
++  registry->RegisterBooleanPref(prefs::kEnableGPC, true);
+   registry->RegisterBooleanPref(prefs::kPrivacySandboxM1TopicsEnabled, false);
+   registry->RegisterBooleanPref(prefs::kPrivacySandboxM1FledgeEnabled, false);
+   registry->RegisterBooleanPref(prefs::kPrivacySandboxM1AdMeasurementEnabled,
 diff --git a/components/privacy_sandbox/privacy_sandbox_prefs.h b/components/privacy_sandbox/privacy_sandbox_prefs.h
-index 5cbbb70675078..b5f6678556c04 100644
+index d4708731fbc7e..fad0ca950f7b4 100644
 --- a/components/privacy_sandbox/privacy_sandbox_prefs.h
 +++ b/components/privacy_sandbox/privacy_sandbox_prefs.h
-@@ -165,6 +165,8 @@ inline constexpr char kTrackingProtection3pcdEnabled[] =
- inline constexpr char kBlockAll3pcToggleEnabled[] =
-     "tracking_protection.block_all_3pc_toggle_enabled";
+@@ -48,6 +48,8 @@ inline constexpr char
+ inline constexpr char kPrivacySandboxRelatedWebsiteSetsEnabled[] =
+     "privacy_sandbox.first_party_sets_enabled";
  
 +inline constexpr char kEnableGPC[] = "enable_gpc";
 +
- // Mode B prefs end
- 
  }  // namespace prefs
-diff --git a/content/browser/loader/browser_initiated_resource_request.cc b/content/browser/loader/browser_initiated_resource_request.cc
-index 30673aaabfa6f..fe153d189e996 100644
---- a/content/browser/loader/browser_initiated_resource_request.cc
-+++ b/content/browser/loader/browser_initiated_resource_request.cc
-@@ -34,7 +34,8 @@ void UpdateAdditionalHeadersForBrowserInitiatedRequest(
  
-   // Set the GlobalPrivacyControl header if appropriate.
-   // https://w3c.github.io/gpc/#expression-format
--  if (blink::IsGlobalPrivacyControlEnabled()) {
-+  if (renderer_preferences.enable_gpc ||
-+      blink::IsGlobalPrivacyControlEnabled()) {
-     if (should_update_existing_headers) {
-       headers->RemoveHeader(blink::kGlobalPrivacyControlHeader);
-     }
-diff --git a/content/renderer/render_frame_impl.cc b/content/renderer/render_frame_impl.cc
-index 258bbed890abe..7d0ff3d2e73e6 100644
---- a/content/renderer/render_frame_impl.cc
-+++ b/content/renderer/render_frame_impl.cc
-@@ -4613,7 +4613,8 @@ void RenderFrameImpl::FinalizeRequestInternal(
-     request.SetHttpHeaderField(
-         blink::WebString::FromUtf8(blink::kDoNotTrackHeader), "1");
-   }
--  if (blink::IsGlobalPrivacyControlEnabled()) {
-+  if (GetWebView()->GetRendererPreferences().enable_gpc ||
-+      blink::IsGlobalPrivacyControlEnabled()) {
-     request.SetHttpHeaderField(
-         blink::WebString::FromUtf8(blink::kGlobalPrivacyControlHeader), "1");
-     blink::MaybeRecordGlobalPrivacyControlSourceMetric(
+ namespace privacy_sandbox {
+diff --git a/third_party/blink/common/global_privacy_control/global_privacy_control_util.cc b/third_party/blink/common/global_privacy_control/global_privacy_control_util.cc
+index 01007b64935df..b2f4c0fe405ea 100644
+--- a/third_party/blink/common/global_privacy_control/global_privacy_control_util.cc
++++ b/third_party/blink/common/global_privacy_control/global_privacy_control_util.cc
+@@ -30,6 +30,9 @@ bool IsGlobalPrivacyControlFeatureEnabled() {
+ 
+ bool IsGlobalPrivacyControlFeatureAndSettingEnabled(
+     const RendererPreferences& renderer_preferences) {
++  if (renderer_preferences.enable_gpc) {
++    return true;
++  }
+   // TODO(crbug.com/40745270): `kGlobalPrivacyControlForce` currently enables
+   // this but it should be removed once we have a real setting to test.
+   if (base::FeatureList::IsEnabled(features::kGlobalPrivacyControlForce)) {
 diff --git a/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc b/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc
-index 83c2933c8eb81..91cda7407c330 100644
+index 1401e99cb9e66..71173683a4cae 100644
 --- a/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc
 +++ b/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc
-@@ -54,6 +54,7 @@ bool StructTraits<blink::mojom::RendererPreferencesDataView,
+@@ -55,6 +55,7 @@ bool StructTraits<blink::mojom::RendererPreferencesDataView,
    out->enable_referrers = data.enable_referrers();
    out->allow_cross_origin_auth_prompt = data.allow_cross_origin_auth_prompt();
    out->enable_do_not_track = data.enable_do_not_track();
@@ -522,7 +508,7 @@ index 83c2933c8eb81..91cda7407c330 100644
  
    if (!data.ReadWebrtcIpHandlingPolicy(&out->webrtc_ip_handling_policy))
 diff --git a/third_party/blink/public/common/renderer_preferences/renderer_preferences.h b/third_party/blink/public/common/renderer_preferences/renderer_preferences.h
-index 2395a9e5a6a72..20addabd6ad7a 100644
+index 336c8061e4251..67619f3ca7fe9 100644
 --- a/third_party/blink/public/common/renderer_preferences/renderer_preferences.h
 +++ b/third_party/blink/public/common/renderer_preferences/renderer_preferences.h
 @@ -53,6 +53,7 @@ struct BLINK_COMMON_EXPORT RendererPreferences {
@@ -531,13 +517,13 @@ index 2395a9e5a6a72..20addabd6ad7a 100644
    bool enable_do_not_track{false};
 +  bool enable_gpc{false};
    bool enable_encrypted_media{true};
- #if BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_WIN)
-   bool use_overlay_scrollbar{false};
+ #if BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_MAC) || \
+     BUILDFLAG(IS_WIN)
 diff --git a/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h b/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h
-index bfafb5c72fdb4..92d078c8589fd 100644
+index d0279aa1ca308..ac5ccd40b576f 100644
 --- a/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h
 +++ b/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h
-@@ -128,6 +128,11 @@ struct BLINK_COMMON_EXPORT
+@@ -125,6 +125,11 @@ struct BLINK_COMMON_EXPORT
      return data.enable_do_not_track;
    }
  
@@ -550,7 +536,7 @@ index bfafb5c72fdb4..92d078c8589fd 100644
        const ::blink::RendererPreferences& data) {
      return data.enable_encrypted_media;
 diff --git a/third_party/blink/public/mojom/renderer_preferences.mojom b/third_party/blink/public/mojom/renderer_preferences.mojom
-index 586d4eba50f6f..c33c1355b7cc5 100644
+index 026d009b9d728..daabb23d63a49 100644
 --- a/third_party/blink/public/mojom/renderer_preferences.mojom
 +++ b/third_party/blink/public/mojom/renderer_preferences.mojom
 @@ -89,6 +89,8 @@ struct RendererPreferences {
@@ -562,70 +548,15 @@ index 586d4eba50f6f..c33c1355b7cc5 100644
    // Whether to allow the use of Encrypted Media Extensions (EME), except for
    // the use of Clear Key key system which is always allowed as required by the
    // spec.
-diff --git a/third_party/blink/renderer/core/exported/web_view_impl.cc b/third_party/blink/renderer/core/exported/web_view_impl.cc
-index 09171e03df2d7..98587bd52a331 100644
---- a/third_party/blink/renderer/core/exported/web_view_impl.cc
-+++ b/third_party/blink/renderer/core/exported/web_view_impl.cc
-@@ -3810,6 +3810,9 @@ void WebViewImpl::UpdateRendererPreferences(
-   GetSettings()->SetCaretBrowsingEnabled(
-       renderer_preferences_.caret_browsing_enabled);
- 
-+  WebRuntimeFeatures::EnableFeatureFromString("GlobalPrivacyControl",
-+                                              renderer_preferences_.enable_gpc);
-+
- #if BUILDFLAG(IS_OZONE)
-   GetSettings()->SetSelectionClipboardBufferAvailable(
-       renderer_preferences_.selection_clipboard_buffer_available);
-diff --git a/third_party/blink/renderer/modules/global_privacy_control/navigator_global_privacy_control.cc b/third_party/blink/renderer/modules/global_privacy_control/navigator_global_privacy_control.cc
-index 0caff6a6a8548..82c7abef3aac8 100644
---- a/third_party/blink/renderer/modules/global_privacy_control/navigator_global_privacy_control.cc
-+++ b/third_party/blink/renderer/modules/global_privacy_control/navigator_global_privacy_control.cc
-@@ -4,20 +4,11 @@
- 
- #include "third_party/blink/renderer/modules/global_privacy_control/navigator_global_privacy_control.h"
- 
--#include "third_party/blink/public/common/global_privacy_control/global_privacy_control_util.h"
--#include "third_party/blink/renderer/core/execution_context/navigator_base.h"
--#include "third_party/blink/renderer/core/frame/local_dom_window.h"
--#include "third_party/blink/renderer/core/frame/local_frame.h"
--#include "third_party/blink/renderer/core/frame/local_frame_client.h"
--
- namespace blink {
- namespace NavigatorGlobalPrivacyControl {
- 
--bool globalPrivacyControl(NavigatorBase& navigator) {
--  // TODO(crbug.com/40745270): Currently, the GPC signal is controlled by a
--  // feature flag, when a user facing setting is added, this should be modified
--  // to use frame cached value.
--  return IsGlobalPrivacyControlEnabled();
-+bool globalPrivacyControl(NavigatorBase&) {
-+  return true;
- }
- 
- }  // namespace NavigatorGlobalPrivacyControl
-diff --git a/third_party/blink/renderer/modules/service_worker/web_service_worker_fetch_context_impl.cc b/third_party/blink/renderer/modules/service_worker/web_service_worker_fetch_context_impl.cc
-index fe3cc6299bfd0..065dfa59c6408 100644
---- a/third_party/blink/renderer/modules/service_worker/web_service_worker_fetch_context_impl.cc
-+++ b/third_party/blink/renderer/modules/service_worker/web_service_worker_fetch_context_impl.cc
-@@ -151,7 +151,7 @@ void WebServiceWorkerFetchContextImpl::FinalizeRequest(WebURLRequest& request) {
-   if (renderer_preferences_.enable_do_not_track) {
-     request.SetHttpHeaderField(WebString::FromUtf8(kDoNotTrackHeader), "1");
-   }
--  if (IsGlobalPrivacyControlEnabled()) {
-+  if (renderer_preferences_.enable_gpc || IsGlobalPrivacyControlEnabled()) {
-     request.SetHttpHeaderField(WebString::FromUtf8(kGlobalPrivacyControlHeader),
-                                "1");
-     blink::MaybeRecordGlobalPrivacyControlSourceMetric(
-diff --git a/third_party/blink/renderer/platform/loader/fetch/url_loader/dedicated_or_shared_worker_global_scope_context_impl.cc b/third_party/blink/renderer/platform/loader/fetch/url_loader/dedicated_or_shared_worker_global_scope_context_impl.cc
-index 6a19e63586dcc..3be11f8736d2b 100644
---- a/third_party/blink/renderer/platform/loader/fetch/url_loader/dedicated_or_shared_worker_global_scope_context_impl.cc
-+++ b/third_party/blink/renderer/platform/loader/fetch/url_loader/dedicated_or_shared_worker_global_scope_context_impl.cc
-@@ -378,7 +378,7 @@ void DedicatedOrSharedWorkerGlobalScopeContextImpl::FinalizeRequest(
-   if (renderer_preferences_.enable_do_not_track) {
-     request.SetHttpHeaderField(WebString::FromUtf8(kDoNotTrackHeader), "1");
-   }
--  if (IsGlobalPrivacyControlEnabled()) {
-+  if (renderer_preferences_.enable_gpc || IsGlobalPrivacyControlEnabled()) {
-     request.SetHttpHeaderField(WebString::FromUtf8(kGlobalPrivacyControlHeader),
-                                "1");
-     blink::MaybeRecordGlobalPrivacyControlSourceMetric(
+diff --git a/third_party/blink/renderer/platform/runtime_enabled_features.json5 b/third_party/blink/renderer/platform/runtime_enabled_features.json5
+index b6fa80893dca2..141a61da97449 100644
+--- a/third_party/blink/renderer/platform/runtime_enabled_features.json5
++++ b/third_party/blink/renderer/platform/runtime_enabled_features.json5
+@@ -3380,6 +3380,7 @@
+     },
+     {
+       name: "GlobalPrivacyControl",
++      status: "stable",
+       implied_by: [
+         "GlobalPrivacyControlForce",
+         "GlobalPrivacyControlTest"

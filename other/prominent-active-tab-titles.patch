@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index 0d15d3e76dbcd..c90349d854592 100644
+index daa14a2f504f2..eb4e72ddc84bc 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -234,6 +234,7 @@ Tab::Tab(tabs::TabHandle handle, TabSlotController* controller)
+@@ -356,6 +356,7 @@ Tab::Tab(tabs::TabHandle handle, TabSlotController* controller)
    SetID(VIEW_ID_TAB);
  
    AddChildViewRaw(title_.get());
@@ -10,7 +10,7 @@ index 0d15d3e76dbcd..c90349d854592 100644
  
    SetEventTargeter(std::make_unique<views::ViewTargeter>(this));
  
-@@ -917,6 +918,7 @@ void Tab::ActiveStateChanged() {
+@@ -1062,6 +1063,7 @@ void Tab::ActiveStateChanged() {
    icon_->SetActiveState(IsActive());
    alert_indicator_button_->OnParentTabButtonColorChanged();
    alert_indicator_button_->UpdateEnabledForMuteToggle();
@@ -19,85 +19,59 @@ index 0d15d3e76dbcd..c90349d854592 100644
  }
  
 diff --git a/chrome/browser/ui/views/tabs/tab_style_views.cc b/chrome/browser/ui/views/tabs/tab_style_views.cc
-index e65c106f7e634..8282c1ca20111 100644
+index 3bc10a66bbd7d..8cffaeca808e9 100644
 --- a/chrome/browser/ui/views/tabs/tab_style_views.cc
 +++ b/chrome/browser/ui/views/tabs/tab_style_views.cc
 @@ -9,6 +9,7 @@
+ #include <string>
  #include <utility>
  
- #include "base/check_is_test.h"
 +#include "base/command_line.h"
- #include "base/i18n/rtl.h"
- #include "base/memory/raw_ptr.h"
- #include "base/numerics/safe_conversions.h"
-@@ -42,6 +43,7 @@
- #include "ui/gfx/geometry/insets.h"
- #include "ui/gfx/geometry/skia_conversions.h"
- #include "ui/gfx/scoped_canvas.h"
+ #include "base/strings/strcat.h"
+ #include "base/strings/string_util.h"
+ #include "base/strings/utf_string_conversions.h"
+@@ -16,6 +17,8 @@
+ #include "chrome/browser/ui/views/tabs/horizontal_tab_style_views.h"
+ #include "chrome/browser/ui/views/tabs/vertical_tab_style_views.h"
+ #include "ui/gfx/color_utils.h"
 +#include "ui/views/style/typography.h"
- #include "ui/views/widget/widget.h"
++#include "ui/views/style/typography_provider.h"
  
- namespace {
-@@ -66,6 +68,7 @@ class TabStyleViewsImpl : public TabStyleViews {
-   bool IsApparentlyActive() const override;
-   float GetCurrentActiveOpacity() const override;
-   TabStyle::TabColors CalculateTargetColors() const override;
-+  const gfx::FontList& GetFontList() const override;
-   void ShowHover(TabStyle::ShowHoverStyle style) override;
-   void HideHover(TabStyle::HideHoverStyle style) override;
+ // static
+ std::u16string ui::metadata::TypeConverter<TabStyle::TabColors>::ToString(
+@@ -74,3 +77,14 @@ std::unique_ptr<TabStyleViews> TabStyleViews::Create(
+ TabStyleViews::TabStyleViews() : tab_style_(TabStyle::Get()) {}
  
-@@ -164,6 +167,9 @@ class TabStyleViewsImpl : public TabStyleViews {
-   const raw_ptr<const Tab> tab_;
- 
-   std::unique_ptr<GlowHoverController> hover_controller_;
+ TabStyleViews::~TabStyleViews() = default;
 +
-+  gfx::FontList normal_font_;
-+  gfx::FontList heavy_font_;
- };
- 
- // TabStyleViewsImpl ----------------------------------------------------------
-@@ -172,7 +178,11 @@ TabStyleViewsImpl::TabStyleViewsImpl(Tab* tab)
-     : tab_(tab),
-       hover_controller_((tab && gfx::Animation::ShouldRenderRichAnimation())
-                             ? new GlowHoverController(tab)
--                            : nullptr) {
-+                            : nullptr),
-+      normal_font_(views::TypographyProvider::Get().GetFont(
-+          views::style::CONTEXT_LABEL, views::style::STYLE_PRIMARY)),
-+      heavy_font_(views::TypographyProvider::Get().GetFont(
-+          views::style::CONTEXT_BUTTON_MD, views::style::STYLE_PRIMARY)) {
-   // `tab_` must not be nullptr.
-   CHECK(tab_);
-   // TODO(dfried): create a new STYLE_PROMINENT or similar to use instead of
-@@ -599,6 +609,18 @@ TabStyle::TabColors TabStyleViewsImpl::CalculateTargetColors() const {
-       tab()->GetColorProvider());
- }
- 
-+const gfx::FontList& TabStyleViewsImpl::GetFontList() const {
++const gfx::FontList& TabStyleViews::GetFontList() const {
 +  static const bool prominent_active_tab_titles =
 +      base::CommandLine::ForCurrentProcess()->HasSwitch(
 +          "prominent-active-tab-titles");
-+
-+  if (prominent_active_tab_titles && tab_->IsActive()) {
-+    return heavy_font_;
-+  }
-+
-+  return normal_font_;
++  const int context = prominent_active_tab_titles && delegate()->IsActive()
++                          ? views::style::CONTEXT_BUTTON_MD
++                          : views::style::CONTEXT_LABEL;
++  return views::TypographyProvider::Get().GetFont(context,
++                                                 views::style::STYLE_PRIMARY);
 +}
-+
- void TabStyleViewsImpl::ShowHover(TabStyle::ShowHoverStyle style) {
-   if (!hover_controller_) {
-     return;
 diff --git a/chrome/browser/ui/views/tabs/tab_style_views.h b/chrome/browser/ui/views/tabs/tab_style_views.h
-index 2a29c948f9869..87b038336d86e 100644
+index c1d2c371fc2f4..4fbafe2d3d3d0 100644
 --- a/chrome/browser/ui/views/tabs/tab_style_views.h
 +++ b/chrome/browser/ui/views/tabs/tab_style_views.h
-@@ -52,6 +52,9 @@ class TabStyleViews {
+@@ -83,6 +83,7 @@ class TabStyleViewDelegate {
+ };
+ 
+ namespace gfx {
++class FontList;
+ class Canvas;
+ }
+ 
+@@ -111,6 +112,9 @@ class TabStyleViews {
                           float scale,
                           const TabPathFlags& flags) const = 0;
  
 +  // Returns the appropriate font for the current active state.
-+  virtual const gfx::FontList& GetFontList() const = 0;
++  const gfx::FontList& GetFontList() const;
 +
    // Paints the tab.
    virtual void PaintTab(gfx::Canvas* canvas) const = 0;

@@ -1,5 +1,5 @@
 diff --git a/components/download/internal/common/download_item_impl.cc b/components/download/internal/common/download_item_impl.cc
-index 4b6015cc2d57d..ff91c3ceece10 100644
+index b7558098bc4e2..bcb39f3a29fbf 100644
 --- a/components/download/internal/common/download_item_impl.cc
 +++ b/components/download/internal/common/download_item_impl.cc
 @@ -47,6 +47,10 @@
@@ -13,7 +13,7 @@ index 4b6015cc2d57d..ff91c3ceece10 100644
  #include "components/download/internal/common/download_job_impl.h"
  #include "components/download/internal/common/parallel_download_utils.h"
  #include "components/download/public/common/download_danger_type.h"
-@@ -134,6 +138,21 @@ void DownloadFileCancel(std::unique_ptr<DownloadFile> download_file) {
+@@ -135,6 +139,21 @@ void DownloadFileCancel(std::unique_ptr<DownloadFile> download_file) {
    download_file->Cancel();
  }
  
@@ -35,17 +35,17 @@ index 4b6015cc2d57d..ff91c3ceece10 100644
  // Most of the cancellation pathways behave the same whether the cancellation
  // was initiated by ther user (CANCELED) or initiated due to browser context
  // shutdown (SHUTDOWN).
-@@ -2083,7 +2102,8 @@ void DownloadItemImpl::OnDownloadRenamedToFinalName(
- 
-   DCHECK_EQ(GetTargetFilePath(), full_path);
+@@ -2092,7 +2111,8 @@ void DownloadItemImpl::OnDownloadRenamedToFinalName(
+     return;
+   }
  
 -  if (full_path != GetFullPath()) {
 +  bool full_path_changed = full_path != GetFullPath();
 +  if (full_path_changed) {
      // full_path is now the current and target file path.
      DCHECK(!full_path.empty());
-     SetFullPath(full_path);
-@@ -2097,6 +2117,10 @@ void DownloadItemImpl::OnDownloadRenamedToFinalName(
+     destination_info_.target_path = full_path;
+@@ -2107,6 +2127,10 @@ void DownloadItemImpl::OnDownloadRenamedToFinalName(
    DCHECK(download_file_);
    ReleaseDownloadFile(false);
  

@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/toolbar/app_menu_model.cc b/chrome/browser/ui/toolbar/app_menu_model.cc
-index 66571f07bc4b7..324b057aae1b9 100644
+index 45cd05f343372..6fd5251d39eb3 100644
 --- a/chrome/browser/ui/toolbar/app_menu_model.cc
 +++ b/chrome/browser/ui/toolbar/app_menu_model.cc
 @@ -1,4 +1,4 @@
@@ -8,18 +8,18 @@ index 66571f07bc4b7..324b057aae1b9 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -1124,9 +1124,7 @@ void HelpMenuModel::Build(Browser* browser) {
-     int help_string_id = IDS_HELP_PAGE;
+@@ -1128,9 +1128,7 @@ void HelpMenuModel::Build(BrowserWindowInterface* browser) {
+   int help_string_id = IDS_HELP_PAGE;
  #endif
-     AddItemWithStringIdAndVectorIcon(this, IDC_ABOUT, IDS_ABOUT,
--                                     features::IsRoundedIconsEnabled()
--                                         ? vector_icons::kInfoIcon
--                                         : vector_icons::kInfoRefreshOldIcon);
-+                                     vector_icons::kInfoRegularIcon);
+   AddItemWithStringIdAndVectorIcon(this, IDC_ABOUT, IDS_ABOUT,
+-                                   features::IsRoundedIconsEnabled()
+-                                       ? vector_icons::kInfoIcon
+-                                       : vector_icons::kInfoRefreshOldIcon);
++                                   vector_icons::kInfoRegularIcon);
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
-     if (whats_new::IsEnabled()) {
-       AddItemWithStringIdAndVectorIcon(
-@@ -2324,8 +2322,7 @@ void AppMenuModel::Build() {
+   if (whats_new::IsEnabled()) {
+     AddItemWithStringIdAndVectorIcon(
+@@ -2368,8 +2366,7 @@ void AppMenuModel::Build() {
  
    AddItemWithStringIdAndVectorIcon(
        this, IDC_CLEAR_BROWSING_DATA, IDS_CLEAR_BROWSING_DATA,
@@ -29,7 +29,7 @@ index 66571f07bc4b7..324b057aae1b9 100644
    SetElementIdentifierAt(GetIndexOfCommandId(IDC_CLEAR_BROWSING_DATA).value(),
                           kClearBrowsingDataMenuItem);
  
-@@ -2425,12 +2422,11 @@ void AppMenuModel::Build() {
+@@ -2469,12 +2466,11 @@ void AppMenuModel::Build() {
                           kHelpMenuItem);
  #else
  #if BUILDFLAG(IS_CHROMEOS)

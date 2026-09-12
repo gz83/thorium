@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/webui/version/version_ui.cc b/chrome/browser/ui/webui/version/version_ui.cc
-index 6f1f293bacaef..2e72603400dc4 100644
+index 4c523d48d8f85..a064fc133faaa 100644
 --- a/chrome/browser/ui/webui/version/version_ui.cc
 +++ b/chrome/browser/ui/webui/version/version_ui.cc
 @@ -121,6 +121,8 @@ void CreateAndAddVersionUIDataSource(Profile* profile) {
@@ -12,7 +12,7 @@ index 6f1f293bacaef..2e72603400dc4 100644
  }
  
 diff --git a/components/webui/version/resources/about_version.css b/components/webui/version/resources/about_version.css
-index 33e926a18ce3c..248e18ac02d7e 100644
+index 5b7c6b03bf496..40ec7cec6a5f6 100644
 --- a/components/webui/version/resources/about_version.css
 +++ b/components/webui/version/resources/about_version.css
 @@ -1,4 +1,4 @@
@@ -44,7 +44,7 @@ index 33e926a18ce3c..248e18ac02d7e 100644
    font-family: monospace;
  }
 diff --git a/components/webui/version/resources/about_version.html b/components/webui/version/resources/about_version.html
-index 664cb15bf7ee5..320ec60444a0f 100644
+index 950b0a5c4895e..3d0a96ad54efd 100644
 --- a/components/webui/version/resources/about_version.html
 +++ b/components/webui/version/resources/about_version.html
 @@ -3,6 +3,7 @@
@@ -53,7 +53,7 @@ index 664cb15bf7ee5..320ec60444a0f 100644
  -->
 +<!-- Copyright (c) 2026 Alex313031 -->
  
- <html id="t" dir="$i18n{textdirection}" lang="$i18n{language}">
+ <html id="t" dir="$i18n{textdirection}" lang="$i18n{language}" $i18n{webuiRoundedIconsAttribute}>
    <head>
 @@ -31,7 +32,7 @@ about:version template page
        <div id="logo">

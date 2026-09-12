@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ssl/ssl_config_service_manager.cc b/chrome/browser/ssl/ssl_config_service_manager.cc
-index be7fe08f34259..3221ea2e87d94 100644
+index 322bc5c1d4213..f508009d00064 100644
 --- a/chrome/browser/ssl/ssl_config_service_manager.cc
 +++ b/chrome/browser/ssl/ssl_config_service_manager.cc
 @@ -10,6 +10,7 @@
@@ -7,10 +7,10 @@ index be7fe08f34259..3221ea2e87d94 100644
  #include <vector>
  
 +#include "base/command_line.h"
+ #include "base/containers/extend.h"
  #include "base/containers/to_vector.h"
  #include "base/feature_list.h"
- #include "base/functional/bind.h"
-@@ -253,6 +254,18 @@ network::mojom::SSLConfigPtr SSLConfigServiceManager::GetNewSSLConfig() const {
+@@ -306,6 +307,18 @@ network::mojom::SSLConfigPtr SSLConfigServiceManager::GetNewSSLConfig() const {
  
    config->ech_enabled = ech_enabled_.GetValue();
  
@@ -26,6 +26,6 @@ index be7fe08f34259..3221ea2e87d94 100644
 +      config->ech_enabled = false;
 +  }
 +
- #if BUILDFLAG(CHROME_ROOT_STORE_SUPPORTED)
-   config->trust_anchor_ids =
-       trust_anchor_ids_.has_value()
+   config->trust_anchor_ids = trust_anchor_ids_;
+   if (time_bound_trust_anchor_ids_.has_value()) {
+     config->time_bound_trust_anchor_ids =

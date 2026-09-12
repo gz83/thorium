@@ -61,10 +61,10 @@ index ccfc9c792b4c2..109e3b7454aea 100644
    }
  }
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 917176a3749de..cca48e40e152a 100644
+index 70785fa49bb70..ea82149069dbd 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -208,6 +208,10 @@ BASE_FEATURE_PARAM(std::string,
+@@ -216,6 +216,10 @@ BASE_FEATURE_PARAM(std::string,
                     "mode",
                     "foreground");
  
@@ -76,16 +76,16 @@ index 917176a3749de..cca48e40e152a 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 850ebc24f7e92..b55df37b133ad 100644
+index 69fbebbcc767d..04744d37b8583 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -406,6 +406,9 @@ BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
+@@ -394,6 +394,9 @@ BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
  BASE_DECLARE_FEATURE(kOpenOmniboxUrlInNewTab);
  BASE_DECLARE_FEATURE_PARAM(std::string, kOpenOmniboxUrlInNewTabMode);
  
 +// Disables the QR code generator entry points for sharing page links.
 +BASE_DECLARE_FEATURE(kThoriumDisableQRCodeGenerator);
 +
- BASE_DECLARE_FEATURE(kVerticalTabsGrabHandleRemoval);
- BASE_DECLARE_FEATURE_PARAM(bool, kVerticalTabsGrabHandleRemovalAlways);
+ BASE_DECLARE_FEATURE(kTabGroupRibbon);
+ bool IsTabGroupRibbonEnabled();
  

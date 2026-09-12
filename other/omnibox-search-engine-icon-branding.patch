@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/omnibox/omnibox_view.cc b/chrome/browser/ui/omnibox/omnibox_view.cc
-index ae11b7b2690bb..25e3e5023a56c 100644
+index 5b1c2ad3dd90a..83529d6f13402 100644
 --- a/chrome/browser/ui/omnibox/omnibox_view.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_view.cc
 @@ -1,4 +1,4 @@

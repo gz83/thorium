@@ -1,8 +1,8 @@
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index b0a1d84286ff9..d9e65bef76169 100644
+index bf68d725c62b0..14fa034797461 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -6362,6 +6362,12 @@ Keep your key file in a safe place. You will need it to create new versions of y
+@@ -6425,6 +6425,12 @@ Keep your key file in a safe place. You will need it to create new versions of y
          <message name="IDS_EXTENSIONS_MENU_TITLE" desc="Title of the Extensions Menu" formatter_data="android_java">
            Extensions
          </message>
@@ -16,10 +16,10 @@ index b0a1d84286ff9..d9e65bef76169 100644
            More options
          </message>
 diff --git a/chrome/browser/ui/android/extensions/extensions_menu_delegate_android.cc b/chrome/browser/ui/android/extensions/extensions_menu_delegate_android.cc
-index de4a4c04a7b5c..42175aa46131c 100644
+index 28fbc01b20c4b..8e0f838a4883f 100644
 --- a/chrome/browser/ui/android/extensions/extensions_menu_delegate_android.cc
 +++ b/chrome/browser/ui/android/extensions/extensions_menu_delegate_android.cc
-@@ -315,6 +315,19 @@ void ExtensionsMenuDelegateAndroid::OnExtensionToggleSelected(
+@@ -322,6 +322,19 @@ void ExtensionsMenuDelegateAndroid::OnExtensionToggleSelected(
    }
  }
  
@@ -75,10 +75,10 @@ index 5de0ad6e04cc3..eee8ef63e7df9 100644
    virtual void OnReloadPageButtonClicked() = 0;
  
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index fddf744850f58..528d97ec2d860 100644
+index a8be823002b09..730ea14d0a4ae 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -115,6 +115,9 @@ BASE_FEATURE(kLegacySearchIntegrityCheck, base::FEATURE_DISABLED_BY_DEFAULT);
+@@ -117,6 +117,9 @@ BASE_FEATURE(kLegacySearchIntegrityCheck, base::FEATURE_DISABLED_BY_DEFAULT);
  
  BASE_FEATURE(kExtensionsCollapseMainMenu, base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -89,10 +89,10 @@ index fddf744850f58..528d97ec2d860 100644
  // default.
  BASE_FEATURE(kExtensionsPinnedByDefault, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 7c128026b8b18..569e4229a4218 100644
+index 50bef0b62804e..ca820a8d2272f 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -66,6 +66,8 @@ bool IsWebuiRefresh2026Enabled();
+@@ -69,6 +69,8 @@ bool IsWebuiRefresh2026Enabled();
  // the "Discover Chrome Extensions" item will be present.
  BASE_DECLARE_FEATURE(kExtensionsCollapseMainMenu);
  
@@ -289,7 +289,7 @@ index 56f0cbe009a9e..20a9727adf213 100644
  ExtensionsContainerViews* GetExtensionsContainerViews(gfx::NativeWindow parent);
  
 diff --git a/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.cc b/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.cc
-index fc2080daf61b7..36ea4a3584039 100644
+index 4f01efd742548..0eef437140ee3 100644
 --- a/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.cc
 +++ b/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.cc
 @@ -6,7 +6,9 @@
@@ -318,15 +318,18 @@ index fc2080daf61b7..36ea4a3584039 100644
  }
  
  void ExtensionsMenuDelegateDesktop::OnActionRemoved(
-@@ -270,6 +274,7 @@ void ExtensionsMenuDelegateDesktop::OnActionRemoved(
+@@ -270,7 +274,9 @@ void ExtensionsMenuDelegateDesktop::OnActionRemoved(
    auto* main_page = GetMainPage(current_page_.view());
    CHECK(main_page);
    main_page->RemoveMenuEntry(index);
+-  if (main_page->GetMenuEntries().empty()) {
 +  MaybeUpdateExtensionQuickToggles(main_page);
++  if (main_page->GetMenuEntries().empty() &&
++      !base::FeatureList::IsEnabled(features::kExtensionsMenuQuickToggle)) {
+     CloseBubble();
+   }
  }
- 
- void ExtensionsMenuDelegateDesktop::OnActionUpdated(
-@@ -461,6 +466,23 @@ void ExtensionsMenuDelegateDesktop::OnExtensionToggleSelected(
+@@ -468,6 +474,23 @@ void ExtensionsMenuDelegateDesktop::OnExtensionToggleSelected(
    }
  }
  
@@ -350,7 +353,7 @@ index fc2080daf61b7..36ea4a3584039 100644
  void ExtensionsMenuDelegateDesktop::OnReloadPageButtonClicked() {
    menu_model_->ReloadWebContents();
  }
-@@ -520,6 +542,17 @@ void ExtensionsMenuDelegateDesktop::UpdateMainPage(
+@@ -527,6 +550,17 @@ void ExtensionsMenuDelegateDesktop::UpdateMainPage(
          menu_model_->GetMenuEntryState(menu_entry->extension_id(), icon_size);
      menu_entry->Update(entry_state);
    }
@@ -369,10 +372,10 @@ index fc2080daf61b7..36ea4a3584039 100644
  
  void ExtensionsMenuDelegateDesktop::UpdateSitePermissionsPage(
 diff --git a/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.h b/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.h
-index 1aece851a758c..b80c23427edf7 100644
+index e5c088ab41a55..96d6623eee55b 100644
 --- a/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.h
 +++ b/chrome/browser/ui/views/extensions/extensions_menu_delegate_desktop.h
-@@ -86,6 +86,10 @@ class ExtensionsMenuDelegateDesktop : public ExtensionsMenuViewModel::Delegate,
+@@ -85,6 +85,10 @@ class ExtensionsMenuDelegateDesktop : public ExtensionsMenuViewModel::Delegate,
    void OnExtensionToggleSelected(const extensions::ExtensionId& extension_id,
                                   const url::Origin& origin,
                                   bool is_on) override;
@@ -383,7 +386,7 @@ index 1aece851a758c..b80c23427edf7 100644
    void OnReloadPageButtonClicked() override;
    void OnAllowExtensionClicked(
        const extensions::ExtensionId& extension_id) override;
-@@ -119,6 +123,9 @@ class ExtensionsMenuDelegateDesktop : public ExtensionsMenuViewModel::Delegate,
+@@ -118,6 +122,9 @@ class ExtensionsMenuDelegateDesktop : public ExtensionsMenuViewModel::Delegate,
                         ExtensionActionViewModel* action_model,
                         int index);
  
@@ -393,7 +396,7 @@ index 1aece851a758c..b80c23427edf7 100644
    const raw_ptr<BrowserWindowInterface> browser_;
    const raw_ref<ExtensionsContainer> extensions_container_;
    const raw_ptr<ExtensionsContainerViews> extensions_container_views_;
-@@ -126,6 +133,7 @@ class ExtensionsMenuDelegateDesktop : public ExtensionsMenuViewModel::Delegate,
+@@ -125,6 +132,7 @@ class ExtensionsMenuDelegateDesktop : public ExtensionsMenuViewModel::Delegate,
  
    // The platform-agnostic menu view model.
    std::unique_ptr<ExtensionsMenuViewModel> menu_model_;
@@ -402,7 +405,7 @@ index 1aece851a758c..b80c23427edf7 100644
                            ExtensionsMenuViewModel::Observer>
        menu_model_observation_{this};
 diff --git a/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc b/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
-index aaa8653f84516..af2e430d769bc 100644
+index f570d94215d6f..b6cb8a30f2312 100644
 --- a/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
 +++ b/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
 @@ -9,6 +9,7 @@
@@ -413,7 +416,7 @@ index aaa8653f84516..af2e430d769bc 100644
  #include "base/functional/bind.h"
  #include "base/memory/raw_ptr.h"
  #include "base/metrics/user_metrics.h"
-@@ -19,9 +20,11 @@
+@@ -18,9 +19,11 @@
  #include "chrome/browser/ui/color/chrome_color_id.h"
  #include "chrome/browser/ui/extensions/extension_action_view_model.h"
  #include "chrome/browser/ui/extensions/extensions_menu_handler.h"
@@ -425,7 +428,7 @@ index aaa8653f84516..af2e430d769bc 100644
  #include "chrome/browser/ui/views/extensions/extensions_menu_entry_view.h"
  #include "chrome/grit/generated_resources.h"
  #include "components/vector_icons/vector_icons.h"
-@@ -215,6 +218,13 @@ ExtensionsMenuMainPageView::ExtensionsMenuMainPageView(
+@@ -214,6 +217,13 @@ ExtensionsMenuMainPageView::ExtensionsMenuMainPageView(
            CreateManageButtonBuilder())
        .BuildChildren();
  
@@ -439,7 +442,7 @@ index aaa8653f84516..af2e430d769bc 100644
    // By default, the button's accessible description is set to the button's
    // tooltip text. This is the accepted workaround to ensure only accessible
    // name is announced by a screenreader rather than tooltip text and
-@@ -264,10 +274,18 @@ void ExtensionsMenuMainPageView::CreateAndInsertMenuEntry(
+@@ -263,10 +273,18 @@ void ExtensionsMenuMainPageView::CreateAndInsertMenuEntry(
    }
  
    menu_entries_->AddChildViewAt(std::move(item), index);
@@ -458,7 +461,7 @@ index aaa8653f84516..af2e430d769bc 100644
  }
  
  void ExtensionsMenuMainPageView::UpdateSiteSettings(
-@@ -282,6 +300,74 @@ void ExtensionsMenuMainPageView::UpdateSiteSettings(
+@@ -281,6 +299,74 @@ void ExtensionsMenuMainPageView::UpdateSiteSettings(
        site_settings_state.toggle.tooltip_text);
  }
  
@@ -533,7 +536,7 @@ index aaa8653f84516..af2e430d769bc 100644
  void ExtensionsMenuMainPageView::AddExtensionRequestingAccess(
      ExtensionsMenuViewModel::HostAccessRequest request,
      int index) {
-@@ -611,6 +697,62 @@ ExtensionsMenuMainPageView::CreateContentsBuilder(
+@@ -610,6 +696,62 @@ ExtensionsMenuMainPageView::CreateContentsBuilder(
                                .CopyAddressTo(&requests_entries_view_)
                                .SetOrientation(
                                    views::BoxLayout::Orientation::kVertical)),
@@ -639,10 +642,10 @@ index 4c949b172a72c..3e5c8f87a4d80 100644
    // ExtensionsMenuEntryView.
    raw_ptr<views::View> menu_entries_ = nullptr;
 diff --git a/chrome/browser/ui/views/extensions/extensions_menu_view.cc b/chrome/browser/ui/views/extensions/extensions_menu_view.cc
-index d9bb4dc20c6bb..132f8cad8b655 100644
+index 8214be37b215e..207c0fcde2082 100644
 --- a/chrome/browser/ui/views/extensions/extensions_menu_view.cc
 +++ b/chrome/browser/ui/views/extensions/extensions_menu_view.cc
-@@ -16,11 +16,13 @@
+@@ -15,11 +15,13 @@
  #include "chrome/browser/ui/extensions/extension_action_view_model.h"
  #include "chrome/browser/ui/tabs/tab_strip_model.h"
  #include "chrome/browser/ui/toolbar/toolbar_action_view_model.h"
@@ -656,7 +659,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  #include "chrome/browser/ui/views/extensions/extensions_container_views.h"
  #include "chrome/browser/ui/views/extensions/extensions_menu_item_view.h"
  #include "chrome/grit/generated_resources.h"
-@@ -34,6 +36,7 @@
+@@ -33,6 +35,7 @@
  #include "ui/gfx/geometry/insets.h"
  #include "ui/views/accessibility/view_accessibility.h"
  #include "ui/views/border.h"
@@ -664,7 +667,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  #include "ui/views/controls/label.h"
  #include "ui/views/controls/scroll_view.h"
  #include "ui/views/controls/separator.h"
-@@ -151,6 +154,7 @@ void ExtensionsMenuView::Populate() {
+@@ -149,6 +152,7 @@ void ExtensionsMenuView::Populate() {
    // wouldn't ever pop up so that they pop outside the screen.
    constexpr int kMaxExtensionButtonsHeightDp = 448;
    auto scroll_view = std::make_unique<views::ScrollView>();
@@ -672,7 +675,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
    scroll_view->ClipHeightTo(0, kMaxExtensionButtonsHeightDp);
    scroll_view->SetDrawOverflowIndicator(false);
    scroll_view->SetHorizontalScrollBarMode(
-@@ -259,6 +263,9 @@ ExtensionsMenuView::CreateExtensionButtonsContainer() {
+@@ -257,6 +261,9 @@ ExtensionsMenuView::CreateExtensionButtonsContainer() {
      extension_buttons->AddChildView(std::move(container));
    };
  
@@ -682,7 +685,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
    create_section(&has_access_);
    create_section(&wants_access_);
    create_section(&cant_access_);
-@@ -266,6 +273,157 @@ ExtensionsMenuView::CreateExtensionButtonsContainer() {
+@@ -264,6 +271,157 @@ ExtensionsMenuView::CreateExtensionButtonsContainer() {
    return extension_buttons;
  }
  
@@ -840,7 +843,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  ExtensionsMenuView::Section* ExtensionsMenuView::GetSectionForSiteInteraction(
      extensions::SitePermissionsHelper::SiteInteraction site_interaction) {
    Section* section = nullptr;
-@@ -353,6 +511,21 @@ void ExtensionsMenuView::UpdateSectionVisibility() {
+@@ -351,6 +509,21 @@ void ExtensionsMenuView::UpdateSectionVisibility() {
    update_section(&cant_access_);
  }
  
@@ -862,7 +865,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  void ExtensionsMenuView::Update() {
    content::WebContents* const web_contents =
        browser_->GetTabStripModel()->GetActiveWebContents();
-@@ -383,6 +556,7 @@ void ExtensionsMenuView::Update() {
+@@ -381,6 +554,7 @@ void ExtensionsMenuView::Update() {
  
    SortMenuItemsByName();
    UpdateSectionVisibility();
@@ -870,7 +873,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  
    SanityCheck();
  }
-@@ -448,6 +622,7 @@ void ExtensionsMenuView::OnToolbarActionAdded(
+@@ -445,6 +619,7 @@ void ExtensionsMenuView::OnToolbarActionAdded(
    CreateAndInsertNewItem(item);
    SortMenuItemsByName();
    UpdateSectionVisibility();
@@ -878,7 +881,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  
    SanityCheck();
  }
-@@ -465,6 +640,7 @@ void ExtensionsMenuView::OnToolbarActionRemoved(
+@@ -462,6 +637,7 @@ void ExtensionsMenuView::OnToolbarActionRemoved(
    extensions_menu_items_.erase(iter);
  
    UpdateSectionVisibility();
@@ -886,7 +889,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  
    SanityCheck();
  }
-@@ -472,6 +648,7 @@ void ExtensionsMenuView::OnToolbarActionRemoved(
+@@ -469,6 +645,7 @@ void ExtensionsMenuView::OnToolbarActionRemoved(
  void ExtensionsMenuView::OnToolbarActionUpdated(
      const ToolbarActionsModel::ActionId& action_id) {
    Update();
@@ -895,7 +898,7 @@ index d9bb4dc20c6bb..132f8cad8b655 100644
  
  void ExtensionsMenuView::OnToolbarModelInitialized() {
 diff --git a/chrome/browser/ui/views/extensions/extensions_menu_view.h b/chrome/browser/ui/views/extensions/extensions_menu_view.h
-index b04363a45c123..86060d284cacc 100644
+index d632239a4ff31..7d9f81072db3e 100644
 --- a/chrome/browser/ui/views/extensions/extensions_menu_view.h
 +++ b/chrome/browser/ui/views/extensions/extensions_menu_view.h
 @@ -18,12 +18,15 @@
@@ -914,7 +917,7 @@ index b04363a45c123..86060d284cacc 100644
  class View;
  }  // namespace views
  
-@@ -133,6 +136,17 @@ class ExtensionsMenuView : public views::BubbleDialogDelegateView,
+@@ -132,6 +135,17 @@ class ExtensionsMenuView : public views::BubbleDialogDelegateView,
  
    std::unique_ptr<views::View> CreateExtensionButtonsContainer();
  
@@ -932,7 +935,7 @@ index b04363a45c123..86060d284cacc 100644
    // Returns the appropriate section for the given `site_interaction`.
    Section* GetSectionForSiteInteraction(
        extensions::SitePermissionsHelper::SiteInteraction site_interaction);
-@@ -171,6 +185,11 @@ class ExtensionsMenuView : public views::BubbleDialogDelegateView,
+@@ -170,6 +184,11 @@ class ExtensionsMenuView : public views::BubbleDialogDelegateView,
        extensions_menu_items_;
  
    raw_ptr<views::LabelButton> manage_extensions_button_ = nullptr;

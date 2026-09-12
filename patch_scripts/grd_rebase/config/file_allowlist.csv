@@ -26,3 +26,4 @@
 "ui/chromeos/ui_chromeos_strings.grd","True","False","overlay_text_sync","Reviewed overlay-owned replacements; auto-discover plain branding replacements, with special cases in message_allowlist.csv."
 "ui/resources/ui_resources.grd","False","True","structural_resource","Patch-owned Android resource condition; excluded from string sync."
 "ash/webui/help_app_ui/resources/help_app_resources.grd","False","True","structural_resource","Reviewed patch-owned Help App resource registration; excluded from branding text sync."
+"chrome/browser/resources/component_extension_resources.grd","False","True","structural_resource","Auto-detected from current patch series."

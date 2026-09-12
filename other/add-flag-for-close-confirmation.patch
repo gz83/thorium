@@ -1,8 +1,8 @@
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index 31d6afc9a2a62..2a9421d208fbb 100644
+index 550900f11c502..a4bc404b937a7 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -14994,6 +14994,10 @@ Please help our engineers fix this problem. Tell us what happened right before y
+@@ -15174,6 +15174,10 @@ Please help our engineers fix this problem. Tell us what happened right before y
          </message>
        </if>
  
@@ -14,7 +14,7 @@ index 31d6afc9a2a62..2a9421d208fbb 100644
          <message name="IDS_RESTORE_WINDOW_MENU_WIN" desc="The Windows browser window menu item text for restoring the window.">
            &amp;Restore
 diff --git a/chrome/browser/ui/unload_controller.cc b/chrome/browser/ui/unload_controller.cc
-index 95415e5abb210..decc6c15bb2b3 100644
+index 6ac2d32db9d0b..3b5b3af799679 100644
 --- a/chrome/browser/ui/unload_controller.cc
 +++ b/chrome/browser/ui/unload_controller.cc
 @@ -5,7 +5,9 @@
@@ -27,7 +27,7 @@ index 95415e5abb210..decc6c15bb2b3 100644
  #include "base/functional/bind.h"
  #include "base/location.h"
  #include "base/task/single_thread_task_runner.h"
-@@ -30,11 +32,13 @@
+@@ -32,11 +34,13 @@
  #include "chrome/browser/ui/tabs/tab_group_model.h"
  #include "chrome/browser/ui/tabs/tab_strip_model.h"
  #include "chrome/browser/ui/tabs/tab_strip_model_delegate.h"
@@ -38,10 +38,10 @@ index 95415e5abb210..decc6c15bb2b3 100644
  #include "chrome/browser/web_applications/web_app_provider.h"
  #include "chrome/common/chrome_features.h"
 +#include "chrome/grit/generated_resources.h"
+ #include "components/keep_alive_registry/keep_alive_registry.h"
  #include "components/performance_manager/public/execution_context_priority/execution_context_priority.h"
  #include "components/sessions/core/tab_restore_service.h"
- #include "components/tab_groups/tab_group_id.h"
-@@ -44,6 +48,8 @@
+@@ -47,6 +51,8 @@
  #include "content/public/browser/render_view_host.h"
  #include "content/public/browser/web_contents.h"
  #include "extensions/buildflags/buildflags.h"
@@ -50,7 +50,7 @@ index 95415e5abb210..decc6c15bb2b3 100644
  
  #if BUILDFLAG(ENABLE_EXTENSIONS)
  #include "chrome/browser/profiles/profile.h"
-@@ -474,6 +480,8 @@ bool UnloadController::TryToCloseWindow(
+@@ -477,6 +483,8 @@ bool UnloadController::TryToCloseWindow(
  void UnloadController::ResetTryToCloseWindow() {
    cancel_download_confirmation_state_ =
        CancelDownloadConfirmationState::kNotPrompted;
@@ -59,7 +59,7 @@ index 95415e5abb210..decc6c15bb2b3 100644
    if (!is_calling_before_unload_handlers()) {
      return;
    }
-@@ -792,10 +800,12 @@ UnloadController::MaybeWarnBeforeClosing(
+@@ -793,10 +801,12 @@ UnloadController::MaybeWarnBeforeClosing(
      return WarnBeforeClosingResult::kOkToClose;
    }
  
@@ -76,7 +76,7 @@ index 95415e5abb210..decc6c15bb2b3 100644
    }
  
    DCHECK(!warn_before_closing_callback_)
-@@ -893,6 +903,67 @@ bool UnloadController::CanCloseWithInProgressDownloads() {
+@@ -894,6 +904,67 @@ bool UnloadController::CanCloseWithInProgressDownloads() {
    return false;
  }
  
@@ -144,7 +144,7 @@ index 95415e5abb210..decc6c15bb2b3 100644
  base::WeakPtr<UnloadController> UnloadController::GetWeakPtr() {
    return weak_factory_.GetWeakPtr();
  }
-@@ -920,6 +991,21 @@ void UnloadController::InProgressDownloadResponse(bool cancel_downloads) {
+@@ -921,6 +992,21 @@ void UnloadController::InProgressDownloadResponse(bool cancel_downloads) {
        .Run(WarnBeforeClosingResult::kDoNotClose);
  }
  
@@ -167,10 +167,10 @@ index 95415e5abb210..decc6c15bb2b3 100644
    switch (result) {
      case WarnBeforeClosingResult::kOkToClose:
 diff --git a/chrome/browser/ui/unload_controller.h b/chrome/browser/ui/unload_controller.h
-index 84bf3492e3b2a..8d3995b12d784 100644
+index 1c994941bdeab..bae1d24df006c 100644
 --- a/chrome/browser/ui/unload_controller.h
 +++ b/chrome/browser/ui/unload_controller.h
-@@ -14,6 +14,7 @@
+@@ -15,6 +15,7 @@
  #include "base/memory/weak_ptr.h"
  #include "chrome/browser/tab_contents/web_contents_collection.h"
  #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
@@ -178,7 +178,7 @@ index 84bf3492e3b2a..8d3995b12d784 100644
  #include "chrome/browser/ui/tabs/tab_strip_model_observer.h"
  #include "ui/base/unowned_user_data/scoped_unowned_user_data.h"
  
-@@ -253,6 +254,9 @@ class UnloadController : public WebContentsCollection::Observer,
+@@ -269,6 +270,9 @@ class UnloadController : public WebContentsCollection::Observer,
    // Returns true if the window can close, false otherwise.
    bool CanCloseWithInProgressDownloads();
  
@@ -188,7 +188,7 @@ index 84bf3492e3b2a..8d3995b12d784 100644
    base::WeakPtr<UnloadController> GetWeakPtr();
  
   private:
-@@ -272,6 +276,8 @@ class UnloadController : public WebContentsCollection::Observer,
+@@ -288,6 +292,8 @@ class UnloadController : public WebContentsCollection::Observer,
    // downloads running.
    void InProgressDownloadResponse(bool cancel_downloads);
  
@@ -197,7 +197,7 @@ index 84bf3492e3b2a..8d3995b12d784 100644
   private:
    void RenderProcessGone(content::WebContents* web_contents,
                           base::TerminationStatus status) override;
-@@ -361,6 +367,9 @@ class UnloadController : public WebContentsCollection::Observer,
+@@ -377,6 +383,9 @@ class UnloadController : public WebContentsCollection::Observer,
    CancelDownloadConfirmationState cancel_download_confirmation_state_ =
        CancelDownloadConfirmationState::kNotPrompted;
  
@@ -206,4 +206,4 @@ index 84bf3492e3b2a..8d3995b12d784 100644
 +
    WarnBeforeClosingCallback warn_before_closing_callback_;
  
-   base::WeakPtrFactory<UnloadController> weak_factory_{this};
+   using BrowserDidCloseCallbackList =

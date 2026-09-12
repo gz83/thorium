@@ -15,7 +15,7 @@ index 8e80b183a7622..a62900ea14288 100644
          return false;
        }
 diff --git a/chrome/common/media/cdm_registration.cc b/chrome/common/media/cdm_registration.cc
-index 46293c0a15611..ab4feab6fdcfd 100644
+index 60a79ace428e9..451f5aa572d11 100644
 --- a/chrome/common/media/cdm_registration.cc
 +++ b/chrome/common/media/cdm_registration.cc
 @@ -60,9 +60,7 @@ namespace {
