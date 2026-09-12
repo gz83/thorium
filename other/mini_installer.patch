@@ -25,7 +25,7 @@ index d5f9a09fc06cb..13e9cc7b901b9 100644
            An operating system error occurred during installation. Please download Chromium again.
          </message>
 diff --git a/chrome/installer/mini_installer/BUILD.gn b/chrome/installer/mini_installer/BUILD.gn
-index ce1f5a5711eeb..cebb79715bd24 100644
+index ce1f5a5711eeb..7e124474b9eed 100644
 --- a/chrome/installer/mini_installer/BUILD.gn
 +++ b/chrome/installer/mini_installer/BUILD.gn
 @@ -1,8 +1,9 @@
@@ -66,7 +66,7 @@ index ce1f5a5711eeb..cebb79715bd24 100644
      "mini_installer_resource.h",
      "mini_string.cc",
      "mini_string.h",
-@@ -70,21 +77,24 @@ source_set("lib") {
+@@ -70,21 +77,26 @@ source_set("lib") {
    ]
  
    deps = [
@@ -81,11 +81,12 @@ index ce1f5a5711eeb..cebb79715bd24 100644
 -  configs += [ ":mini_installer_compiler_flags" ]
 -
 -  # Because it changes the stack protector.
--  use_libcxx_modules = false
 +  # This executable is the CPU compatibility gate for setup and the browser.
 +  # Keep all of its runtime code at the Chromium/Windows ABI baseline. The
 +  # strings dependency contributes generated resources only.
 +  configs -= [ "//build/config/compiler:thorium_x86_isa" ]
++  # The shared system PCM uses the browser ISA, not the installer baseline.
+   use_libcxx_modules = false
  }
  
 -process_version_rc_template("version") {
@@ -100,7 +101,7 @@ index ce1f5a5711eeb..cebb79715bd24 100644
  }
  
  source_set("unit_tests") {
-@@ -151,7 +161,7 @@ action("mini_installer_archive") {
+@@ -151,7 +163,7 @@ action("mini_installer_archive") {
    inputs = [
      "$root_out_dir/chrome.dll",
      "$root_out_dir/chrome_elf.dll",
@@ -109,7 +110,7 @@ index ce1f5a5711eeb..cebb79715bd24 100644
      "$root_out_dir/locales/en-US.pak",
      "$root_out_dir/setup.exe",
      "//chrome/tools/build/win/makecab.py",
-@@ -183,9 +193,6 @@ action("mini_installer_archive") {
+@@ -183,9 +195,6 @@ action("mini_installer_archive") {
      rebase_path(setup_runtime_deps, root_build_dir),
      "--build_time",
      build_timestamp,
@@ -119,7 +120,7 @@ index ce1f5a5711eeb..cebb79715bd24 100644
    ]
  
    deps = [
-@@ -258,14 +265,11 @@ source_set("mini_installer_sources") {
+@@ -258,14 +267,13 @@ source_set("mini_installer_sources") {
    sources = [ "mini_installer_exe_main.cc" ]
    deps = [
      ":lib",
@@ -131,14 +132,15 @@ index ce1f5a5711eeb..cebb79715bd24 100644
 -  configs += [ ":mini_installer_compiler_flags" ]
 -
 -  # Because it changes the stack protector.
--  use_libcxx_modules = false
 +  configs -= [ "//build/config/compiler:thorium_x86_isa" ]
++  # The shared system PCM uses the browser ISA, not the installer baseline.
+   use_libcxx_modules = false
 +  defines =
 +      [ "THORIUM_INSTALLER_CPU_FEATURES=$thorium_x86_required_cpu_features" ]
  }
  
  copy("copy_signing") {
-@@ -276,66 +280,73 @@ copy("copy_signing") {
+@@ -276,66 +284,74 @@ copy("copy_signing") {
  # Generates a mini_installer executable containing the resources provided in the
  # caller's `rc_file`.
  template("generate_mini_installer") {
@@ -176,6 +178,7 @@ index ce1f5a5711eeb..cebb79715bd24 100644
 -      "//build/config/win:sdk_link",
 -      "//build/config/win:windowed",
 +    configs += [ "//build/config/win:windowed" ]
++    use_libcxx_modules = false
 +
 +    # The Thorium installer UI uses the CRT, C++ standard library, and task
 +    # dialog APIs. Unlike Chromium's minimal installer, it cannot use a custom
@@ -248,7 +251,7 @@ index ce1f5a5711eeb..cebb79715bd24 100644
    }
  }
  
-@@ -362,14 +373,14 @@ if (!(is_component_build && is_debug && target_cpu == "x86") &&
+@@ -362,14 +378,14 @@ if (!(is_component_build && is_debug && target_cpu == "x86") &&
              root_out_dir)
      inputs = [
        "$root_out_dir/" + alternate_version_generator_rel_path,

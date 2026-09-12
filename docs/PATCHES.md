@@ -70,7 +70,7 @@ overlay-derived, or still need separate provenance review.
 | [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch) | [uazo/Cromite](https://github.com/uazo/cromite) enable extension in incognito patch |
 | [`GPC.patch`](../other/GPC.patch) | Global Privacy Control behavior adapted from privacy-focused Chromium patch references |
 | [`disable-middle-click-paste-with-autoscroll.patch`](../other/disable-middle-click-paste-with-autoscroll.patch) | Thorium-maintained Linux behavior fix for disabling selection clipboard paste paths when Blink MiddleClickAutoscroll is enabled |
-| [`mini_installer.patch`](../other/mini_installer.patch) | Thorium Windows mini_installer GUI, SIMD-aware naming and packaging manifest |
+| [`mini_installer.patch`](../other/mini_installer.patch) | Thorium Windows mini_installer GUI, SIMD-aware naming and packaging manifest; baseline installer targets disable shared C++ modules to avoid ISA mismatches |
 
 ## Series Patches
 
