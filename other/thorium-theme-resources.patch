@@ -1,5 +1,5 @@
 diff --git a/chrome/app/theme/theme_resources.grd b/chrome/app/theme/theme_resources.grd
-index 538b8a6f073a7..05ba8807e4f03 100644
+index 538b8a6f073a7..ee65ca24702c4 100644
 --- a/chrome/app/theme/theme_resources.grd
 +++ b/chrome/app/theme/theme_resources.grd
 @@ -149,7 +149,6 @@
@@ -36,21 +36,27 @@ index 538b8a6f073a7..05ba8807e4f03 100644
              </else>
            </if> <!-- is_linux -->
            <if expr="_is_chrome_for_testing_branded">
-@@ -192,6 +195,14 @@
-             <else> <!-- not _is_chrome_for_testing_branded -->
-               <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_NAME_22" file="${branding_path_component}/product_logo_name_22.png" />
-               <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_NAME_22_WHITE" file="${branding_path_component}/product_logo_name_22_white.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_MASCOT" file="chromium/thorium_mascot.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_ROBOT" file="chromium/technical_error.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_AI_CHROME" file="chromium/ai_chrome.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_CHROMIUM_BLANK" file="chromium/chromium_blank.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_CHROMIUM_QUESTION" file="chromium/chromium_question.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_THORIUM_ATOMIC" file="chromium/thorium_atomic.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_THORIUM_ELEMENT" file="chromium/thorium_element.png" />
-+              <structure type="chrome_scaled_image" name="IDR_PRODUCT_THORIUM_GUY" file="chromium/thorium_guy.png" />
-             </else>
-           </if> <!-- _is_chrome_for_testing_branded -->
-         </else>
+diff --git a/chrome/app/theme/webui_theme_resources.grd b/chrome/app/theme/webui_theme_resources.grd
+index 7444f3f98a562..942eb8bd87ed7 100644
+--- a/chrome/app/theme/webui_theme_resources.grd
++++ b/chrome/app/theme/webui_theme_resources.grd
+@@ -30,6 +30,16 @@
+         <structure type="chrome_scaled_image" name="IDR_LOGO_AVATAR_CIRCLE_BLUE_COLOR" file="cros/logo_avatar_circle_blue_color.png" />
+         <structure type="chrome_scaled_image" name="IDR_LOGO_GOOGLE_COLOR_90" file="cros/logo_google_color_90.png" />
+       </if>
++      <if expr="not _google_chrome and not _is_chrome_for_testing_branded">
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_AI_CHROME" file="chromium/ai_chrome.png" />
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_CHROMIUM_BLANK" file="chromium/chromium_blank.png" />
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_CHROMIUM_QUESTION" file="chromium/chromium_question.png" />
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_MASCOT" file="chromium/thorium_mascot.png" />
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_ROBOT" file="chromium/technical_error.png" />
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_THORIUM_ATOMIC" file="chromium/thorium_atomic.png" />
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_THORIUM_ELEMENT" file="chromium/thorium_element.png" />
++        <structure type="chrome_scaled_image" name="IDR_PRODUCT_THORIUM_GUY" file="chromium/thorium_guy.png" />
++      </if>
+       <if expr="not is_android">
+         <structure type="chrome_scaled_image" name="IDR_PROFILE_AVATAR_0" file="common/profile_avatar_generic.png" />
+         <structure type="chrome_scaled_image" name="IDR_PROFILE_AVATAR_1" file="common/profile_avatar_generic_aqua.png" />
 diff --git a/chrome/browser/resources/settings/about_page/about_page.css b/chrome/browser/resources/settings/about_page/about_page.css
 index 2987e61a89e98..dbf17949acd38 100644
 --- a/chrome/browser/resources/settings/about_page/about_page.css

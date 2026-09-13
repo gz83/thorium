@@ -42,7 +42,7 @@ overlay-derived, or still need separate provenance review.
 | [`omnibox-search-engine-icon-branding.patch`](../other/omnibox-search-engine-icon-branding.patch) | [ungoogled-software/contrib](https://github.com/ungoogled-software/contrib) default search icon tweak |
 | [`keep-doh-enabled-on-managed-devices.patch`](../other/keep-doh-enabled-on-managed-devices.patch) | [uazo/Cromite](https://github.com/uazo/cromite) keeps DoH available unless explicitly disabled by policy, including on managed devices and systems with parental controls |
 | [`reduce-doh-request-headers.patch`](../other/reduce-doh-request-headers.patch) | [uazo/Cromite](https://github.com/uazo/cromite) reduce DoH request headers patch |
-| [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) | [Ahrotahn/ungoogled-chromium](https://github.com/Ahrotahn/ungoogled-chromium/blob/major/patches/core/ungoogled-chromium/disable-privacy-sandbox.patch) Privacy Sandbox preload dependency removal |
+| [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) | M154 residual advertising feature defaults and attestation preload/update removal |
 | [`disable-fetching-field-trials.patch`](../other/disable-fetching-field-trials.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) / Bromite disable field-trials fetching patch |
 | [`disable-encryption.patch`](../other/disable-encryption.patch) | [ungoogled-chromium-windows](https://github.com/ungoogled-software/ungoogled-chromium-windows) portable encryption/machine-id patches plus Supermium portable-profile reversion commits |
 | [`enable-saving-pages-from-all-schemes.patch`](../other/enable-saving-pages-from-all-schemes.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) enable page saving on more schemes patch |
@@ -109,7 +109,7 @@ overlay-derived, or still need separate provenance review.
 - [`android-thorium-branding.patch`](../other/android-thorium-branding.patch)
 - [`thorium-startup-logging.patch`](../other/thorium-startup-logging.patch)
 - [`thorium-app-metadata-branding.patch`](../other/thorium-app-metadata-branding.patch)
-- [`thorium-theme-resources.patch`](../other/thorium-theme-resources.patch)
+- [`thorium-theme-resources.patch`](../other/thorium-theme-resources.patch) — Registers all eight Thorium WebUI images in M154’s theme resource map, retaining Android’s direct resource-ID access to the version-page mascot.
 - [`thorium-app-vector-icons.patch`](../other/thorium-app-vector-icons.patch)
 - [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Downloads and verifies the upstream uBlock Origin 1.74.0 GitHub CRX at build time, then bundles it for offline installation in new profiles without Chrome Web Store access.
 - [`bookmark-default-prefs.patch`](../other/bookmark-default-prefs.patch)
@@ -242,7 +242,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium_webui.patch`](../other/thorium_webui.patch)
 - [`keyboard_shortcuts.patch`](../other/keyboard_shortcuts.patch)
 - [`keep-expired-flags.patch`](../other/keep-expired-flags.patch)
-- [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) — Matches the upstream patch’s three attestation preload dependency removals in `chrome/BUILD.gn` and `chrome/browser/resources/BUILD.gn`, with context adapted for Thorium. Other packaging paths, component registration and runtime settings remain unchanged.
+- [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) — Defaults iframe URNs and the M1 advertising API override to disabled; the other advertising override is already disabled upstream. Removes production attestation preload packaging and component-update registration, and disables Android APK fallback loading by default. Preserves upstream Fenced Frames compatibility behavior, attestation enforcement, RWS, CHIPS, FedCM, Storage Access API and account capabilities. Feature overrides can re-enable these defaults; existing user data is not deleted.
 - [`disable-encryption.patch`](../other/disable-encryption.patch)
 - [`disable-feature-promos.patch`](../other/disable-feature-promos.patch)
 - [`thorium-install-static-branding.patch`](../other/thorium-install-static-branding.patch)

@@ -223,7 +223,7 @@ index b10c478cb1b3b..8c109bdce1a6a 100644
               features::kThrottleMainFrameTo60HzDesktopAndroid);
  #else
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index eb192f7220e5e..ea68b830baa48 100644
+index 4010528bc88d9..f033eaca3ba8f 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
 @@ -1035,7 +1035,7 @@ if (_is_default_toolchain) {
@@ -235,7 +235,7 @@ index eb192f7220e5e..ea68b830baa48 100644
        deps +=
            [ "//chrome/browser/ui/android/extensions/windowing/internal:java" ]
      } else {
-@@ -2466,7 +2466,7 @@ if (_is_default_toolchain) {
+@@ -2465,7 +2465,7 @@ if (_is_default_toolchain) {
        "//components/embedder_support/android:virtual_structure_javatests",
      ]
  
@@ -970,10 +970,10 @@ index cda942a9ccbd2..cb59a70b7aafe 100644
      No description provided
    </message>
 diff --git a/chrome/app/theme/theme_resources.grd b/chrome/app/theme/theme_resources.grd
-index 05ba8807e4f03..7d990db70af4b 100644
+index ee65ca24702c4..477b13b42cdd1 100644
 --- a/chrome/app/theme/theme_resources.grd
 +++ b/chrome/app/theme/theme_resources.grd
-@@ -289,7 +289,7 @@
+@@ -281,7 +281,7 @@
          <structure type="chrome_scaled_image" name="IDR_UPLOAD_VIOLATION_DARK" file="common/upload_violation_dark.png" />
        </if>
        <if expr="not _google_chrome">
@@ -982,7 +982,7 @@ index 05ba8807e4f03..7d990db70af4b 100644
            <!-- Desktop Android supports extensions and the web store. -->
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON" file="chromium/webstore_icon.png" />
            <structure type="chrome_scaled_image" name="IDR_WEBSTORE_ICON_16" file="chromium/webstore_icon_16.png" />
-@@ -297,7 +297,7 @@
+@@ -289,7 +289,7 @@
          </if>
        </if>
        <if expr="_google_chrome">
@@ -6111,7 +6111,7 @@ index 174028663459a..3616ee1857f69 100644
  
  # Skia only needs to support GPU rasterization if we use the full Chromium
 diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/features.cc
-index a25fcdff1c6f6..7fef7ca5ad7b0 100644
+index 10b907c13e662..82ea056b8d21b 100644
 --- a/third_party/blink/common/features.cc
 +++ b/third_party/blink/common/features.cc
 @@ -2241,7 +2241,7 @@ BASE_FEATURE(kStopInBackground,
