@@ -183,7 +183,7 @@ overlay-derived, or still need separate provenance review.
 - [`restore-tab-button.patch`](../other/restore-tab-button.patch)
 - [`thorium-chrome-labs-experiments.patch`](../other/thorium-chrome-labs-experiments.patch)
 - [`add-flag-for-system-linux-theme.patch`](../other/add-flag-for-system-linux-theme.patch)
-- [`restore_download_shelf.patch`](../other/restore_download_shelf.patch)
+- [`restore_download_shelf.patch`](../other/restore_download_shelf.patch) — Restores the desktop download shelf; ChromeOS retains system download notifications and does not instantiate the shelf.
 - [`downloads-page-enhancements.patch`](../other/downloads-page-enhancements.patch)
 
 ### 60 - Installer, shell integration, and context-menu behavior.
@@ -228,7 +228,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-sandbox-compat.patch`](../other/thorium-sandbox-compat.patch)
 - [`thoriumos-ash-vector-icons.patch`](../other/thoriumos-ash-vector-icons.patch)
 - [`thoriumos-help-app-discovery.patch`](../other/thoriumos-help-app-discovery.patch)
-- [`thoriumos-sample-system-web-app.patch`](../other/thoriumos-sample-system-web-app.patch)
+- [`thoriumos-sample-system-web-app.patch`](../other/thoriumos-sample-system-web-app.patch) — Enables the sample system web app in official builds using M154’s `is_chromeos` guard, preserving trusted/untrusted TypeScript resource mappings.
 - [`thoriumos-disable-stats-reporting.patch`](../other/thoriumos-disable-stats-reporting.patch)
 - [`add-flag-for-auto-dark-mode.patch`](../other/add-flag-for-auto-dark-mode.patch)
 - [`disable-thorium-icons.patch`](../other/disable-thorium-icons.patch)

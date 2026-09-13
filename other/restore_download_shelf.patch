@@ -3600,7 +3600,7 @@ index 39c36aab3c4d2..53f41e15c3b33 100644
  
    if (WindowFeatureController::From(GetBrowserView()->browser())
 diff --git a/chrome/browser/ui/views/frame/browser_view.cc b/chrome/browser/ui/views/frame/browser_view.cc
-index 24eca1ab9a2ab..7b3d5433db542 100644
+index 24eca1ab9a2ab..b9614eec1ad21 100644
 --- a/chrome/browser/ui/views/frame/browser_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_view.cc
 @@ -42,6 +42,7 @@
@@ -3646,7 +3646,7 @@ index 24eca1ab9a2ab..7b3d5433db542 100644
  // static
  void BrowserView::SetDisableRevealerDelayForTesting(bool disable) {
    g_disable_revealer_delay_for_testing = disable;
-@@ -3152,6 +3160,45 @@ ShowTranslateBubbleResult BrowserView::ShowTranslateBubble(
+@@ -3152,6 +3160,50 @@ ShowTranslateBubbleResult BrowserView::ShowTranslateBubble(
    return ShowTranslateBubbleResult::kSuccess;
  }
  
@@ -3665,6 +3665,10 @@ index 24eca1ab9a2ab..7b3d5433db542 100644
 +}
 +
 +DownloadShelf* BrowserView::GetDownloadShelf() {
++#if BUILDFLAG(IS_CHROMEOS)
++  // ChromeOS uses download notifications instead of the desktop shelf.
++  return nullptr;
++#else
 +  // Don't show download shelf if download bubble is enabled, except that the
 +  // shelf is already showing (this can happen if prefs were changed at
 +  // runtime).
@@ -3679,6 +3683,7 @@ index 24eca1ab9a2ab..7b3d5433db542 100644
 +    EnsureFocusOrder();
 +  }
 +  return download_shelf_;
++#endif  // BUILDFLAG(IS_CHROMEOS)
 +}
 +
 +views::View* BrowserView::GetTopContainer() {
@@ -3692,7 +3697,7 @@ index 24eca1ab9a2ab..7b3d5433db542 100644
  DownloadBubbleUIController* BrowserView::GetDownloadBubbleUIController() {
  #if !BUILDFLAG(IS_CHROMEOS)
    if (auto* download_controller =
-@@ -3882,6 +3929,14 @@ void BrowserView::EnsureFocusOrder() {
+@@ -3882,6 +3934,14 @@ void BrowserView::EnsureFocusOrder() {
      infobar_container_->InsertAfterInFocusList(top_container_);
    }
  
@@ -3707,7 +3712,7 @@ index 24eca1ab9a2ab..7b3d5433db542 100644
  #if DCHECK_IS_ON()
    // Make sure we didn't create any cycles in the focus order.
    CheckFocusListForCycles(top_container_);
-@@ -4493,6 +4548,9 @@ void BrowserView::GetAccessiblePanes(std::vector<views::View*>* panes) {
+@@ -4493,6 +4553,9 @@ void BrowserView::GetAccessiblePanes(std::vector<views::View*>* panes) {
    if (side_panel_) {
      panes->push_back(side_panel_);
    }
@@ -3717,7 +3722,7 @@ index 24eca1ab9a2ab..7b3d5433db542 100644
    for (views::View* pane : multi_contents_view_->GetAccessiblePanes()) {
      panes->push_back(pane);
    }
-@@ -5352,7 +5410,7 @@ bool BrowserView::MaybeShowBookmarkBar(WebContents* contents) {
+@@ -5352,7 +5415,7 @@ bool BrowserView::MaybeShowBookmarkBar(WebContents* contents) {
  
  bool BrowserView::MaybeShowInfoBar(WebContents* contents) {
    // TODO(beng): Remove this function once the interface between
@@ -3726,7 +3731,7 @@ index 24eca1ab9a2ab..7b3d5433db542 100644
    //             view is sorted out.
    return true;
  }
-@@ -5947,6 +6005,23 @@ Profile* BrowserView::GetProfile() const {
+@@ -5947,6 +6010,23 @@ Profile* BrowserView::GetProfile() const {
    return browser_->GetProfile();
  }
  
