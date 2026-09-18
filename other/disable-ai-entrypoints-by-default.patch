@@ -39,7 +39,7 @@ index 79cfa8e7ef628..c31f13345c3b7 100644
        AimEligibilityServiceFactory::GetForProfile(profile);
    const auto* ai_mode_button_service =
 diff --git a/components/lens/lens_features.cc b/components/lens/lens_features.cc
-index 96efcc438f63a..3713baeb8df0b 100644
+index 5775195551f21..8086296f677bc 100644
 --- a/components/lens/lens_features.cc
 +++ b/components/lens/lens_features.cc
 @@ -24,7 +24,7 @@ BASE_FEATURE(kLensOverlay,

@@ -1,5 +1,5 @@
 diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
-index 438d0fa748339..575c5a25f82a6 100644
+index 04e9471f3b8f9..6e1695095288c 100644
 --- a/chrome/BUILD.gn
 +++ b/chrome/BUILD.gn
 @@ -389,7 +389,6 @@ if (!is_android && !is_mac) {
@@ -10,8 +10,8 @@ index 438d0fa748339..575c5a25f82a6 100644
        "//third_party/widevine/cdm",
      ]
  
-@@ -1389,7 +1388,6 @@ if (is_win) {
-       "//chrome/browser/lens/sapisid:sapisid_bundle_data",
+@@ -1388,7 +1387,6 @@ if (is_win) {
+       ":widevine_cdm_library",
        "//chrome/browser/resources/media/mei_preload:component_bundle",
        "//chrome/browser/web_applications/isolated_web_apps/key_distribution/preload:component_bundle",
 -      "//components/privacy_sandbox/privacy_sandbox_attestations/preload:component_bundle",
@@ -63,10 +63,10 @@ index 494f08cb1820a..0067a6e0cc3e2 100644
    }
  
 diff --git a/chrome/installer/linux/BUILD.gn b/chrome/installer/linux/BUILD.gn
-index 47a27ce391364..4a46d18bce92b 100644
+index 8faff2a94b066..ff14c55448e16 100644
 --- a/chrome/installer/linux/BUILD.gn
 +++ b/chrome/installer/linux/BUILD.gn
-@@ -157,8 +157,6 @@ packaging_files = packaging_files_binaries + [
+@@ -148,8 +148,6 @@ packaging_files = packaging_files_binaries + [
                      "$root_out_dir/locales/en-US.pak",
                      "$root_out_dir/MEIPreload/manifest.json",
                      "$root_out_dir/MEIPreload/preloaded_data.pb",
@@ -75,7 +75,7 @@ index 47a27ce391364..4a46d18bce92b 100644
                    ]
  if (enable_swiftshader) {
    packaging_files += [ "$root_out_dir/vk_swiftshader_icd.json" ]
-@@ -530,7 +528,6 @@ group("installer_deps") {
+@@ -515,7 +513,6 @@ group("installer_deps") {
      "//chrome/browser/enterprise/connectors/device_trust/key_management/installer/management_service:chrome_management_service",
      "//chrome/browser/resources/media/mei_preload:component",
      "//components/crash/core/app:chrome_crashpad_handler",
@@ -84,10 +84,10 @@ index 47a27ce391364..4a46d18bce92b 100644
      "//third_party/devtools-frontend/src/inspector_overlay:build_inspector_overlay",
      "//ui/resources:copy_ui_resources_100_percent",
 diff --git a/chrome/installer/linux/common/installer.py b/chrome/installer/linux/common/installer.py
-index 1710e45870945..cc321032d967b 100644
+index 50bb9dbfaa395..2183613ce354b 100644
 --- a/chrome/installer/linux/common/installer.py
 +++ b/chrome/installer/linux/common/installer.py
-@@ -586,24 +586,6 @@ class Installer:
+@@ -577,24 +577,6 @@ class Installer:
          for pak in (self.output_dir / "locales").glob("*.pak"):
              self._install_into_dir(pak, locales_dir, mode=0o644)
  
@@ -113,7 +113,7 @@ index 1710e45870945..cc321032d967b 100644
          mei_manifest = self.output_dir / "MEIPreload/manifest.json"
          if mei_manifest.exists():
 diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index 1811767f803c3..bc2c2ab9b54f0 100644
+index 6aff0e63cc7de..ae15cd75a3f04 100644
 --- a/chrome/installer/mini_installer/chrome.release
 +++ b/chrome/installer/mini_installer/chrome.release
 @@ -88,12 +88,6 @@ WidevineCdm\_platform_specific\win_arm64\widevinecdm.dll.sig: %(VersionDir)s\Wid
@@ -156,10 +156,10 @@ index 7edb9b3eb69a8..839f6103d26ff 100644
  #if BUILDFLAG(IS_ANDROID)
  // When disabled("legacy behavior") it resets ongoing gestures when window loses
 diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/features.cc
-index a25fcdff1c6f6..10b907c13e662 100644
+index 304d8e6942fef..e395ffbb3a0fd 100644
 --- a/third_party/blink/common/features.cc
 +++ b/third_party/blink/common/features.cc
-@@ -122,7 +122,7 @@ BASE_FEATURE(kAllowDatapipeDrainedAsBytesConsumerInBFCache,
+@@ -126,7 +126,7 @@ BASE_FEATURE(kAllowDatapipeDrainedAsBytesConsumerInBFCache,
  
  // Enables URN URLs like those produced by Protected Audience auctions to be
  // displayed by iframes (instead of requiring fenced frames).

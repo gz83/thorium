@@ -23,7 +23,7 @@ index 7fca4a9b3ee53..7a028d59b564f 100644
          mUrlView.setText(url);
      }
 diff --git a/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc b/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
-index acde19acf8a84..44ab232fa9a51 100644
+index b8ce14775ed63..8205cea7b3f16 100644
 --- a/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
 +++ b/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
 @@ -50,6 +50,7 @@
@@ -34,7 +34,7 @@ index acde19acf8a84..44ab232fa9a51 100644
  #include "chrome/browser/translate/chrome_translate_client.h"
  #include "chrome/browser/ui/browser_command_controller.h"
  #include "chrome/browser/ui/browser_window/public/browser_window_features.h"
-@@ -419,7 +420,9 @@ std::string ChromeAutocompleteProviderClient::GetAcceptLanguages() const {
+@@ -420,7 +421,9 @@ std::string ChromeAutocompleteProviderClient::GetAcceptLanguages() const {
  std::string
  ChromeAutocompleteProviderClient::GetEmbedderRepresentationOfAboutScheme()
      const {
@@ -45,7 +45,7 @@ index acde19acf8a84..44ab232fa9a51 100644
  }
  
  std::vector<std::u16string> ChromeAutocompleteProviderClient::GetBuiltinURLs() {
-@@ -457,6 +460,10 @@ ChromeAutocompleteProviderClient::GetBuiltinsToProvideAsUserTypes() {
+@@ -458,6 +461,10 @@ ChromeAutocompleteProviderClient::GetBuiltinsToProvideAsUserTypes() {
    builtins_to_provide.push_back(chrome::kChromeUISettingsURL16);
  #endif
    builtins_to_provide.push_back(chrome::kChromeUIVersionURL16);
@@ -57,7 +57,7 @@ index acde19acf8a84..44ab232fa9a51 100644
  }
  
 diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browser/flags/android/chrome_feature_list.cc
-index d9c4370ab0496..9b67f89461405 100644
+index c055eeb193909..3f46c728b30e7 100644
 --- a/chrome/browser/flags/android/chrome_feature_list.cc
 +++ b/chrome/browser/flags/android/chrome_feature_list.cc
 @@ -213,6 +213,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
@@ -69,10 +69,10 @@ index d9c4370ab0496..9b67f89461405 100644
      &feed::kFeedAudioOverviews,
      &feed::kFeedContainment,
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index 1a011d2c626be..f287d698de07a 100644
+index b815f730afa44..424cd244e6c87 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-@@ -827,6 +827,8 @@ public abstract class ChromeFeatureList {
+@@ -829,6 +829,8 @@ public abstract class ChromeFeatureList {
      public static final String TASK_MANAGER_CLANK = "TaskManagerClank";
      public static final String TEST_DEFAULT_DISABLED = "TestDefaultDisabled";
      public static final String TEST_DEFAULT_ENABLED = "TestDefaultEnabled";
@@ -201,10 +201,10 @@ index 5b32f2d6254d4..4a8584955d1d6 100644
  
  #endif  // CHROME_BROWSER_THORIUM_URL_UTILS_H_
 diff --git a/chrome/browser/ui/browser_commands.cc b/chrome/browser/ui/browser_commands.cc
-index 62b15254001ee..8c3818877bcc1 100644
+index 260bed1d0fa30..74a6758d86802 100644
 --- a/chrome/browser/ui/browser_commands.cc
 +++ b/chrome/browser/ui/browser_commands.cc
-@@ -57,6 +57,7 @@
+@@ -58,6 +58,7 @@
  #include "chrome/browser/sessions/tab_restore_service_factory.h"
  #include "chrome/browser/sharing_hub/sharing_hub_features.h"
  #include "chrome/browser/tab_group_sync/tab_group_sync_service_factory.h"
@@ -212,7 +212,7 @@ index 62b15254001ee..8c3818877bcc1 100644
  #include "chrome/browser/translate/chrome_translate_client.h"
  #include "chrome/browser/ui/accelerator_utils.h"
  #include "chrome/browser/ui/autofill/address_bubbles_controller.h"
-@@ -2869,7 +2870,9 @@ bool IsDebuggerAttachedToCurrentTab(BrowserWindowInterface* browser) {
+@@ -2870,7 +2871,9 @@ bool IsDebuggerAttachedToCurrentTab(BrowserWindowInterface* browser) {
  void CopyURL(BrowserWindowInterface* browser,
               content::WebContents* web_contents) {
    ui::ScopedClipboardWriter scw(ui::ClipboardBuffer::kCopyPaste);

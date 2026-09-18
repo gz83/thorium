@@ -269,7 +269,7 @@ index ce1f5a5711eeb..7e124474b9eed 100644
        "$target_name.exe",
        "--path_7za",
 diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index 173c8590146cf..1811767f803c3 100644
+index b0008cc7bb75f..6aff0e63cc7de 100644
 --- a/chrome/installer/mini_installer/chrome.release
 +++ b/chrome/installer/mini_installer/chrome.release
 @@ -1,4 +1,4 @@
@@ -1560,7 +1560,7 @@ index 9635a435d6fdc..629ec231b459b 100644
        "//components/base32",
        "//components/crash/core/app",
 diff --git a/chrome/installer/setup/install_worker.cc b/chrome/installer/setup/install_worker.cc
-index bf819dec3bda5..da2b2bfa4de8f 100644
+index b197e7addd13c..a95f03b33400a 100644
 --- a/chrome/installer/setup/install_worker.cc
 +++ b/chrome/installer/setup/install_worker.cc
 @@ -1,4 +1,4 @@
@@ -1596,15 +1596,15 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
  // Adds work items to register the Elevation Service with Windows. Only for
  // system level installs.
  void AddElevationServiceWorkItems(const base::FilePath& elevation_service_path,
-@@ -132,6 +138,7 @@ void AddElevationServiceWorkItems(const base::FilePath& elevation_service_path,
-       {install_static::GetElevatorClsid()}, {install_static::GetElevatorIid()});
+@@ -133,6 +139,7 @@ void AddElevationServiceWorkItems(const base::FilePath& elevation_service_path,
+       install_static::GetOldElevatorIids());
    list->AddWorkItem(install_service_work_item);
  }
 +#endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
  
  // Create Version key for a product (if not already present) and sets the new
  // product version as the last step.
-@@ -266,6 +273,43 @@ void AddDeleteUninstallEntryForMSIWorkItems(
+@@ -267,6 +274,43 @@ void AddDeleteUninstallEntryForMSIWorkItems(
    delete_reg_key->set_best_effort(true);
  }
  
@@ -1648,7 +1648,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
  // Adds Chrome specific install work items to |install_list|.
  void AddChromeWorkItems(const InstallParams& install_params,
                          WorkItemList* install_list) {
-@@ -277,6 +321,14 @@ void AddChromeWorkItems(const InstallParams& install_params,
+@@ -278,6 +322,14 @@ void AddChromeWorkItems(const InstallParams& install_params,
  
    const base::FilePath& target_path = installer_state.target_path();
  
@@ -1663,7 +1663,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
    if (current_version.IsValid()) {
      // TODO(crbug.com/441478433): Delete this cleanup some time in 2027.
      // Delete the archive from an existing install to save some disk space.
-@@ -291,9 +343,9 @@ void AddChromeWorkItems(const InstallParams& install_params,
+@@ -292,9 +344,9 @@ void AddChromeWorkItems(const InstallParams& install_params,
      delete_old_archive_work_item->set_rollback_enabled(false);
    }
  
@@ -1676,7 +1676,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
    const base::FilePath target_version_dir =
        target_path.AppendASCII(new_version.GetString());
    // Allow items in `src_path` to be left behind. It is in a temporary directory
-@@ -301,7 +353,7 @@ void AddChromeWorkItems(const InstallParams& install_params,
+@@ -302,7 +354,7 @@ void AddChromeWorkItems(const InstallParams& install_params,
    install_list->AddMoveTreeWorkItem(
        src_path.AppendASCII(new_version.GetString()), target_version_dir,
        temp_path,
@@ -1685,7 +1685,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
                                  .lenient_deletion = true});
  
    // Compress the locale packs now that they are in their final location.
-@@ -313,12 +365,18 @@ void AddChromeWorkItems(const InstallParams& install_params,
+@@ -314,12 +366,18 @@ void AddChromeWorkItems(const InstallParams& install_params,
    // Copy installer in install directory.
    AddInstallerCopyTasks(install_params, install_list);
  
@@ -1704,7 +1704,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
  
    // Move chrome.exe to new_chrome.exe if the target is in use; otherwise,
    // delete a pre-existing new_chrome.exe and overwrite the target.
-@@ -370,6 +428,7 @@ void AddChromeWorkItems(const InstallParams& install_params,
+@@ -371,6 +429,7 @@ void AddChromeWorkItems(const InstallParams& install_params,
    install_list->AddWorkItem(manifest_item.release());
  }
  
@@ -1712,7 +1712,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
  // Adds work items to register or unregister the elevated tracing service.
  void AddTracingServiceWorkItems(const InstallationState& original_state,
                                  const base::FilePath& tracing_service_path,
-@@ -431,7 +490,6 @@ void AddTracingServiceWorkItems(const InstallationState& original_state,
+@@ -433,7 +492,6 @@ void AddTracingServiceWorkItems(const InstallationState& original_state,
    }
  }
  
@@ -1720,7 +1720,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
  // Adds work items to add the "store-dmtoken" command to Chrome's version key.
  // This method is a no-op if this is anything other than system-level Chrome.
  // The command is used when enrolling Chrome browser instances into enterprise
-@@ -1020,7 +1078,7 @@ void AddInstallWorkItems(const InstallParams& install_params,
+@@ -1022,7 +1080,7 @@ void AddInstallWorkItems(const InstallParams& install_params,
                                      install_list);
    AddPlatformExperienceHelperWorkItems(installer_state, new_version,
                                         install_list);
@@ -1729,7 +1729,7 @@ index bf819dec3bda5..da2b2bfa4de8f 100644
    AddFirewallRulesWorkItems(installer_state, !current_version.IsValid(),
                              install_list);
  
-@@ -1299,10 +1357,12 @@ void AddFinalizeUpdateWorkItems(const InstallationState& original_state,
+@@ -1301,10 +1359,12 @@ void AddFinalizeUpdateWorkItems(const InstallationState& original_state,
    AddWerHelperRegistration(installer_state.root_key(),
                             GetWerHelperPath(target_path, new_version), list);
  

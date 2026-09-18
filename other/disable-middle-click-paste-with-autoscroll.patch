@@ -23,10 +23,10 @@ index 3b61122e40519..1425afde4aa6f 100644
  #endif
    prefs->caret_blink_interval =
 diff --git a/chrome/browser/ui/browser_commands.cc b/chrome/browser/ui/browser_commands.cc
-index 8c3818877bcc1..633494fd599a5 100644
+index 74a6758d86802..33b9502a74608 100644
 --- a/chrome/browser/ui/browser_commands.cc
 +++ b/chrome/browser/ui/browser_commands.cc
-@@ -1417,7 +1417,8 @@ void NewTabToRight(BrowserWindowInterface* browser) {
+@@ -1418,7 +1418,8 @@ void NewTabToRight(BrowserWindowInterface* browser) {
  void NewTabFromClipboardURL(BrowserWindowInterface* browser) {
  #if BUILDFLAG(IS_LINUX)
    if (ui::Clipboard::IsSupportedClipboardBuffer(

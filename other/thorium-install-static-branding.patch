@@ -1,5 +1,5 @@
 diff --git a/chrome/install_static/chromium_install_modes.h b/chrome/install_static/chromium_install_modes.h
-index f29a8228fe611..91db56d0ebe92 100644
+index a6d969df56d13..92dcb019e5e7b 100644
 --- a/chrome/install_static/chromium_install_modes.h
 +++ b/chrome/install_static/chromium_install_modes.h
 @@ -1,4 +1,4 @@
@@ -21,7 +21,7 @@ index f29a8228fe611..91db56d0ebe92 100644
  
  // Note: This list of indices must be kept in sync with the brand-specific
  // resource strings in chrome/installer/util/prebuild/create_string_rc.
-@@ -43,17 +43,16 @@ inline constexpr auto kInstallModes = std::to_array<InstallConstants>({
+@@ -52,17 +52,16 @@ inline constexpr auto kInstallModes = std::to_array<InstallConstants>({
          .install_suffix =
              L"",  // Empty install_suffix for the primary install mode.
          .logo_suffix = L"",  // No logo suffix for the primary install mode.

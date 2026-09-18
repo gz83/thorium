@@ -17,7 +17,7 @@ index 1fe7f40cfccf9..986ca51f6ca6f 100644
      sources += [
        "ios_share.icon",
 diff --git a/components/vector_icons/BUILD.gn b/components/vector_icons/BUILD.gn
-index cb13b9984e99f..da736cbaccf31 100644
+index 87e4c28932ad4..5de7526ea326e 100644
 --- a/components/vector_icons/BUILD.gn
 +++ b/components/vector_icons/BUILD.gn
 @@ -1,4 +1,4 @@

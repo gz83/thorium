@@ -32,10 +32,10 @@ index 6fada0a2b1a1f..6b2ec4b67e015 100644
  			<key>CFBundleURLName</key>
  			<string>Local file URL</string>
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index 77dd03b65b789..550900f11c502 100644
+index d718a56fe4ed9..0d34ab0ef84b1 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -15053,6 +15053,9 @@ This can include information about installed software, files, your browser, the
+@@ -15047,6 +15047,9 @@ This can include information about installed software, files, your browser, the
        <message name="IDS_DIRECTORY_LISTING_DATE_MODIFIED" desc="When viewing a local directory, this is the text for the column above the last modified dates.">
          Date Modified
        </message>
@@ -46,10 +46,10 @@ index 77dd03b65b789..550900f11c502 100644
        <!-- Saving Page-->
        <message name="IDS_SAVE_PAGE_DESC_HTML_ONLY" desc="In the Save Page dialog, the description of saving only the HTML of a webpage.">
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
-index 514ad3d7383f7..2457b69198123 100644
+index ecaccc6e198e7..bd5d738b0f0e9 100644
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -8545,6 +8545,12 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -8549,6 +8549,12 @@ const FeatureEntry kFeatureEntries[] = {
       FEATURE_VALUE_TYPE(
           heavy_ad_intervention::features::kHeavyAdPrivacyMitigations)},
  
@@ -63,7 +63,7 @@ index 514ad3d7383f7..2457b69198123 100644
      {"crostini-container-install",
       flag_descriptions::kCrostiniContainerInstallName,
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
-index df78618f4e9f2..c15eeb5a91e56 100644
+index c693323f7677a..019df2f7199c2 100644
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
 @@ -795,6 +795,15 @@ inline constexpr char kEnableDrDcDescription[] =

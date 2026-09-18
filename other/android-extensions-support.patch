@@ -38,7 +38,7 @@ index 91b8ec5bd6516..6c322ffa7c55e 100644
      "IS_COMPONENT_BUILD=$is_component_build",
      "IS_DEBUG=$partition_alloc_is_debug",
 diff --git a/base/android/device_info.cc b/base/android/device_info.cc
-index 827a95cab1a14..dc10d26577f58 100644
+index dc0347596ba43..d65079275c0c1 100644
 --- a/base/android/device_info.cc
 +++ b/base/android/device_info.cc
 @@ -106,6 +106,14 @@ bool is_desktop() {
@@ -66,7 +66,7 @@ index 827a95cab1a14..dc10d26577f58 100644
  
  // This returns the cached value during initial startup. If you need this
 diff --git a/base/android/device_info.h b/base/android/device_info.h
-index 2fda999479e2a..50b5f14c310dd 100644
+index 6a85f3be1975f..9c9b06ed05393 100644
 --- a/base/android/device_info.h
 +++ b/base/android/device_info.h
 @@ -30,6 +30,8 @@ BASE_EXPORT bool is_tv();
@@ -79,7 +79,7 @@ index 2fda999479e2a..50b5f14c310dd 100644
  BASE_EXPORT int32_t vulkan_deqp_level();
  BASE_EXPORT bool is_xr();
 diff --git a/base/android/java/src/org/chromium/base/DeviceInfo.java b/base/android/java/src/org/chromium/base/DeviceInfo.java
-index b3db5be13595c..3a2591b5fb40b 100644
+index c683a71cfdd15..ac9edc10fc94a 100644
 --- a/base/android/java/src/org/chromium/base/DeviceInfo.java
 +++ b/base/android/java/src/org/chromium/base/DeviceInfo.java
 @@ -229,6 +229,14 @@ public final class DeviceInfo {
@@ -97,7 +97,7 @@ index b3db5be13595c..3a2591b5fb40b 100644
      public static int getVulkanDeqpLevel() {
          return getInstance().mIDeviceInfo.vulkanDeqpLevel;
      }
-@@ -442,7 +450,7 @@ public final class DeviceInfo {
+@@ -443,7 +451,7 @@ public final class DeviceInfo {
          mIDeviceInfo.isDesktop =
                  (sIsDesktopForTesting != null)
                          ? sIsDesktopForTesting
@@ -875,7 +875,7 @@ index 6a9467d96a630..d6be86497714a 100644
  
      private ListItem buildPrintItem(Tab currentTab) {
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java
-index 9e5a7ef2ff76f..0b8a96e79293e 100644
+index 4f9ae229d847f..ec83091a25356 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedRootUiCoordinator.java
 @@ -834,7 +834,7 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
@@ -1041,7 +1041,7 @@ index 47ffa41fe7042..c230c92c73bcd 100644
          [ "//chrome/browser/ui/webui/ai_overlay_dialog:mojo_bindings" ]
    }
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
-index 2457b69198123..aa33901ab64c0 100644
+index bd5d738b0f0e9..b0f2071b1ccb1 100644
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
 @@ -403,6 +403,10 @@
@@ -1055,7 +1055,7 @@ index 2457b69198123..aa33901ab64c0 100644
  #if BUILDFLAG(ENABLE_PDF)
  #include "pdf/pdf_features.h"
  #endif
-@@ -9194,6 +9198,13 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -9198,6 +9202,13 @@ const FeatureEntry kFeatureEntries[] = {
       FEATURE_VALUE_TYPE(ash::features::kTrafficCountersForWiFiTesting)},
  #endif  // BUILDFLAG(IS_CHROMEOS)
  
@@ -1234,7 +1234,7 @@ index 13147547235d5..d668eaf1852b1 100644
                          : INITIAL_BOOKMARK_ROW_DISPLAY_PREF;
          return mPrefsManager.readInt(ChromePreferenceKeys.BOOKMARKS_VISUALS_PREF, fallback);
 diff --git a/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/BookmarkUtils.java b/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/BookmarkUtils.java
-index a6293b44c6f9b..f14c71a610ee8 100644
+index d116f1b85ef8a..898932c15aa79 100644
 --- a/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/BookmarkUtils.java
 +++ b/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/BookmarkUtils.java
 @@ -19,6 +19,7 @@ import androidx.annotation.VisibleForTesting;
@@ -1265,7 +1265,7 @@ index a6293b44c6f9b..f14c71a610ee8 100644
              View decorView =
                      activity.getWindow() != null
                              ? activity.getWindow().getDecorView()
-@@ -947,7 +950,8 @@ public class BookmarkUtils {
+@@ -954,7 +957,8 @@ public class BookmarkUtils {
       * @return Whether the desktop bookmarks layout is enabled.
       */
      public static boolean isDesktopBookmarksLayoutEnabled() {
@@ -1274,12 +1274,12 @@ index a6293b44c6f9b..f14c71a610ee8 100644
 +                && ChromeFeatureList.isEnabled(ChromeFeatureList.ANDROID_DESKTOP_BOOKMARK_LAYOUT);
      }
  
-     private static Locale getLocale(Activity activity) {
+     /**
 diff --git a/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java b/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java
-index 2fb4f128d6a22..fe588cd80d249 100644
+index 2608d2766aa4f..78a07db8e8961 100644
 --- a/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java
 +++ b/chrome/browser/bookmarks/android/java/src/org/chromium/chrome/browser/bookmarks/bar/BookmarkBarUtils.java
-@@ -305,7 +305,7 @@ public class BookmarkBarUtils {
+@@ -311,7 +311,7 @@ public class BookmarkBarUtils {
       * @param fromKeyboardShortcut True if the change was triggered by a keyboard shortcut.
       */
      public static void toggleShowBookmarksBar(Profile profile, boolean fromKeyboardShortcut) {
@@ -1288,7 +1288,7 @@ index 2fb4f128d6a22..fe588cd80d249 100644
              toggleUserPrefsShowBookmarksBar(profile, fromKeyboardShortcut);
          } else {
              toggleDevicePrefShowBookmarksBar(profile, fromKeyboardShortcut);
-@@ -873,13 +873,13 @@ public class BookmarkBarUtils {
+@@ -879,13 +879,13 @@ public class BookmarkBarUtils {
          boolean isCurrentlyVisible = isBookmarkBarVisible(context, profile, isXrFullSpaceMode);
  
          // Record if the Bookmark Bar is visible, but not in cases of a forced feature param.
@@ -1304,7 +1304,7 @@ index 2fb4f128d6a22..fe588cd80d249 100644
              RecordHistogram.recordEnumeratedHistogram(
                      BOOKMARK_BAR_SHOWN_ON_START_UP_REASON,
                      isCurrentlyVisible
-@@ -967,13 +967,13 @@ public class BookmarkBarUtils {
+@@ -973,13 +973,13 @@ public class BookmarkBarUtils {
      /**
       * Returns whether the bookmark bar should use profile user preferences (synced across devices,
       * e.g. Desktop) rather than local device preferences (e.g. tablet). This method should not be
@@ -1395,7 +1395,7 @@ index 681ad0d1e1789..b533f11c63663 100644
  #elif BUILDFLAG(ENABLE_EXTENSIONS)
    extensions_browser_client_ =
 diff --git a/chrome/browser/chrome_browser_field_trials.cc b/chrome/browser/chrome_browser_field_trials.cc
-index d61bf669264c4..ede80cc730614 100644
+index 63e5aff1330e4..0a07e7493f6d6 100644
 --- a/chrome/browser/chrome_browser_field_trials.cc
 +++ b/chrome/browser/chrome_browser_field_trials.cc
 @@ -134,7 +134,7 @@ void ChromeBrowserFieldTrials::RegisterFeatureOverrides(
@@ -1647,7 +1647,7 @@ index 72f62b0209af0..ecf44cf830376 100644
  
  }  // namespace chrome::internal
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 388c2dfb94264..585fff2018411 100644
+index ba64f64266801..4639088fafafe 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
 @@ -4251,7 +4251,7 @@ base::OnceClosure ChromeContentBrowserClient::SelectClientCertificate(
@@ -2331,7 +2331,7 @@ index efbd97de81493..bf0eea5256021 100644
        base::android::device_info::is_automotive() ||
        base::android::device_info::is_xr()) {
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
-index c15eeb5a91e56..cb40fafaa47ce 100644
+index 019df2f7199c2..f8b12a5b9d8a7 100644
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
 @@ -2627,6 +2627,10 @@ inline constexpr char kExtensionsCollapseMainMenuDescription[] =
@@ -2346,10 +2346,10 @@ index c15eeb5a91e56..cb40fafaa47ce 100644
      "Extensions Menu Access Control";
  inline constexpr char kExtensionsMenuAccessControlDescription[] =
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index f287d698de07a..cc09e69f8e325 100644
+index 424cd244e6c87..ac9c0a10d8131 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-@@ -941,7 +941,10 @@ public abstract class ChromeFeatureList {
+@@ -943,7 +943,10 @@ public abstract class ChromeFeatureList {
      public static final CachedFlag sAndroidNoCaptureWhenScrollingDisabledOnDesktop =
              newCachedFlag(ANDROID_NO_CAPTURE_WHEN_SCROLLING_DISABLED_ON_DESKTOP, false);
      public static final CachedFlag sAndroidOpenIncognitoAsWindow =
@@ -2361,7 +2361,7 @@ index f287d698de07a..cc09e69f8e325 100644
      public static final CachedFlag sAndroidOpenIncognitoAsWindowRestrictions =
              newCachedFlag(ANDROID_OPEN_INCOGNITO_AS_WINDOW_RESTRICTIONS, true);
      public static final CachedFlag sAndroidPageInfoAsAppMenuItem =
-@@ -1075,7 +1078,8 @@ public abstract class ChromeFeatureList {
+@@ -1077,7 +1080,8 @@ public abstract class ChromeFeatureList {
      public static final CachedFlag sCctTabSwitcherEnabledForEmbedderExperiment =
              newCachedFlag(CCT_TAB_SWITCHER_ENABLED_FOR_EMBEDDER_EXPERIMENT, true);
      public static final CachedFlag sChromeNativeUrlOverriding =
@@ -2837,10 +2837,10 @@ index 0067a6e0cc3e2..8e6ecf6f3ddda 100644
        "discards:resources",
        "management:resources",
 diff --git a/chrome/browser/resources/contextual_tasks/app.ts b/chrome/browser/resources/contextual_tasks/app.ts
-index b2ddf24ac077b..babfe8e371887 100644
+index b47a48adb6a82..52ea33d1c6845 100644
 --- a/chrome/browser/resources/contextual_tasks/app.ts
 +++ b/chrome/browser/resources/contextual_tasks/app.ts
-@@ -403,7 +403,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+@@ -389,7 +389,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
    // Whether the composebox jump fix is enabled. This fix hides the composebox
    // until the server gives the embedded page gives the initial bounds for the
    // composebox.
@@ -2849,7 +2849,7 @@ index b2ddf24ac077b..babfe8e371887 100644
    private enableComposeboxJumpFix_: boolean =
        loadTimeData.getBoolean('enableComposeboxJumpFix');
    // </if>
-@@ -831,7 +831,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+@@ -817,7 +817,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
            }
          });
  
@@ -2858,7 +2858,7 @@ index b2ddf24ac077b..babfe8e371887 100644
      this.isDomContentLoaded_ = true;
      if (this.isInitialFrameLoad_ && this.isZeroState_) {
        this.playZeroStateAnimations_();
-@@ -1104,7 +1104,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+@@ -1066,7 +1066,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
      this.updateBasicModeAfterNavigation();
      this.maybeOnThreadFrameTopLevelNavigation(ev.url);
  
@@ -2867,7 +2867,7 @@ index b2ddf24ac077b..babfe8e371887 100644
      // On standard mobile Android phones, since guest-to-host script
      // communication is not supported, must set isDomContentLoaded_ on
      // loadcommit rather than waiting for a domContentLoaded message.
-@@ -1373,7 +1373,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
+@@ -1335,7 +1335,7 @@ export class ContextualTasksAppElement extends ContextualTasksAppElementBase {
      // forcedcomposeboxBounds are set. No-op if the feature flag is not enabled.
      // On standard mobile Android, since we have no guest-to-host script
      // communication the bounds will never be set, so we must not hide the composebox.
@@ -3895,10 +3895,10 @@ index 770a58b5dc44c..70f5678b2f2b2 100644
  
          LifetimeAssert.setSafeToGc(mLifetimeAssert, true);
 diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarControlContainer.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarControlContainer.java
-index 486dc5d9ef7a7..8ddad4a0e720d 100644
+index 6d3c374317dd9..bca223895197c 100644
 --- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarControlContainer.java
 +++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarControlContainer.java
-@@ -958,7 +958,7 @@ public class ToolbarControlContainer extends OptimizedFrameLayout
+@@ -972,7 +972,7 @@ public class ToolbarControlContainer extends OptimizedFrameLayout
          }
  
          private boolean isCapturingDisabled() {
@@ -4488,7 +4488,7 @@ index dbb546b6ddc2b..b1be720c2dc7e 100644
  
  #endif  // CHROME_RENDERER_SANDBOX_STATUS_EXTENSION_ANDROID_H_
 diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
-index f29c4205817c7..0a94c080b746d 100644
+index abc2dc97418a4..646706f974780 100644
 --- a/chrome/test/BUILD.gn
 +++ b/chrome/test/BUILD.gn
 @@ -1186,7 +1186,7 @@ source_set("platform_browser_tests") {
@@ -4820,7 +4820,7 @@ index ac0499ab05e78..0d55559a08346 100644
                      && event.getClassification() == MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE) {
                  if (mPendingTwoFingerSwipeDownEvent != null) {
 diff --git a/components/embedder_support/user_agent_utils.cc b/components/embedder_support/user_agent_utils.cc
-index 3f87ec84fb32a..fe8cc573db5c7 100644
+index 5d96c60405807..fcf9cc329a799 100644
 --- a/components/embedder_support/user_agent_utils.cc
 +++ b/components/embedder_support/user_agent_utils.cc
 @@ -307,7 +307,7 @@ std::string GetUnifiedPlatform() {
@@ -4832,7 +4832,7 @@ index 3f87ec84fb32a..fe8cc573db5c7 100644
        base::android::device_info::is_xr()) {
      return base::FeatureList::IsEnabled(
                 blink::features::kAndroidDesktopUASpoofAsChromeOS)
-@@ -569,7 +569,7 @@ bool GetMobileBitForUAMetadata() {
+@@ -585,7 +585,7 @@ bool GetMobileBitForUAMetadata() {
    // Android and not a desktop form factor, AND the kUseMobileUserAgent switch
    // is present.
  #if BUILDFLAG(IS_ANDROID)
@@ -4841,7 +4841,7 @@ index 3f87ec84fb32a..fe8cc573db5c7 100644
        base::android::device_info::is_xr()) {
      return false;
    }
-@@ -595,7 +595,7 @@ std::string GetPlatformVersion() {
+@@ -611,7 +611,7 @@ std::string GetPlatformVersion() {
    // info checks.
    if (!base::FeatureList::IsEnabled(
            blink::features::kAndroidDesktopUAPlatform) &&
@@ -4850,7 +4850,7 @@ index 3f87ec84fb32a..fe8cc573db5c7 100644
         base::android::device_info::is_xr())) {
      return std::string();
    }
-@@ -615,7 +615,7 @@ std::string GetPlatformVersion() {
+@@ -631,7 +631,7 @@ std::string GetPlatformVersion() {
  
  std::string GetPlatformForUAMetadata() {
  #if BUILDFLAG(IS_ANDROID)
@@ -4859,16 +4859,16 @@ index 3f87ec84fb32a..fe8cc573db5c7 100644
        base::android::device_info::is_xr()) {
      return base::FeatureList::IsEnabled(
                 blink::features::kAndroidDesktopUAPlatform)
-@@ -740,7 +740,7 @@ std::string GetCpuArchitecture() {
-   // TODO(crbug.com/433345971) The user agent string should contain the actual
-   // cpu type information obtained from the Android device. Same for the cpu bit
-   // count in #GetCpuBitness below.
+@@ -753,7 +753,7 @@ std::string GetCpuArchitecture() {
+ #elif BUILDFLAG(IS_IOS)
+   return "arm";
+ #elif BUILDFLAG(IS_ANDROID)
 -  if (base::android::device_info::is_desktop() ||
 +  if (base::android::device_info::is_desktop_false() ||
        base::android::device_info::is_xr()) {
-     return "x86";
+     return GetAndroidDesktopCpuArchitecture();
    }
-@@ -780,7 +780,7 @@ std::string GetCpuBitness() {
+@@ -785,7 +785,7 @@ std::string GetCpuBitness() {
  #elif BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_FUCHSIA)
    return "64";
  #elif BUILDFLAG(IS_ANDROID)
@@ -4877,7 +4877,7 @@ index 3f87ec84fb32a..fe8cc573db5c7 100644
        base::android::device_info::is_xr()) {
      return "64";
    }
-@@ -853,7 +853,7 @@ std::string BuildUserAgentFromProduct(const std::string& product) {
+@@ -858,7 +858,7 @@ std::string BuildUserAgentFromProduct(const std::string& product) {
  std::string BuildModelInfo() {
  #if BUILDFLAG(IS_ANDROID)
    // Model information is not exposed on Android desktop.
@@ -6119,10 +6119,10 @@ index 174028663459a..3616ee1857f69 100644
  
  # Skia only needs to support GPU rasterization if we use the full Chromium
 diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/features.cc
-index 10b907c13e662..82ea056b8d21b 100644
+index e395ffbb3a0fd..a8a65e122a25a 100644
 --- a/third_party/blink/common/features.cc
 +++ b/third_party/blink/common/features.cc
-@@ -2241,7 +2241,7 @@ BASE_FEATURE(kStopInBackground,
+@@ -2245,7 +2245,7 @@ BASE_FEATURE(kStopInBackground,
  // b/248036988 - Disable this for Chromecast on Android builds to prevent apps
  // that play audio in the background from stopping.
  #if BUILDFLAG(IS_ANDROID) && !BUILDFLAG(IS_CAST_ANDROID) && \
@@ -6131,7 +6131,7 @@ index 10b907c13e662..82ea056b8d21b 100644
               base::FEATURE_ENABLED_BY_DEFAULT
  #else
               base::FEATURE_DISABLED_BY_DEFAULT
-@@ -2537,7 +2537,7 @@ bool IsFencedFramesEnabled() {
+@@ -2541,7 +2541,7 @@ bool IsFencedFramesEnabled() {
  // https://bugs.chromium.org/p/chromium/issues/detail?id=1335069#c3.
  bool IsMemoryPurgeOnBackgroundingEnabled() {
    return

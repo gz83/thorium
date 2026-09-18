@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index c398ef5092586..e1bcf962215d2 100644
+index 7c98d174cb5b8..98c9bfaeb6970 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
 @@ -3989,9 +3989,12 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,

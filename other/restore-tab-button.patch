@@ -1,8 +1,8 @@
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index a4bc404b937a7..347ac1c874505 100644
+index 1412317c79211..d9183dfc3d130 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -10235,6 +10235,9 @@ Keep your key file in a safe place. You will need it to create new versions of y
+@@ -10229,6 +10229,9 @@ Keep your key file in a safe place. You will need it to create new versions of y
        <message name="IDS_TOOLTIP_STOP" desc="The tooltip for the stop button">
          Stop loading this page
        </message>
@@ -12,7 +12,7 @@ index a4bc404b937a7..347ac1c874505 100644
        <message name="IDS_TOOLTIP_EXTENSIONS_BUTTON" desc="The tooltip for the extensions button">
          Extensions
        </message>
-@@ -10955,6 +10958,9 @@ Keep your key file in a safe place. You will need it to create new versions of y
+@@ -10949,6 +10952,9 @@ Keep your key file in a safe place. You will need it to create new versions of y
        <message name="IDS_ACCNAME_RELOAD" desc="The accessible name for the reload/stop button.">
          Reload
        </message>
@@ -170,7 +170,7 @@ index 0000000000000..f9c5e97781b98
 +
 +#endif  // CHROME_BROWSER_UI_VIEWS_TOOLBAR_RESTORE_TAB_BUTTON_H_
 diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui/views/toolbar/toolbar_view.cc
-index 58334f6105692..ceef558af156c 100644
+index c824f203b2cb5..8e33f9ef4c47c 100644
 --- a/chrome/browser/ui/views/toolbar/toolbar_view.cc
 +++ b/chrome/browser/ui/views/toolbar/toolbar_view.cc
 @@ -102,6 +102,7 @@
@@ -181,7 +181,7 @@ index 58334f6105692..ceef558af156c 100644
  #include "chrome/browser/ui/views/toolbar/split_tabs_button.h"
  #include "chrome/browser/ui/views/toolbar/toolbar_button.h"
  #include "chrome/browser/ui/views/toolbar/toolbar_controller.h"
-@@ -444,6 +445,15 @@ void ToolbarView::Init() {
+@@ -455,6 +456,15 @@ void ToolbarView::Init() {
          browser_, base::BindRepeating(callback, browser_, IDC_HOME)));
    }
  
@@ -197,7 +197,7 @@ index 58334f6105692..ceef558af156c 100644
    if (!features::IsWebUISplitTabsButtonEnabled()) {
      split_tabs_ =
          AddChildView(std::make_unique<SplitTabsToolbarButton>(browser_));
-@@ -1582,6 +1592,13 @@ void ToolbarView::InitLayout() {
+@@ -1593,6 +1603,13 @@ void ToolbarView::InitLayout() {
              0, GetLayoutConstant(LayoutConstant::kToolbarDividerSpacing)));
    }
  
@@ -212,7 +212,7 @@ index 58334f6105692..ceef558af156c 100644
        base::FeatureList::IsEnabled(features::kToolbarGlicButtonResizing)) {
      glic_button_->SetProperty(
 diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.h b/chrome/browser/ui/views/toolbar/toolbar_view.h
-index daed2c76ac524..197f23eae0599 100644
+index 51f030104cf30..d9180e630715a 100644
 --- a/chrome/browser/ui/views/toolbar/toolbar_view.h
 +++ b/chrome/browser/ui/views/toolbar/toolbar_view.h
 @@ -57,6 +57,7 @@ class HomeButton;
@@ -231,7 +231,7 @@ index daed2c76ac524..197f23eae0599 100644
    LocationBarView* location_bar_view() const { return location_bar_view_; }
    LocationBar* location_bar() const { return location_bar_; }
    CustomTabBarView* custom_tab_bar() { return custom_tab_bar_; }
-@@ -378,6 +380,7 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -383,6 +385,7 @@ class ToolbarView : public views::AccessiblePaneView,
    raw_ptr<ToolbarButton> back_ = nullptr;
    raw_ptr<ToolbarButton> forward_ = nullptr;
    raw_ptr<ReloadButton> reload_ = nullptr;
@@ -239,7 +239,7 @@ index daed2c76ac524..197f23eae0599 100644
    raw_ptr<WebUIToolbarWebView> toolbar_webview_ = nullptr;
    std::unique_ptr<WebUIToolbarWebView> detached_toolbar_webview_;
    raw_ptr<HomeButton> home_ = nullptr;
-@@ -389,6 +392,7 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -394,6 +397,7 @@ class ToolbarView : public views::AccessiblePaneView,
    raw_ptr<LocationBar> location_bar_ = nullptr;
    raw_ptr<ExtensionsToolbarDesktop> extensions_container_ = nullptr;
    raw_ptr<ToolbarDivider> toolbar_divider_ = nullptr;

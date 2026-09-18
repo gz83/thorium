@@ -11,7 +11,7 @@ index 0e9128249b48c..03eecd37d16ac 100644
  #define IDC_CONTENT_CONTEXT_OPENLINK_ISOLATED 50113
  // Image items.
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index e12de4c874cf1..bf68d725c62b0 100644
+index a70a1e7fe80d0..1a1d9b744f19c 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
 @@ -811,6 +811,9 @@ are declared in tools/grit/grit_args.gni.

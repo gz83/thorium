@@ -1,8 +1,8 @@
 diff --git a/chrome/android/chrome_java_resources.gni b/chrome/android/chrome_java_resources.gni
-index 503af026fd70c..54e887013995d 100644
+index 6b84ae364be97..3cf21110c5b60 100644
 --- a/chrome/android/chrome_java_resources.gni
 +++ b/chrome/android/chrome_java_resources.gni
-@@ -673,6 +673,7 @@ chrome_java_resources = [
+@@ -672,6 +672,7 @@ chrome_java_resources = [
    "java/res/xml/developer_preferences.xml",
    "java/res/xml/do_not_track_preferences.xml",
    "java/res/xml/google_services_preferences.xml",
@@ -549,7 +549,7 @@ index 026d009b9d728..daabb23d63a49 100644
    // the use of Clear Key key system which is always allowed as required by the
    // spec.
 diff --git a/third_party/blink/renderer/platform/runtime_enabled_features.json5 b/third_party/blink/renderer/platform/runtime_enabled_features.json5
-index b6fa80893dca2..141a61da97449 100644
+index 56be67e70f1cd..844ace441eecd 100644
 --- a/third_party/blink/renderer/platform/runtime_enabled_features.json5
 +++ b/third_party/blink/renderer/platform/runtime_enabled_features.json5
 @@ -3380,6 +3380,7 @@

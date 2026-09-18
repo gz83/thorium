@@ -12,7 +12,7 @@ index 242cb6d654118..1ca6ffab7dc63 100644
      "unexpire_flags.h",
      "universal_web_contents_observers.cc",
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 92e1a5aa484ba..c398ef5092586 100644
+index 033f22b414651..7c98d174cb5b8 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
 @@ -192,6 +192,7 @@
