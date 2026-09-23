@@ -116,10 +116,36 @@ jobs:
         run: |
           set -euo pipefail
 
-          gh release download "$RELEASE_TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --pattern "$SOURCE_ASSET" \
-            --dir "$INPUT_DIR"
+          # The release-by-tag response can have an empty embedded assets list
+          # even when the separate release-assets endpoint lists the upload.
+          release_id="$(gh api \
+            "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" \
+            --jq '.id')"
+          if [[ ! "$release_id" =~ ^[0-9]+$ ]]; then
+            echo "::error::Could not resolve the release ID"
+            exit 1
+          fi
+
+          asset_id="$(gh api --paginate \
+            "repos/$GITHUB_REPOSITORY/releases/$release_id/assets?per_page=100" |
+            jq -ers --arg name "$SOURCE_ASSET" '
+              [.[][] | select(.name == $name)] |
+              if length != 1 then
+                error("Expected exactly one release asset named " + $name)
+              elif .[0].state != "uploaded" then
+                error("Release asset is not fully uploaded: " + $name)
+              else
+                .[0].id
+              end
+            ')"
+          if [[ ! "$asset_id" =~ ^[0-9]+$ ]]; then
+            echo "::error::Could not resolve the asset ID"
+            exit 1
+          fi
+
+          gh api "repos/$GITHUB_REPOSITORY/releases/assets/$asset_id" \
+            -H 'Accept: application/octet-stream' \
+            > "$INPUT_DIR/$SOURCE_ASSET"
 
           test -f "$INPUT_DIR/$SOURCE_ASSET"
 
