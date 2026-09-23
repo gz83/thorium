@@ -2345,8 +2345,30 @@ index 019df2f7199c2..f8b12a5b9d8a7 100644
  inline constexpr char kExtensionsMenuAccessControlName[] =
      "Extensions Menu Access Control";
  inline constexpr char kExtensionsMenuAccessControlDescription[] =
+diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browser/flags/android/chrome_feature_list.cc
+index 3f46c728b30e7..9c13a8ded436a 100644
+--- a/chrome/browser/flags/android/chrome_feature_list.cc
++++ b/chrome/browser/flags/android/chrome_feature_list.cc
+@@ -955,7 +955,7 @@ BASE_FEATURE(kUseAppTaskForCustomTabActivation, base::FEATURE_ENABLED_BY_DEFAULT
+ // Use the LibunwindstackNativeUnwinderAndroid for only browser main thread, and
+ // only on Android.
+ BASE_FEATURE(kUseLibunwindstackNativeUnwinderAndroid, base::FEATURE_ENABLED_BY_DEFAULT);
+-BASE_FEATURE(kUseWebUiNtpAndroid, BUILDFLAG(IS_DESKTOP_ANDROID) ? base::FEATURE_ENABLED_BY_DEFAULT : base::FEATURE_DISABLED_BY_DEFAULT);
++BASE_FEATURE(kUseWebUiNtpAndroid, base::FEATURE_DISABLED_BY_DEFAULT);
+ // Verify sign-in state on startup.
+ BASE_FEATURE(kVerifyStartupSigninState, base::FEATURE_ENABLED_BY_DEFAULT);
+ BASE_FEATURE(kVirtualKeyboardResizesContentTransientOvershootFix, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -965,7 +965,7 @@ BASE_FEATURE(kWebAppShortEdgesCutoutMode, base::FEATURE_DISABLED_BY_DEFAULT);
+ // Shows only the remote device name on the Android notification instead of
+ // a descriptive text.
+ BASE_FEATURE(kWebOtpCrossDeviceSimpleString, base::FEATURE_DISABLED_BY_DEFAULT);
+-BASE_FEATURE(kWebUiAndroidTheming, BUILDFLAG(IS_DESKTOP_ANDROID) ? base::FEATURE_ENABLED_BY_DEFAULT : base::FEATURE_DISABLED_BY_DEFAULT);
++BASE_FEATURE(kWebUiAndroidTheming, base::FEATURE_DISABLED_BY_DEFAULT);
+ BASE_FEATURE(kXplatSyncedSetupThemes, base::FEATURE_DISABLED_BY_DEFAULT);
+ BASE_FEATURE(kYourSavedInfoSettingsPageAndroid, base::FEATURE_DISABLED_BY_DEFAULT);
+ // go/keep-sorted end
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index 424cd244e6c87..ac9c0a10d8131 100644
+index 424cd244e6c87..68399660c7ee0 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 @@ -943,7 +943,10 @@ public abstract class ChromeFeatureList {
@@ -2371,6 +2393,33 @@ index 424cd244e6c87..ac9c0a10d8131 100644
      public static final CachedFlag sClampAutomotiveScaling =
              newCachedFlag(CLAMP_AUTOMOTIVE_SCALING, true);
      public static final CachedFlag sClankStartupLatencyInjection =
+@@ -1155,7 +1159,7 @@ public abstract class ChromeFeatureList {
+     public static final CachedFlag sEnableAndroidSidePanel =
+             newCachedFlag(
+                     ENABLE_ANDROID_SIDE_PANEL,
+-                    /* defaultValue= */ BuildConfig.IS_DESKTOP_ANDROID,
++                    /* defaultValue= */ BuildConfig.IS_DESKTOP_ANDROID_FALSE,
+                     // In http://crrev.com/c/7689838, "defaultValueInTests" was set to
+                     // true for testing purposes. Detailed reasons are in that CL's commit message.
+                     //
+@@ -1453,7 +1457,7 @@ public abstract class ChromeFeatureList {
+     public static final CachedFlag sUseLibunwindstackNativeUnwinderAndroid =
+             newCachedFlag(USE_LIBUNWINDSTACK_NATIVE_UNWINDER_ANDROID, true);
+     public static final CachedFlag sUseWebUiNtpAndroid =
+-            newCachedFlag(USE_WEB_UI_NTP_ANDROID, BuildConfig.IS_DESKTOP_ANDROID);
++            newCachedFlag(USE_WEB_UI_NTP_ANDROID, BuildConfig.IS_DESKTOP_ANDROID_FALSE);
+     public static final CachedFlag sVirtualKeyboardResizesContentTransientOvershootFix =
+             newCachedFlag(VIRTUAL_KEYBOARD_RESIZES_CONTENT_TRANSIENT_OVERSHOOT_FIX, true);
+     public static final CachedFlag sVirtualKeyboardTransientInnerHeightFix =
+@@ -1466,7 +1470,7 @@ public abstract class ChromeFeatureList {
+                     /* defaultValue= */ false,
+                     /* defaultValueInTests= */ true);
+     public static final CachedFlag sWebUiAndroidTheming =
+-            newCachedFlag(WEB_UI_ANDROID_THEMING, BuildConfig.IS_DESKTOP_ANDROID);
++            newCachedFlag(WEB_UI_ANDROID_THEMING, BuildConfig.IS_DESKTOP_ANDROID_FALSE);
+     // keep-sorted end
+ 
+     public static final List<CachedFlag> sFlagsCachedFullBrowser =
 diff --git a/chrome/browser/glic/BUILD.gn b/chrome/browser/glic/BUILD.gn
 index 68a41caa43eb6..c001bc05402a3 100644
 --- a/chrome/browser/glic/BUILD.gn
