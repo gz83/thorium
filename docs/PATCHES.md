@@ -111,7 +111,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-app-metadata-branding.patch`](../other/thorium-app-metadata-branding.patch)
 - [`thorium-theme-resources.patch`](../other/thorium-theme-resources.patch) — Registers all eight Thorium WebUI images in M154’s theme resource map, retaining Android’s direct resource-ID access to the version-page mascot.
 - [`thorium-app-vector-icons.patch`](../other/thorium-app-vector-icons.patch)
-- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Downloads and verifies the upstream uBlock Origin 1.74.0 GitHub CRX at build time, then bundles it for offline installation in new profiles without Chrome Web Store access.
+- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Downloads and verifies the upstream uBlock Origin 1.75.0 GitHub CRX at build time, then bundles it for offline installation in new profiles without Chrome Web Store access. The bundled CRX retains upstream’s extension update URL.
 - [`bookmark-default-prefs.patch`](../other/bookmark-default-prefs.patch)
 - [`bookmark-dialog-default-folder.patch`](../other/bookmark-dialog-default-folder.patch)
 - [`increase-bookmark-open-prompt-threshold.patch`](../other/increase-bookmark-open-prompt-threshold.patch)
@@ -231,7 +231,7 @@ overlay-derived, or still need separate provenance review.
 - [`thoriumos-sample-system-web-app.patch`](../other/thoriumos-sample-system-web-app.patch) — Enables the sample system web app in official builds using M154’s `is_chromeos` guard, preserving trusted/untrusted TypeScript resource mappings.
 - [`thoriumos-disable-stats-reporting.patch`](../other/thoriumos-disable-stats-reporting.patch)
 - [`add-flag-for-auto-dark-mode.patch`](../other/add-flag-for-auto-dark-mode.patch)
-- [`disable-thorium-icons.patch`](../other/disable-thorium-icons.patch)
+- [`disable-thorium-icons.patch`](../other/disable-thorium-icons.patch) — Selects separate Thorium vector icons, shared WebUI SVGs and common folder PNGs; `--disable-thorium-icons` preserves upstream rounded and legacy resources, including WebUI icon mappings.
 - [`always-enable-reload-menu.patch`](../other/always-enable-reload-menu.patch)
 
 ### 80 - Extensions, privacy, install branding, and late platform overlays.
@@ -250,7 +250,7 @@ overlay-derived, or still need separate provenance review.
 - [`windows-profile-shortcut-icon-version.patch`](../other/windows-profile-shortcut-icon-version.patch)
 - [`disable-aero.patch`](../other/disable-aero.patch)
 - [`android-disable-signin-without-account-manager.patch`](../other/android-disable-signin-without-account-manager.patch)
-- [`android-extensions-support.patch`](../other/android-extensions-support.patch) — Adapts Android extension support to M154’s bookmark helpers, inline switches and locale validation API. Updates GN, C++ and Java platform selectors, enabling extension support while preserving mobile UI behavior. Retains the extension toggle and depends on the following `enable-extension-in-incognito.patch` for shared toolbar bridges.
+- [`android-extensions-support.patch`](../other/android-extensions-support.patch) — Adapts Android extension support to M155, including side-panel dependencies, settings APIs and relocated extension test targets. Updates GN, C++ and Java platform selectors, enabling extension support while preserving mobile UI behavior. Retains the extension toggle and depends on the following `enable-extension-in-incognito.patch` for shared toolbar bridges.
 - [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch) — Preserves Android extension bridge switching between regular and incognito profiles. Adapts M154 popup parameters, Web App toolbar calls and `ScopedTab` ownership; avoids invalidated iterators during tab collection cleanup.
 - [`add-quick-extension-toggle-menu.patch`](../other/add-quick-extension-toggle-menu.patch) - Adds a default-off, `chrome://flags`-controlled quick enable/disable section to the extensions menu. Keeps the menu open when disabling the last extension so it can be re-enabled.
 

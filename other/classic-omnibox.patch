@@ -29,7 +29,7 @@ index 16d85ffee569f..35ed9c8018e89 100644
        return 16;
      case LayoutConstant::kLocationBarChipPadding:
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 5a42cb3387e66..6f5c5422559cf 100644
+index 0f991201a1e89..4b902c8674283 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
 @@ -10,6 +10,7 @@
@@ -40,7 +40,7 @@ index 5a42cb3387e66..6f5c5422559cf 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
-@@ -247,7 +248,11 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
+@@ -249,7 +250,11 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
            }));
        views::FocusRing::Get(this)->SetOutsetFocusRingDisabled(true);
      }
@@ -53,7 +53,7 @@ index 5a42cb3387e66..6f5c5422559cf 100644
  
  #if BUILDFLAG(OS_LEVEL_GEOLOCATION_PERMISSION_SUPPORTED)
      if (features::IsOsLevelGeolocationPermissionSupportEnabled()) {
-@@ -525,6 +530,11 @@ bool LocationBarView::IsInitialized() const {
+@@ -535,6 +540,11 @@ bool LocationBarView::IsInitialized() const {
  }
  
  int LocationBarView::GetBorderRadius() const {
@@ -65,7 +65,7 @@ index 5a42cb3387e66..6f5c5422559cf 100644
    return ComputeBorderRadius(size());
  }
  
-@@ -1404,6 +1414,12 @@ void LocationBarView::RefreshBackground() {
+@@ -1434,6 +1444,12 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;

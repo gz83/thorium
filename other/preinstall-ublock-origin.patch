@@ -35,7 +35,7 @@ index 0d681e3a260a1..0a0249393b725 100644
  
 +// The upstream GitHub CRX has its own signing key, distinct from the CWS ID.
 +constexpr char kUBlockOriginExtensionId[] = "fkgkibajhfbepljeaefdnfnegdcjomkh";
-+constexpr char kUBlockOriginVersion[] = "1.74.0";
++constexpr char kUBlockOriginVersion[] = "1.75.0";
 +
 +// Keep the source in the profile: the external installer reads it
 +// asynchronously. The signed CRX is verified by the normal external-file
@@ -44,7 +44,7 @@ index 0d681e3a260a1..0a0249393b725 100644
 +                                    std::string crx_data) {
 +  const base::FilePath directory =
 +      profile_path.AppendASCII("Preinstalled Extensions");
-+  const base::FilePath path = directory.AppendASCII("uBlock0_1.74.0.crx");
++  const base::FilePath path = directory.AppendASCII("uBlock0_1.75.0.crx");
 +  if (crx_data.empty() || !base::CreateDirectory(directory) ||
 +      !base::WriteFile(path, crx_data)) {
 +    return base::FilePath();
@@ -212,17 +212,17 @@ index 399a7f4b8dbb1..4d54d1b78a53d 100644
  
  }  // namespace preinstalled_extensions
 diff --git a/chrome/browser/resources/BUILD.gn b/chrome/browser/resources/BUILD.gn
-index eb9d625d1c5e7..494f08cb1820a 100644
+index c76bba135901c..93f402ff8a5f8 100644
 --- a/chrome/browser/resources/BUILD.gn
 +++ b/chrome/browser/resources/BUILD.gn
-@@ -236,6 +236,14 @@ if (enable_webui_generate_code_cache) {
+@@ -237,6 +237,14 @@ if (enable_webui_generate_code_cache) {
  }
  
  if (enable_extensions_core) {
 +  if (!is_chromeos) {
 +    action("download_ublock_origin") {
 +      script = "ublock_origin/download.py"
-+      outputs = [ "$target_gen_dir/ublock_origin/uBlock0_1.74.0.crx" ]
++      outputs = [ "$target_gen_dir/ublock_origin/uBlock0_1.75.0.crx" ]
 +      args = [ rebase_path(outputs[0], root_build_dir) ]
 +    }
 +  }
@@ -230,13 +230,13 @@ index eb9d625d1c5e7..494f08cb1820a 100644
    grit("component_extension_resources") {
      source = "component_extension_resources.grd"
  
-@@ -270,6 +278,10 @@ if (enable_extensions_core) {
+@@ -271,6 +279,10 @@ if (enable_extensions_core) {
      # Some resources within component_extension_resources.grd are generated at
      # build time so we include them as explicit dependencies here
      deps = [ "//chrome/browser/resources/glic/extension:build_ts" ]
 +    if (!is_chromeos) {
 +      deps += [ ":download_ublock_origin" ]
-+      inputs += [ "$target_gen_dir/ublock_origin/uBlock0_1.74.0.crx" ]
++      inputs += [ "$target_gen_dir/ublock_origin/uBlock0_1.75.0.crx" ]
 +    }
  
      if (is_chromeos) {
@@ -250,7 +250,7 @@ index 37f5f7edf273e..c23c42f6218aa 100644
          <include name="IDR_ARC_SUPPORT_UI_JS" file="chromeos/arc_support/ui.js" type="chrome_html" />
        </if>
 +      <if expr="not is_chromeos">
-+        <include name="IDR_THORIUM_UBLOCK_ORIGIN_CRX" file="${root_gen_dir}/chrome/browser/resources/ublock_origin/uBlock0_1.74.0.crx" use_base_dir="false" resource_path="ublock_origin/uBlock0_1.74.0.crx" type="BINDATA" />
++        <include name="IDR_THORIUM_UBLOCK_ORIGIN_CRX" file="${root_gen_dir}/chrome/browser/resources/ublock_origin/uBlock0_1.75.0.crx" use_base_dir="false" resource_path="ublock_origin/uBlock0_1.75.0.crx" type="BINDATA" />
 +      </if>
      </includes>
  
@@ -276,10 +276,10 @@ index 0000000000000..89fe73de3481f
 +import urllib.request
 +
 +URL = (
-+    "https://github.com/gorhill/uBlock/releases/download/1.74.0/"
-+    "uBlock0_1.74.0.chromium.crx"
++    "https://github.com/gorhill/uBlock/releases/download/1.75.0/"
++    "uBlock0_1.75.0.chromium.crx"
 +)
-+SHA256 = "b6be71ed3e3e85eaad8f02710b9071d06428e141d942c43d5f65d4526e82dc3e"
++SHA256 = "d688ed3f0262ec4f8bdcd4c8f65987c5444c560aeb387a9e02aca1facdfa7046"
 +
 +
 +def fetch(output):

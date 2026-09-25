@@ -1,5 +1,5 @@
 diff --git a/tools/clang/scripts/build.py b/tools/clang/scripts/build.py
-index 2263458aa7e34..09e39666b89ea 100755
+index f636fb0951c54..87f9782e1bbd6 100755
 --- a/tools/clang/scripts/build.py
 +++ b/tools/clang/scripts/build.py
 @@ -99,6 +99,10 @@ BUG_REPORT_URL = (

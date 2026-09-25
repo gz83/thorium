@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index ede95ad351b54..ba64f64266801 100644
+index 31df3dabe2fa2..0c0986838d9de 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -408,6 +408,7 @@
+@@ -405,6 +405,7 @@
  #include "mojo/public/cpp/bindings/remote.h"
  #include "net/base/data_url.h"
  #include "net/base/features.h"
@@ -10,7 +10,7 @@ index ede95ad351b54..ba64f64266801 100644
  #include "net/base/url_util.h"
  #include "net/cookies/cookie_setting_override.h"
  #include "net/cookies/site_for_cookies.h"
-@@ -3195,6 +3196,12 @@ void ChromeContentBrowserClient::AppendExtraCommandLineSwitches(
+@@ -3219,6 +3220,12 @@ void ChromeContentBrowserClient::AppendExtraCommandLineSwitches(
  
      command_line->CopySwitchesFrom(browser_command_line, kSwitchNames);
  #endif

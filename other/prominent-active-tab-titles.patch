@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index daa14a2f504f2..eb4e72ddc84bc 100644
+index de060ada24258..33c9dbac3c165 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -356,6 +356,7 @@ Tab::Tab(tabs::TabHandle handle, TabSlotController* controller)
+@@ -363,6 +363,7 @@ Tab::Tab(tabs::TabHandle handle, TabSlotController* controller)
    SetID(VIEW_ID_TAB);
  
    AddChildViewRaw(title_.get());
@@ -10,7 +10,7 @@ index daa14a2f504f2..eb4e72ddc84bc 100644
  
    SetEventTargeter(std::make_unique<views::ViewTargeter>(this));
  
-@@ -1062,6 +1063,7 @@ void Tab::ActiveStateChanged() {
+@@ -1069,6 +1070,7 @@ void Tab::ActiveStateChanged() {
    icon_->SetActiveState(IsActive());
    alert_indicator_button_->OnParentTabButtonColorChanged();
    alert_indicator_button_->UpdateEnabledForMuteToggle();
@@ -19,7 +19,7 @@ index daa14a2f504f2..eb4e72ddc84bc 100644
  }
  
 diff --git a/chrome/browser/ui/views/tabs/tab_style_views.cc b/chrome/browser/ui/views/tabs/tab_style_views.cc
-index 3bc10a66bbd7d..8cffaeca808e9 100644
+index 9ed4e9a31b776..31b171c3cac2d 100644
 --- a/chrome/browser/ui/views/tabs/tab_style_views.cc
 +++ b/chrome/browser/ui/views/tabs/tab_style_views.cc
 @@ -9,6 +9,7 @@
@@ -31,8 +31,8 @@ index 3bc10a66bbd7d..8cffaeca808e9 100644
  #include "base/strings/string_util.h"
  #include "base/strings/utf_string_conversions.h"
 @@ -16,6 +17,8 @@
- #include "chrome/browser/ui/views/tabs/horizontal_tab_style_views.h"
- #include "chrome/browser/ui/views/tabs/vertical_tab_style_views.h"
+ #include "chrome/browser/ui/views/tabs/common/horizontal_tab_style_views.h"
+ #include "chrome/browser/ui/views/tabs/common/vertical_tab_style_views.h"
  #include "ui/gfx/color_utils.h"
 +#include "ui/views/style/typography.h"
 +#include "ui/views/style/typography_provider.h"
@@ -55,10 +55,10 @@ index 3bc10a66bbd7d..8cffaeca808e9 100644
 +                                                 views::style::STYLE_PRIMARY);
 +}
 diff --git a/chrome/browser/ui/views/tabs/tab_style_views.h b/chrome/browser/ui/views/tabs/tab_style_views.h
-index c1d2c371fc2f4..4fbafe2d3d3d0 100644
+index b3cd296d9073e..ccfae977801f1 100644
 --- a/chrome/browser/ui/views/tabs/tab_style_views.h
 +++ b/chrome/browser/ui/views/tabs/tab_style_views.h
-@@ -83,6 +83,7 @@ class TabStyleViewDelegate {
+@@ -84,6 +84,7 @@ class TabStyleViewDelegate {
  };
  
  namespace gfx {
@@ -66,9 +66,9 @@ index c1d2c371fc2f4..4fbafe2d3d3d0 100644
  class Canvas;
  }
  
-@@ -111,6 +112,9 @@ class TabStyleViews {
-                          float scale,
-                          const TabPathFlags& flags) const = 0;
+@@ -117,6 +118,9 @@ class TabStyleViews {
+   virtual std::optional<SkPath> GetChildClipPath(
+       float paint_recording_scale) const = 0;
  
 +  // Returns the appropriate font for the current active state.
 +  const gfx::FontList& GetFontList() const;

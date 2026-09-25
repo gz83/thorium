@@ -12,18 +12,18 @@ index 62900ea996f5c..35383b03df137 100644
    registry->RegisterBooleanPref(kGlicGeolocationEnabled, false);
    registry->RegisterBooleanPref(kGlicTabContextEnabled, false);
 diff --git a/chrome/browser/ui/omnibox/omnibox_next_features.cc b/chrome/browser/ui/omnibox/omnibox_next_features.cc
-index 79cfa8e7ef628..c31f13345c3b7 100644
+index 713f6fa62a3e0..94dc477bda357 100644
 --- a/chrome/browser/ui/omnibox/omnibox_next_features.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_next_features.cc
-@@ -23,6 +23,7 @@
- #include "components/contextual_search/contextual_search_session_handle.h"
+@@ -25,6 +25,7 @@
+ #include "components/lens/lens_features.h"
  #include "components/omnibox/browser/aim_eligibility_service.h"
  #include "components/omnibox/browser/omnibox_field_trial.h"
 +#include "components/omnibox/browser/omnibox_pref_names.h"
  #include "components/omnibox/common/omnibox_features.h"
  #include "components/prefs/pref_service.h"
  #include "components/search/search.h"
-@@ -221,6 +222,14 @@ omnibox::NTPComposeboxConfig GetNTPComposeboxConfig() {
+@@ -238,6 +239,14 @@ omnibox::NTPComposeboxConfig GetNTPComposeboxConfig() {
  }
  
  bool ShouldShowAimContextMenuOption(Profile* profile) {

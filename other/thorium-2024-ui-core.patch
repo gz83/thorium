@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/resources/settings/settings.html b/chrome/browser/resources/settings/settings.html
-index a1da62ba3a289..188ed766fcf6c 100644
+index 333ca8a1bdf7f..7b28d560b8381 100644
 --- a/chrome/browser/resources/settings/settings.html
 +++ b/chrome/browser/resources/settings/settings.html
 @@ -1,6 +1,6 @@
@@ -11,10 +11,10 @@ index a1da62ba3a289..188ed766fcf6c 100644
    <meta charset="utf-8">
    <meta name="color-scheme" content="light dark">
 diff --git a/chrome/browser/ui/bookmarks/bookmark_utils.cc b/chrome/browser/ui/bookmarks/bookmark_utils.cc
-index ed11adf55026f..2fc8c1771b5d6 100644
+index bbb39ea6755c8..b1b57fa9d145c 100644
 --- a/chrome/browser/ui/bookmarks/bookmark_utils.cc
 +++ b/chrome/browser/ui/bookmarks/bookmark_utils.cc
-@@ -383,15 +383,36 @@ bool CanAllBeEditedByUser(
+@@ -385,15 +385,36 @@ bool CanAllBeEditedByUser(
  
  ui::ImageModel GetBookmarkFolderIcon(BookmarkFolderIconType icon_type,
                                       ui::ColorVariant color) {
@@ -58,10 +58,10 @@ index ed11adf55026f..2fc8c1771b5d6 100644
    return ui::ImageModel::FromVectorIcon(*icon_id, color);
  }
 diff --git a/chrome/browser/ui/color/chrome_color_mixer.cc b/chrome/browser/ui/color/chrome_color_mixer.cc
-index 877e3a5e6c69a..6d0439b84f228 100644
+index 93177a26829ed..8f06e8bbe7f69 100644
 --- a/chrome/browser/ui/color/chrome_color_mixer.cc
 +++ b/chrome/browser/ui/color/chrome_color_mixer.cc
-@@ -381,8 +381,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
+@@ -412,8 +412,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
        gfx::kGoogleGrey500, kColorBookmarkBarBackground, 6.0f);
    mixer[kColorBookmarkFolderIcon] = {ui::kColorIcon};
    mixer[kColorBookmarkBarSeparator] = {kColorToolbarSeparator};
@@ -76,8 +76,8 @@ index 877e3a5e6c69a..6d0439b84f228 100644
    mixer[kColorBookmarkDragImageBackground] = {ui::kColorAccent};
    mixer[kColorBookmarkDragImageCountBackground] = {ui::kColorAlertHighSeverity};
    mixer[kColorBookmarkDragImageCountForeground] =
-@@ -805,8 +809,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
-   mixer[kColorAppMenuChipInkDropRipple] = {kColorToolbarInkDropRipple};
+@@ -840,8 +844,12 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
+   mixer[kColorAppMenuZoomSeparator] = {ui::kColorSysNeutralOutline};
    mixer[kColorToolbarCloseButtonBackgroundDefault] = {
        ui::kColorSysBaseContainer};
 -  mixer[kColorToolbarExtensionSeparatorEnabled] = {
@@ -92,10 +92,10 @@ index 877e3a5e6c69a..6d0439b84f228 100644
        kColorToolbarButtonIconInactive};
    mixer[kColorToolbarGlicButtonBackgroundDefault] = {
 diff --git a/chrome/browser/ui/color/chrome_color_mixers.cc b/chrome/browser/ui/color/chrome_color_mixers.cc
-index 9698e807b11df..4a399b63b6caa 100644
+index 8432f49468346..706a5e3f94ef3 100644
 --- a/chrome/browser/ui/color/chrome_color_mixers.cc
 +++ b/chrome/browser/ui/color/chrome_color_mixers.cc
-@@ -22,6 +22,7 @@
+@@ -23,6 +23,7 @@
  #include "chrome/browser/ui/color/omnibox_color_mixer.h"
  #include "chrome/browser/ui/color/product_specifications_color_mixer.h"
  #include "chrome/browser/ui/color/tab_strip_color_mixer.h"
@@ -103,7 +103,7 @@ index 9698e807b11df..4a399b63b6caa 100644
  #include "ui/color/color_provider_utils.h"
  
  namespace {
-@@ -59,17 +60,28 @@ void AddChromeColorMixers(ui::ColorProvider* provider,
+@@ -73,17 +74,28 @@ void AddChromeColorMixers(ui::ColorProvider* provider,
        chrome_color_provider_utils_callbacks;
    ui::SetColorProviderUtilsCallbacks(
        chrome_color_provider_utils_callbacks.get());
@@ -498,10 +498,10 @@ index ae95d2dfc228b..21f2e3e73604c 100644
        GetLayoutConstant(LayoutConstant::kTabVerticalPadding) +
            GetLayoutConstant(LayoutConstant::kTabStripPadding),
 diff --git a/chrome/browser/ui/views/bookmarks/bookmark_bar_view.cc b/chrome/browser/ui/views/bookmarks/bookmark_bar_view.cc
-index 658ff47afb8a8..ebbc1ed6c036e 100644
+index b5442449aec5c..039f44f0ef1c8 100644
 --- a/chrome/browser/ui/views/bookmarks/bookmark_bar_view.cc
 +++ b/chrome/browser/ui/views/bookmarks/bookmark_bar_view.cc
-@@ -346,8 +346,8 @@ class BookmarkBarView::ButtonSeparatorView : public views::Separator {
+@@ -334,8 +334,8 @@ class BookmarkBarView::ButtonSeparatorView : public views::Separator {
  
   public:
    ButtonSeparatorView() {
@@ -512,7 +512,7 @@ index 658ff47afb8a8..ebbc1ed6c036e 100644
      const gfx::Insets border_insets =
          gfx::Insets::TLBR(0, leading_padding, 0, trailing_padding);
      const ui::ColorId color_id = kColorBookmarkBarSeparatorChromeRefresh;
-@@ -585,8 +585,10 @@ void BookmarkBarView::GetAnchorPositionForButton(
+@@ -569,8 +569,10 @@ void BookmarkBarView::GetAnchorPositionForButton(
  }
  
  int BookmarkBarView::GetLeadingMargin() const {
@@ -525,7 +525,7 @@ index 658ff47afb8a8..ebbc1ed6c036e 100644
  
    if (saved_tab_groups_separator_view_ &&
        saved_tab_groups_separator_view_->GetVisible()) {
-@@ -704,7 +706,7 @@ void BookmarkBarView::Layout(PassKey) {
+@@ -688,7 +690,7 @@ void BookmarkBarView::Layout(PassKey) {
    }
  
    int x = GetLeadingMargin();
@@ -534,7 +534,7 @@ index 658ff47afb8a8..ebbc1ed6c036e 100644
    int width = View::width() - x - kBookmarkBarTrailingMargin;
  
    const int button_height =
-@@ -899,6 +901,9 @@ void BookmarkBarView::Layout(PassKey) {
+@@ -883,6 +885,9 @@ void BookmarkBarView::Layout(PassKey) {
    x = max_x + bookmark_bar_button_padding;
  
    // The overflow button.
@@ -545,7 +545,7 @@ index 658ff47afb8a8..ebbc1ed6c036e 100644
    overflow_button_->SetVisible(show_bookmarks_overflow);
    x += overflow_pref.width();
 diff --git a/chrome/browser/ui/views/chrome_layout_provider.cc b/chrome/browser/ui/views/chrome_layout_provider.cc
-index 7814bc018a066..57b425642ff91 100644
+index 72d9fb2bea710..2bff7d6b43f42 100644
 --- a/chrome/browser/ui/views/chrome_layout_provider.cc
 +++ b/chrome/browser/ui/views/chrome_layout_provider.cc
 @@ -11,6 +11,7 @@
@@ -580,7 +580,7 @@ index 7814bc018a066..57b425642ff91 100644
        // Hover button in page info requires double the height compared to the
        // label button because it behaves like a menu control.
        return gfx::Insets::VH(insets.height(), horizontal_padding);
-@@ -125,7 +128,7 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
+@@ -130,7 +133,7 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
      case DISTANCE_EXTENSIONS_MENU_WIDTH:
        return kMediumDialogWidth;
      case DISTANCE_EXTENSIONS_MENU_BUTTON_ICON_SIZE:
@@ -589,7 +589,7 @@ index 7814bc018a066..57b425642ff91 100644
      case DISTANCE_EXTENSIONS_MENU_BUTTON_ICON_SMALL_SIZE:
        return 16;
      case DISTANCE_EXTENSIONS_MENU_EXTENSION_ICON_SIZE:
-@@ -161,7 +164,7 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
+@@ -166,7 +169,7 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
      case DISTANCE_BETWEEN_PRIMARY_AND_SECONDARY_LABELS_HORIZONTAL:
        return 24;
      case DISTANCE_OMNIBOX_CELL_VERTICAL_PADDING:
@@ -598,7 +598,7 @@ index 7814bc018a066..57b425642ff91 100644
      case DISTANCE_OMNIBOX_TWO_LINE_CELL_VERTICAL_PADDING:
        return 4;
      case DISTANCE_SIDE_PANEL_HEADER_VECTOR_ICON_SIZE:
-@@ -173,19 +176,23 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
+@@ -178,19 +181,23 @@ int ChromeLayoutProvider::GetDistanceMetric(int metric) const {
      case DISTANCE_SIDE_PANEL_CONTENT_RADIUS:
        return 8;
      case DISTANCE_HORIZONTAL_SEPARATOR_PADDING_PAGE_INFO_VIEW:
@@ -675,10 +675,10 @@ index 62208395da94a..0a223f8fefd7c 100644
 +             : kExtraTopBorder;
  }
 diff --git a/chrome/browser/ui/views/frame/browser_frame_view_win.cc b/chrome/browser/ui/views/frame/browser_frame_view_win.cc
-index 207ea26540d4d..56fb0bf4464ab 100644
+index 5b7aa7203114f..b12882b6fd3c8 100644
 --- a/chrome/browser/ui/views/frame/browser_frame_view_win.cc
 +++ b/chrome/browser/ui/views/frame/browser_frame_view_win.cc
-@@ -292,7 +292,9 @@ int BrowserFrameViewWin::NonClientHitTest(const gfx::Point& point) {
+@@ -293,7 +293,9 @@ int BrowserFrameViewWin::NonClientHitTest(const gfx::Point& point) {
    constexpr int kResizeCornerWidth = 16;
  
    const int top_border_thickness =
@@ -689,7 +689,7 @@ index 207ea26540d4d..56fb0bf4464ab 100644
            ? FrameTopBorderThickness(false)
            : GetLayoutConstant(LayoutConstant::kTabStripPadding);
  
-@@ -496,7 +498,11 @@ int BrowserFrameViewWin::FrameTopBorderThickness(bool restored) const {
+@@ -497,7 +499,11 @@ int BrowserFrameViewWin::FrameTopBorderThickness(bool restored) const {
      // default. When maximized, the OS sizes the window such that the border
      // extends beyond the screen edges. In that case, we must return the
      // default value.
@@ -702,7 +702,7 @@ index 207ea26540d4d..56fb0bf4464ab 100644
    }
  
    // Mouse and touch locations are floored but GetSystemMetricsInDIP is rounded,
-@@ -737,10 +743,15 @@ void BrowserFrameViewWin::LayoutCaptionButtons() {
+@@ -734,10 +740,15 @@ void BrowserFrameViewWin::LayoutCaptionButtons() {
    const gfx::Size preferred_size =
        caption_button_container_->GetPreferredSize();
  
@@ -720,7 +720,7 @@ index 207ea26540d4d..56fb0bf4464ab 100644
    caption_button_container_->SetBounds(width() - preferred_size.width(),
                                         WindowTopY(), preferred_size.width(),
 diff --git a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
-index efb641c5c5e48..d24ce6e8c25bc 100644
+index 8bc95a92fecbd..8294e4157410f 100644
 --- a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
 +++ b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
 @@ -9,6 +9,7 @@
@@ -731,7 +731,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
  #include "chrome/browser/geic/geic_enabling.h"
  #include "chrome/browser/glic/public/glic_enabling.h"
  #include "chrome/browser/ui/actions/chrome_action_id.h"
-@@ -175,6 +176,13 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
+@@ -178,6 +179,13 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
          browser, TabStripComboButton::Context::kHorizontalTabStrip);
      combo_button->SetProperty(views::kCrossAxisAlignmentKey,
                                views::LayoutAlignment::kCenter);
@@ -745,7 +745,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
    }
  
    if (combo_button && render_combo_button_before_tab_strip_) {
-@@ -238,7 +246,8 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
+@@ -241,7 +249,8 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
          std::make_unique<NewTabButton>(
              base::BindRepeating(&TabStrip::NewTabButtonPressed,
                                  base::Unretained(tab_strip_)),
@@ -755,7 +755,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
                  ? vector_icons::kAddWeight500CustomIcon
                  : vector_icons::kAddOldIcon,
              Edge::kNone, Edge::kNone, browser);
-@@ -399,14 +408,20 @@ void HorizontalTabStripRegionViewOld::Layout(PassKey) {
+@@ -402,14 +411,20 @@ void HorizontalTabStripRegionViewOld::Layout(PassKey) {
      // negative margins.
      gfx::Size button_size = button_to_paint_to_layer->GetPreferredSize();
  
@@ -779,7 +779,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
      gfx::Rect button_new_bounds = gfx::Rect(button_new_position, button_size);
  
      // If the tabsearch button is before the tabstrip container, then manually
-@@ -628,10 +643,14 @@ bool HorizontalTabStripRegionViewOld::HasLeadingButtons() const {
+@@ -631,10 +646,14 @@ bool HorizontalTabStripRegionViewOld::HasLeadingButtons() const {
  }
  
  void HorizontalTabStripRegionViewOld::UpdateButtonBorders() {
@@ -795,7 +795,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
    const int top_inset = extra_vertical_space / 2;
    const int bottom_inset =
        extra_vertical_space - top_inset +
-@@ -690,7 +709,9 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
+@@ -693,7 +712,9 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
  
      tab_strip_right_margin =
          button_to_paint_to_layer->GetPreferredSize().width() +
@@ -806,7 +806,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
    }
  
    // If the tab search button is before the tab strip, it also overlaps the
-@@ -704,7 +725,9 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
+@@ -707,7 +728,9 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
      unfocus_button_->SetProperty(views::kViewIgnoredByLayoutKey, true);
      current_leading_width +=
          unfocus_button_->GetPreferredSize().width() +
@@ -817,7 +817,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
    }
  
    if (render_combo_button_before_tab_strip_ && combo_button_ &&
-@@ -717,12 +740,17 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
+@@ -720,12 +743,17 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
      combo_button_->SetProperty(views::kViewIgnoredByLayoutKey, true);
      current_leading_width +=
          combo_button_->GetPreferredSize().width() +
@@ -838,7 +838,7 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
    }
  
    bool subtract_radius = current_leading_width > 0;
-@@ -756,10 +784,14 @@ void HorizontalTabStripRegionViewOld::AdjustViewBoundsRect(View* view,
+@@ -759,10 +787,14 @@ void HorizontalTabStripRegionViewOld::AdjustViewBoundsRect(View* view,
                                                             int offset) {
    const gfx::Size view_size = view->GetPreferredSize();
    const int x = tab_strip_->x() + TabStyle::Get()->GetBottomCornerRadius() -
@@ -856,14 +856,12 @@ index efb641c5c5e48..d24ce6e8c25bc 100644
    view->SetBoundsRect(new_bounds);
  }
  
-@@ -799,6 +831,13 @@ HorizontalTabStripRegionViewNew::HorizontalTabStripRegionViewNew(
-         browser, TabStripComboButton::Context::kHorizontalTabStrip));
-     combo_button_->SetProperty(views::kCrossAxisAlignmentKey,
-                                views::LayoutAlignment::kCenter);
-+    combo_button_->SetProperty(
-+        views::kMarginsKey,
-+        gfx::Insets::TLBR(
-+            0, 0, 0,
+@@ -805,7 +837,10 @@ HorizontalTabStripRegionViewNew::HorizontalTabStripRegionViewNew(
+     combo_button_->SetProperty(
+         views::kMarginsKey,
+         gfx::Insets::TLBR(
+-            0, GetLayoutConstant(LayoutConstant::kTabStripPadding), 0, 0));
++            0, GetLayoutConstant(LayoutConstant::kTabStripPadding), 0,
 +            GetLayoutConstant(features::IsThorium2024()
 +                                  ? LayoutConstant::kTabSearchPadding
 +                                  : LayoutConstant::kTabStripPadding)));
@@ -937,10 +935,10 @@ index 4a92fd22a44b2..e4e690f02864f 100644
    // are disabled.  If |restored| is true, acts as if the window is restored
    // regardless of the real mode.
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index b9988028f4620..5a42cb3387e66 100644
+index 9251f8590b1ad..0f991201a1e89 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-@@ -176,6 +176,7 @@ int IncrementalMinimumWidth(const views::View* view) {
+@@ -178,6 +178,7 @@ int IncrementalMinimumWidth(const views::View* view) {
  
  // The padding between the content setting icons and other trailing decorations.
  constexpr int kContentSettingIntraItemPadding = 8;
@@ -948,7 +946,7 @@ index b9988028f4620..5a42cb3387e66 100644
  
  // Capsule dimensions and padding for the elevated page action toolbar.
  constexpr int kPageActionCapsuleEdgePadding = 2;
-@@ -217,26 +218,35 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
+@@ -219,26 +220,35 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
        });
    set_suppress_default_focus_handling();
    if (!is_popup_mode_) {
@@ -1004,7 +1002,7 @@ index b9988028f4620..5a42cb3387e66 100644
      views::InstallPillHighlightPathGenerator(this);
  
  #if BUILDFLAG(OS_LEVEL_GEOLOCATION_PERMISSION_SUPPORTED)
-@@ -315,10 +325,16 @@ void LocationBarView::Init() {
+@@ -317,10 +327,16 @@ void LocationBarView::Init() {
    const gfx::FontList& font_list = typography_provider.GetFont(
        CONTEXT_OMNIBOX_PRIMARY, views::style::STYLE_PRIMARY);
  
@@ -1025,7 +1023,7 @@ index b9988028f4620..5a42cb3387e66 100644
  
    auto location_icon_view =
        std::make_unique<LocationIconView>(omnibox_chip_font_list, this, this);
-@@ -463,7 +479,7 @@ void LocationBarView::Init() {
+@@ -473,7 +489,7 @@ void LocationBarView::Init() {
      page_action_items = page_actions::GetActivePageActionItems(*browser_);
    }
  
@@ -1034,7 +1032,7 @@ index b9988028f4620..5a42cb3387e66 100644
    const page_actions::PageActionViewParams page_action_params{
        .icon_size =
            GetLayoutConstant(LayoutConstant::kLocationBarTrailingIconSize),
-@@ -746,7 +762,7 @@ void LocationBarView::Layout(PassKey) {
+@@ -773,7 +789,7 @@ void LocationBarView::Layout(PassKey) {
    // e.g. the page info icon, the google G icon, the selected suggestion icon.
    int icon_left = 5;
    // The padding between the LHS icon and the text.
@@ -1043,7 +1041,7 @@ index b9988028f4620..5a42cb3387e66 100644
  
    // Apply indentation to align the omnibox input icon and the text with those
    // of the suggestions in the popup. However, there are two exceptions where
-@@ -765,22 +781,22 @@ void LocationBarView::Layout(PassKey) {
+@@ -792,22 +808,22 @@ void LocationBarView::Layout(PassKey) {
                               !location_icon_view_->ShouldShowLabel() &&
                               !ShouldShowKeywordBubble();
    if (should_indent) {
@@ -1070,7 +1068,7 @@ index b9988028f4620..5a42cb3387e66 100644
    }
  
    LocationBarLayout leading_decorations(LocationBarLayout::Position::kLeftEdge,
-@@ -812,7 +828,10 @@ void LocationBarView::Layout(PassKey) {
+@@ -839,7 +855,10 @@ void LocationBarView::Layout(PassKey) {
                  !ShouldShowKeywordBubble()
            : chip_controller_->chip()->GetVisible() &&
                  !ShouldShowKeywordBubble();
@@ -1081,7 +1079,7 @@ index b9988028f4620..5a42cb3387e66 100644
      if (base::FeatureList::IsEnabled(
              content_settings::features::kLeftHandSideActivityIndicators)) {
        leading_decorations.AddDecoration(vertical_padding, location_height,
-@@ -889,7 +908,9 @@ void LocationBarView::Layout(PassKey) {
+@@ -916,7 +935,9 @@ void LocationBarView::Layout(PassKey) {
                            /*edge_padding=*/trailing_decorations_edge_padding);
    for (ContentSettingImageView* view :
         std::views::reverse(content_setting_views_)) {
@@ -1092,7 +1090,7 @@ index b9988028f4620..5a42cb3387e66 100644
      add_trailing_decoration(view, intra_item_padding,
                              /*edge_padding=*/trailing_decorations_edge_padding);
    }
-@@ -1167,13 +1188,21 @@ SkColor LocationBarView::GetIconLabelBubbleSurroundingForegroundColor() const {
+@@ -1194,13 +1215,21 @@ SkColor LocationBarView::GetIconLabelBubbleSurroundingForegroundColor() const {
    // fall back to the usual omnibox text color to ensure UI consistency.
    // In either case, all IconLabelBubbleViews situated within the location bar
    // will inherit the selected "surrounding foreground color".
@@ -1117,7 +1115,7 @@ index b9988028f4620..5a42cb3387e66 100644
    return 0xFF;
  }
  
-@@ -1364,7 +1393,8 @@ void LocationBarView::RefreshBackground() {
+@@ -1394,7 +1423,8 @@ void LocationBarView::RefreshBackground() {
      // focused.
      background_color_ =
          color_provider->GetColor(kColorOmniboxResultsBackground);
@@ -1127,7 +1125,7 @@ index b9988028f4620..5a42cb3387e66 100644
      // Under CR23 guidelines, if the Omnibox is unfocused, but still contains
      // in-progress user input, the background color matches the popup (unless
      // high-contrast mode is enabled).
-@@ -1374,6 +1404,16 @@ void LocationBarView::RefreshBackground() {
+@@ -1404,6 +1434,16 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;
@@ -1274,7 +1272,7 @@ index 9b355a4392845..aa11061a76aa5 100644
  
  gfx::Size LocationIconView::GetMinimumSizeForPreferredSize(
 diff --git a/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.cc b/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.cc
-index 4d5b3f6dd0b2a..56fb58352ef10 100644
+index debac67f17150..04bb1302fedca 100644
 --- a/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.cc
 +++ b/chrome/browser/ui/views/omnibox/rounded_omnibox_results_frame.cc
 @@ -24,6 +24,7 @@
@@ -1384,7 +1382,7 @@ index 17ff3a90e9b43..327ccb49644d1 100644
    static gfx::Insets GetShadowInsets();
  
 diff --git a/chrome/browser/ui/views/page_info/page_info_view_factory.cc b/chrome/browser/ui/views/page_info/page_info_view_factory.cc
-index 7d9c4f5658bb2..91a280177b1d5 100644
+index 7f22647e5e881..961275c09b13b 100644
 --- a/chrome/browser/ui/views/page_info/page_info_view_factory.cc
 +++ b/chrome/browser/ui/views/page_info/page_info_view_factory.cc
 @@ -89,6 +89,12 @@ std::unique_ptr<views::View> PageInfoViewFactory::CreateSeparator(
@@ -1400,7 +1398,7 @@ index 7d9c4f5658bb2..91a280177b1d5 100644
    auto separator = std::make_unique<views::Separator>();
    separator->SetProperty(views::kMarginsKey,
                           gfx::Insets::VH(separator_spacing, horizontal_inset));
-@@ -883,9 +889,9 @@ const ui::ImageModel PageInfoViewFactory::GetOpenSubpageIcon() {
+@@ -896,9 +902,9 @@ const ui::ImageModel PageInfoViewFactory::GetOpenSubpageIcon() {
    // GetIconSize() does not work for subpage icons because the default size of
    // features::IsRoundedIconsEnabled() ? vector_icons::kArrowRightFlippableIcon
    // : kSubmenuArrowOldIcon is 8 rather than 16.
@@ -1413,7 +1411,7 @@ index 7d9c4f5658bb2..91a280177b1d5 100644
            : vector_icons::kSubmenuArrowChromeRefreshOldIcon,
        ui::kColorIcon, kIconSize);
 diff --git a/chrome/browser/ui/views/side_panel/side_panel.cc b/chrome/browser/ui/views/side_panel/side_panel.cc
-index a58147d1997a9..e8b6bfdb1d703 100644
+index ab8999f84de69..83b896504b2af 100644
 --- a/chrome/browser/ui/views/side_panel/side_panel.cc
 +++ b/chrome/browser/ui/views/side_panel/side_panel.cc
 @@ -73,7 +73,7 @@ constexpr BrowserAnimationGroup kAnimationGroup =
@@ -1457,10 +1455,10 @@ index b7663b7b03f9b..c82d7aaf806bf 100644
    const SkColor resize_handle_color =
        GetColorProvider()->GetColor(kColorSidePanelHoverResizeAreaHandle);
    SetBackground(CreateRoundedRectBackground(resize_handle_color, 2));
-diff --git a/chrome/browser/ui/views/tabs/horizontal_tab_style_views.cc b/chrome/browser/ui/views/tabs/horizontal_tab_style_views.cc
-index 4851028593cdb..0ec399ff9ada0 100644
---- a/chrome/browser/ui/views/tabs/horizontal_tab_style_views.cc
-+++ b/chrome/browser/ui/views/tabs/horizontal_tab_style_views.cc
+diff --git a/chrome/browser/ui/views/tabs/common/horizontal_tab_style_views.cc b/chrome/browser/ui/views/tabs/common/horizontal_tab_style_views.cc
+index f9ace7f21c286..954ff9d44ae33 100644
+--- a/chrome/browser/ui/views/tabs/common/horizontal_tab_style_views.cc
++++ b/chrome/browser/ui/views/tabs/common/horizontal_tab_style_views.cc
 @@ -30,6 +30,7 @@
  #include "third_party/skia/include/core/SkPathBuilder.h"
  #include "third_party/skia/include/core/SkRRect.h"
@@ -1469,7 +1467,7 @@ index 4851028593cdb..0ec399ff9ada0 100644
  #include "ui/gfx/animation/tween.h"
  #include "ui/gfx/canvas.h"
  #include "ui/gfx/favicon_size.h"
-@@ -93,7 +94,7 @@ SkPath HorizontalTabStyleViews::GetPath(TabStyle::PathType path_type,
+@@ -98,7 +99,7 @@ SkPath HorizontalTabStyleViews::GetPath(TabStyle::PathType path_type,
  
      // The hit test extends the full height to make it easier to select tabs.
      if (path_type != TabStyle::PathType::kHitTest) {
@@ -1478,7 +1476,7 @@ index 4851028593cdb..0ec399ff9ada0 100644
        tab_height -=
            GetLayoutConstant(LayoutConstant::kTabstripToolbarOverlap) * scale;
      }
-@@ -106,7 +107,7 @@ SkPath HorizontalTabStyleViews::GetPath(TabStyle::PathType path_type,
+@@ -111,7 +112,7 @@ SkPath HorizontalTabStyleViews::GetPath(TabStyle::PathType path_type,
  
      float left = aligned_bounds.x() + extension_corner_radius;
      float top = aligned_bounds.y() +
@@ -1487,7 +1485,7 @@ index 4851028593cdb..0ec399ff9ada0 100644
  
      float right = aligned_bounds.right() - extension_corner_radius;
      const int bottom = top + tab_height;
-@@ -119,7 +120,7 @@ SkPath HorizontalTabStyleViews::GetPath(TabStyle::PathType path_type,
+@@ -124,7 +125,7 @@ SkPath HorizontalTabStyleViews::GetPath(TabStyle::PathType path_type,
      // of the tab, encompassing the top padding. This makes it easy to click on
      // tabs by moving the mouse to the top of the screen.
      if (path_type == TabStyle::PathType::kHitTest && is_frame_condensed) {
@@ -1496,7 +1494,7 @@ index 4851028593cdb..0ec399ff9ada0 100644
        // Don't round the top corners to avoid creating dead space between tabs.
        top_left_corner_radius = 0;
        top_right_corner_radius = 0;
-@@ -747,6 +748,10 @@ void HorizontalTabStyleViews::PaintTabBackgroundFill(
+@@ -789,6 +790,10 @@ void HorizontalTabStyleViews::PaintTabBackgroundFill(
      flags.setAntiAlias(true);
  
      flags.setColor(GetCurrentTabBackgroundColor(selection_state, false));
@@ -1507,7 +1505,7 @@ index 4851028593cdb..0ec399ff9ada0 100644
      canvas->DrawRect(gfx::ScaleToEnclosingRect(
                           delegate_->GetView()->GetLocalBounds(), scale),
                       flags);
-@@ -918,13 +923,13 @@ std::optional<SkPath> HorizontalTabStyleViews::GetPinnedPath(
+@@ -966,13 +971,13 @@ std::optional<SkPath> HorizontalTabStyleViews::GetPinnedPath(
    float bottom_right_corner_radius = content_corner_radius;
    float tab_height = GetLayoutConstant(LayoutConstant::kTabHeight) * scale;
  
@@ -1643,7 +1641,7 @@ index 125f2eed7c3a2..3105833a00f62 100644
    base::RepeatingClosureList will_invoke_action_callback_list_;
  };
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index ac45f58802600..daa14a2f504f2 100644
+index 3eab59926db18..de060ada24258 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
 @@ -1,4 +1,4 @@
@@ -1652,7 +1650,7 @@ index ac45f58802600..daa14a2f504f2 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -67,6 +67,7 @@
+@@ -69,6 +69,7 @@
  #include "ui/base/metadata/metadata_impl_macros.h"
  #include "ui/base/models/list_selection_model.h"
  #include "ui/base/pointer/touch_ui_controller.h"
@@ -1660,7 +1658,7 @@ index ac45f58802600..daa14a2f504f2 100644
  #include "ui/base/theme_provider.h"
  #include "ui/compositor/clip_recorder.h"
  #include "ui/compositor/compositor.h"
-@@ -114,7 +115,9 @@ constexpr int kPinnedTabExtraWidthToRenderAsNormal = 30;
+@@ -116,7 +117,9 @@ constexpr int kPinnedTabExtraWidthToRenderAsNormal = 30;
  // Additional padding of close button to the right of the tab
  // indicator when `extra_alert_indicator_padding_` is true.
  constexpr int kTabAlertIndicatorCloseButtonPaddingAdjustmentTouchUI = 8;
@@ -1670,7 +1668,7 @@ index ac45f58802600..daa14a2f504f2 100644
  
  bool g_show_hover_card_on_mouse_hover = true;
  
-@@ -488,7 +491,11 @@ void Tab::Layout(PassKey) {
+@@ -495,7 +498,11 @@ void Tab::Layout(PassKey) {
    const bool was_showing_icon = showing_icon_;
    UpdateIconVisibility();
  
@@ -1683,7 +1681,7 @@ index ac45f58802600..daa14a2f504f2 100644
  
    // Position the underline under the tab contents.
    constexpr int kGlicUnderlineYOffset = 8;
-@@ -506,6 +513,12 @@ void Tab::Layout(PassKey) {
+@@ -513,6 +520,12 @@ void Tab::Layout(PassKey) {
    // indicator, but visually it will be smaller at kFaviconSize wide.
    gfx::Rect favicon_bounds(start, contents_rect.y(), 0, 0);
    if (showing_icon_) {
@@ -1696,7 +1694,7 @@ index ac45f58802600..daa14a2f504f2 100644
      if (center_icon_) {
        // When centering the favicon, the favicon is allowed to escape the normal
        // contents rect.
-@@ -568,7 +581,9 @@ void Tab::Layout(PassKey) {
+@@ -575,7 +588,9 @@ void Tab::Layout(PassKey) {
        if (extra_alert_indicator_padding_) {
          right -= ui::TouchUiController::Get()->touch_ui()
                       ? kTabAlertIndicatorCloseButtonPaddingAdjustmentTouchUI
@@ -1707,7 +1705,7 @@ index ac45f58802600..daa14a2f504f2 100644
        }
      }
      const gfx::Size image_size = alert_indicator_button_->GetPreferredSize();
-@@ -1277,6 +1292,9 @@ void Tab::UpdateIconVisibility() {
+@@ -1284,6 +1299,9 @@ void Tab::UpdateIconVisibility() {
    // a non-narrow tab.
    if (!closing_) {
      center_icon_ = false;
@@ -1717,7 +1715,7 @@ index ac45f58802600..daa14a2f504f2 100644
    }
  
    showing_icon_ = showing_alert_indicator_ = false;
-@@ -1314,6 +1332,9 @@ void Tab::UpdateIconVisibility() {
+@@ -1321,6 +1339,9 @@ void Tab::UpdateIconVisibility() {
      // While animating to or from the pinned state, pinned tabs are rendered as
      // normal tabs. Force the extra padding on so the favicon doesn't jitter
      // left and then back right again as it resizes through layout regimes.
@@ -1727,7 +1725,7 @@ index ac45f58802600..daa14a2f504f2 100644
      extra_alert_indicator_padding_ = true;
      return;
    }
-@@ -1423,6 +1444,16 @@ void Tab::UpdateIconVisibility() {
+@@ -1430,6 +1451,16 @@ void Tab::UpdateIconVisibility() {
      }
    }
  
@@ -1781,7 +1779,7 @@ index d4c4f01c14c21..ade6fffdb65f5 100644
        gfx::Insets(extra_height / 2) + *GetProperty(views::kInternalPaddingKey);
  
 diff --git a/chrome/browser/ui/webui/settings/settings_ui.cc b/chrome/browser/ui/webui/settings/settings_ui.cc
-index c87847cfd7ef9..dd4dbe2f6c066 100644
+index 798b115148941..dfc0c6889d0e9 100644
 --- a/chrome/browser/ui/webui/settings/settings_ui.cc
 +++ b/chrome/browser/ui/webui/settings/settings_ui.cc
 @@ -157,6 +157,7 @@
@@ -1800,9 +1798,9 @@ index c87847cfd7ef9..dd4dbe2f6c066 100644
  #else  // !BUILDFLAG(IS_CHROMEOS)
  #include "chrome/browser/search/background/ntp_custom_background_service_factory.h"
  #include "chrome/browser/signin/account_consistency_mode_manager.h"
-@@ -697,6 +697,9 @@ SettingsUI::SettingsUI(content::WebUI* web_ui)
-           autofill::AtMemoryAction::kAllowCustomizeAtMemoryShortcut,
-           autofill_client));
+@@ -699,6 +699,9 @@ SettingsUI::SettingsUI(content::WebUI* web_ui)
+                           base::FeatureList::IsEnabled(
+                               autofill::features::kAutofillAtMemoryDoubleCtrl));
  
 +  html_source->AddString("thorium2024",
 +                         features::IsThorium2024() ? "thorium-2024" : "");
@@ -1811,10 +1809,10 @@ index c87847cfd7ef9..dd4dbe2f6c066 100644
        "webuiRefresh2026",
        features::IsWebuiRefresh2026Enabled() ? "webui-refresh-2026" : "");
 diff --git a/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc b/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc
-index 976faaf3f4d41..58653443b8775 100644
+index f9e1f91362368..6042468719af9 100644
 --- a/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc
 +++ b/chrome/browser/ui/webui/webui_toolbar/webui_toolbar_layout_css_helper.cc
-@@ -111,6 +111,14 @@ std::string_view LayoutConstantToCssVarName(LayoutConstant layout_constant) {
+@@ -112,6 +112,14 @@ std::string_view LayoutConstantToCssVarName(LayoutConstant layout_constant) {
        return "--tab-strip-height";
      case kTabStripPadding:
        return "--tab-strip-padding";
@@ -1830,10 +1828,10 @@ index 976faaf3f4d41..58653443b8775 100644
        return "--tab-separator-height";
      case kTabPreTitlePadding:
 diff --git a/ui/base/ui_base_features.cc b/ui/base/ui_base_features.cc
-index 480fdaf4b6118..de5f3843039fb 100644
+index 6b9944fb71094..4fe5697241524 100644
 --- a/ui/base/ui_base_features.cc
 +++ b/ui/base/ui_base_features.cc
-@@ -427,6 +427,14 @@ bool IsVariableRefreshRateAlwaysOn() {
+@@ -413,6 +413,14 @@ bool IsVariableRefreshRateAlwaysOn() {
    return base::FeatureList::IsEnabled(kEnableVariableRefreshRateAlwaysOn);
  }
  
@@ -1849,10 +1847,10 @@ index 480fdaf4b6118..de5f3843039fb 100644
  
  #if BUILDFLAG(IS_WIN)
 diff --git a/ui/base/ui_base_features.h b/ui/base/ui_base_features.h
-index d66588dfaaae3..184e24693032a 100644
+index 9f16656d2302f..7471d915781da 100644
 --- a/ui/base/ui_base_features.h
 +++ b/ui/base/ui_base_features.h
-@@ -248,6 +248,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES)
+@@ -247,6 +247,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES)
  BASE_DECLARE_FEATURE(kEnableVariableRefreshRateAlwaysOn);
  COMPONENT_EXPORT(UI_BASE_FEATURES) bool IsVariableRefreshRateAlwaysOn();
  
@@ -2392,10 +2390,10 @@ index d1461bbffb758..3b7bfe91f15f6 100644
    use_bubble_border = corner_radius > 0;
  }
 diff --git a/ui/views/controls/menu/menu_item_view.cc b/ui/views/controls/menu/menu_item_view.cc
-index 482d212cd0310..bc8605a090df8 100644
+index 6da79d2d71ae0..abbec9a66fbd9 100644
 --- a/ui/views/controls/menu/menu_item_view.cc
 +++ b/ui/views/controls/menu/menu_item_view.cc
-@@ -1700,11 +1700,13 @@ void MenuItemView::UpdateSelectionBasedState(bool paint_as_selected) {
+@@ -1729,11 +1729,13 @@ void MenuItemView::UpdateSelectionBasedState(bool paint_as_selected) {
    last_paint_as_selected_ = paint_as_selected;
    const Colors colors = CalculateColors(paint_as_selected);
    if (submenu_arrow_image_view_) {
@@ -2414,7 +2412,7 @@ index 482d212cd0310..bc8605a090df8 100644
    MenuDelegate* delegate = GetDelegate();
    if (type_ == Type::kCheckbox && delegate &&
 diff --git a/ui/views/controls/tree/tree_view.cc b/ui/views/controls/tree/tree_view.cc
-index d6274d19a8bb5..b3da5c56f65e9 100644
+index 0af1ac1590a10..53c1ebc751ca0 100644
 --- a/ui/views/controls/tree/tree_view.cc
 +++ b/ui/views/controls/tree/tree_view.cc
 @@ -109,14 +109,28 @@ TreeView::TreeView()
@@ -2454,7 +2452,7 @@ index d6274d19a8bb5..b3da5c56f65e9 100644
  
    SetInitialAccessibilityAttributes();
  }
-@@ -1277,18 +1291,24 @@ void TreeView::PaintNodeIcon(gfx::Canvas* canvas,
+@@ -1268,18 +1282,24 @@ void TreeView::PaintNodeIcon(gfx::Canvas* canvas,
                               const gfx::Rect& bounds) {
    std::optional<size_t> icon_index = model_->GetIconIndex(node->model_node());
    int icon_x = kArrowRegionSize + kImagePadding;
@@ -2482,7 +2480,7 @@ index d6274d19a8bb5..b3da5c56f65e9 100644
        icon_x = bounds.width() - icon_x - icon.width();
      }
 diff --git a/ui/views/controls/tree/tree_view.h b/ui/views/controls/tree/tree_view.h
-index 07eab46b85ef2..dacd335baf4c3 100644
+index 7e9d8beb36e4c..754a9fc97aa1b 100644
 --- a/ui/views/controls/tree/tree_view.h
 +++ b/ui/views/controls/tree/tree_view.h
 @@ -468,6 +468,10 @@ class VIEWS_EXPORT TreeView : public View,

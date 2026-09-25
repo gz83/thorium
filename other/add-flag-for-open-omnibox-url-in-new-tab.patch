@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/omnibox/omnibox_edit_model.cc b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
-index 5184ec80e0960..bec4a3330dd98 100644
+index ca3966dc01b66..0068c6d5e4ca5 100644
 --- a/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 @@ -42,6 +42,7 @@
@@ -10,7 +10,7 @@ index 5184ec80e0960..bec4a3330dd98 100644
  #include "chrome/common/chrome_features.h"
  #include "chrome/common/webui_url_constants.h"
  #include "chrome/grit/theme_resources.h"
-@@ -183,6 +184,22 @@ void RecordAimEntrypointMetric(const std::string& name,
+@@ -186,6 +187,22 @@ void RecordAimEntrypointMetric(const std::string& name,
    }
  }
  
@@ -33,29 +33,29 @@ index 5184ec80e0960..bec4a3330dd98 100644
  void EmitEnteredKeywordModeHistogram(
      OmniboxEventProto::KeywordModeEntryMethod entry_method,
      const TemplateURL* turl,
-@@ -912,6 +929,8 @@ void OmniboxEditModel::OpenSelection(OmniboxPopupSelection selection,
-                                      base::TimeTicks timestamp,
-                                      WindowOpenDisposition disposition,
-                                      bool via_keyboard) {
+@@ -923,6 +940,8 @@ void OmniboxEditModel::OpenSelection(
+     WindowOpenDisposition disposition,
+     bool via_keyboard,
+     const searchbox::AutocompleteSnapshot* snapshot) {
 +  disposition = MaybeOverrideOmniboxCurrentTabDisposition(disposition);
 +
    controller_->StopAutocomplete(/*clear_result=*/false);
  
    base::UmaHistogramMicrosecondsTimes("Omnibox.InputToOpenSelection",
-@@ -2568,6 +2587,8 @@ void OmniboxEditModel::StepPopupSelection(
- 
+@@ -2588,6 +2607,8 @@ void OmniboxEditModel::StepPopupSelection(
  void OmniboxEditModel::AcceptInput(WindowOpenDisposition disposition,
                                     base::TimeTicks match_selection_timestamp) {
+   TRACE_EVENT("omnibox", "OmniboxEditModel::AcceptInput");
 +  disposition = MaybeOverrideOmniboxCurrentTabDisposition(disposition);
 +
    // Get the URL and transition type for the selected entry.
    GURL alternate_nav_url;
    AutocompleteMatch match = CurrentMatchAndAlternateNavUrl(&alternate_nav_url);
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 34b4976ea156e..70785fa49bb70 100644
+index 199ea678d33e2..2c537b4a80938 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -206,6 +206,16 @@ BASE_FEATURE_PARAM(std::string,
+@@ -227,6 +227,16 @@ BASE_FEATURE_PARAM(std::string,
                     "mode",
                     "foreground");
  
@@ -73,10 +73,10 @@ index 34b4976ea156e..70785fa49bb70 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 420d99dbe58b9..69fbebbcc767d 100644
+index ca7c32d696333..a2861bd2f90ec 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -391,6 +391,9 @@ BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
+@@ -394,6 +394,9 @@ BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
  BASE_DECLARE_FEATURE(kOpenBookmarksInNewTab);
  BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
  

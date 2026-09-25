@@ -1,5 +1,5 @@
 diff --git a/chrome/app/chromium_strings.grd b/chrome/app/chromium_strings.grd
-index d5f9a09fc06cb..13e9cc7b901b9 100644
+index ec554cfceb6a9..87c6d8272faeb 100644
 --- a/chrome/app/chromium_strings.grd
 +++ b/chrome/app/chromium_strings.grd
 @@ -734,6 +734,21 @@ Chromium is unable to recover your settings.
@@ -269,7 +269,7 @@ index ce1f5a5711eeb..7e124474b9eed 100644
        "$target_name.exe",
        "--path_7za",
 diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index b0008cc7bb75f..6aff0e63cc7de 100644
+index 037b80488cf24..4e0e1b71ee947 100644
 --- a/chrome/installer/mini_installer/chrome.release
 +++ b/chrome/installer/mini_installer/chrome.release
 @@ -1,4 +1,4 @@
@@ -432,7 +432,7 @@ index fc23ed716a20e..e18eec1993f04 100644
  
  }  // namespace mini_installer
 diff --git a/chrome/installer/mini_installer/mini_installer.cc b/chrome/installer/mini_installer/mini_installer.cc
-index 6c1cf196a2fbe..7b61c392957e4 100644
+index c37d8d1409b30..310050807ef70 100644
 --- a/chrome/installer/mini_installer/mini_installer.cc
 +++ b/chrome/installer/mini_installer/mini_installer.cc
 @@ -1,29 +1,20 @@
@@ -552,17 +552,17 @@ index 6c1cf196a2fbe..7b61c392957e4 100644
  }
  
  namespace {
-@@ -466,7 +454,8 @@ ProcessExitResult UnpackBinaryResources(HMODULE module,
- ProcessExitResult RunSetup(const Configuration& configuration,
-                            const wchar_t* archive_path,
-                            const wchar_t* setup_path,
--                           bool compressed_archive) {
-+                           bool compressed_archive,
+@@ -457,7 +445,8 @@ ProcessExitResult RunSetup(const Configuration& configuration,
+                            HMODULE module,
+                            const wchar_t* archive_name,
+                            const wchar_t* archive_type,
+-                           const wchar_t* setup_path) {
++                           const wchar_t* setup_path,
 +                           bool suppress_post_install_launch) {
-   // Get the path to setup.exe.
-   PathString setup_exe;
-   if (!setup_exe.assign(setup_path)) {
-@@ -496,6 +485,14 @@ ProcessExitResult RunSetup(const Configuration& configuration,
+   // Get the path to mini_installer.
+   PathString mini_installer_path;
+   DWORD len =
+@@ -499,6 +488,14 @@ ProcessExitResult RunSetup(const Configuration& configuration,
    // on to setup.exe
    AppendCommandLineFlags(configuration.command_line(), &cmd_line);
  
@@ -577,7 +577,7 @@ index 6c1cf196a2fbe..7b61c392957e4 100644
    return RunProcessAndWait(setup_exe.get(), cmd_line.get(),
                             RUN_SETUP_FAILED_FILE_NOT_FOUND,
                             RUN_SETUP_FAILED_PATH_NOT_FOUND,
-@@ -665,8 +662,11 @@ bool CreateWorkDir(const wchar_t* base_path,
+@@ -664,8 +661,11 @@ bool CreateWorkDir(const wchar_t* base_path,
      // because of little endianness, but we don't care since it's just
      // a name. Since we checked capaity at the front end, we don't need to
      // duplicate it here.
@@ -591,7 +591,7 @@ index 6c1cf196a2fbe..7b61c392957e4 100644
  
      // We only want the first 5 digits to remain within the 8.3 file name
      // format (compliant with previous implementation).
-@@ -706,21 +706,301 @@ bool GetWorkDir(HMODULE module,
+@@ -705,21 +705,301 @@ bool GetWorkDir(HMODULE module,
           CreateWorkDir(base_path.get(), work_dir, exit_code);
  }
  
@@ -903,17 +903,17 @@ index 6c1cf196a2fbe..7b61c392957e4 100644
    // First get a path where we can extract payload
    PathString base_path;
    if (!GetWorkDir(module, &base_path, &exit_code)) {
-@@ -743,7 +1023,8 @@ ProcessExitResult WMain(HMODULE module) {
+@@ -742,7 +1022,8 @@ ProcessExitResult WMain(HMODULE module) {
  
    if (exit_code.IsSuccess()) {
-     exit_code = RunSetup(configuration, archive_path.get(), setup_path.get(),
--                         archive_type.compare(kLZMAResourceType) == 0);
-+                         archive_type.compare(kLZMAResourceType) == 0,
+     exit_code = RunSetup(configuration, module, archive_name.get(),
+-                         archive_type.get(), setup_path.get());
++                         archive_type.get(), setup_path.get(),
 +                         suppress_post_install_launch);
    }
  
    if (configuration.should_delete_extracted_files()) {
-@@ -768,4 +1049,22 @@ ProcessExitResult WMain(HMODULE module) {
+@@ -766,4 +1047,22 @@ ProcessExitResult WMain(HMODULE module) {
    return exit_code;
  }
  
@@ -937,7 +937,7 @@ index 6c1cf196a2fbe..7b61c392957e4 100644
 +
  }  // namespace mini_installer
 diff --git a/chrome/installer/mini_installer/mini_installer_constants.cc b/chrome/installer/mini_installer/mini_installer_constants.cc
-index c2a03ccbb6460..55fce7bc9e1f5 100644
+index ed578609ad4b6..dc849ba780cca 100644
 --- a/chrome/installer/mini_installer/mini_installer_constants.cc
 +++ b/chrome/installer/mini_installer/mini_installer_constants.cc
 @@ -1,4 +1,4 @@
@@ -955,8 +955,8 @@ index c2a03ccbb6460..55fce7bc9e1f5 100644
  // The prefix of the chrome archive resource.
  const wchar_t kChromeArchivePrefix[] = L"chrome";
  // The prefix of the installer resource.
-@@ -21,7 +23,7 @@ const wchar_t kCmdInstallArchive[] = L"install-archive";
- const wchar_t kCmdUncompressedArchive[] = L"uncompressed-archive";
+@@ -22,7 +24,7 @@ const wchar_t kCmdArchiveResourceName[] = L"archive-resource-name";
+ const wchar_t kCmdArchiveResourceType[] = L"archive-resource-type";
  
  // Temp directory prefix that this process creates.
 -const wchar_t kTempPrefix[] = L"CR_";
@@ -964,7 +964,7 @@ index c2a03ccbb6460..55fce7bc9e1f5 100644
  
  // The resource types that would be unpacked from the mini installer.
  // Uncompressed binary.
-@@ -67,12 +69,16 @@ const wchar_t kCleanupRegistryKey[] = L"Software\\Chrome for Testing";
+@@ -68,12 +70,16 @@ const wchar_t kCleanupRegistryKey[] = L"Software\\Chrome for Testing";
  #else
  // The path to the key containing each app's Clients registry key.
  // No trailing slash on this one because the app's GUID is not appended.
@@ -985,7 +985,7 @@ index c2a03ccbb6460..55fce7bc9e1f5 100644
 +
  }  // namespace mini_installer
 diff --git a/chrome/installer/mini_installer/mini_installer_constants.h b/chrome/installer/mini_installer/mini_installer_constants.h
-index 23de845654342..6fac7c7f225ea 100644
+index 47e6327737c81..80a06dd34a823 100644
 --- a/chrome/installer/mini_installer/mini_installer_constants.h
 +++ b/chrome/installer/mini_installer/mini_installer_constants.h
 @@ -9,6 +9,7 @@ namespace mini_installer {
@@ -996,7 +996,7 @@ index 23de845654342..6fac7c7f225ea 100644
  extern const wchar_t kChromeArchivePrefix[];
  extern const wchar_t kSetupPrefix[];
  
-@@ -44,6 +45,7 @@ extern const wchar_t kUninstallRegistryValue[];
+@@ -45,6 +46,7 @@ extern const wchar_t kUninstallRegistryValue[];
  extern const wchar_t kClientsKeyBase[];
  extern const wchar_t kClientStateKeyBase[];
  extern const wchar_t kCleanupRegistryKey[];
@@ -1527,7 +1527,7 @@ index 0000000000000..8c97032d04a87
 +
 +#endif  // CHROME_INSTALLER_MINI_INSTALLER_MINI_INSTALLER_VERSION_H_
 diff --git a/chrome/installer/setup/BUILD.gn b/chrome/installer/setup/BUILD.gn
-index 9635a435d6fdc..629ec231b459b 100644
+index 8967d1094ffe3..2ab7358f5124c 100644
 --- a/chrome/installer/setup/BUILD.gn
 +++ b/chrome/installer/setup/BUILD.gn
 @@ -4,6 +4,7 @@
@@ -1538,7 +1538,7 @@ index 9635a435d6fdc..629ec231b459b 100644
  import("//chrome/process_version_rc_template.gni")
  import("//services/webnn/features.gni")
  import("//testing/test.gni")
-@@ -99,6 +100,12 @@ if (is_win) {
+@@ -101,6 +102,12 @@ if (is_win) {
        "wof_compression.h",
      ]
  
@@ -1551,7 +1551,7 @@ index 9635a435d6fdc..629ec231b459b 100644
      public_deps = [
        "//base",
        "//chrome/installer/util:with_rc_strings",
-@@ -111,6 +118,7 @@ if (is_win) {
+@@ -113,6 +120,7 @@ if (is_win) {
        "//chrome/common:version_header",
        "//chrome/install_static:buildflags",
        "//chrome/install_static:install_static_util",
@@ -1560,7 +1560,7 @@ index 9635a435d6fdc..629ec231b459b 100644
        "//components/base32",
        "//components/crash/core/app",
 diff --git a/chrome/installer/setup/install_worker.cc b/chrome/installer/setup/install_worker.cc
-index b197e7addd13c..a95f03b33400a 100644
+index 5ddec8caa708c..795ce039c9393 100644
 --- a/chrome/installer/setup/install_worker.cc
 +++ b/chrome/installer/setup/install_worker.cc
 @@ -1,4 +1,4 @@
@@ -1720,16 +1720,7 @@ index b197e7addd13c..a95f03b33400a 100644
  // Adds work items to add the "store-dmtoken" command to Chrome's version key.
  // This method is a no-op if this is anything other than system-level Chrome.
  // The command is used when enrolling Chrome browser instances into enterprise
-@@ -1022,7 +1080,7 @@ void AddInstallWorkItems(const InstallParams& install_params,
-                                     install_list);
-   AddPlatformExperienceHelperWorkItems(installer_state, new_version,
-                                        install_list);
--#endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING
-+#endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
-   AddFirewallRulesWorkItems(installer_state, !current_version.IsValid(),
-                             install_list);
- 
-@@ -1301,10 +1359,12 @@ void AddFinalizeUpdateWorkItems(const InstallationState& original_state,
+@@ -1332,10 +1390,12 @@ void AddFinalizeUpdateWorkItems(const InstallationState& original_state,
    AddWerHelperRegistration(installer_state.root_key(),
                             GetWerHelperPath(target_path, new_version), list);
  
@@ -1903,7 +1894,7 @@ index d7de103384061..0bf62853e86ce 100644
    return true;
  #else
 diff --git a/chrome/installer/util/BUILD.gn b/chrome/installer/util/BUILD.gn
-index b42bb73601831..cfa8001351145 100644
+index 50897db71742d..cdbcc69d6bc9b 100644
 --- a/chrome/installer/util/BUILD.gn
 +++ b/chrome/installer/util/BUILD.gn
 @@ -7,6 +7,10 @@ import("//build/config/chrome_build.gni")
@@ -2191,7 +2182,7 @@ index 0000000000000..fb3d431b6a02e
 +
 +#endif  // CHROME_INSTALLER_UTIL_THORIUM_CPU_FEATURES_H_
 diff --git a/chrome/installer/util/util_constants.h b/chrome/installer/util/util_constants.h
-index 2f0df7216ad9c..dd7ff74b6f220 100644
+index e9c61e09475af..aa7316978a9ce 100644
 --- a/chrome/installer/util/util_constants.h
 +++ b/chrome/installer/util/util_constants.h
 @@ -1,4 +1,4 @@
@@ -2200,7 +2191,7 @@ index 2f0df7216ad9c..dd7ff74b6f220 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  //
-@@ -234,9 +234,10 @@ inline constexpr char kForceConfigureUserSettings[] =
+@@ -249,9 +249,10 @@ inline constexpr char kForceConfigureUserSettings[] =
  // confirmation from user.
  inline constexpr char kForceUninstall[] = "force-uninstall";
  
@@ -2213,8 +2204,8 @@ index 2f0df7216ad9c..dd7ff74b6f220 100644
 +// of an uncompressed archive).
  inline constexpr char kInstallArchive[] = "install-archive";
  
- // Use the given uncompressed chrome.7z archive as the source of files to
-@@ -326,6 +327,9 @@ inline constexpr char kUninstall[] = "uninstall";
+ // Specify the path to the mini_installer binary containing the Chrome archive
+@@ -357,6 +358,9 @@ inline constexpr char kUninstall[] = "uninstall";
  // Enable verbose logging (info level).
  inline constexpr char kVerboseLogging[] = "verbose-logging";
  
@@ -2224,7 +2215,7 @@ index 2f0df7216ad9c..dd7ff74b6f220 100644
  }  // namespace switches
  
  namespace env_vars {
-@@ -348,9 +352,9 @@ inline constexpr char kGoogleUpdateIsMachineEnvVar[] = "GoogleUpdateIsMachine";
+@@ -379,9 +383,9 @@ inline constexpr char kGoogleUpdateIsMachineEnvVar[] = "GoogleUpdateIsMachine";
  // Active Setup.
  inline constexpr wchar_t kActiveSetupExe[] = L"chrmstp.exe";
  inline constexpr wchar_t kChromeDll[] = L"chrome.dll";

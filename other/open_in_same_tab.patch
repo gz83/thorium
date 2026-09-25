@@ -1,8 +1,8 @@
 diff --git a/chrome/app/chrome_command_ids.h b/chrome/app/chrome_command_ids.h
-index 0e9128249b48c..03eecd37d16ac 100644
+index 67f37eafaa58d..5b3e1f1d37ec6 100644
 --- a/chrome/app/chrome_command_ids.h
 +++ b/chrome/app/chrome_command_ids.h
-@@ -328,6 +328,7 @@
+@@ -327,6 +327,7 @@
  #define IDC_CONTENT_CONTEXT_OPENLINKINPROFILE 50108
  #define IDC_CONTENT_CONTEXT_OPENLINKBOOKMARKAPP 50109
  #define IDC_CONTENT_CONTEXT_OPENLINKSPLITVIEW 50111
@@ -11,10 +11,10 @@ index 0e9128249b48c..03eecd37d16ac 100644
  #define IDC_CONTENT_CONTEXT_OPENLINK_ISOLATED 50113
  // Image items.
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index a70a1e7fe80d0..1a1d9b744f19c 100644
+index 4b0456d70ea54..e2dabf762dae8 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -811,6 +811,9 @@ are declared in tools/grit/grit_args.gni.
+@@ -812,6 +812,9 @@ are declared in tools/grit/grit_args.gni.
            <message name="IDS_CONTENT_CONTEXT_OPENLINKNEWTAB" desc="The name of the Open Link in New Tab command in the content area context menu">
              Open link in new &amp;tab
            </message>
@@ -24,7 +24,7 @@ index a70a1e7fe80d0..1a1d9b744f19c 100644
            <message name="IDS_CONTENT_CONTEXT_OPENLINKNEWWINDOW" desc="The name of the Open Link in New Window command in the content area context menu">
              Open link in new &amp;window
            </message>
-@@ -1167,6 +1170,9 @@ are declared in tools/grit/grit_args.gni.
+@@ -1168,6 +1171,9 @@ are declared in tools/grit/grit_args.gni.
            <message name="IDS_CONTENT_CONTEXT_OPENLINKNEWTAB" desc="In Title Case: The name of the Open Link in New Tab command in the content area context menu">
              Open Link in New &amp;Tab
            </message>
@@ -35,10 +35,10 @@ index a70a1e7fe80d0..1a1d9b744f19c 100644
              Open Link in New &amp;Window
            </message>
 diff --git a/chrome/browser/renderer_context_menu/render_view_context_menu.cc b/chrome/browser/renderer_context_menu/render_view_context_menu.cc
-index b6c3e9dacf530..5c3417585e495 100644
+index 5271cc2681aac..63f7e285bd2fa 100644
 --- a/chrome/browser/renderer_context_menu/render_view_context_menu.cc
 +++ b/chrome/browser/renderer_context_menu/render_view_context_menu.cc
-@@ -656,13 +656,14 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
+@@ -659,13 +659,14 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
         {IDC_SPELLCHECK_REMOVE_FROM_DICTIONARY, 167},
         {IDC_CONTENT_CONTEXT_SAVE_TO_MEMORY_BANKS, 168},
         {IDC_CONTENT_CONTEXT_OPENLINK_ISOLATED, 169},
@@ -54,7 +54,7 @@ index b6c3e9dacf530..5c3417585e495 100644
    // LINT.ThenChange(//tools/metrics/histograms/metadata/ui/enums.xml:RenderViewContextMenuItem)
  
    // LINT.IfChange(ContextMenuOptionDesktop)
-@@ -703,13 +704,14 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
+@@ -706,13 +707,14 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
         {IDC_CONTENT_CONTEXT_GLICSHAREIMAGE, 32},
         {IDC_SPELLCHECK_REMOVE_FROM_DICTIONARY, 33},
         {IDC_CONTENT_CONTEXT_OPENLINK_ISOLATED, 34},
@@ -70,7 +70,7 @@ index b6c3e9dacf530..5c3417585e495 100644
    // LINT.ThenChange(//tools/metrics/histograms/metadata/ui/enums.xml:ContextMenuOptionDesktop)
  
    switch (type) {
-@@ -773,7 +775,8 @@ int FindUMAEnumValueForCommand(int id, UmaEnumIdLookupType type) {
+@@ -776,7 +778,8 @@ int FindUMAEnumValueForCommand(int id, UmaEnumIdLookupType type) {
  
  // Returns true if the command id is for opening a link.
  bool IsCommandForOpenLink(int id) {
@@ -80,7 +80,7 @@ index b6c3e9dacf530..5c3417585e495 100644
           id == IDC_CONTENT_CONTEXT_OPENLINKNEWWINDOW ||
           id == IDC_CONTENT_CONTEXT_OPENLINKOFFTHERECORD ||
           id == IDC_CONTENT_CONTEXT_OPENLINK_ISOLATED ||
-@@ -2024,7 +2027,12 @@ void RenderViewContextMenu::AppendLinkItems() {
+@@ -2027,7 +2030,12 @@ void RenderViewContextMenu::AppendLinkItems() {
        }
      }
  #endif
@@ -94,7 +94,7 @@ index b6c3e9dacf530..5c3417585e495 100644
      if (params_.link_url.is_valid()) {
        AppendProtocolHandlerSubMenu();
      }
-@@ -3454,6 +3462,7 @@ bool RenderViewContextMenu::IsCommandIdEnabled(int id) const {
+@@ -3465,6 +3473,7 @@ bool RenderViewContextMenu::IsCommandIdEnabled(int id) const {
  
      case IDC_CONTENT_CONTEXT_OPENLINKBOOKMARKAPP:
      case IDC_CONTENT_CONTEXT_OPENLINKINPROFILE:
@@ -102,7 +102,7 @@ index b6c3e9dacf530..5c3417585e495 100644
      case IDC_CONTENT_CONTEXT_OPENLINKNEWTAB:
      case IDC_CONTENT_CONTEXT_OPENLINKNEWWINDOW:
        return navigation_allowed && params_.link_url.is_valid() &&
-@@ -3784,6 +3793,30 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
+@@ -3797,6 +3806,30 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
    }
  
    switch (id) {
@@ -134,7 +134,7 @@ index b6c3e9dacf530..5c3417585e495 100644
        WindowOpenDisposition new_tab_disposition =
            WindowOpenDisposition::NEW_BACKGROUND_TAB;
 diff --git a/chrome/browser/ui/actions/chrome_action_id.h b/chrome/browser/ui/actions/chrome_action_id.h
-index 954c2933aaf30..f9dd35ac99e18 100644
+index fb916f99899f5..7b8786da5d8b4 100644
 --- a/chrome/browser/ui/actions/chrome_action_id.h
 +++ b/chrome/browser/ui/actions/chrome_action_id.h
 @@ -225,6 +225,7 @@
@@ -146,7 +146,7 @@ index 954c2933aaf30..f9dd35ac99e18 100644
    E(kActionContentContextOpenLinkNewWindow, \
      IDC_CONTENT_CONTEXT_OPENLINKNEWWINDOW) \
 diff --git a/tools/metrics/histograms/metadata/ui/enums.xml b/tools/metrics/histograms/metadata/ui/enums.xml
-index 193a907199770..22a7402335fea 100644
+index 0771a745f1781..9ece25fd7a892 100644
 --- a/tools/metrics/histograms/metadata/ui/enums.xml
 +++ b/tools/metrics/histograms/metadata/ui/enums.xml
 @@ -80,6 +80,7 @@ chromium-metrics-reviews@google.com.
@@ -157,7 +157,7 @@ index 193a907199770..22a7402335fea 100644
  </enum>
  
  <!-- LINT.ThenChange(//chrome/browser/renderer_context_menu/render_view_context_menu.cc:ContextMenuOptionDesktop) -->
-@@ -414,6 +415,7 @@ chromium-metrics-reviews@google.com.
+@@ -427,6 +428,7 @@ chromium-metrics-reviews@google.com.
    <int value="167" label="IDC_SPELLCHECK_REMOVE_FROM_DICTIONARY"/>
    <int value="168" label="IDC_CONTENT_CONTEXT_SAVE_TO_MEMORY_BANKS"/>
    <int value="169" label="IDC_CONTENT_CONTEXT_OPENLINK_ISOLATED"/>

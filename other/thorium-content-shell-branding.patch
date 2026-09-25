@@ -1,5 +1,5 @@
 diff --git a/components/BUILD.gn b/components/BUILD.gn
-index 16eb2601036f6..539acf994c6fb 100644
+index 7603d9169d914..f0a9bb4023d5a 100644
 --- a/components/BUILD.gn
 +++ b/components/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -20,7 +20,7 @@ index 16eb2601036f6..539acf994c6fb 100644
  
      if (toolkit_views && !is_mac && !is_castos) {
 diff --git a/content/shell/BUILD.gn b/content/shell/BUILD.gn
-index ea8664f6ba1b0..ad4a1fc881351 100644
+index b469f34869406..f486a8ef6fe0d 100644
 --- a/content/shell/BUILD.gn
 +++ b/content/shell/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -49,16 +49,16 @@ index ea8664f6ba1b0..ad4a1fc881351 100644
      testonly = true
      deps = [ "//content/shell/android:content_shell_apk" ]
    }
-@@ -632,7 +632,7 @@ if (is_android) {
-       content_shell_version,
+@@ -633,7 +633,7 @@ if (is_android) {
      ]
    }
+ 
 -  mac_app_bundle("content_shell") {
 +  mac_app_bundle("thorium_shell") {
      testonly = true
      output_name = content_shell_product_name
      sources = [ "app/shell_main_mac.cc" ]
-@@ -753,7 +753,7 @@ if (is_android) {
+@@ -754,7 +754,7 @@ if (is_android) {
      }
    }
  } else {
@@ -67,7 +67,7 @@ index ea8664f6ba1b0..ad4a1fc881351 100644
      testonly = true
  
      sources = [ "app/shell_main.cc" ]
-@@ -815,7 +815,7 @@ if (is_android) {
+@@ -816,7 +816,7 @@ if (is_android) {
      fuchsia_component("content_shell_component") {
        testonly = true
        manifest = "fuchsia/content_shell.cml"
@@ -76,7 +76,7 @@ index ea8664f6ba1b0..ad4a1fc881351 100644
        visibility = [ ":*" ]
      }
  
-@@ -1111,7 +1111,7 @@ if (is_android) {
+@@ -1113,7 +1113,7 @@ if (is_android) {
        "//content/test/data/media/",
      ]
      data_deps = [
@@ -85,7 +85,7 @@ index ea8664f6ba1b0..ad4a1fc881351 100644
        "//build/android:devil_chromium_py",
        "//build/android:test_runner_py",
        "//testing:test_scripts_shared",
-@@ -1123,7 +1123,7 @@ if (is_android) {
+@@ -1125,7 +1125,7 @@ if (is_android) {
  group("content_shell_crash_test") {
    testonly = true
    data_deps = [
@@ -95,7 +95,7 @@ index ea8664f6ba1b0..ad4a1fc881351 100644
      "//third_party/angle:includes",
    ]
 diff --git a/content/shell/android/BUILD.gn b/content/shell/android/BUILD.gn
-index b45d4365a7077..e24a57f6134a3 100644
+index bed3bc2c58d4c..f60e6aa7727f0 100644
 --- a/content/shell/android/BUILD.gn
 +++ b/content/shell/android/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -104,7 +104,7 @@ index b45d4365a7077..e24a57f6134a3 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -216,9 +216,14 @@ template("content_shell_apk_tmpl") {
+@@ -217,9 +217,14 @@ template("content_shell_apk_tmpl") {
    }
  }
  
@@ -120,7 +120,7 @@ index b45d4365a7077..e24a57f6134a3 100644
    android_manifest = content_shell_manifest
    android_manifest_dep = ":content_shell_manifest"
    shared_libraries = [ ":libcontent_shell_content_view" ]
-@@ -228,7 +233,7 @@ content_shell_apk_tmpl("content_shell_apk") {
+@@ -229,7 +234,7 @@ content_shell_apk_tmpl("content_shell_apk") {
  
  content_shell_apk_tmpl("content_shell_test_apk") {
    target_type = "instrumentation_test_apk"
@@ -206,7 +206,7 @@ index 0c52b54f11aaa..02b15082cd391 100644
    shell_data.window_widget->Init(std::move(params));
  #endif  // BUILDFLAG(IS_CHROMEOS)
 diff --git a/content/test/BUILD.gn b/content/test/BUILD.gn
-index 4897045f04658..589fdaf412447 100644
+index 830f84198c02f..94a0f5ea026a6 100644
 --- a/content/test/BUILD.gn
 +++ b/content/test/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -215,7 +215,7 @@ index 4897045f04658..589fdaf412447 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -2341,8 +2341,8 @@ test("content_browsertests") {
+@@ -2348,8 +2348,8 @@ test("content_browsertests") {
        "../renderer/render_view_browsertest_mac.mm",
      ]
      deps += [ "//third_party/ocmock" ]

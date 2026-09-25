@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_browser_main.cc b/chrome/browser/chrome_browser_main.cc
-index 00fe10f55ffb3..ab94ee7d82749 100644
+index cbf3b6c563090..d01d8cdfd5242 100644
 --- a/chrome/browser/chrome_browser_main.cc
 +++ b/chrome/browser/chrome_browser_main.cc
-@@ -1305,6 +1305,8 @@ int ChromeBrowserMainParts::PreCreateThreadsImpl() {
+@@ -1340,6 +1340,8 @@ int ChromeBrowserMainParts::PreCreateThreadsImpl() {
    if (first_run::IsChromeFirstRun()) {
      if (!base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kApp) &&
          !base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kAppId)) {

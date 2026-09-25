@@ -1,5 +1,21 @@
+diff --git a/ui/webui/resources/cr_components/searchbox/icons/BUILD.gn b/ui/webui/resources/cr_components/searchbox/icons/BUILD.gn
+index 1854c30..d71edf8 100644
+--- a/ui/webui/resources/cr_components/searchbox/icons/BUILD.gn
++++ b/ui/webui/resources/cr_components/searchbox/icons/BUILD.gn
+@@ -10,6 +10,11 @@ generate_grd("build_grdp") {
+   resource_path_prefix = "cr_components/searchbox/icons"
+   out_grd = "$target_gen_dir/resources.grdp"
+   input_files = [
++    "bookmark_cr23_old_thorium.svg",
++    "dino_cr23_old_thorium.svg",
++    "extension_app_old_thorium.svg",
++    "incognito_cr23_old_thorium.svg",
++    "star_active_old_thorium.svg",
+     "account_circle.svg",
+     "account_circle_old.svg",
+     "arrow_forward.svg",
 diff --git a/ui/webui/resources/images/BUILD.gn b/ui/webui/resources/images/BUILD.gn
-index 3bb8b5d1df3b3..49bf5b6f87feb 100644
+index 3bb8b5d..3f2f4ea 100644
 --- a/ui/webui/resources/images/BUILD.gn
 +++ b/ui/webui/resources/images/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +24,34 @@ index 3bb8b5d1df3b3..49bf5b6f87feb 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -26,6 +26,7 @@ generate_grd("build_grdp") {
+@@ -10,6 +10,26 @@ generate_grd("build_grdp") {
+   out_grd = "$target_gen_dir/resources.grdp"
+   input_files_base_dir = rebase_path(".", "//")
+   input_files = [
++    "arrow_down_thorium.svg",
++    "arrow_right_old_thorium.svg",
++    "dark/arrow_down_thorium.svg",
++    "extension_thorium.svg",
++    "hazard_thorium.svg",
++    "info.svg",
++    "info_thorium.svg",
++    "icon_arrow_back_old_thorium.svg",
++    "icon_arrow_drop_down_cr23_old_thorium.svg",
++    "icon_arrow_drop_up_cr23_old_thorium.svg",
++    "icon_arrow_dropdown_old_thorium.svg",
++    "icon_cancel_old_thorium.svg",
++    "icon_clear_old_thorium.svg",
++    "icon_delete_gray_old_thorium.svg",
++    "icon_expand_less_old_thorium.svg",
++    "icon_expand_more_old_thorium.svg",
++    "icon_more_vert_old_thorium.svg",
++    "icon_picture_delete_old_thorium.svg",
++    "icon_refresh_old_thorium.svg",
++    "tree_triangle_thorium.svg",
+     "add.svg",
+     "add_old.svg",
+     "apps_home_empty_238x170.svg",
+@@ -26,6 +44,7 @@ generate_grd("build_grdp") {
      "error.svg",
      "error_yellow900.svg",
      "extension.svg",
@@ -16,7 +59,7 @@ index 3bb8b5d1df3b3..49bf5b6f87feb 100644
      "icon_arrow_dropdown.svg",
      "icon_arrow_dropdown_old.svg",
      "icon_cancel.svg",
-@@ -41,6 +42,7 @@ generate_grd("build_grdp") {
+@@ -41,6 +60,7 @@ generate_grd("build_grdp") {
      "icon_refresh_old.svg",
      "icon_search.svg",
      "icon_tab.svg",

@@ -1,8 +1,8 @@
 diff --git a/chrome/android/chrome_java_resources.gni b/chrome/android/chrome_java_resources.gni
-index 6b84ae364be97..3cf21110c5b60 100644
+index 67d140d94d0a5..3ea19e25b0475 100644
 --- a/chrome/android/chrome_java_resources.gni
 +++ b/chrome/android/chrome_java_resources.gni
-@@ -672,6 +672,7 @@ chrome_java_resources = [
+@@ -674,6 +674,7 @@ chrome_java_resources = [
    "java/res/xml/developer_preferences.xml",
    "java/res/xml/do_not_track_preferences.xml",
    "java/res/xml/google_services_preferences.xml",
@@ -11,10 +11,10 @@ index 6b84ae364be97..3cf21110c5b60 100644
    "java/res/xml/legal_information_preferences.xml",
    "java/res/xml/main_preferences.xml",
 diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java_sources.gni
-index 1a541dcb256ac..b012d3bc92724 100644
+index 30ba7c4c23820..5224bfad7b9dc 100644
 --- a/chrome/android/chrome_java_sources.gni
 +++ b/chrome/android/chrome_java_sources.gni
-@@ -1035,6 +1035,7 @@ chrome_java_sources = [
+@@ -1042,6 +1042,7 @@ chrome_java_sources = [
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditor.java",
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditorBridge.java",
    "java/src/org/chromium/chrome/browser/privacy/settings/DoNotTrackSettings.java",
@@ -122,7 +122,7 @@ index 0000000000000..484572ab2db9c
 +    }
 +}
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
-index a87bc4d56b382..8ee4d1128f395 100644
+index 1b5d10dbf1aa0..18adb45d30563 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
 @@ -93,6 +93,7 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
@@ -133,8 +133,8 @@ index a87bc4d56b382..8ee4d1128f395 100644
      private static final String PREF_SAFE_BROWSING = "safe_browsing";
      private static final String PREF_PASSWORD_LEAK_DETECTION = "password_leak_detection";
      private static final String PREF_SYNC_AND_SERVICES_LINK = "sync_and_services_link";
-@@ -405,6 +406,14 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
-             }
+@@ -403,6 +404,14 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
+                             : R.string.text_off);
          }
  
 +        Preference gpcPref = findPreference(PREF_GPC);
@@ -149,10 +149,10 @@ index a87bc4d56b382..8ee4d1128f395 100644
          if (preloadPagesPreference != null) {
              preloadPagesPreference.setSummary(
 diff --git a/chrome/app/settings_strings.grdp b/chrome/app/settings_strings.grdp
-index 884e32a5f21f4..e85dc72dfab14 100644
+index caae29834c2cf..2eee53a6f3cb0 100644
 --- a/chrome/app/settings_strings.grdp
 +++ b/chrome/app/settings_strings.grdp
-@@ -1744,6 +1744,18 @@
+@@ -1775,6 +1775,18 @@
      <message name="IDS_SETTINGS_UNIVERSAL_OPT_OUT_SUB_LABEL" desc="Subtitle of a setting. It appears below the title: ‘Send an opt-out request to sites regarding use of your data’. Users choose whether they want to send a request to sites about how to treat their user data. This string explains that sites may not respond to the user’s request even when this toggle is on; and, even when they do respond, sites may handle opt-out requests differently based on regional laws. On desktop computers, this string appears in the ‘Site requests’ section of the ‘Third-party cookies and site data’ page. On mobile devices, this string appears on its own subpage. The tone should be informative.">
        The sites you visit, including Google, are responsible for determining how they respond to this request. Depending on the laws in your region, sites may respond by limiting the sale and sharing of your data or its use for personalized ads.
      </message>
@@ -172,10 +172,10 @@ index 884e32a5f21f4..e85dc72dfab14 100644
        Controls what information sites can use and show (location, camera, pop-ups, and more)
      </message>
 diff --git a/chrome/browser/extensions/api/settings_private/prefs_util.cc b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-index 2363c9ba7de85..a5d5965f58c11 100644
+index 3b2361d90cb07..d0142c52006a1 100644
 --- a/chrome/browser/extensions/api/settings_private/prefs_util.cc
 +++ b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-@@ -493,6 +493,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
+@@ -497,6 +497,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
    (*s_allowlist)[::prefs::kEnableDoNotTrack] = settings_api::PrefType::kBoolean;
    (*s_allowlist)[universal_optout::prefs::kUniversalOptOutEnabled] =
        settings_api::PrefType::kBoolean;
@@ -204,10 +204,10 @@ index 2b542a4814ddc..3b61122e40519 100644
    // kGlobalPrivacyControlDevToolsOverridest.
    if (base::FeatureList::IsEnabled(
 diff --git a/chrome/browser/resources/settings/BUILD.gn b/chrome/browser/resources/settings/BUILD.gn
-index 041905516f82d..ee52414436c7d 100644
+index 5b58a98f56da9..ab4c706742230 100644
 --- a/chrome/browser/resources/settings/BUILD.gn
 +++ b/chrome/browser/resources/settings/BUILD.gn
-@@ -103,6 +103,7 @@ build_webui("build") {
+@@ -98,6 +98,7 @@ build_webui("build") {
      "glic_page/glic_subpage.ts",
      "privacy_page/cookies_page.ts",
      "privacy_page/do_not_track_toggle.ts",
@@ -216,11 +216,11 @@ index 041905516f82d..ee52414436c7d 100644
      "privacy_page/privacy_guide/privacy_guide_completion_fragment.ts",
      "privacy_page/privacy_guide/privacy_guide_cookies_fragment.ts",
 diff --git a/chrome/browser/resources/settings/privacy_page/cookies_page.html b/chrome/browser/resources/settings/privacy_page/cookies_page.html
-index e78b7e20543cb..c42923fd57fe3 100644
+index 63e5742f3021d..eae4fd30154d9 100644
 --- a/chrome/browser/resources/settings/privacy_page/cookies_page.html
 +++ b/chrome/browser/resources/settings/privacy_page/cookies_page.html
-@@ -157,6 +157,8 @@
-           sub-label="$i18n{universalOptOutSubLabel}">
+@@ -253,6 +253,8 @@
+           learn-more-url="$i18n{universalOptOutLearnMoreURL}">
        </settings-toggle-button>
      </template>
 +    <settings-gpc-toggle id="gpc" prefs="{{prefs}}">
@@ -229,10 +229,10 @@ index e78b7e20543cb..c42923fd57fe3 100644
          on-click="onSiteDataClick_" label="$i18n{cookiePageAllSitesLink}"
          role-description="$i18n{subpageArrowRoleDescription}">
 diff --git a/chrome/browser/resources/settings/privacy_page/cookies_page.ts b/chrome/browser/resources/settings/privacy_page/cookies_page.ts
-index 7fe9ca2df6467..9af04185552fe 100644
+index fa70b79146429..549420b242558 100644
 --- a/chrome/browser/resources/settings/privacy_page/cookies_page.ts
 +++ b/chrome/browser/resources/settings/privacy_page/cookies_page.ts
-@@ -22,6 +22,7 @@ import '../settings_page/settings_subpage.js';
+@@ -23,6 +23,7 @@ import '../settings_page/settings_subpage.js';
  import '../settings_shared.css.js';
  import '../site_settings/site_list.js';
  import './do_not_track_toggle.js';
@@ -404,10 +404,10 @@ index 0000000000000..d4c2ddde9d163
 +customElements.define(
 +  SettingsGpcToggleElement.is, SettingsGpcToggleElement);
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-index efeb9f81eb8e2..092dac23423e8 100644
+index 6fcf7f35b7d9b..9ef1931a0f271 100644
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1057,6 +1057,12 @@ For example, some websites may respond to this request by showing you ads that a
+@@ -1063,6 +1063,12 @@ For example, some websites may respond to this request by showing you ads that a
        <message name="IDS_UNIVERSAL_OPT_OUT_INFO_TEXT" desc="Subtitle of a setting. It appears below the title: ‘Send an opt-out request to sites regarding use of your data’. Users choose whether they want to send a request to sites about how to treat their user data. This string explains that sites may not respond to the user’s request even when this toggle is on; and, even when they do respond, sites may handle opt-out requests differently based on regional laws. This string appears on its own subpage. The tone should be informative. Clicking on Learn more link opens a help center article, the link tag should not be translated but the 'learn more' text inside the link tag should be translated.">
          The sites you visit, including Google, are responsible for determining how they respond to this request. Depending on the laws in your region, sites may respond by limiting the sale and sharing of your data or its use for personalized ads. <ph name="BEGIN_LINK">&lt;link&gt;</ph>Learn more<ph name="END_LINK">&lt;/link&gt;</ph>
        </message>
@@ -421,7 +421,7 @@ index efeb9f81eb8e2..092dac23423e8 100644
          Access payment methods
        </message>
 diff --git a/chrome/browser/ui/prefs/pref_watcher.cc b/chrome/browser/ui/prefs/pref_watcher.cc
-index 7b02f5e7a3649..f46f5c7008b00 100644
+index 01a8bcb7679ee..ebce2afab0d64 100644
 --- a/chrome/browser/ui/prefs/pref_watcher.cc
 +++ b/chrome/browser/ui/prefs/pref_watcher.cc
 @@ -24,6 +24,7 @@
@@ -431,8 +431,8 @@ index 7b02f5e7a3649..f46f5c7008b00 100644
 +#include "components/privacy_sandbox/privacy_sandbox_prefs.h"
  #include "components/universal_optout/prefs.h"
  #include "content/public/browser/browser_context.h"
- #include "mojo/public/cpp/bindings/pending_remote.h"
-@@ -154,6 +155,7 @@ PrefWatcher::PrefWatcher(Profile* profile) : profile_(profile) {
+ #include "extensions/buildflags/buildflags.h"
+@@ -155,6 +156,7 @@ PrefWatcher::PrefWatcher(Profile* profile) : profile_(profile) {
                                       renderer_callback);
    profile_pref_change_registrar_.Add(prefs::kEnableDoNotTrack,
                                       renderer_callback);
@@ -441,10 +441,10 @@ index 7b02f5e7a3649..f46f5c7008b00 100644
        universal_optout::prefs::kUniversalOptOutEnabled, renderer_callback);
    profile_pref_change_registrar_.Add(
 diff --git a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-index e8a171fb21f5a..d5f30478a363f 100644
+index 774e32188161b..b2fd73429e910 100644
 --- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 +++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-@@ -2554,6 +2554,11 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
+@@ -2578,6 +2578,11 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
        {"doNotTrackDialogMessage", IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_TEXT},
        {"doNotTrackDialogLearnMoreA11yLabel",
         IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_LEARN_MORE_ACCESSIBILITY_LABEL},
@@ -549,10 +549,10 @@ index 026d009b9d728..daabb23d63a49 100644
    // the use of Clear Key key system which is always allowed as required by the
    // spec.
 diff --git a/third_party/blink/renderer/platform/runtime_enabled_features.json5 b/third_party/blink/renderer/platform/runtime_enabled_features.json5
-index 56be67e70f1cd..844ace441eecd 100644
+index b1d9c43f888b7..040fb591b9ad3 100644
 --- a/third_party/blink/renderer/platform/runtime_enabled_features.json5
 +++ b/third_party/blink/renderer/platform/runtime_enabled_features.json5
-@@ -3380,6 +3380,7 @@
+@@ -3421,6 +3421,7 @@
      },
      {
        name: "GlobalPrivacyControl",

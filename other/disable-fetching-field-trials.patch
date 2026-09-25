@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index 7c832f2e7893f..b815f730afa44 100644
+index 749e4e09273c2..7684bd39704b1 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 7c832f2e7893f..b815f730afa44 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -65,7 +65,7 @@ public abstract class ChromeFeatureList {
+@@ -66,7 +66,7 @@ public abstract class ChromeFeatureList {
       *     instead.
       */
      public static String getFieldTrialParamByFeature(String featureName, String paramName) {
@@ -17,7 +17,7 @@ index 7c832f2e7893f..b815f730afa44 100644
      }
  
      /**
-@@ -80,8 +80,7 @@ public abstract class ChromeFeatureList {
+@@ -81,8 +81,7 @@ public abstract class ChromeFeatureList {
       */
      public static boolean getFieldTrialParamByFeatureAsBoolean(
              String featureName, String paramName, boolean defaultValue) {
@@ -27,7 +27,7 @@ index 7c832f2e7893f..b815f730afa44 100644
      }
  
      /**
-@@ -109,8 +108,7 @@ public abstract class ChromeFeatureList {
+@@ -110,8 +109,7 @@ public abstract class ChromeFeatureList {
       */
      public static int getFieldTrialParamByFeatureAsInt(
              String featureName, String paramName, int defaultValue) {
@@ -37,7 +37,7 @@ index 7c832f2e7893f..b815f730afa44 100644
      }
  
      /**
-@@ -137,8 +135,7 @@ public abstract class ChromeFeatureList {
+@@ -138,8 +136,7 @@ public abstract class ChromeFeatureList {
       */
      public static double getFieldTrialParamByFeatureAsDouble(
              String featureName, String paramName, double defaultValue) {
@@ -48,7 +48,7 @@ index 7c832f2e7893f..b815f730afa44 100644
  
      /**
 diff --git a/components/variations/service/variations_service.cc b/components/variations/service/variations_service.cc
-index 52cdcea1c685a..eaaa6aff97962 100644
+index 192aa8f32db17..f0a1c604dd518 100644
 --- a/components/variations/service/variations_service.cc
 +++ b/components/variations/service/variations_service.cc
 @@ -1,4 +1,4 @@
@@ -57,7 +57,7 @@ index 52cdcea1c685a..eaaa6aff97962 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -268,22 +268,7 @@ bool GetInstanceManipulations(const net::HttpResponseHeaders* headers,
+@@ -269,22 +269,7 @@ bool GetInstanceManipulations(const net::HttpResponseHeaders* headers,
  // Variations seed fetching is only enabled in official Chrome builds, if a URL
  // is specified on the command line, and for testing.
  bool IsFetchingEnabled() {

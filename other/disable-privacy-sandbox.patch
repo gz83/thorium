@@ -1,8 +1,8 @@
 diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
-index 04e9471f3b8f9..6e1695095288c 100644
+index 75a17f190c9e4..31fc552e3b417 100644
 --- a/chrome/BUILD.gn
 +++ b/chrome/BUILD.gn
-@@ -389,7 +389,6 @@ if (!is_android && !is_mac) {
+@@ -385,7 +385,6 @@ if (!is_android && !is_mac) {
      data_deps += [
        "//chrome/browser/resources/media/mei_preload:component",
        "//chrome/browser/web_applications/isolated_web_apps/key_distribution/preload:component",
@@ -10,7 +10,7 @@ index 04e9471f3b8f9..6e1695095288c 100644
        "//third_party/widevine/cdm",
      ]
  
-@@ -1388,7 +1387,6 @@ if (is_win) {
+@@ -1391,7 +1390,6 @@ if (is_win) {
        ":widevine_cdm_library",
        "//chrome/browser/resources/media/mei_preload:component_bundle",
        "//chrome/browser/web_applications/isolated_web_apps/key_distribution/preload:component_bundle",
@@ -19,10 +19,10 @@ index 04e9471f3b8f9..6e1695095288c 100644
  
      if (is_chrome_branded) {
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index eb192f7220e5e..4010528bc88d9 100644
+index a85c5219ca5d5..3254274c4ce41 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
-@@ -1840,7 +1840,6 @@ if (_is_default_toolchain) {
+@@ -1845,7 +1845,6 @@ if (_is_default_toolchain) {
    java_group("chrome_public_non_pak_assets") {
      deps = [
        "//chrome/android/webapk/libs/runtime_library:runtime_library_assets",
@@ -31,7 +31,7 @@ index eb192f7220e5e..4010528bc88d9 100644
    }
  
 diff --git a/chrome/browser/component_updater/registration.cc b/chrome/browser/component_updater/registration.cc
-index 9fd11c9f722cb..b7926ade35a67 100644
+index b11907b0f46d6..f39f20ac1ff03 100644
 --- a/chrome/browser/component_updater/registration.cc
 +++ b/chrome/browser/component_updater/registration.cc
 @@ -28,7 +28,6 @@
@@ -42,7 +42,7 @@ index 9fd11c9f722cb..b7926ade35a67 100644
  #include "chrome/browser/component_updater/private_verification_tokens_installer.h"
  #include "chrome/browser/component_updater/ssl_error_assistant_component_installer.h"
  #include "chrome/browser/component_updater/subresource_filter_component_installer.h"
-@@ -154,7 +153,6 @@ void RegisterComponentsForUpdate() {
+@@ -159,7 +158,6 @@ void RegisterComponentsForUpdate() {
    RegisterTrustTokenKeyCommitmentsComponentIfTrustTokensEnabled(cus);
    RegisterPrivateVerificationTokensComponentIfEnabled(cus);
    RegisterFirstPartySetsComponent(cus);
@@ -51,10 +51,10 @@ index 9fd11c9f722cb..b7926ade35a67 100644
    if (history_embeddings::IsHistoryEmbeddingsFeatureEnabled()) {
      RegisterHistorySearchStringsComponent(cus);
 diff --git a/chrome/browser/resources/BUILD.gn b/chrome/browser/resources/BUILD.gn
-index 494f08cb1820a..0067a6e0cc3e2 100644
+index 93f402ff8a5f8..04abcafbf534d 100644
 --- a/chrome/browser/resources/BUILD.gn
 +++ b/chrome/browser/resources/BUILD.gn
-@@ -135,7 +135,6 @@ group("resources") {
+@@ -136,7 +136,6 @@ group("resources") {
      public_deps += [
        "unexportable_keys_internals:resources",
        "//chrome/browser/resources/media/mei_preload:component",
@@ -63,7 +63,7 @@ index 494f08cb1820a..0067a6e0cc3e2 100644
    }
  
 diff --git a/chrome/installer/linux/BUILD.gn b/chrome/installer/linux/BUILD.gn
-index 8faff2a94b066..ff14c55448e16 100644
+index 44842eef3d8f0..33a05266923ff 100644
 --- a/chrome/installer/linux/BUILD.gn
 +++ b/chrome/installer/linux/BUILD.gn
 @@ -148,8 +148,6 @@ packaging_files = packaging_files_binaries + [
@@ -113,7 +113,7 @@ index 50bb9dbfaa395..2183613ce354b 100644
          mei_manifest = self.output_dir / "MEIPreload/manifest.json"
          if mei_manifest.exists():
 diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index 6aff0e63cc7de..ae15cd75a3f04 100644
+index 4e0e1b71ee947..adb6a07f9c927 100644
 --- a/chrome/installer/mini_installer/chrome.release
 +++ b/chrome/installer/mini_installer/chrome.release
 @@ -88,12 +88,6 @@ WidevineCdm\_platform_specific\win_arm64\widevinecdm.dll.sig: %(VersionDir)s\Wid
@@ -143,10 +143,10 @@ index 11ff98e135767..04eaa94b10729 100644
  
  BASE_FEATURE(kRelatedWebsiteSetsUi, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/content/common/features.cc b/content/common/features.cc
-index 7edb9b3eb69a8..839f6103d26ff 100644
+index 7ac35b5a84b62..d6efdf61920c4 100644
 --- a/content/common/features.cc
 +++ b/content/common/features.cc
-@@ -584,7 +584,7 @@ BASE_FEATURE(kPriorityOverridePendingViews, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -598,7 +598,7 @@ BASE_FEATURE(kPriorityOverridePendingViews, base::FEATURE_ENABLED_BY_DEFAULT);
  // Enables exposure of the core milestone 1 (M1) APIs in the renderer without an
  // origin trial token: Attribution Reporting, FLEDGE, Topics.
  BASE_FEATURE(kPrivacySandboxAdsAPIsM1Override,
@@ -156,7 +156,7 @@ index 7edb9b3eb69a8..839f6103d26ff 100644
  #if BUILDFLAG(IS_ANDROID)
  // When disabled("legacy behavior") it resets ongoing gestures when window loses
 diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/features.cc
-index 304d8e6942fef..e395ffbb3a0fd 100644
+index 94a49a204a0a5..bbf67359cba07 100644
 --- a/third_party/blink/common/features.cc
 +++ b/third_party/blink/common/features.cc
 @@ -126,7 +126,7 @@ BASE_FEATURE(kAllowDatapipeDrainedAsBytesConsumerInBFCache,

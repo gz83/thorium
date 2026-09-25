@@ -25,7 +25,7 @@ index 71ae0c1a7626d..e785d05249cd8 100644
    margin-inline-start: 12px;
    margin-inline-end: 12px;
 diff --git a/chrome/browser/resources/downloads/item.html.ts b/chrome/browser/resources/downloads/item.html.ts
-index d07c2cf8f5d8d..81216c983f839 100644
+index 35465838d549f..a5629f0f68536 100644
 --- a/chrome/browser/resources/downloads/item.html.ts
 +++ b/chrome/browser/resources/downloads/item.html.ts
 @@ -45,6 +45,9 @@ export function getHtml(this: DownloadsItemElement) {
@@ -38,7 +38,7 @@ index d07c2cf8f5d8d..81216c983f839 100644
        </div>
  
        <div class="description" role="gridcell"
-@@ -91,7 +94,7 @@ export function getHtml(this: DownloadsItemElement) {
+@@ -92,7 +95,7 @@ export function getHtml(this: DownloadsItemElement) {
              focus-type="copyDownloadLink">
          </cr-icon-button>
          <cr-icon-button id="more-actions" iron-icon="cr:more-vert"

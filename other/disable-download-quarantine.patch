@@ -1,5 +1,5 @@
 diff --git a/components/download/internal/common/base_file.cc b/components/download/internal/common/base_file.cc
-index 459f6cb657138..2ce3d3c7f6e97 100644
+index 3be36deb96238..8213c9f75e69e 100644
 --- a/components/download/internal/common/base_file.cc
 +++ b/components/download/internal/common/base_file.cc
 @@ -1,4 +1,4 @@
@@ -14,9 +14,9 @@ index 459f6cb657138..2ce3d3c7f6e97 100644
  #include "components/download/public/common/download_stats.h"
 -#include "components/services/quarantine/quarantine.h"
  #include "crypto/hash.h"
- #include "crypto/secure_hash.h"
  
-@@ -585,106 +584,12 @@ DownloadInterruptReason BaseFile::PublishDownload() {
+ #if BUILDFLAG(IS_ANDROID)
+@@ -583,106 +582,12 @@ DownloadInterruptReason BaseFile::PublishDownload() {
  }
  #endif  // BUILDFLAG(IS_ANDROID)
  
@@ -124,7 +124,7 @@ index 459f6cb657138..2ce3d3c7f6e97 100644
  }
  
  void BaseFile::AnnotateWithSourceInformation(
-@@ -694,33 +599,7 @@ void BaseFile::AnnotateWithSourceInformation(
+@@ -692,33 +597,7 @@ void BaseFile::AnnotateWithSourceInformation(
      const std::optional<url::Origin>& request_initiator,
      mojo::PendingRemote<quarantine::mojom::Quarantine> remote_quarantine,
      OnAnnotationDoneCallback on_annotation_done_callback) {
@@ -160,18 +160,18 @@ index 459f6cb657138..2ce3d3c7f6e97 100644
  
  }  // namespace download
 diff --git a/components/download/public/common/base_file.h b/components/download/public/common/base_file.h
-index d162c097d6e5f..310d5c770fb9e 100644
+index 00e0ed6c6225b..d8a8eff069b9c 100644
 --- a/components/download/public/common/base_file.h
 +++ b/components/download/public/common/base_file.h
-@@ -27,7 +27,6 @@
+@@ -26,7 +26,6 @@
  #include "components/services/quarantine/public/mojom/quarantine.mojom.h"
- #include "crypto/secure_hash.h"
+ #include "crypto/hash.h"
  #include "mojo/public/cpp/bindings/pending_remote.h"
 -#include "mojo/public/cpp/bindings/remote.h"
  #include "net/base/net_errors.h"
  #include "url/gurl.h"
  #include "url/origin.h"
-@@ -281,14 +280,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
+@@ -279,14 +278,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
                                               int os_error,
                                               DownloadInterruptReason reason);
  
@@ -186,7 +186,7 @@ index d162c097d6e5f..310d5c770fb9e 100644
    // Full path to the file including the file name.
    base::FilePath full_path_;
  
-@@ -316,12 +307,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
+@@ -314,12 +305,6 @@ class COMPONENTS_DOWNLOAD_EXPORT BaseFile {
    // ID of the download, used for trace events.
    uint32_t download_id_;
  
@@ -200,7 +200,7 @@ index d162c097d6e5f..310d5c770fb9e 100644
  
    base::WeakPtrFactory<BaseFile> weak_factory_{this};
 diff --git a/content/browser/BUILD.gn b/content/browser/BUILD.gn
-index 4e9e52469939b..247b949d29378 100644
+index 53dd562d46bae..90cbc49666012 100644
 --- a/content/browser/BUILD.gn
 +++ b/content/browser/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -218,7 +218,7 @@ index 4e9e52469939b..247b949d29378 100644
      "//components/services/storage:filesystem_proxy_factory",
      "//components/services/storage/dom_storage/leveldb:local_storage_proto",
 diff --git a/content/browser/file_system_access/file_system_access_safe_move_helper.cc b/content/browser/file_system_access/file_system_access_safe_move_helper.cc
-index 3ee586f42449c..23f5a77b879e5 100644
+index d8ce931231009..3bbc9037f7407 100644
 --- a/content/browser/file_system_access/file_system_access_safe_move_helper.cc
 +++ b/content/browser/file_system_access/file_system_access_safe_move_helper.cc
 @@ -1,4 +1,4 @@

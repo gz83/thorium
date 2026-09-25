@@ -12,7 +12,7 @@ index a4ad87db54e3c..65a42ceb6409c 100644
      deps = [ "//chrome/installer/linux" ]
    }
 diff --git a/chrome/installer/linux/BUILD.gn b/chrome/installer/linux/BUILD.gn
-index 5ddd3e4cd5a0e..8faff2a94b066 100644
+index 26c3bd1dd6510..44842eef3d8f0 100644
 --- a/chrome/installer/linux/BUILD.gn
 +++ b/chrome/installer/linux/BUILD.gn
 @@ -1,16 +1,16 @@
@@ -362,7 +362,7 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
      public_deps += [
        "//ui/gl:dummy_libEGL",
        "//ui/gl:dummy_libGLESv2",
-@@ -562,22 +588,33 @@ group("installer_deps") {
+@@ -562,23 +588,34 @@ group("installer_deps") {
  # channel:
  #   Name of the channel.
  template("linux_package") {
@@ -377,6 +377,7 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
    }
  
    deb_target_name = "${target_name}_deb"
+ 
    action(deb_target_name) {
 +    testonly = true
      visibility = [ ":*" ]
@@ -402,7 +403,7 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
  
      args = [
        "-a",
-@@ -588,33 +625,61 @@ template("linux_package") {
+@@ -589,22 +626,38 @@ template("linux_package") {
        invoker.channel,
        "-d",
        branding_path_component,
@@ -445,8 +446,9 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
      ]
    }
  
-   if (!is_chromeos) {
+@@ -612,11 +665,23 @@ template("linux_package") {
      rpm_target_name = "${target_name}_rpm"
+ 
      action(rpm_target_name) {
 +      testonly = true
        visibility = [ ":*" ]
@@ -470,7 +472,7 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
  
        args = [
          "-a",
-@@ -625,18 +690,38 @@ template("linux_package") {
+@@ -627,18 +692,38 @@ template("linux_package") {
          invoker.channel,
          "-d",
          branding_path_component,
@@ -509,7 +511,7 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
        ]
      }
  
-@@ -673,6 +758,7 @@ template("linux_package") {
+@@ -676,6 +761,7 @@ template("linux_package") {
    }
  
    group(target_name) {
@@ -517,16 +519,19 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
      deps = [ ":$deb_target_name" ]
      if (!is_chromeos) {
        deps += [ ":$rpm_target_name" ]
-@@ -687,30 +773,3 @@ template("linux_package") {
+@@ -690,34 +776,3 @@ template("linux_package") {
  linux_package("stable") {
    channel = "stable"
  }
+-
 -linux_package("beta") {
 -  channel = "beta"
 -}
+-
 -linux_package("unstable") {
 -  channel = "unstable"
 -}
+-
 -linux_package("canary") {
 -  channel = "canary"
 -}
@@ -539,6 +544,7 @@ index 5ddd3e4cd5a0e..8faff2a94b066 100644
 -  group("dev_deb") {
 -    deps = [ ":unstable_deb" ]
 -  }
+-
 -  group("dev_rpm") {
 -    deps = [ ":unstable_rpm" ]
 -  }
@@ -2805,29 +2811,44 @@ index 3ca7333a9eff0..f4baec809b042 100644
    fi
  fi
 diff --git a/chrome/installer/linux/common/rpm.include b/chrome/installer/linux/common/rpm.include
-index 9965c8227052c..45add57c7075e 100644
+index 9b87ef588baa2..45add57c7075e 100644
 --- a/chrome/installer/linux/common/rpm.include
 +++ b/chrome/installer/linux/common/rpm.include
-@@ -1,239 +1,4 @@
+@@ -1,253 +1,4 @@
 -@@include@@repo_variables.include
 -@@include@@key.include
 -
 -# Install the repository signing key (see also:
 -# https://www.google.com/linuxrepositories/)
 -install_rpm_key() {
--  KEY_PACKAGE="gpg-pubkey-d38b4796-570c8cd3"
--  # Check to see if all keys already exists.
+-  # The version of the gpg-pubkey package is the short key ID for rpm < 6.0
+-  # (gpg-pubkey-d38b4796-570c8cd3) and the full key fingerprint for rpm >= 6.0
+-  # (gpg-pubkey-eb4c1bfd4f042f6dddccec917721f63bd38b4796-570c8cd3), so look for
+-  # either form rather than hardcoding a package name.
+-  # Use an explicit query format since the default is configurable via the
+-  # %_query_all_fmt rpm macro.
+-  KEY_PACKAGES=$(rpm -q --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' gpg-pubkey \
+-    2>/dev/null | grep -Ei \
+-    '^gpg-pubkey-(eb4c1bfd4f042f6dddccec917721f63b)?d38b4796-570c8cd3$')
+-
+-  # Check to see if all keys already exist.
 -  # Make sure all the most recent signing subkeys are installed.
 -  NEED_KEYS=0
 -
--  for SUB_KEY in $PGP_SUBKEYS; do
--    rpm -q ${KEY_PACKAGE} --qf '%{Pubkeys:armor}\n' | \
--      gpg --with-colons - 2>/dev/null | \
--      grep -q "$SUB_KEY"
--    if [ "$?" -ne "0" ]; then
--      NEED_KEYS=1
--    fi
--  done
+-  if [ -z "$KEY_PACKAGES" ]; then
+-    NEED_KEYS=1
+-  else
+-    INSTALLED_SUBKEYS=$(rpm -q --qf '%{Pubkeys:armor}\n' $KEY_PACKAGES \
+-      2>/dev/null | gpg --with-colons - 2>/dev/null)
+-    for SUB_KEY in $PGP_SUBKEYS; do
+-      # The key ID is the fifth field of the colon-delimited subkey record.
+-      if ! printf '%s\n' "$INSTALLED_SUBKEYS" | \
+-          grep -qiE "^sub(:[^:]*){3}:$SUB_KEY:"; then
+-        NEED_KEYS=1
+-        break
+-      fi
+-    done
+-  fi
 -
 -  if [ $NEED_KEYS -ne 1 ]; then
 -    return
@@ -2835,13 +2856,12 @@ index 9965c8227052c..45add57c7075e 100644
 -
 -  # Make sure no older version of the key is installed because it appears
 -  # 'rpm --import' won't overwrite an existing key package.
--  rpm -q ${KEY_PACKAGE} >/dev/null 2>&1
--  if [ "$?" -eq "0" ]; then
+-  if [ -n "$KEY_PACKAGES" ]; then
 -    # Note, if this is run during the package install, it will fail because rpm
 -    # can't recursively run rpm, but it should work when run later as part of
 -    # the installed cron job (and probably nothing needs the new keys before
 -    # then).
--    rpm -e --allmatches ${KEY_PACKAGE} >/dev/null 2>&1 || return
+-    rpm -e --allmatches $KEY_PACKAGES >/dev/null 2>&1 || return
 -  fi
 -
 -  # RPM on Mandriva 2009 is dumb and does not understand "rpm --import -"

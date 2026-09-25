@@ -23,7 +23,7 @@ index 7fca4a9b3ee53..7a028d59b564f 100644
          mUrlView.setText(url);
      }
 diff --git a/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc b/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
-index b8ce14775ed63..8205cea7b3f16 100644
+index a9bb896ea13af..3de46bf398e5b 100644
 --- a/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
 +++ b/chrome/browser/autocomplete/chrome_autocomplete_provider_client.cc
 @@ -50,6 +50,7 @@
@@ -34,7 +34,7 @@ index b8ce14775ed63..8205cea7b3f16 100644
  #include "chrome/browser/translate/chrome_translate_client.h"
  #include "chrome/browser/ui/browser_command_controller.h"
  #include "chrome/browser/ui/browser_window/public/browser_window_features.h"
-@@ -420,7 +421,9 @@ std::string ChromeAutocompleteProviderClient::GetAcceptLanguages() const {
+@@ -421,7 +422,9 @@ std::string ChromeAutocompleteProviderClient::GetAcceptLanguages() const {
  std::string
  ChromeAutocompleteProviderClient::GetEmbedderRepresentationOfAboutScheme()
      const {
@@ -45,7 +45,7 @@ index b8ce14775ed63..8205cea7b3f16 100644
  }
  
  std::vector<std::u16string> ChromeAutocompleteProviderClient::GetBuiltinURLs() {
-@@ -458,6 +461,10 @@ ChromeAutocompleteProviderClient::GetBuiltinsToProvideAsUserTypes() {
+@@ -459,6 +462,10 @@ ChromeAutocompleteProviderClient::GetBuiltinsToProvideAsUserTypes() {
    builtins_to_provide.push_back(chrome::kChromeUISettingsURL16);
  #endif
    builtins_to_provide.push_back(chrome::kChromeUIVersionURL16);
@@ -57,23 +57,23 @@ index b8ce14775ed63..8205cea7b3f16 100644
  }
  
 diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browser/flags/android/chrome_feature_list.cc
-index c055eeb193909..3f46c728b30e7 100644
+index d97919d872b11..872295819583c 100644
 --- a/chrome/browser/flags/android/chrome_feature_list.cc
 +++ b/chrome/browser/flags/android/chrome_feature_list.cc
-@@ -213,6 +213,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
-     &features::kSafetyHubUnifiedPasswordsModule,
+@@ -217,6 +217,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
      &features::kSafetyHubWeakAndReusedPasswords,
      &features::kTaskManagerClank,
+     &features::kTaskManagerToolbar,
 +    &features::kThoriumInternalUrlSchemeBranding,
      &feed::kAndroidOpenIncognitoAsWindow,
      &feed::kFeedAudioOverviews,
      &feed::kFeedContainment,
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index b815f730afa44..424cd244e6c87 100644
+index 7684bd39704b1..5201d653222da 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-@@ -829,6 +829,8 @@ public abstract class ChromeFeatureList {
-     public static final String TASK_MANAGER_CLANK = "TaskManagerClank";
+@@ -846,6 +846,8 @@ public abstract class ChromeFeatureList {
+     public static final String TASK_MANAGER_TOOLBAR = "TaskManagerToolbar";
      public static final String TEST_DEFAULT_DISABLED = "TestDefaultDisabled";
      public static final String TEST_DEFAULT_ENABLED = "TestDefaultEnabled";
 +    public static final String THORIUM_INTERNAL_URL_SCHEME_BRANDING =
@@ -201,7 +201,7 @@ index 5b32f2d6254d4..4a8584955d1d6 100644
  
  #endif  // CHROME_BROWSER_THORIUM_URL_UTILS_H_
 diff --git a/chrome/browser/ui/browser_commands.cc b/chrome/browser/ui/browser_commands.cc
-index 260bed1d0fa30..74a6758d86802 100644
+index dc1749661c3b2..786ecf5d7c993 100644
 --- a/chrome/browser/ui/browser_commands.cc
 +++ b/chrome/browser/ui/browser_commands.cc
 @@ -58,6 +58,7 @@
@@ -212,7 +212,7 @@ index 260bed1d0fa30..74a6758d86802 100644
  #include "chrome/browser/translate/chrome_translate_client.h"
  #include "chrome/browser/ui/accelerator_utils.h"
  #include "chrome/browser/ui/autofill/address_bubbles_controller.h"
-@@ -2870,7 +2871,9 @@ bool IsDebuggerAttachedToCurrentTab(BrowserWindowInterface* browser) {
+@@ -2862,7 +2863,9 @@ bool IsDebuggerAttachedToCurrentTab(BrowserWindowInterface* browser) {
  void CopyURL(BrowserWindowInterface* browser,
               content::WebContents* web_contents) {
    ui::ScopedClipboardWriter scw(ui::ClipboardBuffer::kCopyPaste);
@@ -224,7 +224,7 @@ index 260bed1d0fa30..74a6758d86802 100644
  #if !BUILDFLAG(IS_ANDROID)
    if (toast_features::IsEnabled(toast_features::kLinkCopiedToast)) {
 diff --git a/chrome/browser/ui/browser_web_contents_delegate/browser_web_contents_delegate.cc b/chrome/browser/ui/browser_web_contents_delegate/browser_web_contents_delegate.cc
-index 9e27bdcb53a50..3f032f1e1c401 100644
+index d3fa7eea6db80..ca918256e76b2 100644
 --- a/chrome/browser/ui/browser_web_contents_delegate/browser_web_contents_delegate.cc
 +++ b/chrome/browser/ui/browser_web_contents_delegate/browser_web_contents_delegate.cc
 @@ -26,6 +26,7 @@
@@ -235,7 +235,7 @@ index 9e27bdcb53a50..3f032f1e1c401 100644
  #include "chrome/browser/ui/blocked_content/chrome_popup_navigation_delegate.h"
  #include "chrome/browser/ui/blocked_content/framebust_block_tab_helper.h"
  #include "chrome/browser/ui/browser_command_controller.h"
-@@ -793,6 +794,7 @@ void BrowserWebContentsDelegate::SetContentsBounds(content::WebContents* source,
+@@ -798,6 +799,7 @@ void BrowserWebContentsDelegate::SetContentsBounds(content::WebContents* source,
  
  void BrowserWebContentsDelegate::UpdateTargetURL(content::WebContents* source,
                                                   const GURL& url) {
@@ -243,7 +243,7 @@ index 9e27bdcb53a50..3f032f1e1c401 100644
    std::vector<StatusBubble*> status_bubbles =
        browser_ui_controller_->GetStatusBubbles();
    for (StatusBubble* status_bubble : status_bubbles) {
-@@ -801,7 +803,7 @@ void BrowserWebContentsDelegate::UpdateTargetURL(content::WebContents* source,
+@@ -806,7 +808,7 @@ void BrowserWebContentsDelegate::UpdateTargetURL(content::WebContents* source,
      ContentsWebView* anchor =
          static_cast<ContentsWebView*>(status_bubble_views->base_view());
      if (source == anchor->GetWebContents()) {
@@ -253,7 +253,7 @@ index 9e27bdcb53a50..3f032f1e1c401 100644
      }
    }
 diff --git a/chrome/browser/ui/omnibox/omnibox_edit_model.cc b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
-index 97d8f09eb2e11..5184ec80e0960 100644
+index 7956bfeda0b44..ca3966dc01b66 100644
 --- a/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 @@ -36,6 +36,7 @@
@@ -264,7 +264,7 @@ index 97d8f09eb2e11..5184ec80e0960 100644
  #include "chrome/browser/ui/omnibox/omnibox_controller.h"
  #include "chrome/browser/ui/omnibox/omnibox_next_features.h"
  #include "chrome/browser/ui/omnibox/omnibox_popup_state_manager.h"
-@@ -510,6 +511,9 @@ void OmniboxEditModel::AdjustTextForCopy(int sel_min,
+@@ -517,6 +518,9 @@ void OmniboxEditModel::AdjustTextForCopy(int sel_min,
        controller_->client()->GetPageClassification(/*is_prefetch=*/false),
        controller_->client()->GetContextualTasksInnerFrameURL(), url_from_text,
        write_url);
@@ -325,7 +325,7 @@ index d36e0b20cb5dd..5121fe57dc514 100644
                url_formatter::kFormatUrlOmitHTTPS |
                url_formatter::kFormatUrlOmitTrivialSubdomains |
 diff --git a/chrome/browser/ui/webui/tab_search/tab_search_ui.cc b/chrome/browser/ui/webui/tab_search/tab_search_ui.cc
-index a61b2449d0391..2d35862a83c8c 100644
+index dba0dc8a1ba30..f9a5255850064 100644
 --- a/chrome/browser/ui/webui/tab_search/tab_search_ui.cc
 +++ b/chrome/browser/ui/webui/tab_search/tab_search_ui.cc
 @@ -11,6 +11,7 @@
@@ -336,7 +336,7 @@ index a61b2449d0391..2d35862a83c8c 100644
  #include "chrome/browser/ui/tabs/features.h"
  #include "chrome/browser/ui/ui_features.h"
  #include "chrome/browser/ui/webui/favicon_source.h"
-@@ -106,6 +107,8 @@ TabSearchUI::TabSearchUI(content::WebUI* web_ui)
+@@ -108,6 +109,8 @@ TabSearchUI::TabSearchUI(content::WebUI* web_ui)
    };
    source->AddLocalizedStrings(kStrings);
    source->AddBoolean("useRipples", views::PlatformStyle::kUseRipples);
@@ -346,10 +346,10 @@ index a61b2449d0391..2d35862a83c8c 100644
                       features::IsTabGroupColorRefreshEnabled());
    source->AddBoolean(
 diff --git a/chrome/common/chrome_features.cc b/chrome/common/chrome_features.cc
-index e9f21e32e5194..e87bba02bc46a 100644
+index 06fc6d52b1a5e..3dd880ab3b03c 100644
 --- a/chrome/common/chrome_features.cc
 +++ b/chrome/common/chrome_features.cc
-@@ -1756,6 +1756,9 @@ BASE_FEATURE(kSkyVault, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -1759,6 +1759,9 @@ BASE_FEATURE(kProcessPerSiteForDSE,
  // from a secure page. As of M89, mixed downloads are blocked on all platforms.
  BASE_FEATURE(kTreatUnsafeDownloadsAsActive, base::FEATURE_ENABLED_BY_DEFAULT);
  
@@ -360,10 +360,10 @@ index e9f21e32e5194..e87bba02bc46a 100644
  #if !BUILDFLAG(IS_ANDROID)
  // Enables surveying of users of Trust & Safety features with HaTS.
 diff --git a/chrome/common/chrome_features.h b/chrome/common/chrome_features.h
-index 4a9ffd988cc3d..e598a72feba1a 100644
+index 65fd2dfa832cd..cae2ad54f77d2 100644
 --- a/chrome/common/chrome_features.h
 +++ b/chrome/common/chrome_features.h
-@@ -1210,6 +1210,10 @@ COMPONENT_EXPORT(CHROME_FEATURES) BASE_DECLARE_FEATURE(kSkyVault);
+@@ -1212,6 +1212,10 @@ COMPONENT_EXPORT(CHROME_FEATURES) BASE_DECLARE_FEATURE(kProcessPerSiteForDSE);
  COMPONENT_EXPORT(CHROME_FEATURES)
  BASE_DECLARE_FEATURE(kTreatUnsafeDownloadsAsActive);
  

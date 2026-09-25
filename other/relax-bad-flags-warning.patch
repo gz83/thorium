@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/startup/bad_flags_prompt.cc b/chrome/browser/ui/startup/bad_flags_prompt.cc
-index ec4de18dce248..5befa2280105b 100644
+index 75f26af3ddce3..81dc964fe24ec 100644
 --- a/chrome/browser/ui/startup/bad_flags_prompt.cc
 +++ b/chrome/browser/ui/startup/bad_flags_prompt.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index ec4de18dce248..5befa2280105b 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -113,7 +113,8 @@ const char* const kBadFlags[] = {
+@@ -118,7 +118,8 @@ const char* const kBadFlags[] = {
  #if BUILDFLAG(ENABLE_EXTENSIONS)
      // These flags enable extensions running scripts on chrome:// and
      // chrome-extension:// URLs.
@@ -18,7 +18,7 @@ index ec4de18dce248..5befa2280105b 100644
      extensions::switches::kExtensionsOnExtensionURLs,
  
      // This flag gives the specified extension(s) access to restricted extension
-@@ -129,8 +130,8 @@ const char* const kBadFlags[] = {
+@@ -134,8 +135,8 @@ const char* const kBadFlags[] = {
  
      // These flags control Blink feature state, which is not supported and is
      // intended only for use by Chromium developers.
@@ -29,7 +29,7 @@ index ec4de18dce248..5befa2280105b 100644
  
      // This flag allows people to allowlist certain origins as secure, even
      // if they are not.
-@@ -154,7 +155,7 @@ const char* const kBadFlags[] = {
+@@ -159,7 +160,7 @@ const char* const kBadFlags[] = {
  
      // GPU sanboxing isn't implemented for the Web GPU API yet meaning it would
      // be possible to read GPU data for other Chromium processes.

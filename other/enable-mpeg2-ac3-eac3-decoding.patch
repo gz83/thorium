@@ -52,7 +52,7 @@ index 6b021822da201..c17a74ba02418 100644
  #define EXTRA_CODECS
  #endif
 diff --git a/media/filters/ffmpeg_glue.cc b/media/filters/ffmpeg_glue.cc
-index 6ecbf5d8b3157..61849c4913f5a 100644
+index fcacae3add97e..83d1fee3c5901 100644
 --- a/media/filters/ffmpeg_glue.cc
 +++ b/media/filters/ffmpeg_glue.cc
 @@ -1,4 +1,4 @@
@@ -61,7 +61,7 @@ index 6ecbf5d8b3157..61849c4913f5a 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -89,6 +89,8 @@ static const char* GetAllowedDemuxers() {
+@@ -90,6 +90,8 @@ static const char* GetAllowedDemuxers() {
                                                   "flac", "mp3",      "mov"};
  #if BUILDFLAG(USE_PROPRIETARY_CODECS)
      allowed_demuxers.push_back("aac");

@@ -19,10 +19,10 @@ index ae3ce667f878d..c5997883fab47 100644
                              }
                              SigninMetricsUtils.logAddAccountStateHistogram(State.STARTED);
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-index 5ba86824cc17f..dd29b28d23440 100644
+index fb8131777be43..40da704070d8b 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-@@ -149,6 +149,9 @@ final class SigninBridge {
+@@ -148,6 +148,9 @@ final class SigninBridge {
              AccountPickerBottomSheetCoordinatorFactory factory,
              String extensionName) {
          ThreadUtils.assertOnUiThread();
@@ -52,10 +52,10 @@ index 6862188a56395..81012c99adfae 100644
      }
  
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java b/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
-index 3982e87ee0472..7d40000009d90 100644
+index 9c2f7e8690afc..a8178159ce637 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
-@@ -293,7 +293,9 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
+@@ -294,7 +294,9 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
                  accountsCategory.addPreference(createAccountPreference(account));
              }
          }
@@ -66,7 +66,7 @@ index 3982e87ee0472..7d40000009d90 100644
          notifyPreferencesUpdated();
      }
  
-@@ -364,7 +366,8 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
+@@ -366,7 +368,8 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
  
                                  if (intent != null) {
                                      startActivity(intent);
@@ -77,10 +77,10 @@ index 3982e87ee0472..7d40000009d90 100644
                                      // to open settings instead.
                                      SigninUtils.openSettingsForAllAccounts(getActivity());
 diff --git a/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java b/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
-index 2e4946010c874..4f3efbf532ace 100644
+index d3436207af688..cc1e19f2e9c19 100644
 --- a/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
 +++ b/chrome/browser/signin/services/android/java/src/org/chromium/chrome/browser/signin/services/SigninManagerImpl.java
-@@ -229,6 +229,9 @@ class SigninManagerImpl implements SigninManager, AccountsChangeObserver {
+@@ -236,6 +236,9 @@ class SigninManagerImpl implements SigninManager, AccountsChangeObserver {
  
      @Override
      public boolean isSigninSupported(boolean requireUpdatedPlayServices) {
@@ -91,7 +91,7 @@ index 2e4946010c874..4f3efbf532ace 100644
              return ExternalAuthUtils.getInstance().canUseGooglePlayServices();
          }
 diff --git a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
-index bc424bf7a782e..c9be6e60ebe5e 100644
+index 1687705219dfc..b00a4de489d6b 100644
 --- a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
 +++ b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
 @@ -401,7 +401,8 @@ public class FullscreenSigninMediator
@@ -105,7 +105,7 @@ index bc424bf7a782e..c9be6e60ebe5e 100644
                  && !mConfig.shouldDisableSignin;
      }
 diff --git a/components/signin/internal/identity_manager/primary_account_manager.cc b/components/signin/internal/identity_manager/primary_account_manager.cc
-index 3f8997799d313..b78797dff39d1 100644
+index cb7399be2cc65..e6fb11c529a74 100644
 --- a/components/signin/internal/identity_manager/primary_account_manager.cc
 +++ b/components/signin/internal/identity_manager/primary_account_manager.cc
 @@ -391,7 +391,11 @@ void PrimaryAccountManager::RegisterProfilePrefs(PrefRegistrySimple* registry) {

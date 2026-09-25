@@ -1,5 +1,5 @@
 diff --git a/chrome/app/vector_icons/BUILD.gn b/chrome/app/vector_icons/BUILD.gn
-index 4867edb88e44d..706731b0acf7e 100644
+index ea4a283ba7b88..7436110e7514e 100644
 --- a/chrome/app/vector_icons/BUILD.gn
 +++ b/chrome/app/vector_icons/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 4867edb88e44d..706731b0acf7e 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -349,6 +349,7 @@ aggregate_vector_icons("chrome_vector_icons") {
+@@ -350,6 +350,7 @@ aggregate_vector_icons("chrome_vector_icons") {
      "translate_old.icon",
      "trash_can_old.icon",
      "trash_can_refresh_old.icon",
@@ -16,12 +16,24 @@ index 4867edb88e44d..706731b0acf7e 100644
      "travel_explore.icon",
      "travel_explore_old.icon",
      "tv.icon",
-@@ -403,6 +404,20 @@ aggregate_vector_icons("chrome_vector_icons") {
+@@ -404,6 +405,34 @@ aggregate_vector_icons("chrome_vector_icons") {
      # go/keep-sorted end
    ]
  
 +  if (is_thorium_build) {
 +    sources += [
++      "browser_tools_error_old_thorium.icon",
++      "browser_tools_old_thorium.icon",
++      "browser_tools_touch_old_thorium.icon",
++      "browser_tools_update_chrome_refresh_old_thorium.icon",
++      "close_group_refresh_old_thorium.icon",
++      "crashed_tab_old_thorium.icon",
++      "navigate_stop_touch_old_thorium.icon",
++      "new_tab_in_group_refresh_old_thorium.icon",
++      "new_tab_mac_touchbar_old_thorium.icon",
++      "reload_touch_old_thorium.icon",
++      "tab_close_normal_old_thorium.icon",
++      "trash_can_old_thorium.icon",
 +      "thorium/browser_tools_chrome_refresh_thorium.icon",
 +      "thorium/close_chrome_refresh_thorium.icon",
 +      "thorium/incognito_thorium.icon",
@@ -30,6 +42,8 @@ index 4867edb88e44d..706731b0acf7e 100644
 +      "thorium/media_toolbar_button_touch_thorium.icon",
 +      "thorium/navigate_home_chrome_refresh_thorium.icon",
 +      "thorium/navigate_stop_chrome_refresh_thorium.icon",
++      "thorium/info_thorium.icon",
++      "thorium/sad_tab_thorium.icon",
 +      "thorium/science_thorium.icon",
 +      "thorium/trash_can_refresh_thorium.icon",
 +    ]

@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/webui/BUILD.gn b/chrome/browser/ui/webui/BUILD.gn
-index 914c97f1a4bc4..7be78fbfcb886 100644
+index 2a4eae8943e6a..e783d6d51d8c6 100644
 --- a/chrome/browser/ui/webui/BUILD.gn
 +++ b/chrome/browser/ui/webui/BUILD.gn
 @@ -35,6 +35,7 @@ source_set("configs") {
@@ -11,7 +11,7 @@ index 914c97f1a4bc4..7be78fbfcb886 100644
  
    configs += [ "//build/config/compiler:wexit_time_destructors" ]
 diff --git a/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
-index f949b9ea7c142..d22db0f58ff30 100644
+index 62b07dca08345..9c247ea22eb26 100644
 --- a/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 +++ b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 @@ -56,6 +56,7 @@
@@ -22,7 +22,7 @@ index f949b9ea7c142..d22db0f58ff30 100644
  #include "chrome/browser/ui/webui/translate_internals/translate_internals_ui.h"
  #include "chrome/browser/ui/webui/usb_internals/usb_internals_ui.h"
  #include "chrome/browser/ui/webui/version/version_ui.h"
-@@ -310,6 +311,9 @@ void RegisterChromeWebUIConfigs() {
+@@ -323,6 +324,9 @@ void RegisterChromeWebUIConfigs() {
    map.AddWebUIConfig(std::make_unique<SiteEngagementUIConfig>());
    map.AddWebUIConfig(std::make_unique<SuggestInternalsUIConfig>());
    map.AddWebUIConfig(std::make_unique<SyncInternalsUIConfig>());
@@ -292,7 +292,7 @@ index 0000000000000..e183c1f64b82a
 +
 +#endif  // THORIUM_EASTER_EGGS_H_
 diff --git a/chrome/common/webui_url_constants.cc b/chrome/common/webui_url_constants.cc
-index 9c32ebdbbd83f..f3f388158b4b0 100644
+index 17100eb74d54c..5b18571cdb412 100644
 --- a/chrome/common/webui_url_constants.cc
 +++ b/chrome/common/webui_url_constants.cc
 @@ -123,6 +123,9 @@ base::span<const base::cstring_view> ChromeURLHosts() {
@@ -306,7 +306,7 @@ index 9c32ebdbbd83f..f3f388158b4b0 100644
        kChromeUIAppServiceInternalsHost,
  #endif
 diff --git a/chrome/common/webui_url_constants.h b/chrome/common/webui_url_constants.h
-index 23b1c1220e2f3..378257d018deb 100644
+index 47c543c844b33..3692ee29d65b8 100644
 --- a/chrome/common/webui_url_constants.h
 +++ b/chrome/common/webui_url_constants.h
 @@ -33,6 +33,12 @@ namespace chrome {
@@ -347,7 +347,7 @@ index 6b2eae031956d..6251e6ca34a44 100755
        'opensource_link': 'https://source.chromium.org/chromium',
      },
 diff --git a/ui/webui/resources/BUILD.gn b/ui/webui/resources/BUILD.gn
-index e395a144cbeef..40395c0985e7d 100644
+index 44b39cda6816b..9a59e360525a7 100644
 --- a/ui/webui/resources/BUILD.gn
 +++ b/ui/webui/resources/BUILD.gn
 @@ -39,6 +39,7 @@ generate_grd("build_grd") {

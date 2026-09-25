@@ -1,14 +1,23 @@
 diff --git a/components/omnibox/browser/BUILD.gn b/components/omnibox/browser/BUILD.gn
-index 1fe7f40cfccf9..986ca51f6ca6f 100644
+index d193e3c7c08bf..695ce85e8eb49 100644
 --- a/components/omnibox/browser/BUILD.gn
 +++ b/components/omnibox/browser/BUILD.gn
-@@ -114,6 +114,13 @@ aggregate_vector_icons("omnibox_vector_icons") {
+@@ -114,6 +114,22 @@ aggregate_vector_icons("omnibox_vector_icons") {
      "wb_sunny_filled.icon",
    ]
  
 +  if (is_thorium_build) {
 +    sources += [
++      "bookmark_chrome_refresh_old_thorium.icon",
++      "bookmark_old_thorium.icon",
++      "clear_old_thorium.icon",
++      "http_old_thorium.icon",
++      "incognito_cr2023_old_thorium.icon",
++      "star_active_chrome_refresh_old_thorium.icon",
++      "star_chrome_refresh_old_thorium.icon",
 +      "find_in_page_thorium.icon",
++      "incognito_thorium.icon",
++      "star_thorium.icon",
 +      "http_chrome_refresh_thorium.icon",
 +    ]
 +  }
@@ -17,7 +26,7 @@ index 1fe7f40cfccf9..986ca51f6ca6f 100644
      sources += [
        "ios_share.icon",
 diff --git a/components/vector_icons/BUILD.gn b/components/vector_icons/BUILD.gn
-index 87e4c28932ad4..5de7526ea326e 100644
+index 74b4515d88203..7491db19fdb7b 100644
 --- a/components/vector_icons/BUILD.gn
 +++ b/components/vector_icons/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -26,12 +35,34 @@ index 87e4c28932ad4..5de7526ea326e 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -525,6 +525,24 @@ if (current_toolchain == default_toolchain) {
+@@ -527,6 +527,46 @@ if (current_toolchain == default_toolchain) {
        "work_old.icon",
      ]
  
 +    if (is_thorium_build) {
 +      sources += [
++        "back_arrow_old_thorium.icon",
++        "back_to_tab_chrome_refresh_old_thorium.icon",
++        "cancel_chrome_refresh_old_thorium.icon",
++        "close_old_thorium.icon",
++        "close_rounded_old_thorium.icon",
++        "error_old_thorium.icon",
++        "error_outline_old_thorium.icon",
++        "extension_old_thorium.icon",
++        "forward_arrow_old_thorium.icon",
++        "help_old_thorium.icon",
++        "help_outline_old_thorium.icon",
++        "info_outline_old_thorium.icon",
++        "info_refresh_old_thorium.icon",
++        "not_secure_warning_chrome_refresh_old_thorium.icon",
++        "not_secure_warning_off_chrome_refresh_old_thorium.icon",
++        "not_secure_warning_old_thorium.icon",
++        "submenu_arrow_old_thorium.icon",
++        "volume_up_old_thorium.icon",
++        "warning_old_thorium.icon",
++        "warning_outline_old_thorium.icon",
++        "thorium/back_to_tab_thorium.icon",
++        "thorium/cookie_thorium.icon",
 +        "bookmark_folder.icon",
 +        "folder_managed.icon",
 +        "info_regular.icon",

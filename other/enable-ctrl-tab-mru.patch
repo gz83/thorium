@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index aa39154c2005b..5138f1098955d 100644
+index 0114f94b2dc36..dad5f3d68ff37 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -44,7 +44,7 @@ BASE_FEATURE(kAllowEyeDropperWGCScreenCapture,
+@@ -45,7 +45,7 @@ BASE_FEATURE(kAllowEyeDropperWGCScreenCapture,
  BASE_FEATURE(kCompositorLoadingThrobber, base::FEATURE_DISABLED_BY_DEFAULT);
  
  

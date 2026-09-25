@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view_horizontal_layout.cc b/chrome/browser/ui/views/tabs/common/tab_view_horizontal_layout.cc
-index 0cdc03c73147c..a54f78dc4ca16 100644
+index 5abff59181f11..74c5c42ff03f4 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view_horizontal_layout.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view_horizontal_layout.cc
 @@ -4,6 +4,7 @@
@@ -10,7 +10,7 @@ index 0cdc03c73147c..a54f78dc4ca16 100644
  #include "chrome/browser/glic/browser_ui/tab_underline_view.h"
  #include "chrome/browser/ui/layout_constants.h"
  #include "chrome/browser/ui/ui_features.h"
-@@ -300,6 +301,10 @@ TabViewHorizontalLayout::CalculateChildVisibilities(int width,
+@@ -316,6 +317,10 @@ TabViewHorizontalLayout::CalculateChildVisibilities(int width,
    }
  #endif  // BUILDFLAG(IS_CHROMEOS)
  
@@ -46,10 +46,10 @@ index 6641560e2f254..9f934b2c9a498 100644
        return false;
      }
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index d0afedf25815a..c382d26c38252 100644
+index 2b89885d7fdcb..55ab248666cd5 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -1431,12 +1431,16 @@ void Tab::UpdateIconVisibility() {
+@@ -1438,12 +1438,16 @@ void Tab::UpdateIconVisibility() {
  #if BUILDFLAG(IS_CHROMEOS)
    // Hide tab close button for OnTask if locked. Only applicable for non-web
    // browser scenarios.

@@ -1,8 +1,8 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java b/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java
-index 15e829f8b90e4..1d1203930011c 100644
+index e783bf65be65e..77df929edd757 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java
-@@ -82,7 +82,6 @@ import org.chromium.chrome.browser.share.qrcode.QrCodeCoordinator;
+@@ -81,7 +81,6 @@ import org.chromium.chrome.browser.share.qrcode.QrCodeCoordinator;
  import org.chromium.chrome.browser.share.send_tab_to_self.SendTabToSelfAndroidBridge;
  import org.chromium.chrome.browser.tab.Tab;
  import org.chromium.chrome.browser.tab.TabContextMenuItemDelegate;
@@ -10,7 +10,7 @@ index 15e829f8b90e4..1d1203930011c 100644
  import org.chromium.chrome.browser.tab_bottom_sheet.TabBottomSheetUtils;
  import org.chromium.chrome.browser.translate.TranslateBridge;
  import org.chromium.chrome.browser.translate.TranslateUtils;
-@@ -119,7 +118,6 @@ import org.chromium.ui.listmenu.ListMenuSubmenuItemProperties;
+@@ -116,7 +115,6 @@ import org.chromium.ui.listmenu.ListMenuSubmenuItemProperties;
  import org.chromium.ui.modelutil.MVCListAdapter.ListItem;
  import org.chromium.ui.modelutil.MVCListAdapter.ModelList;
  import org.chromium.ui.modelutil.PropertyModel;
@@ -18,7 +18,7 @@ index 15e829f8b90e4..1d1203930011c 100644
  import org.chromium.ui.widget.Toast;
  import org.chromium.url.GURL;
  
-@@ -483,13 +481,7 @@ public class ChromeContextMenuPopulator implements ContextMenuPopulator {
+@@ -478,13 +476,7 @@ public class ChromeContextMenuPopulator implements ContextMenuPopulator {
  
      @VisibleForTesting
      boolean shouldShowEmptySpaceContextMenu() {
@@ -33,7 +33,7 @@ index 15e829f8b90e4..1d1203930011c 100644
      }
  
      @VisibleForTesting
-@@ -508,8 +500,7 @@ public class ChromeContextMenuPopulator implements ContextMenuPopulator {
+@@ -503,8 +495,7 @@ public class ChromeContextMenuPopulator implements ContextMenuPopulator {
      @VisibleForTesting
      boolean shouldShowDeveloperMenu() {
          return DevToolsWindowAndroid.isDevToolsAllowedFor(
@@ -44,10 +44,10 @@ index 15e829f8b90e4..1d1203930011c 100644
  
      @VisibleForTesting
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/MoreToolsItemBuilder.java b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/MoreToolsItemBuilder.java
-index 89bd40c7e8a94..1f7ef18f7ef77 100644
+index ce4411afa49bc..a7bb5fca36c20 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/MoreToolsItemBuilder.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/MoreToolsItemBuilder.java
-@@ -25,7 +25,6 @@ import org.chromium.components.embedder_support.util.UrlUtilities;
+@@ -28,7 +28,6 @@ import org.chromium.components.embedder_support.util.UrlUtilities;
  import org.chromium.content_public.browser.ContentFeatureList;
  import org.chromium.content_public.browser.ContentFeatureMap;
  import org.chromium.content_public.browser.WebContents;
@@ -55,7 +55,7 @@ index 89bd40c7e8a94..1f7ef18f7ef77 100644
  import org.chromium.ui.modelutil.MVCListAdapter.ListItem;
  import org.chromium.ui.modelutil.PropertyModel;
  import org.chromium.url.GURL;
-@@ -105,10 +104,6 @@ public class MoreToolsItemBuilder {
+@@ -108,10 +107,6 @@ public class MoreToolsItemBuilder {
       * @param currentTab The current tab.
       */
      public boolean shouldShowMoreToolsItem(@Nullable Tab currentTab) {
@@ -66,7 +66,7 @@ index 89bd40c7e8a94..1f7ef18f7ef77 100644
          ReadAloudController readAloudController = mReadAloudControllerSupplier.get();
          if ((readAloudController != null && readAloudController.isReadable(currentTab))
                  || shouldShowReaderModeItem(currentTab)
-@@ -248,7 +243,6 @@ public class MoreToolsItemBuilder {
+@@ -252,7 +247,6 @@ public class MoreToolsItemBuilder {
       */
      public boolean shouldShowDevToolsItem(@Nullable Tab currentTab) {
          if (!ContentFeatureMap.isEnabled(ContentFeatureList.ANDROID_DEV_TOOLS_FRONTEND)
@@ -75,7 +75,7 @@ index 89bd40c7e8a94..1f7ef18f7ef77 100644
                  || currentTab.isNativePage()) {
              return false;
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
-index d6be86497714a..4d132f23bd7ec 100644
+index 759ac45e1288d..331e10ea82ebe 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
 @@ -497,6 +497,11 @@ public class TabbedAppMenuPropertiesDelegate extends AppMenuPropertiesDelegateIm
@@ -116,7 +116,7 @@ index 40c7c3a8c0f5f..b938d81f6934a 100644
  
      /** Launches the task manager. */
 diff --git a/content/public/common/content_features.cc b/content/public/common/content_features.cc
-index 6ee836e017c3e..3c0541a9f301a 100644
+index fa2d5ddacd62e..1abe81614d463 100644
 --- a/content/public/common/content_features.cc
 +++ b/content/public/common/content_features.cc
 @@ -42,7 +42,13 @@ BASE_FEATURE(kAperitifHelpers, base::FEATURE_DISABLED_BY_DEFAULT);

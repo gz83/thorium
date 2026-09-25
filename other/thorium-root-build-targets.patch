@@ -1,5 +1,5 @@
 diff --git a/BUILD.gn b/BUILD.gn
-index d55402aaad0d7..e841bff57baf1 100644
+index 5d49f9d915ff8..362dacec98476 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -133,7 +133,7 @@ index d55402aaad0d7..e841bff57baf1 100644
        ]
      }
  
-@@ -1223,7 +1323,7 @@ if (use_blink && !is_cronet_build) {
+@@ -1225,7 +1325,7 @@ if (use_blink && !is_cronet_build) {
      data_deps = [
        ":layout_test_data_mojo_bindings",
        ":layout_test_data_mojo_bindings_lite",
@@ -142,7 +142,7 @@ index d55402aaad0d7..e841bff57baf1 100644
        "//content/test:mojo_bindings_web_test_mojom_js_data_deps",
        "//content/test:mojo_web_test_bindings_js_data_deps",
        "//device/bluetooth/public/mojom:fake_bluetooth_interfaces_js_data_deps",
-@@ -1528,9 +1628,9 @@ if (use_blink && !is_cronet_build) {
+@@ -1530,9 +1630,9 @@ if (use_blink && !is_cronet_build) {
  # modulemaps requires building targets on linux-x86
  if (!running_modularize) {
    # TODO(cassew): Add more OS's that don't support x86.
@@ -155,7 +155,7 @@ index d55402aaad0d7..e841bff57baf1 100644
  
    # Note: v8_target_cpu == arm allows using the V8 arm simulator on x86 for
    # fuzzing.
-@@ -1593,7 +1693,7 @@ if (!is_ios && !is_android && !is_castos && !is_cronet_build) {
+@@ -1595,7 +1695,7 @@ if (!is_ios && !is_android && !is_castos && !is_cronet_build) {
      write_runtime_deps = "${root_out_dir}/${target_name}.runtime_deps"
  
      data_deps = [

@@ -1,5 +1,5 @@
 diff --git a/media/base/media_switches.cc b/media/base/media_switches.cc
-index 6576dae682f87..e687cef059a9e 100644
+index 3f75c218a35f4..e4f1056ead212 100644
 --- a/media/base/media_switches.cc
 +++ b/media/base/media_switches.cc
 @@ -1,4 +1,4 @@
@@ -25,7 +25,7 @@ index 6576dae682f87..e687cef059a9e 100644
  
  // Enables tracking the occlusion of HW secure encrypted video elements.
  // The HW secure check is OS agnostic, but this switch is currently only
-@@ -1199,7 +1200,7 @@ BASE_FEATURE(kOpenH264SoftwareEncoder, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -1186,7 +1187,7 @@ BASE_FEATURE(kOpenH264SoftwareEncoder, base::FEATURE_ENABLED_BY_DEFAULT);
  // Otherwise, this feature has no effect and neither encrypted nor clear Dolby
  // Vision is allowed.
  BASE_FEATURE(kAllowClearDolbyVisionInMseWhenPlatformEncryptedDvEnabled,
@@ -34,7 +34,7 @@ index 6576dae682f87..e687cef059a9e 100644
  
  // Enables clear Dolby Vision playback through a pure MFT processor in the GPU
  // process, working together with the D3D11 video decoder.
-@@ -1212,7 +1213,7 @@ BASE_FEATURE(kPlatformEncryptedDolbyVision,
+@@ -1199,7 +1200,7 @@ BASE_FEATURE(kPlatformEncryptedDolbyVision,
  #if BUILDFLAG(IS_WIN)
               base::FEATURE_ENABLED_BY_DEFAULT
  #else
@@ -43,7 +43,7 @@ index 6576dae682f87..e687cef059a9e 100644
  #endif
  );
  
-@@ -1773,7 +1774,9 @@ std::string GetEffectiveAutoplayPolicy(const base::CommandLine& command_line) {
+@@ -1759,7 +1760,9 @@ std::string GetEffectiveAutoplayPolicy(const base::CommandLine& command_line) {
      return command_line.GetSwitchValueASCII(switches::kAutoplayPolicy);
    }
  

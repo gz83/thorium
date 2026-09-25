@@ -192,7 +192,7 @@ index d59df0d9103fe..d00feb7f41264 100644
    DWORD computer_name_size = std::size(computer_name);
  
 diff --git a/services/preferences/tracked/tracked_split_preference.cc b/services/preferences/tracked/tracked_split_preference.cc
-index 484fe52093f80..e795591640db5 100644
+index 18c809334f24c..92f5b9e115ce4 100644
 --- a/services/preferences/tracked/tracked_split_preference.cc
 +++ b/services/preferences/tracked/tracked_split_preference.cc
 @@ -1,4 +1,4 @@
@@ -209,7 +209,7 @@ index 484fe52093f80..e795591640db5 100644
  #include "base/notreached.h"
  #include "base/values.h"
  #include "services/preferences/public/cpp/tracked/pref_names.h"
-@@ -102,6 +103,14 @@ bool TrackedSplitPreference::EnforceAndReport(
+@@ -104,6 +105,14 @@ bool TrackedSplitPreference::EnforceAndReport(
    }
    TrackedPreferenceHelper::ResetAction reset_action =
        helper_.GetAction(value_state);

@@ -32,10 +32,10 @@ index 6fada0a2b1a1f..6b2ec4b67e015 100644
  			<key>CFBundleURLName</key>
  			<string>Local file URL</string>
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index d718a56fe4ed9..0d34ab0ef84b1 100644
+index 29f655d33e044..f351d55b0a2c6 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -15047,6 +15047,9 @@ This can include information about installed software, files, your browser, the
+@@ -15185,6 +15185,9 @@ This can include information about installed software, files, your browser, the
        <message name="IDS_DIRECTORY_LISTING_DATE_MODIFIED" desc="When viewing a local directory, this is the text for the column above the last modified dates.">
          Date Modified
        </message>
@@ -46,10 +46,10 @@ index d718a56fe4ed9..0d34ab0ef84b1 100644
        <!-- Saving Page-->
        <message name="IDS_SAVE_PAGE_DESC_HTML_ONLY" desc="In the Save Page dialog, the description of saving only the HTML of a webpage.">
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
-index ecaccc6e198e7..bd5d738b0f0e9 100644
+index a13e2aad1986b..39a7994e85ba7 100644
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -8549,6 +8549,12 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -8524,6 +8524,12 @@ const FeatureEntry kFeatureEntries[] = {
       FEATURE_VALUE_TYPE(
           heavy_ad_intervention::features::kHeavyAdPrivacyMitigations)},
  
@@ -63,10 +63,10 @@ index ecaccc6e198e7..bd5d738b0f0e9 100644
      {"crostini-container-install",
       flag_descriptions::kCrostiniContainerInstallName,
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
-index c693323f7677a..019df2f7199c2 100644
+index 77a95425c6883..4bda7bd67b167 100644
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -795,6 +795,15 @@ inline constexpr char kEnableDrDcDescription[] =
+@@ -807,6 +807,15 @@ inline constexpr char kEnableDrDcDescription[] =
      "(raster, webgl, video) "
      " continues using the gpu main thread.";
  
@@ -83,10 +83,10 @@ index c693323f7677a..019df2f7199c2 100644
      "Enables use of the screen parameter for requestFullscreen.";
  inline constexpr char kEnableFullscreenToAnyScreenAndroidDescription[] =
 diff --git a/chrome/browser/net/profile_network_context_service.cc b/chrome/browser/net/profile_network_context_service.cc
-index d05ae95afce35..6b7506e120b31 100644
+index 67be696b30045..db2a2fa90487e 100644
 --- a/chrome/browser/net/profile_network_context_service.cc
 +++ b/chrome/browser/net/profile_network_context_service.cc
-@@ -1481,6 +1481,15 @@ void ProfileNetworkContextService::ConfigureNetworkContextParamsInternal(
+@@ -1477,6 +1477,15 @@ void ProfileNetworkContextService::ConfigureNetworkContextParamsInternal(
      network_context_params->hsts_policy_bypass_list.push_back(*string_value);
    }
  
@@ -225,7 +225,7 @@ index 2c71195692a74..18dc154e7e26f 100644
  
      return network_context_params;
 diff --git a/content/browser/browser_url_handler_impl.cc b/content/browser/browser_url_handler_impl.cc
-index 406da12b8eda7..b75d68741c721 100644
+index c2b9cf741b6be..e81c0da608024 100644
 --- a/content/browser/browser_url_handler_impl.cc
 +++ b/content/browser/browser_url_handler_impl.cc
 @@ -34,6 +34,7 @@ static bool HandleViewSource(GURL* url, BrowserContext* browser_context) {
@@ -237,10 +237,10 @@ index 406da12b8eda7..b75d68741c721 100644
        url::kFileScheme,
        url::kFileSystemScheme,
 diff --git a/content/browser/security/cpsp/child_process_security_policy_impl.cc b/content/browser/security/cpsp/child_process_security_policy_impl.cc
-index 62e399f851aad..87d67733d2af3 100644
+index 452619bc2b974..2e6732818a7e9 100644
 --- a/content/browser/security/cpsp/child_process_security_policy_impl.cc
 +++ b/content/browser/security/cpsp/child_process_security_policy_impl.cc
-@@ -1238,6 +1238,9 @@ void ChildProcessSecurityPolicyImpl::RegisterDefaultSchemes() {
+@@ -1211,6 +1211,9 @@ void ChildProcessSecurityPolicyImpl::RegisterDefaultSchemes() {
    RegisterWebSafeScheme(url::kWsScheme);
    RegisterWebSafeScheme(url::kWssScheme);
  #endif  // BUILDFLAG(ENABLE_WEBSOCKETS)
@@ -291,7 +291,7 @@ index 4a6bef0d83785..a52a10579d697 100644
    virtual void SetSelectedText(const std::u16string& selection_text,
                                 size_t offset,
 diff --git a/content/renderer/render_frame_impl.cc b/content/renderer/render_frame_impl.cc
-index 822048a25cdf5..400f10a647af6 100644
+index b844982e7506b..de0597fb28b17 100644
 --- a/content/renderer/render_frame_impl.cc
 +++ b/content/renderer/render_frame_impl.cc
 @@ -2486,6 +2486,10 @@ RenderFrameImpl::GetRemoteAssociatedInterfaces() {
@@ -306,10 +306,10 @@ index 822048a25cdf5..400f10a647af6 100644
                                        size_t offset,
                                        const gfx::Range& range) {
 diff --git a/content/renderer/render_frame_impl.h b/content/renderer/render_frame_impl.h
-index fc10f0a6a88f9..ba59e09e8979e 100644
+index eb45d9e75228e..5436ef83e1b5e 100644
 --- a/content/renderer/render_frame_impl.h
 +++ b/content/renderer/render_frame_impl.h
-@@ -361,6 +361,7 @@ class CONTENT_EXPORT RenderFrameImpl
+@@ -360,6 +360,7 @@ class CONTENT_EXPORT RenderFrameImpl
        mojo::ScopedMessagePipeHandle interface_pipe) override;
    blink::AssociatedInterfaceRegistry* GetAssociatedInterfaceRegistry() override;
    blink::AssociatedInterfaceProvider* GetRemoteAssociatedInterfaces() override;
@@ -330,7 +330,7 @@ index d4ae4f54554c0..c69d9d8b069b6 100644
  #import "net/http/http_network_session.h"
  #import "net/http/http_server_properties.h"
 diff --git a/net/BUILD.gn b/net/BUILD.gn
-index 9db60a2d55f66..e5e6e119e87af 100644
+index 54a40951c09aa..79092e2b27071 100644
 --- a/net/BUILD.gn
 +++ b/net/BUILD.gn
 @@ -73,6 +73,7 @@ buildflag_header("buildflags") {
@@ -341,7 +341,7 @@ index 9db60a2d55f66..e5e6e119e87af 100644
      "ENABLE_MDNS=$enable_mdns",
      "ENABLE_REPORTING=$enable_reporting",
      "ENABLE_WEBSOCKETS=$enable_websockets",
-@@ -1758,6 +1759,41 @@ component("net") {
+@@ -1765,6 +1766,41 @@ component("net") {
      ]
    }
  
@@ -383,7 +383,7 @@ index 9db60a2d55f66..e5e6e119e87af 100644
    if (enable_websockets) {
      sources += [
        "server/http_connection.cc",
-@@ -4166,6 +4202,7 @@ fuzzer_test("net_spdy_headers_to_http_response_headers_fuzzer") {
+@@ -4182,6 +4218,7 @@ fuzzer_test("net_spdy_headers_to_http_response_headers_fuzzer") {
    libfuzzer_options = [ "max_len = 512" ]
  }
  
@@ -5071,7 +5071,7 @@ index 091a592299eb8..8ba690c1c5f20 100644
   public:
    // URLRequest::is_for_websockets() must match `is_for_websockets`, or requests
 diff --git a/services/network/network_context.cc b/services/network/network_context.cc
-index 053a25db4b88e..1f056ecb3e5be 100644
+index dca726f08256b..1572871d612a0 100644
 --- a/services/network/network_context.cc
 +++ b/services/network/network_context.cc
 @@ -197,6 +197,10 @@
@@ -5085,7 +5085,7 @@ index 053a25db4b88e..1f056ecb3e5be 100644
  #if BUILDFLAG(ENABLE_WEBSOCKETS)
  #include "services/network/websocket.h"
  #include "services/network/websocket_factory.h"
-@@ -2746,6 +2750,14 @@ void NetworkContext::AddAuthCacheEntry(
+@@ -2729,6 +2733,14 @@ void NetworkContext::AddAuthCacheEntry(
      const net::NetworkAnonymizationKey& network_anonymization_key,
      const net::AuthCredentials& credentials,
      AddAuthCacheEntryCallback callback) {
@@ -5100,7 +5100,7 @@ index 053a25db4b88e..1f056ecb3e5be 100644
    net::HttpAuthCache* http_auth_cache =
        url_request_context_->http_transaction_factory()
            ->GetSession()
-@@ -2757,6 +2769,7 @@ void NetworkContext::AddAuthCacheEntry(
+@@ -2740,6 +2752,7 @@ void NetworkContext::AddAuthCacheEntry(
                         net::HttpAuth::StringToScheme(challenge.scheme),
                         network_anonymization_key, challenge.challenge,
                         credentials, challenge.path);
@@ -5108,7 +5108,7 @@ index 053a25db4b88e..1f056ecb3e5be 100644
    std::move(callback).Run();
  }
  
-@@ -3165,6 +3178,12 @@ URLRequestContextOwner NetworkContext::MakeURLRequestContext(
+@@ -3148,6 +3161,12 @@ URLRequestContextOwner NetworkContext::MakeURLRequestContext(
    }
    builder.set_hsts_policy_bypass_list(params_->hsts_policy_bypass_list);
  
@@ -5122,7 +5122,7 @@ index 053a25db4b88e..1f056ecb3e5be 100644
    bool reporting_enabled = base::FeatureList::IsEnabled(features::kReporting);
    if (reporting_enabled) {
 diff --git a/services/network/public/cpp/features.cc b/services/network/public/cpp/features.cc
-index ec0b3711216b3..0ea81368787c3 100644
+index e1717709247a8..4cc6fc81afaba 100644
 --- a/services/network/public/cpp/features.cc
 +++ b/services/network/public/cpp/features.cc
 @@ -189,6 +189,12 @@ BASE_FEATURE_PARAM(bool,
@@ -5139,7 +5139,7 @@ index ec0b3711216b3..0ea81368787c3 100644
  BASE_FEATURE(kCorsNonWildcardRequestHeadersSupport,
               base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/services/network/public/cpp/features.h b/services/network/public/cpp/features.h
-index 41407f5c18b34..e34bb70112c11 100644
+index a6ff4a6e91ec4..b9d52bbc4932a 100644
 --- a/services/network/public/cpp/features.h
 +++ b/services/network/public/cpp/features.h
 @@ -180,6 +180,9 @@ BASE_DECLARE_FEATURE(kFrameTopHeader);
@@ -5197,7 +5197,7 @@ index 999ff62b99a18..656446b0e8baa 100644
  
  GURL SerializeResponseUrlForReporting(const GURL& url) {
 diff --git a/services/network/public/mojom/network_context.mojom b/services/network/public/mojom/network_context.mojom
-index b085fd3a05f74..364528880d127 100644
+index 1470ee8a8056d..af24d2bf6cfd1 100644
 --- a/services/network/public/mojom/network_context.mojom
 +++ b/services/network/public/mojom/network_context.mojom
 @@ -421,6 +421,10 @@ struct NetworkContextParams {
@@ -5211,7 +5211,7 @@ index b085fd3a05f74..364528880d127 100644
    // Whether or not to check the Android platform's cleartext policy for
    // requests. Under some conditions, Android may advise us to block cleartext
    // traffic.
-@@ -1773,12 +1777,14 @@ interface NetworkContext {
+@@ -1792,12 +1796,14 @@ interface NetworkContext {
    LoadHttpAuthCacheProxyEntries(mojo_base.mojom.UnguessableToken cache_key)
        => ();
  
@@ -5247,7 +5247,7 @@ index b6da61a76551f..2012846a800d7 100644
    virtual void SetCodeCacheHost(
        CrossVariantMojoRemote<mojom::CodeCacheHostInterfaceBase> code_cache_host,
 diff --git a/third_party/blink/renderer/core/loader/document_loader.cc b/third_party/blink/renderer/core/loader/document_loader.cc
-index 830302747f60a..6c57237902dcf 100644
+index c69c5cfd8b6f3..adc6fc5c743fc 100644
 --- a/third_party/blink/renderer/core/loader/document_loader.cc
 +++ b/third_party/blink/renderer/core/loader/document_loader.cc
 @@ -173,6 +173,7 @@
@@ -5307,7 +5307,7 @@ index 830302747f60a..6c57237902dcf 100644
        !network::IsSuccessfulStatus(response_.HttpStatusCode())) {
      DCHECK(!IsA<HTMLObjectElement>(frame_->Owner()));
 diff --git a/third_party/blink/renderer/core/loader/document_loader.h b/third_party/blink/renderer/core/loader/document_loader.h
-index 145c25ad2e817..a0bd2b5a93d8a 100644
+index 668322fea3815..5349906271679 100644
 --- a/third_party/blink/renderer/core/loader/document_loader.h
 +++ b/third_party/blink/renderer/core/loader/document_loader.h
 @@ -369,6 +369,8 @@ class CORE_EXPORT DocumentLoader : public GarbageCollected<DocumentLoader>,
@@ -5329,10 +5329,10 @@ index 145c25ad2e817..a0bd2b5a93d8a 100644
    // |archive_| to be created. Nested documents will also inherit from the same
    // |archive_|, but won't have |loading_main_document_from_mhtml_archive_| set.
 diff --git a/third_party/blink/renderer/platform/loader/BUILD.gn b/third_party/blink/renderer/platform/loader/BUILD.gn
-index a9d5281da7d26..0bac6e059a633 100644
+index 601e551b9d222..4792248ad186a 100644
 --- a/third_party/blink/renderer/platform/loader/BUILD.gn
 +++ b/third_party/blink/renderer/platform/loader/BUILD.gn
-@@ -181,6 +181,8 @@ blink_platform_sources("loader") {
+@@ -183,6 +183,8 @@ blink_platform_sources("loader") {
      "fetch/worker_resource_timing_notifier.h",
      "integrity_report.cc",
      "integrity_report.h",

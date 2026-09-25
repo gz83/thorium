@@ -1,8 +1,8 @@
 diff --git a/chrome/app/theme/theme_resources.grd b/chrome/app/theme/theme_resources.grd
-index 538b8a6f073a7..ee65ca24702c4 100644
+index 2285fe81082d7..1afc8c3065fd1 100644
 --- a/chrome/app/theme/theme_resources.grd
 +++ b/chrome/app/theme/theme_resources.grd
-@@ -149,7 +149,6 @@
+@@ -153,7 +153,6 @@
        </if>
        <structure type="chrome_scaled_image" name="IDR_PLUGINS_FAVICON" file="common/favicon_plugins.png" />
        <structure type="chrome_scaled_image" name="IDR_PRERENDER" file="common/prerender_succeed_icon.png" />
@@ -10,7 +10,7 @@ index 538b8a6f073a7..ee65ca24702c4 100644
        <if expr="not is_android">
            <structure type="chrome_scaled_image" name="IDR_PRICE_TRACKING_ON_IOS_ICON" file="common/price_tracking_on_ios.png" />
        </if>
-@@ -158,11 +157,13 @@
+@@ -162,11 +161,13 @@
            <if expr="is_linux">
              <then>
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_16" file="${branding_path_component}/linux/product_logo_16.png" />
@@ -24,7 +24,7 @@ index 538b8a6f073a7..ee65ca24702c4 100644
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_32_BETA" file="${branding_path_component}/product_logo_32_beta.png" />
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_32_DEV" file="${branding_path_component}/product_logo_32_dev.png" />
              </else>
-@@ -179,9 +180,11 @@
+@@ -183,9 +184,11 @@
            <if expr="is_linux">
              <then>
                <structure type="chrome_scaled_image" name="IDR_PRODUCT_LOGO_16" file="${branding_path_component}/linux/product_logo_16.png" />

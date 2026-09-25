@@ -1,5 +1,5 @@
 diff --git a/build/config/BUILDCONFIG.gn b/build/config/BUILDCONFIG.gn
-index 538bb3d72967d..090702cd96df4 100644
+index bc4236a4e7080..441163edcfdab 100644
 --- a/build/config/BUILDCONFIG.gn
 +++ b/build/config/BUILDCONFIG.gn
 @@ -1,4 +1,4 @@
@@ -33,7 +33,7 @@ index 538bb3d72967d..090702cd96df4 100644
  assert(!(is_debug && is_official_build), "Can't do official debug builds")
  assert(!(current_os == "ios" && is_component_build),
         "Can't use component build on iOS")
-@@ -223,7 +241,13 @@ if (host_toolchain == "") {
+@@ -225,7 +243,13 @@ if (host_toolchain == "") {
    # no toolchain omitted host_toolchain from its toolchain_args().
  
    if (host_os == "linux") {
@@ -48,7 +48,7 @@ index 538bb3d72967d..090702cd96df4 100644
        host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
      } else if (is_clang) {
        host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
-@@ -442,6 +466,9 @@ if (current_os == "zos") {
+@@ -445,6 +469,9 @@ if (current_os == "zos") {
    default_compiler_configs += [ "//build/config/zos:compiler" ]
  }
  
@@ -59,7 +59,7 @@ index 538bb3d72967d..090702cd96df4 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index 652107318f2f0..e515994e0dc0d 100644
+index ccfe9692baf06..9defb7dde8645 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -234,7 +234,7 @@ index 652107318f2f0..e515994e0dc0d 100644
    cflags = []
    ldflags = []
  
-@@ -2458,6 +2552,31 @@ config("no_incompatible_pointer_warnings") {
+@@ -2468,6 +2562,31 @@ config("no_incompatible_pointer_warnings") {
    }
  }
  
@@ -266,7 +266,7 @@ index 652107318f2f0..e515994e0dc0d 100644
  # Optimization -----------------------------------------------------------------
  #
  # The BUILDCONFIG file sets the "default_optimization" config on targets by
-@@ -2694,9 +2813,18 @@ config("optimize_max") {
+@@ -2704,9 +2823,18 @@ config("optimize_max") {
    if (is_win) {
      # Favor speed over size, /O2 must be before the common flags.
      # /O2 implies /Ot, /Oi, and /GF.
@@ -532,7 +532,7 @@ index 0000000000000..cffe8c6058e37
 +  }
 +}
 diff --git a/build/config/win/BUILD.gn b/build/config/win/BUILD.gn
-index ea7a4a92ea8d7..7c35922041850 100644
+index 1edf10346da44..bd9c4f80e6443 100644
 --- a/build/config/win/BUILD.gn
 +++ b/build/config/win/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -574,10 +574,10 @@ index ea7a4a92ea8d7..7c35922041850 100644
  
    # arflags apply only to static_libraries. The normal linker configs are only
 diff --git a/build/toolchain/gcc_toolchain.gni b/build/toolchain/gcc_toolchain.gni
-index ac7a5b84e93fd..b7c0ff488b202 100644
+index 482f7c9e9030e..28befdc5143db 100644
 --- a/build/toolchain/gcc_toolchain.gni
 +++ b/build/toolchain/gcc_toolchain.gni
-@@ -935,6 +935,7 @@ template("gcc_rust_host_build_tools_toolchain") {
+@@ -937,6 +937,7 @@ template("gcc_rust_host_build_tools_toolchain") {
      toolchain_args = {
        # Populate toolchain args from the invoker.
        forward_variables_from(invoker.toolchain_args, "*")
@@ -586,7 +586,7 @@ index ac7a5b84e93fd..b7c0ff488b202 100644
  
        # The host build tools are static release builds to make the Chromium
 diff --git a/build/toolchain/linux/BUILD.gn b/build/toolchain/linux/BUILD.gn
-index a6e20a05c5eba..b2c7a29b72b0e 100644
+index fa3d1ba0cb4ea..c3c81cc8dcc4d 100644
 --- a/build/toolchain/linux/BUILD.gn
 +++ b/build/toolchain/linux/BUILD.gn
 @@ -114,6 +114,16 @@ clang_toolchain("clang_x64") {

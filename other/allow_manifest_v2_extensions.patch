@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/extensions/api/developer_private/extension_info_generator.cc b/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
-index 64c57f2ca2148..15a942664e68b 100644
+index 832d389b0ebed..ab01155193a63 100644
 --- a/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
 +++ b/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
-@@ -47,7 +47,6 @@
+@@ -48,7 +48,6 @@
  #include "extensions/browser/icon_util.h"
  #include "extensions/browser/image_loader.h"
  #include "extensions/browser/managed_installation_mode.h"
@@ -10,7 +10,7 @@ index 64c57f2ca2148..15a942664e68b 100644
  #include "extensions/browser/path_util.h"
  #include "extensions/browser/permissions/site_permissions_helper.h"
  #include "extensions/browser/shared_module_service.h"
-@@ -58,7 +57,6 @@
+@@ -59,7 +58,6 @@
  #include "extensions/common/command.h"
  #include "extensions/common/extension_features.h"
  #include "extensions/common/extension_set.h"
@@ -18,7 +18,7 @@ index 64c57f2ca2148..15a942664e68b 100644
  #include "extensions/common/install_warning.h"
  #include "extensions/common/manifest.h"
  #include "extensions/common/manifest_handlers/background_info.h"
-@@ -872,17 +870,6 @@ void ExtensionInfoGenerator::FillExtensionInfo(const Extension& extension,
+@@ -896,17 +894,6 @@ void ExtensionInfoGenerator::FillExtensionInfo(const Extension& extension,
          toolbar_actions_model->IsActionPinned(extension.id());
    }
  
@@ -37,10 +37,10 @@ index 64c57f2ca2148..15a942664e68b 100644
        AccountExtensionTracker::Get(profile)->CanUploadAsAccountExtension(
            extension)
 diff --git a/chrome/browser/ui/webui/extensions/extensions_ui.cc b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-index c9e85f3caae89..5d0f76a680140 100644
+index 68db74e12838e..175df3a9a4f6a 100644
 --- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
 +++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-@@ -501,9 +501,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
+@@ -504,9 +504,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
        "enableUserPermittedSites",
        base::FeatureList::IsEnabled(
            extensions_features::kExtensionsMenuAccessControlWithPermittedSites));

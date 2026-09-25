@@ -51,6 +51,7 @@ Akos Kiss <akiss@inf.u-szeged.hu>
 Akshay <akshay24495@gmail.com>
 Akpokwaye Mudiaga <mudiaga.akpokwaye@gitstart.dev>
 Aku Kotkavuo <a.kotkavuo@partner.samsung.com>
+Alaric Baraou <alaric.baraou@gmail.com>
 Aldo Culquicondor <alculquicondor@gmail.com>
 Alec Petridis <alecthechop@gmail.com>
 Alejandro Romano <alejandro9r@gmail.com>
@@ -58,6 +59,7 @@ Aleksandar Stojiljkovic <aleksandar.stojiljkovic@intel.com>
 Aleksei Gurianov <gurianov@gmail.com>
 Alesandro Ortiz <alesandro@alesandroortiz.com>
 Alessandro Astone <ales.astone@gmail.com>
+Alex Bordin <bordin.alex@gmail.com>
 Alex Chronopoulos <achronop@gmail.com>
 Alex Gabriel <minilogo@gmail.com>
 Alex Gartrell <agartrell@cmu.edu>
@@ -284,6 +286,7 @@ Chany Arpin-Plante <chany.arpin@gmail.com>
 Chanyong Moon <dev.chanyongmoon@gmail.com>
 Chaobin Zhang <zhchbin@gmail.com>
 Charles Vaughn <cvaughn@gmail.com>
+Charles Zhang <csalinezh@gmail.com>
 Chenhao Diao <diaochenhao@gmail.com>
 Cheng Zhao <zcbenz@gmail.com>
 Cheng Yu <yuzichengcode@gmail.com>
@@ -640,6 +643,7 @@ Ilya Konstantinov <ilya.konstantinov@gmail.com>
 Imam Mohammad Bokhary <imam.bokhary@samsung.com>
 Imranur Rahman <i.rahman@samsung.com>
 Imranur Rahman <ir.shimul@gmail.com>
+Indura Perera <indura.perera@codimite.com>
 Injun Choi <tkfydtls464@gmail.com>
 Ion Rosca <rosca@adobe.com>
 Irmak Kavasoglu <irmakkavasoglu@gmail.com>
@@ -654,6 +658,7 @@ Ivan Sidorov <ivansid@gmail.com>
 Jacek Fedoryński <jfedor@gmail.com>
 Jack Bates <jack@nottheoilrig.com>
 Jack Shi <flystone2020@gmail.com>
+Jack Wang <section9lab@gmail.com>
 Jackson Loeffler <j@jloeffler.com>
 Jacky Hu <flameddd@gmail.com>
 Jacob Clark <jacob.jh.clark@googlemail.com>
@@ -694,6 +699,7 @@ Jan Keitel <jan.keitel@gmail.com>
 Jan Rucka <ruckajan10@gmail.com>
 Jan Sauer <jan@jansauer.de>
 Ján Václav <xvaclav@fi.muni.cz>
+Jan Zidarič <janbenoviczidaric@gmail.com>
 Jan-Michael Brummer <jan.brummer@tabos.org>
 Janusz Majnert <jmajnert@gmail.com>
 Janwar Dinata <j.dinata@gmail.com>
@@ -943,10 +949,12 @@ Kunal Dubey <kunal842002@gmail.com>
 Kunal Thakar <kunalt@gmail.com>
 Kunpeng Yan <yankunpeng.nexus@gmail.com>
 Kushal Pisavadia <kushi.p@gmail.com>
+kuu <kuxu2525@gmail.com>
 Kwanghee Lee <ekwange@gmail.com>
 Kwangho Shin <k_h.shin@samsung.com>
 Kyle Nahrgang <kpn24@drexel.edu>
 Kyle Plumadore <kyle.plumadore@amd.com>
+Kylie Coligan <kyliepct@gmail.com>
 Kyouhei Horizumi <kyouhei.horizumi@gmail.com>
 Kyounga Ra <kyounga.ra@gmail.com>
 Kyoungdeok Kwon <kkd927@gmail.com>
@@ -1100,6 +1108,7 @@ Max Schmitt <max@schmitt.mx>
 Max Vujovic <mvujovic@adobe.com>
 Maximilian Gramzow <mail@makusu.cc>
 Mayank Gupta <mayank.g1@samsung.com>
+Mayank Kumar <mayank.k@samsung.com>
 Mayur Kankanwadi <mayurk.vk@samsung.com>
 Mc Zeng <zengmcong@gmail.com>
 Md Abdullah Al Alamin <a.alamin.cse@gmail.com>
@@ -1190,6 +1199,7 @@ Mukul Nandal <mukulnandal14@gmail.com>
 Munira Tursunova <moonira@google.com>
 Myeongjin Cho <myeongjin.cho@navercorp.com>
 Myles C. Maxfield <mymax@amazon.com>
+mysticalsoap <mysticalsoap@gmail.com>
 Myung-jong Kim <mjkim610@gmail.com>
 Myunghoon Kim <asdvfrqwe@gmail.com>
 Nagarajan Narayanan <nagarajan.n@samsung.com>
@@ -1223,6 +1233,7 @@ Nik Pavlov <nikita.pavlov.dev@gmail.com>
 Nikhil Bansal <n.bansal@samsung.com>
 Nikhil Meena <iakhilmeena@gmail.com>
 Nikhil Sahni <nikhil.sahni@samsung.com>
+Nikhil Shingne <n.shingne@samsung.com>
 Nikita Ofitserov <himikof@gmail.com>
 Niklas Hambüchen <mail@nh2.me>
 Niklas Schulze <me@jns.io>
@@ -1464,6 +1475,7 @@ Sashmitha Atigala <sashmitha.atigala@codimite.com>
 Sathish Kuppuswamy <sathish.kuppuswamy@intel.com>
 Satoshi Matsuzaki <satoshi.matsuzaki@gmail.com>
 Satyajit Sahu <satyajit.sahu@amd.com>
+Satyaveer Singh <satyaveer.s@samsung.com>
 Satvic Dhawan <satvicdhawan14@gmail.com>
 Sayan Nayak <sayan.nayak@samsung.com>
 Sayan Sivakumaran <sivakusayan@gmail.com>
@@ -1522,6 +1534,7 @@ Sherry Mou <wenjinm@amazon.com>
 Shez Baig <sbaig1@bloomberg.net>
 Shi Chunlong <shicl@dingdao.com>
 Shi Chunlong <shichunlong@gmail.com>
+shi yu jie <syujie875@gmail.com>
 Shigeki Ohtsu <shigeki.ohtsu@gmail.com>
 Shicheng Wang <wangshicheng@xiaomi.com>
 Shiliu Wang <aofdwsl@gmail.com>

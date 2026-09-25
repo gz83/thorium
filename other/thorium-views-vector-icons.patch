@@ -1,14 +1,17 @@
 diff --git a/ui/views/BUILD.gn b/ui/views/BUILD.gn
-index 2402dbecc3c5f..fb2e5b2740ac2 100644
+index 4a30d5128fb31..bbd28a162c0a2 100644
 --- a/ui/views/BUILD.gn
 +++ b/ui/views/BUILD.gn
-@@ -86,6 +86,10 @@ aggregate_vector_icons("views_vector_icons") {
+@@ -86,6 +86,13 @@ aggregate_vector_icons("views_vector_icons") {
      "visibility_off.icon",
      "visibility_off_filled.icon",
    ]
 +
 +  if (is_thorium_build) {
-+    sources += [ "thorium/arrow_drop_down_thorium.icon" ]
++    sources += [
++      "thorium/arrow_drop_down_thorium.icon",
++      "new_incognito_window_old_thorium.icon",
++    ]
 +  }
  }
  

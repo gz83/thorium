@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 5138f1098955d..c987877959bab 100644
+index dad5f3d68ff37..caa9919b85b78 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -181,6 +181,11 @@ BASE_FEATURE(kPreloadTopChromeWebUILessNavigations,
+@@ -202,6 +202,11 @@ BASE_FEATURE(kPreloadTopChromeWebUILessNavigations,
  BASE_FEATURE(kPressAndHoldEscToExitBrowserFullscreen,
               base::FEATURE_ENABLED_BY_DEFAULT);
  
@@ -15,10 +15,10 @@ index 5138f1098955d..c987877959bab 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index e3eb18e693568..ad4bd01adb0b7 100644
+index 6212b16d36c31..a6f38580d9853 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -382,6 +382,9 @@ BASE_DECLARE_FEATURE(kTabGroupsFocusing);
+@@ -385,6 +385,9 @@ BASE_DECLARE_FEATURE(kTabGroupsFocusing);
  BASE_DECLARE_FEATURE_PARAM(bool, kTabGroupsFocusFreezing);
  bool IsTabGroupsFocusFreezingEnabled();
  
@@ -29,7 +29,7 @@ index e3eb18e693568..ad4bd01adb0b7 100644
  bool IsTabGroupRibbonEnabled();
  
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
-index 8f23016ce4bc8..d6ca8e04b3c27 100644
+index 1ebea9be9d761..fd2c4110b3940 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
 @@ -8,10 +8,13 @@
@@ -46,7 +46,7 @@ index 8f23016ce4bc8..d6ca8e04b3c27 100644
  #include "base/time/time.h"
  #include "chrome/browser/dictation/dictation_keyed_service.h"
  #include "chrome/browser/glic/browser_ui/tab_underline_controller.h"
-@@ -575,9 +578,18 @@ bool TabView::OnMousePressed(const ui::MouseEvent& event) {
+@@ -598,9 +601,18 @@ bool TabView::OnMousePressed(const ui::MouseEvent& event) {
  
    auto* controller = collection_node_->GetController();
    shift_pressed_on_mouse_down_ = event.IsShiftDown();
@@ -65,7 +65,7 @@ index 8f23016ce4bc8..d6ca8e04b3c27 100644
    // Capture the selection model before selection changes.
    const ui::ListSelectionModel original_selection_model =
        controller->GetSelectionModel();
-@@ -617,6 +629,36 @@ void TabView::OnMouseReleased(const ui::MouseEvent& event) {
+@@ -640,6 +652,36 @@ void TabView::OnMouseReleased(const ui::MouseEvent& event) {
  
    auto* controller = collection_node_->GetController();
    base::WeakPtr<TabView> self = weak_ptr_factory_.GetWeakPtr();
@@ -102,7 +102,7 @@ index 8f23016ce4bc8..d6ca8e04b3c27 100644
    if (event.IsOnlyMiddleMouseButton() ||
        (event.IsOnlyLeftMouseButton() && event.GetClickCount() == 2 &&
         base::CommandLine::ForCurrentProcess()->HasSwitch(
-@@ -637,6 +679,16 @@ void TabView::OnMouseReleased(const ui::MouseEvent& event) {
+@@ -660,6 +702,16 @@ void TabView::OnMouseReleased(const ui::MouseEvent& event) {
      return;
    }
    shift_pressed_on_mouse_down_ = false;
@@ -119,7 +119,7 @@ index 8f23016ce4bc8..d6ca8e04b3c27 100644
  }
  
  void TabView::OnMouseMoved(const ui::MouseEvent& event) {
-@@ -912,6 +964,9 @@ void TabView::ShowContextMenuForViewImpl(
+@@ -952,6 +1004,9 @@ void TabView::ShowContextMenuForViewImpl(
      views::View* source,
      const gfx::Point& point,
      ui::mojom::MenuSourceType source_type) {
@@ -130,10 +130,10 @@ index 8f23016ce4bc8..d6ca8e04b3c27 100644
      if (auto* controller = collection_node_->GetController()) {
        controller->ShowTabContextMenu(collection_node_, point, source_type);
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.h b/chrome/browser/ui/views/tabs/common/tab_view.h
-index af67df69209b9..e673d8ab8c40c 100644
+index 70443037e2b8d..51caf7495fb31 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.h
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.h
-@@ -132,6 +132,7 @@ class TabView : public views::View,
+@@ -135,6 +135,7 @@ class TabView : public views::View,
    bool OnKeyReleased(const ui::KeyEvent& event) override;
    bool OnMousePressed(const ui::MouseEvent& event) override;
    void OnMouseReleased(const ui::MouseEvent& event) override;
@@ -141,7 +141,7 @@ index af67df69209b9..e673d8ab8c40c 100644
    void OnMouseMoved(const ui::MouseEvent& event) override;
    void OnMouseEntered(const ui::MouseEvent& event) override;
    void OnMouseExited(const ui::MouseEvent& event) override;
-@@ -234,6 +235,10 @@ class TabView : public views::View,
+@@ -242,6 +243,10 @@ class TabView : public views::View,
    bool shift_pressed_on_mouse_down_ = false;
    bool should_fill_background_tab_color_ = false;
  
@@ -153,7 +153,7 @@ index af67df69209b9..e673d8ab8c40c 100644
    float hover_opacity_min_;
    float hover_opacity_max_;
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index 6375edbd83cdd..7090fd128eadf 100644
+index 1a5ae7c476bb9..4058c34503840 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
 @@ -13,11 +13,13 @@
@@ -170,7 +170,7 @@ index 6375edbd83cdd..7090fd128eadf 100644
  #include "base/time/time.h"
  #include "build/build_config.h"
  #include "cc/paint/paint_flags.h"
-@@ -719,10 +721,21 @@ bool IsSelectionModifierDown(const ui::MouseEvent& event) {
+@@ -726,10 +728,21 @@ bool IsSelectionModifierDown(const ui::MouseEvent& event) {
  
  bool Tab::OnMousePressed(const ui::MouseEvent& event) {
    shift_pressed_on_mouse_down_ = event.IsShiftDown();
@@ -192,7 +192,7 @@ index 6375edbd83cdd..7090fd128eadf 100644
    // Allow a right click from touch to drag, which corresponds to a long click.
    if (event.IsOnlyLeftMouseButton() ||
        (event.IsOnlyRightMouseButton() && event.flags() & ui::EF_FROM_TOUCH)) {
-@@ -778,10 +791,39 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
+@@ -785,10 +798,39 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
    // so, bail immediately, since our members are already dead and we shouldn't
    // do anything else except drop the tab where it is.
    if (controller_->EndDrag(EndDragReason::kComplete)) {
@@ -232,7 +232,7 @@ index 6375edbd83cdd..7090fd128eadf 100644
    // Close tab on middle click, but only if the button is released over the tab
    // (normal windows behavior is to discard presses of a UI element where the
    // releases happen off the element).
-@@ -821,6 +863,9 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
+@@ -828,6 +870,9 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
  
  void Tab::OnMouseCaptureLost() {
    controller_->EndDrag(EndDragReason::kCaptureLost);
@@ -268,10 +268,10 @@ index 1b185b66762d5..b099d55611205 100644
  
    std::unique_ptr<tabs::TabDataObserver> tab_data_observer_;
 diff --git a/chrome/browser/ui/views/tabs/tab_strip.cc b/chrome/browser/ui/views/tabs/tab_strip.cc
-index aae35f03e3d88..91f7ea3ad4ffd 100644
+index 24d1cf9562415..5be846b042338 100644
 --- a/chrome/browser/ui/views/tabs/tab_strip.cc
 +++ b/chrome/browser/ui/views/tabs/tab_strip.cc
-@@ -2248,6 +2248,9 @@ void TabStrip::TabContextMenuController::ShowContextMenuForViewImpl(
+@@ -2249,6 +2249,9 @@ void TabStrip::TabContextMenuController::ShowContextMenuForViewImpl(
    if (tab->closing()) {
      return;
    }

@@ -31,7 +31,7 @@ index c8f0fd86033d1..b1fbbb0cf4733 100644
    // ChromeOS only badges Incognito, Guest, Enterprise Isolated and captive
    // portal signin icons in the browser window.
 diff --git a/chrome/browser/ui/views/toolbar/webui_toolbar_web_view.cc b/chrome/browser/ui/views/toolbar/webui_toolbar_web_view.cc
-index 623e490b4a458..84fb92743854c 100644
+index f898fddd1c803..dcf996469624f 100644
 --- a/chrome/browser/ui/views/toolbar/webui_toolbar_web_view.cc
 +++ b/chrome/browser/ui/views/toolbar/webui_toolbar_web_view.cc
 @@ -52,6 +52,7 @@
@@ -42,7 +42,7 @@ index 623e490b4a458..84fb92743854c 100644
  #include "chrome/browser/ui/views/toolbar/webui_home_control.h"
  #include "chrome/browser/ui/views/toolbar/webui_overflow_button.h"
  #include "chrome/browser/ui/views/toolbar/webui_performance_intervention_control.h"
-@@ -772,6 +773,8 @@ void WebUIToolbarWebView::MaybeInitializePageDependentControls() {
+@@ -807,6 +808,8 @@ void WebUIToolbarWebView::MaybeInitializePageDependentControls() {
      reload_control_.Init();
    }
    if (features::IsWebUIAvatarButtonEnabled() &&
@@ -51,7 +51,7 @@ index 623e490b4a458..84fb92743854c 100644
        !avatar_control_.is_initialized()) {
      avatar_control_.Initialize();
    }
-@@ -1692,7 +1695,9 @@ gfx::Size WebUIToolbarWebView::ComputeLayout(
+@@ -1769,7 +1772,9 @@ gfx::Size WebUIToolbarWebView::ComputeLayout(
    button_count += features::IsWebUISplitTabsButtonEnabled() &&
                    split_tabs_control_.IsVisible();
    button_count += features::IsWebUIBackForwardButtonEnabled();

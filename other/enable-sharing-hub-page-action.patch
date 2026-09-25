@@ -1,15 +1,15 @@
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 0ab25c63c9f39..eb603ce3e8e9f 100644
+index 82f397571fefa..fcd48e2f9f93a 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -218,6 +218,7 @@ if (!is_android) {
+@@ -245,6 +245,7 @@ if (!is_android) {
        "//chrome/browser/ui/fuzzy_search",
        "//chrome/browser/ui/interaction",
        "//chrome/browser/ui/lens",
 +      "//chrome/browser/ui/omnibox",
+       "//chrome/browser/ui/page_action",
        "//chrome/browser/ui/page_info",
        "//chrome/browser/ui/passwords",
-       "//chrome/browser/ui/performance_controls",
 diff --git a/chrome/browser/ui/browser_action_prefs_listener.cc b/chrome/browser/ui/browser_action_prefs_listener.cc
 index 40c5e669eb231..3db13b78ae29f 100644
 --- a/chrome/browser/ui/browser_action_prefs_listener.cc
@@ -36,10 +36,10 @@ index 40c5e669eb231..3db13b78ae29f 100644
    update_action_visibility(kActionSendTabToSelf);
    update_action_visibility(kActionCopyUrl);
 diff --git a/chrome/browser/ui/browser_actions.cc b/chrome/browser/ui/browser_actions.cc
-index 73053a0a02b25..3de2fc930b8b6 100644
+index 83b50c9d0440e..67eb3609f1e71 100644
 --- a/chrome/browser/ui/browser_actions.cc
 +++ b/chrome/browser/ui/browser_actions.cc
-@@ -118,6 +118,7 @@
+@@ -121,6 +121,7 @@
  #include "chrome/browser/ui/lens/lens_search_controller.h"
  #include "chrome/browser/ui/lens/lens_string_utils.h"
  #include "chrome/browser/ui/omnibox/ai_mode_page_action_controller.h"
@@ -47,7 +47,7 @@ index 73053a0a02b25..3de2fc930b8b6 100644
  #include "chrome/browser/ui/page_action/page_action_controller.h"
  #include "chrome/browser/ui/page_action/page_action_triggers.h"
  #include "chrome/browser/ui/page_info/page_info_dialog.h"
-@@ -4333,6 +4334,13 @@ void BrowserActions::InitializeToolbarAndMiscActions() {
+@@ -4356,6 +4357,13 @@ void BrowserActions::InitializeToolbarAndMiscActions() {
                },
                bwi))
            .SetActionId(kActionSharingHub)
@@ -185,10 +185,10 @@ index dd8784f81c36e..3c81a38629f6d 100644
        anchor, attempt,
        SharingHubBubbleController::CreateOrGetFromWebContents(
 diff --git a/chrome/browser/ui/tabs/BUILD.gn b/chrome/browser/ui/tabs/BUILD.gn
-index e072deb57a91a..ba54fb401b12b 100644
+index 2bd252d8156e4..784baa20c9ccf 100644
 --- a/chrome/browser/ui/tabs/BUILD.gn
 +++ b/chrome/browser/ui/tabs/BUILD.gn
-@@ -550,6 +550,7 @@ if (!is_android) {
+@@ -552,6 +552,7 @@ if (!is_android) {
        "//chrome/browser/profiles:profile_manager",
        "//chrome/browser/search",
        "//chrome/browser/sessions",
@@ -197,10 +197,10 @@ index e072deb57a91a..ba54fb401b12b 100644
        "//chrome/browser/skills:public",
        "//chrome/browser/skills:ui",
 diff --git a/chrome/browser/ui/tabs/tab_features.cc b/chrome/browser/ui/tabs/tab_features.cc
-index b898e05789186..9002d0e0fb2e8 100644
+index 34a7b2e82607b..78a7f785ebbf5 100644
 --- a/chrome/browser/ui/tabs/tab_features.cc
 +++ b/chrome/browser/ui/tabs/tab_features.cc
-@@ -45,6 +45,7 @@
+@@ -48,6 +48,7 @@
  #include "chrome/browser/preloading/prefetch/zero_suggest_prefetch/zero_suggest_prefetch_tab_helper.h"
  #include "chrome/browser/profiles/profile.h"
  #include "chrome/browser/profiles/profile_key.h"
@@ -208,7 +208,7 @@ index b898e05789186..9002d0e0fb2e8 100644
  #include "chrome/browser/signin/identity_manager_factory.h"
  #include "chrome/browser/ssl/ask_before_http_dialog_controller.h"
  #include "chrome/browser/ssl/connection_help_tab_helper.h"
-@@ -240,6 +241,12 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
+@@ -245,6 +246,12 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
                page_actions::PageActionPropertiesProvider(),
                pinned_actions_model);
  
@@ -244,10 +244,10 @@ index 86117f68b479c..93352d57feb4c 100644
        return MojomPageActionId::kActionShowPaymentsChurnedUsersBubble;
      case kActionFakePageActionForDebug:
 diff --git a/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom b/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom
-index 5f776c296f348..c55a31c07fe85 100644
+index 2d57e63270fb5..63451c7bbf2a5 100644
 --- a/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom
 +++ b/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom
-@@ -417,6 +417,7 @@ enum PageActionId {
+@@ -461,6 +461,7 @@ enum PageActionId {
    kActionAnchoredContextualCue,
    kActionWebAuthnAmbientSignin,
    kActionAutofillPayment,
@@ -256,7 +256,7 @@ index 5f776c296f348..c55a31c07fe85 100644
    kActionFakePageActionForDebug,
    kActionWalletReminderNotice,
 diff --git a/tools/metrics/histograms/metadata/page/enums.xml b/tools/metrics/histograms/metadata/page/enums.xml
-index f65fb10364193..221a2b123b149 100644
+index bbf4a35963c44..16016f1d45370 100644
 --- a/tools/metrics/histograms/metadata/page/enums.xml
 +++ b/tools/metrics/histograms/metadata/page/enums.xml
 @@ -259,7 +259,7 @@ chromium-metrics-reviews@google.com.

@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/download/chrome_download_manager_delegate.cc b/chrome/browser/download/chrome_download_manager_delegate.cc
-index d0b653e5eaaf2..8e254fc6f303f 100644
+index 4e9ae04520701..8a169f628b280 100644
 --- a/chrome/browser/download/chrome_download_manager_delegate.cc
 +++ b/chrome/browser/download/chrome_download_manager_delegate.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index d0b653e5eaaf2..8e254fc6f303f 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -2298,8 +2298,12 @@ bool ChromeDownloadManagerDelegate::IsOpenInBrowserPreferredForFile(
+@@ -2343,8 +2343,12 @@ bool ChromeDownloadManagerDelegate::IsOpenInBrowserPreferredForFile(
  bool ChromeDownloadManagerDelegate::ShouldBlockFile(
      download::DownloadItem* item,
      download::DownloadDangerType danger_type) const {
@@ -22,7 +22,7 @@ index d0b653e5eaaf2..8e254fc6f303f 100644
      return false;
    }
  
-@@ -2353,44 +2357,14 @@ bool ChromeDownloadManagerDelegate::ShouldBlockFile(
+@@ -2398,44 +2402,14 @@ bool ChromeDownloadManagerDelegate::ShouldBlockFile(
  void ChromeDownloadManagerDelegate::MaybeSendDangerousDownloadOpenedReport(
      DownloadItem* download,
      bool show_download_in_folder) {
@@ -70,7 +70,7 @@ index d0b653e5eaaf2..8e254fc6f303f 100644
      const content::WebContents::Getter& web_contents_getter,
      const GURL& url,
 diff --git a/chrome/browser/download/download_target_determiner.cc b/chrome/browser/download/download_target_determiner.cc
-index 2633e23a16cab..ab32a1e3f4010 100644
+index 0e2ffe2ae7728..45c402b0c5808 100644
 --- a/chrome/browser/download/download_target_determiner.cc
 +++ b/chrome/browser/download/download_target_determiner.cc
 @@ -1,4 +1,4 @@
@@ -87,7 +87,7 @@ index 2633e23a16cab..ab32a1e3f4010 100644
  #include "base/files/file_path.h"
  #include "base/functional/bind.h"
  #include "base/location.h"
-@@ -1239,6 +1240,14 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
+@@ -1259,6 +1260,14 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
      PriorVisitsToReferrer visits) const {
    DCHECK_CURRENTLY_ON(BrowserThread::UI);
  
@@ -103,7 +103,7 @@ index 2633e23a16cab..ab32a1e3f4010 100644
    // considered dangerous.
    if (download_->HasUserGesture() &&
 diff --git a/chrome/browser/download/insecure_download_blocking.cc b/chrome/browser/download/insecure_download_blocking.cc
-index 61c2bb0ce86d3..18ff6eb35867d 100644
+index 2ecba5bf9ab24..2dfe8da24f242 100644
 --- a/chrome/browser/download/insecure_download_blocking.cc
 +++ b/chrome/browser/download/insecure_download_blocking.cc
 @@ -1,4 +1,4 @@
@@ -120,7 +120,7 @@ index 61c2bb0ce86d3..18ff6eb35867d 100644
  #include "base/debug/crash_logging.h"
  #include "base/debug/dump_without_crashing.h"
  #include "base/memory/raw_ptr.h"
-@@ -218,6 +219,9 @@ struct InsecureDownloadData {
+@@ -219,6 +220,9 @@ struct InsecureDownloadData {
      // used for Chrome stuff. Background fetch should probably be HTTPS-only.
      auto download_source = item->GetDownloadSource();
      auto transition_type = item->GetTransitionType();
@@ -130,7 +130,7 @@ index 61c2bb0ce86d3..18ff6eb35867d 100644
      if (download_source == DownloadSource::RETRY ||
          ui::PageTransitionCoreTypeIs(transition_type,
                                       ui::PAGE_TRANSITION_RELOAD) ||
-@@ -233,7 +237,8 @@ struct InsecureDownloadData {
+@@ -234,7 +238,8 @@ struct InsecureDownloadData {
          download_source == DownloadSource::OFFLINE_PAGE ||
          download_source == DownloadSource::INTERNAL_API ||
          download_source == DownloadSource::EXTENSION_API ||
@@ -140,7 +140,7 @@ index 61c2bb0ce86d3..18ff6eb35867d 100644
        base::UmaHistogramEnumeration(
            kInsecureDownloadHistogramName,
            InsecureDownloadSecurityStatus::kDownloadIgnored);
-@@ -265,7 +270,8 @@ struct InsecureDownloadData {
+@@ -266,7 +271,8 @@ struct InsecureDownloadData {
          download_source == DownloadSource::OFFLINE_PAGE ||
          download_source == DownloadSource::INTERNAL_API ||
          download_source == DownloadSource::EXTENSION_API ||
@@ -150,7 +150,7 @@ index 61c2bb0ce86d3..18ff6eb35867d 100644
        is_insecure_download_ = false;
      } else {  // Not ignorable download.
        // TODO(crbug.com/40857867): Add blocking metrics.
-@@ -417,8 +423,11 @@ InsecureDownloadStatus GetInsecureDownloadStatusForDownload(
+@@ -418,8 +424,11 @@ InsecureDownloadStatus GetInsecureDownloadStatusForDownload(
      const download::DownloadItem* item) {
    InsecureDownloadData data(path, item);
  

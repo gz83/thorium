@@ -1,5 +1,5 @@
 diff --git a/definitions/prepopulated_engines.json b/definitions/prepopulated_engines.json
-index 43d7dc7..40c0c9d 100644
+index 5b30d54..1464ca2 100644
 --- a/definitions/prepopulated_engines.json
 +++ b/definitions/prepopulated_engines.json
 @@ -1,4 +1,4 @@
@@ -12,8 +12,8 @@ index 43d7dc7..40c0c9d 100644
      // existing data should get a new version. Otherwise, existing data may
      // continue to be used and updates made here will not always appear.
      // Also then run tools/search_engine_choice/generate_search_engine_icons.py.
--    "kCurrentDataVersion": 211
-+    "kCurrentDataVersion": 212
+-    "kCurrentDataVersion": 213
++    "kCurrentDataVersion": 214
    },
  
    // The following engines are included in country lists and are added to the
@@ -26,7 +26,7 @@ index 43d7dc7..40c0c9d 100644
        "keyword": "bing.com",
        "favicon_url": "https://www.bing.com/favicon.ico",
        "base_builtin_resource_id": "SEARCH_ENGINE_BING",
-@@ -321,7 +321,7 @@
+@@ -322,7 +322,7 @@
      },
  
      "panda": {
