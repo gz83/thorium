@@ -38,7 +38,7 @@ index 1f049eb708cd2..32184d34ccb6c 100644
    request_->set_isolation_info(GetDohIsolationInfo());
  }
 diff --git a/net/url_request/url_request_http_job.cc b/net/url_request/url_request_http_job.cc
-index f93d02b8024ee..a8e70deb94087 100644
+index c909310d20200..126c54eab6dbe 100644
 --- a/net/url_request/url_request_http_job.cc
 +++ b/net/url_request/url_request_http_job.cc
 @@ -1,4 +1,4 @@
@@ -47,7 +47,7 @@ index f93d02b8024ee..a8e70deb94087 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -515,18 +515,22 @@ void URLRequestHttpJob::Start() {
+@@ -472,18 +472,22 @@ void URLRequestHttpJob::Start() {
    // fields in the referrer.
    GURL referrer(request_->referrer());
  
@@ -80,7 +80,7 @@ index f93d02b8024ee..a8e70deb94087 100644
  
    AddExtraHeaders();
  
-@@ -781,10 +785,13 @@ void URLRequestHttpJob::StartTransactionInternal() {
+@@ -743,10 +747,13 @@ void URLRequestHttpJob::StartTransactionInternal() {
  void URLRequestHttpJob::AddExtraHeaders() {
    request_info_.extra_headers.SetAcceptEncodingIfMissing(
        request()->url(), request()->accepted_stream_types(),

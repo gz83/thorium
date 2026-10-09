@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/browser_features.cc b/chrome/browser/browser_features.cc
-index c502836b808fb..c580f64c2390f 100644
+index cbc2f4280a2fa..dda031b0a8060 100644
 --- a/chrome/browser/browser_features.cc
 +++ b/chrome/browser/browser_features.cc
 @@ -63,6 +63,9 @@ BASE_FEATURE(kCertVerificationNetworkTime, base::FEATURE_DISABLED_BY_DEFAULT);
@@ -13,7 +13,7 @@ index c502836b808fb..c580f64c2390f 100644
  // Enables usage of os_crypt_async::SecretPortalKeyProvider.  Once
  // `kSecretPortalKeyProviderUseForEncryption` is enabled, this flag cannot be
 diff --git a/chrome/browser/browser_features.h b/chrome/browser/browser_features.h
-index f6ba98b4b5902..80c09ecacdea2 100644
+index ee4f110e30019..13be0e4968daf 100644
 --- a/chrome/browser/browser_features.h
 +++ b/chrome/browser/browser_features.h
 @@ -39,6 +39,7 @@ BASE_DECLARE_FEATURE(kBookmarkTriggerForPrefetch);

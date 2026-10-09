@@ -200,7 +200,7 @@ index 00e0ed6c6225b..d8a8eff069b9c 100644
  
    base::WeakPtrFactory<BaseFile> weak_factory_{this};
 diff --git a/content/browser/BUILD.gn b/content/browser/BUILD.gn
-index 53dd562d46bae..90cbc49666012 100644
+index 3162721b67d5b..728a29ad5bc9f 100644
 --- a/content/browser/BUILD.gn
 +++ b/content/browser/BUILD.gn
 @@ -1,4 +1,4 @@

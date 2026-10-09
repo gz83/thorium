@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/tabs/BUILD.gn b/chrome/browser/ui/tabs/BUILD.gn
-index 3396b27000c31..2bd252d8156e4 100644
+index fa77a939373e4..4ed7da8ca9f55 100644
 --- a/chrome/browser/ui/tabs/BUILD.gn
 +++ b/chrome/browser/ui/tabs/BUILD.gn
-@@ -92,7 +92,10 @@ if (!is_android) {
+@@ -102,7 +102,10 @@ if (!is_android) {
        "features.h",
      ]
      public_deps = [ "//base" ]
@@ -105,10 +105,10 @@ index ca6b54f1c52c0..50ed4f16c3b74 100644
  };
  
 diff --git a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
-index aa8f7da426500..8bc95a92fecbd 100644
+index d86ea93f7dd14..12f3e94602ca7 100644
 --- a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
 +++ b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc
-@@ -159,6 +159,8 @@ std::unique_ptr<TabStrip> CreateTabStrip(
+@@ -158,6 +158,8 @@ std::unique_ptr<TabStrip> CreateTabStrip(
  HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
      BrowserView* browser_view)
      : browser_view_(browser_view),
@@ -117,7 +117,7 @@ index aa8f7da426500..8bc95a92fecbd 100644
        action_view_controller_(std::make_unique<views::ActionViewController>()) {
    views::SetCascadingColorProviderColor(
        this, views::kCascadingBackgroundColor,
-@@ -169,13 +171,17 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
+@@ -168,13 +170,17 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
  
    BrowserWindowInterface* const browser = browser_view->browser();
  
@@ -140,7 +140,7 @@ index aa8f7da426500..8bc95a92fecbd 100644
    }
  
    if (base::FeatureList::IsEnabled(features::kTabGroupsFocusing)) {
-@@ -266,10 +272,20 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
+@@ -264,10 +270,20 @@ HorizontalTabStripRegionViewOld::HorizontalTabStripRegionViewOld(
  
    SetProperty(views::kElementIdentifierKey, kTabStripRegionElementId);
  
@@ -161,7 +161,7 @@ index aa8f7da426500..8bc95a92fecbd 100644
    UpdateTabStripMargin();
  }
  
-@@ -357,9 +373,9 @@ views::View::Views HorizontalTabStripRegionViewOld::GetChildrenInZOrder() {
+@@ -355,9 +371,9 @@ views::View::Views HorizontalTabStripRegionViewOld::GetChildrenInZOrder() {
    return children;
  }
  
@@ -174,7 +174,7 @@ index aa8f7da426500..8bc95a92fecbd 100644
  void HorizontalTabStripRegionViewOld::Layout(PassKey) {
    if (!tab_strip_set_) {
      return;
-@@ -375,7 +391,7 @@ void HorizontalTabStripRegionViewOld::Layout(PassKey) {
+@@ -373,7 +389,7 @@ void HorizontalTabStripRegionViewOld::Layout(PassKey) {
                        GetLayoutConstant(LayoutConstant::kTabStripPadding);
    }
  
@@ -183,7 +183,7 @@ index aa8f7da426500..8bc95a92fecbd 100644
      AdjustViewBoundsRect(combo_button_, leading_offset);
    }
  
-@@ -600,7 +616,8 @@ HorizontalTabStripRegionViewOld::GetExpandOnHoverLock(
+@@ -598,7 +614,8 @@ HorizontalTabStripRegionViewOld::GetExpandOnHoverLock(
  }
  
  bool HorizontalTabStripRegionViewOld::HasLeadingButtons() const {
@@ -193,7 +193,7 @@ index aa8f7da426500..8bc95a92fecbd 100644
        ((combo_button_->start_button() &&
          combo_button_->start_button()->GetVisible()) ||
         (combo_button_->end_button() &&
-@@ -693,10 +710,11 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
+@@ -691,10 +708,11 @@ void HorizontalTabStripRegionViewOld::UpdateTabStripMargin() {
          GetLayoutConstant(LayoutConstant::kTabStripPadding);
    }
  
@@ -209,21 +209,21 @@ index aa8f7da426500..8bc95a92fecbd 100644
      combo_button_->SetPaintToLayer();
      combo_button_->layer()->SetFillsBoundsOpaquely(false);
      combo_button_->SetProperty(views::kViewIgnoredByLayoutKey, true);
-@@ -1025,7 +1043,8 @@ gfx::Point HorizontalTabStripRegionViewNew::GetLinkDropArrowPosition(
- }
- 
- void HorizontalTabStripRegionViewNew::OnTabStripViewSet() {
+@@ -1045,7 +1063,8 @@ void HorizontalTabStripRegionViewNew::AddTabStripView(
+       views::kFlexBehaviorKey,
+       views::FlexSpecification(views::MinimumFlexSizeRule::kScaleToZero,
+                                views::MaximumFlexSizeRule::kPreferred));
 -  const size_t index = combo_button_ ? 1 : 0;
 +  const size_t index =
 +      combo_button_ && tabs::IsTabStripComboButtonBeforeTabStrip() ? 1 : 0;
-   ReorderChildView(tab_strip_view(), index);
+   AddChildViewAt(std::move(view), index);
+   UpdateTabStripMargin();
  }
- 
 diff --git a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
-index 3860b6181381b..195b868c71181 100644
+index 474306dd40056..f026830aa8fa9 100644
 --- a/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
 +++ b/chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h
-@@ -132,6 +132,8 @@ class HorizontalTabStripRegionViewOld : public TabStripRegionView {
+@@ -135,6 +135,8 @@ class HorizontalTabStripRegionViewOld : public TabStripRegionView {
    raw_ptr<views::Button> new_tab_button_ = nullptr;
    raw_ptr<TabStripControlButton> unfocus_button_ = nullptr;
  

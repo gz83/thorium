@@ -1,5 +1,5 @@
 diff --git a/sandbox/linux/BUILD.gn b/sandbox/linux/BUILD.gn
-index 1fe96111cefaa..6ce8b52a15fc0 100644
+index 371308c492d37..5d76bdb1c5176 100644
 --- a/sandbox/linux/BUILD.gn
 +++ b/sandbox/linux/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 1fe96111cefaa..6ce8b52a15fc0 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -298,6 +298,9 @@ if (is_linux || is_chromeos) {
+@@ -302,6 +302,9 @@ if (is_linux || is_chromeos) {
        "suid/process_util_linux.c",
        "suid/sandbox.c",
      ]

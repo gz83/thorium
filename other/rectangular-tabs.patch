@@ -24,7 +24,7 @@ index 18e3d2a8277c5..0ac65a03e2b3b 100644
  }
  
 diff --git a/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc b/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
-index bf6b606f7ad8f..36340c03cabd9 100644
+index 7dcd768497f82..2e95facb74a96 100644
 --- a/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
 +++ b/chrome/browser/ui/views/tabs/shared/tab_strip_combo_button.cc
 @@ -4,6 +4,7 @@
@@ -35,7 +35,7 @@ index bf6b606f7ad8f..36340c03cabd9 100644
  #include "base/i18n/rtl.h"
  #include "base/metrics/user_metrics.h"
  #include "base/metrics/user_metrics_action.h"
-@@ -95,6 +96,10 @@ TabStripComboButton::TabStripComboButton(BrowserWindowInterface* browser,
+@@ -97,6 +98,10 @@ TabStripComboButton::TabStripComboButton(BrowserWindowInterface* browser,
      end_button_->SetUseThorium2024Style(true);
      end_button_->SetIconSize(kThorium2024TabSearchIconSize);
    }
@@ -47,10 +47,10 @@ index bf6b606f7ad8f..36340c03cabd9 100644
    PrefService* prefs = browser_->GetProfile()->GetPrefs();
    pref_registrar_.Init(prefs);
 diff --git a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc
-index 372101612e98a..52d7266a4e70b 100644
+index b3da3f6cff53f..d5929c3b2d847 100644
 --- a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc
 +++ b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.cc
-@@ -149,6 +149,20 @@ void TabStripFlatEdgeButton::SetUseThorium2024Style(
+@@ -148,6 +148,20 @@ void TabStripFlatEdgeButton::SetUseThorium2024Style(
    SchedulePaint();
  }
  
@@ -71,7 +71,7 @@ index 372101612e98a..52d7266a4e70b 100644
  void TabStripFlatEdgeButton::SetExpansionFactor(float factor) {
    if (expansion_factor_ == factor) {
      return;
-@@ -324,6 +338,10 @@ ui::ColorId TabStripFlatEdgeButton::GetBackgroundColor() const {
+@@ -322,6 +336,10 @@ ui::ColorId TabStripFlatEdgeButton::GetBackgroundColor() const {
  }
  
  gfx::RoundedCornersF TabStripFlatEdgeButton::GetButtonCornerRadii() const {
@@ -83,7 +83,7 @@ index 372101612e98a..52d7266a4e70b 100644
    const float rounded_radius =
        corner_radius_.value_or(use_thorium_2024_style_ ? 14.0f : 10.0f);
 diff --git a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h
-index 3105833a00f62..5c9fa756d0d34 100644
+index d9b8f2def16bb..361b462348ad7 100644
 --- a/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h
 +++ b/chrome/browser/ui/views/tabs/shared/tab_strip_flat_edge_button.h
 @@ -43,6 +43,7 @@ class TabStripFlatEdgeButton : public views::LabelButton,
@@ -91,11 +91,11 @@ index 3105833a00f62..5c9fa756d0d34 100644
    void SetIconOpacity(float opacity);
    void SetUseThorium2024Style(bool use_thorium_2024_style);
 +  void SetUseRectangularStyle(bool use_rectangular_style);
-   void SetPaintTransparentForGlass(bool paint_transparent);
+   void SetPaintTransparent(bool paint_transparent);
  
    void SetExpansionFactor(float factor);
-@@ -100,6 +101,7 @@ class TabStripFlatEdgeButton : public views::LabelButton,
-   bool paint_transparent_for_glass_ = false;
+@@ -98,6 +99,7 @@ class TabStripFlatEdgeButton : public views::LabelButton,
+   bool paint_transparent_ = false;
    base::CallbackListSubscription paint_as_active_subscription_;
    bool use_thorium_2024_style_ = false;
 +  bool use_rectangular_style_ = false;

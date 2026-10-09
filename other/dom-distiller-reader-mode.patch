@@ -31,7 +31,7 @@ index 570369d1febfe..f80502ac392de 100644
    position: relative;
    width: 100%;
 diff --git a/components/dom_distiller/core/dom_distiller_features.cc b/components/dom_distiller/core/dom_distiller_features.cc
-index fcec9a6a83570..d1274a027ce72 100644
+index 26e59179487a3..8df76d8163b67 100644
 --- a/components/dom_distiller/core/dom_distiller_features.cc
 +++ b/components/dom_distiller/core/dom_distiller_features.cc
 @@ -1,4 +1,4 @@
@@ -61,13 +61,4 @@ index fcec9a6a83570..d1274a027ce72 100644
 +         kReaderModeDesktop;
  }
  
- 
-@@ -43,7 +49,7 @@ BASE_FEATURE(kReaderModeBlurTransitionAnimation,
- BASE_FEATURE(kReaderModeDelayBottomSheetPeek,
-              base::FEATURE_DISABLED_BY_DEFAULT);
- 
--BASE_FEATURE(kReaderModeDistillInApp, base::FEATURE_ENABLED_BY_DEFAULT);
-+BASE_FEATURE(kReaderModeDistillInApp, base::FEATURE_DISABLED_BY_DEFAULT);
- 
- BASE_FEATURE(kReaderModeToggleLinks, base::FEATURE_DISABLED_BY_DEFAULT);
  

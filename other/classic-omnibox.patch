@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/layout_constants.cc b/chrome/browser/ui/layout_constants.cc
-index 16d85ffee569f..35ed9c8018e89 100644
+index e5183b921b313..f9f3b4c22d988 100644
 --- a/chrome/browser/ui/layout_constants.cc
 +++ b/chrome/browser/ui/layout_constants.cc
 @@ -4,6 +4,7 @@
@@ -29,7 +29,7 @@ index 16d85ffee569f..35ed9c8018e89 100644
        return 16;
      case LayoutConstant::kLocationBarChipPadding:
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 0f991201a1e89..4b902c8674283 100644
+index 0cda2d7d04149..34f8790ee6105 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
 @@ -10,6 +10,7 @@
@@ -40,7 +40,7 @@ index 0f991201a1e89..4b902c8674283 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
-@@ -249,7 +250,11 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
+@@ -266,7 +267,11 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
            }));
        views::FocusRing::Get(this)->SetOutsetFocusRingDisabled(true);
      }
@@ -53,7 +53,7 @@ index 0f991201a1e89..4b902c8674283 100644
  
  #if BUILDFLAG(OS_LEVEL_GEOLOCATION_PERMISSION_SUPPORTED)
      if (features::IsOsLevelGeolocationPermissionSupportEnabled()) {
-@@ -535,6 +540,11 @@ bool LocationBarView::IsInitialized() const {
+@@ -541,6 +546,11 @@ bool LocationBarView::IsInitialized() const {
  }
  
  int LocationBarView::GetBorderRadius() const {
@@ -65,7 +65,7 @@ index 0f991201a1e89..4b902c8674283 100644
    return ComputeBorderRadius(size());
  }
  
-@@ -1434,6 +1444,12 @@ void LocationBarView::RefreshBackground() {
+@@ -1449,6 +1459,12 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;
@@ -79,7 +79,7 @@ index 0f991201a1e89..4b902c8674283 100644
    // The custom focus border is disabled on macOS to avoid conflicting with
    // native omnibox rendering.
 diff --git a/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc b/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
-index f9f45c65757a4..23f8f94893b21 100644
+index 295a5d18fa4b4..d8936a48a6f8e 100644
 --- a/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
 +++ b/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
 @@ -6,6 +6,7 @@

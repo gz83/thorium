@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/omnibox/omnibox_edit_model.cc b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
-index ca3966dc01b66..0068c6d5e4ca5 100644
+index c2a581d6a7c7e..255ae8656daa1 100644
 --- a/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 @@ -42,6 +42,7 @@
@@ -33,7 +33,7 @@ index ca3966dc01b66..0068c6d5e4ca5 100644
  void EmitEnteredKeywordModeHistogram(
      OmniboxEventProto::KeywordModeEntryMethod entry_method,
      const TemplateURL* turl,
-@@ -923,6 +940,8 @@ void OmniboxEditModel::OpenSelection(
+@@ -924,6 +941,8 @@ void OmniboxEditModel::OpenSelection(
      WindowOpenDisposition disposition,
      bool via_keyboard,
      const searchbox::AutocompleteSnapshot* snapshot) {
@@ -42,7 +42,7 @@ index ca3966dc01b66..0068c6d5e4ca5 100644
    controller_->StopAutocomplete(/*clear_result=*/false);
  
    base::UmaHistogramMicrosecondsTimes("Omnibox.InputToOpenSelection",
-@@ -2588,6 +2607,8 @@ void OmniboxEditModel::StepPopupSelection(
+@@ -2434,6 +2453,8 @@ void OmniboxEditModel::StepPopupSelection(
  void OmniboxEditModel::AcceptInput(WindowOpenDisposition disposition,
                                     base::TimeTicks match_selection_timestamp) {
    TRACE_EVENT("omnibox", "OmniboxEditModel::AcceptInput");
@@ -52,10 +52,10 @@ index ca3966dc01b66..0068c6d5e4ca5 100644
    GURL alternate_nav_url;
    AutocompleteMatch match = CurrentMatchAndAlternateNavUrl(&alternate_nav_url);
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 199ea678d33e2..2c537b4a80938 100644
+index c06e4d6bcfad9..76f97f747f7af 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -227,6 +227,16 @@ BASE_FEATURE_PARAM(std::string,
+@@ -238,6 +238,16 @@ BASE_FEATURE_PARAM(std::string,
                     "mode",
                     "foreground");
  
@@ -73,10 +73,10 @@ index 199ea678d33e2..2c537b4a80938 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index ca7c32d696333..a2861bd2f90ec 100644
+index c0a4a41e4ee7d..48b30ecdf1a11 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -394,6 +394,9 @@ BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
+@@ -398,6 +398,9 @@ BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
  BASE_DECLARE_FEATURE(kOpenBookmarksInNewTab);
  BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
  

@@ -1,8 +1,8 @@
 diff --git a/chrome/android/chrome_java_resources.gni b/chrome/android/chrome_java_resources.gni
-index 67d140d94d0a5..3ea19e25b0475 100644
+index 5b0fcb902432b..6bcf4fd741992 100644
 --- a/chrome/android/chrome_java_resources.gni
 +++ b/chrome/android/chrome_java_resources.gni
-@@ -674,6 +674,7 @@ chrome_java_resources = [
+@@ -669,6 +669,7 @@ chrome_java_resources = [
    "java/res/xml/developer_preferences.xml",
    "java/res/xml/do_not_track_preferences.xml",
    "java/res/xml/google_services_preferences.xml",
@@ -11,10 +11,10 @@ index 67d140d94d0a5..3ea19e25b0475 100644
    "java/res/xml/legal_information_preferences.xml",
    "java/res/xml/main_preferences.xml",
 diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java_sources.gni
-index 30ba7c4c23820..5224bfad7b9dc 100644
+index 74208304beac3..e5da9598d01e3 100644
 --- a/chrome/android/chrome_java_sources.gni
 +++ b/chrome/android/chrome_java_sources.gni
-@@ -1042,6 +1042,7 @@ chrome_java_sources = [
+@@ -1036,6 +1036,7 @@ chrome_java_sources = [
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditor.java",
    "java/src/org/chromium/chrome/browser/policy/PolicyAuditorBridge.java",
    "java/src/org/chromium/chrome/browser/privacy/settings/DoNotTrackSettings.java",
@@ -122,7 +122,7 @@ index 0000000000000..484572ab2db9c
 +    }
 +}
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
-index 1b5d10dbf1aa0..18adb45d30563 100644
+index 512f512a828d6..e4a2aeba0f2ee 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
 @@ -93,6 +93,7 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
@@ -133,7 +133,7 @@ index 1b5d10dbf1aa0..18adb45d30563 100644
      private static final String PREF_SAFE_BROWSING = "safe_browsing";
      private static final String PREF_PASSWORD_LEAK_DETECTION = "password_leak_detection";
      private static final String PREF_SYNC_AND_SERVICES_LINK = "sync_and_services_link";
-@@ -403,6 +404,14 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
+@@ -410,6 +411,14 @@ public class PrivacySettings extends ChromeBaseSettingsFragment
                              : R.string.text_off);
          }
  
@@ -149,7 +149,7 @@ index 1b5d10dbf1aa0..18adb45d30563 100644
          if (preloadPagesPreference != null) {
              preloadPagesPreference.setSummary(
 diff --git a/chrome/app/settings_strings.grdp b/chrome/app/settings_strings.grdp
-index caae29834c2cf..2eee53a6f3cb0 100644
+index 8c079eb0a703e..2fca7d103de87 100644
 --- a/chrome/app/settings_strings.grdp
 +++ b/chrome/app/settings_strings.grdp
 @@ -1775,6 +1775,18 @@
@@ -172,10 +172,10 @@ index caae29834c2cf..2eee53a6f3cb0 100644
        Controls what information sites can use and show (location, camera, pop-ups, and more)
      </message>
 diff --git a/chrome/browser/extensions/api/settings_private/prefs_util.cc b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-index 3b2361d90cb07..d0142c52006a1 100644
+index 618a67dabc0fd..652790adcc71f 100644
 --- a/chrome/browser/extensions/api/settings_private/prefs_util.cc
 +++ b/chrome/browser/extensions/api/settings_private/prefs_util.cc
-@@ -497,6 +497,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
+@@ -485,6 +485,7 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
    (*s_allowlist)[::prefs::kEnableDoNotTrack] = settings_api::PrefType::kBoolean;
    (*s_allowlist)[universal_optout::prefs::kUniversalOptOutEnabled] =
        settings_api::PrefType::kBoolean;
@@ -184,7 +184,7 @@ index 3b2361d90cb07..d0142c52006a1 100644
    // Sync and personalization page.
    (*s_allowlist)[::prefs::kSearchSuggestEnabled] =
 diff --git a/chrome/browser/renderer_preferences_util.cc b/chrome/browser/renderer_preferences_util.cc
-index 2b542a4814ddc..3b61122e40519 100644
+index 680a3df2d51cd..d2e550883598e 100644
 --- a/chrome/browser/renderer_preferences_util.cc
 +++ b/chrome/browser/renderer_preferences_util.cc
 @@ -26,6 +26,7 @@
@@ -204,22 +204,22 @@ index 2b542a4814ddc..3b61122e40519 100644
    // kGlobalPrivacyControlDevToolsOverridest.
    if (base::FeatureList::IsEnabled(
 diff --git a/chrome/browser/resources/settings/BUILD.gn b/chrome/browser/resources/settings/BUILD.gn
-index 5b58a98f56da9..ab4c706742230 100644
+index 1795e894fc56d..41aaa730f474a 100644
 --- a/chrome/browser/resources/settings/BUILD.gn
 +++ b/chrome/browser/resources/settings/BUILD.gn
-@@ -98,6 +98,7 @@ build_webui("build") {
-     "glic_page/glic_subpage.ts",
+@@ -73,6 +73,7 @@ build_webui("build") {
+     "controls/settings_radio_group.ts",
+     "controls/settings_toggle_button.ts",
      "privacy_page/cookies_page.ts",
-     "privacy_page/do_not_track_toggle.ts",
 +    "privacy_page/gpc_toggle.ts",
      "privacy_page/personalization_options.ts",
-     "privacy_page/privacy_guide/privacy_guide_completion_fragment.ts",
-     "privacy_page/privacy_guide/privacy_guide_cookies_fragment.ts",
+     "privacy_page/privacy_page.ts",
+     "privacy_page/privacy_page_index.ts",
 diff --git a/chrome/browser/resources/settings/privacy_page/cookies_page.html b/chrome/browser/resources/settings/privacy_page/cookies_page.html
-index 63e5742f3021d..eae4fd30154d9 100644
+index db0e0e7f6dabb..17b5f736acc6e 100644
 --- a/chrome/browser/resources/settings/privacy_page/cookies_page.html
 +++ b/chrome/browser/resources/settings/privacy_page/cookies_page.html
-@@ -253,6 +253,8 @@
+@@ -229,6 +229,8 @@
            learn-more-url="$i18n{universalOptOutLearnMoreURL}">
        </settings-toggle-button>
      </template>
@@ -229,7 +229,7 @@ index 63e5742f3021d..eae4fd30154d9 100644
          on-click="onSiteDataClick_" label="$i18n{cookiePageAllSitesLink}"
          role-description="$i18n{subpageArrowRoleDescription}">
 diff --git a/chrome/browser/resources/settings/privacy_page/cookies_page.ts b/chrome/browser/resources/settings/privacy_page/cookies_page.ts
-index fa70b79146429..549420b242558 100644
+index 55e4a4be4331c..cd2434575eb85 100644
 --- a/chrome/browser/resources/settings/privacy_page/cookies_page.ts
 +++ b/chrome/browser/resources/settings/privacy_page/cookies_page.ts
 @@ -23,6 +23,7 @@ import '../settings_page/settings_subpage.js';
@@ -404,10 +404,10 @@ index 0000000000000..d4c2ddde9d163
 +customElements.define(
 +  SettingsGpcToggleElement.is, SettingsGpcToggleElement);
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-index 6fcf7f35b7d9b..9ef1931a0f271 100644
+index 3cddab43196fb..96b05bd78b7a6 100644
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1063,6 +1063,12 @@ For example, some websites may respond to this request by showing you ads that a
+@@ -1076,6 +1076,12 @@ For example, some websites may respond to this request by showing you ads that a
        <message name="IDS_UNIVERSAL_OPT_OUT_INFO_TEXT" desc="Subtitle of a setting. It appears below the title: ‘Send an opt-out request to sites regarding use of your data’. Users choose whether they want to send a request to sites about how to treat their user data. This string explains that sites may not respond to the user’s request even when this toggle is on; and, even when they do respond, sites may handle opt-out requests differently based on regional laws. This string appears on its own subpage. The tone should be informative. Clicking on Learn more link opens a help center article, the link tag should not be translated but the 'learn more' text inside the link tag should be translated.">
          The sites you visit, including Google, are responsible for determining how they respond to this request. Depending on the laws in your region, sites may respond by limiting the sale and sharing of your data or its use for personalized ads. <ph name="BEGIN_LINK">&lt;link&gt;</ph>Learn more<ph name="END_LINK">&lt;/link&gt;</ph>
        </message>
@@ -421,7 +421,7 @@ index 6fcf7f35b7d9b..9ef1931a0f271 100644
          Access payment methods
        </message>
 diff --git a/chrome/browser/ui/prefs/pref_watcher.cc b/chrome/browser/ui/prefs/pref_watcher.cc
-index 01a8bcb7679ee..ebce2afab0d64 100644
+index 1974afa754a81..59a1c33c998cb 100644
 --- a/chrome/browser/ui/prefs/pref_watcher.cc
 +++ b/chrome/browser/ui/prefs/pref_watcher.cc
 @@ -24,6 +24,7 @@
@@ -432,19 +432,19 @@ index 01a8bcb7679ee..ebce2afab0d64 100644
  #include "components/universal_optout/prefs.h"
  #include "content/public/browser/browser_context.h"
  #include "extensions/buildflags/buildflags.h"
-@@ -155,6 +156,7 @@ PrefWatcher::PrefWatcher(Profile* profile) : profile_(profile) {
+@@ -156,6 +157,7 @@ PrefWatcher::PrefWatcher(Profile* profile) : profile_(profile) {
                                       renderer_callback);
    profile_pref_change_registrar_.Add(prefs::kEnableDoNotTrack,
                                       renderer_callback);
 +  profile_pref_change_registrar_.Add(prefs::kEnableGPC, renderer_callback);
    profile_pref_change_registrar_.Add(
        universal_optout::prefs::kUniversalOptOutEnabled, renderer_callback);
-   profile_pref_change_registrar_.Add(
+   profile_pref_change_registrar_.Add(autofill::prefs::kAutofillAtMemoryShortcut,
 diff --git a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-index 774e32188161b..b2fd73429e910 100644
+index 01763a850c07b..04b75b597409b 100644
 --- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
 +++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
-@@ -2578,6 +2578,11 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
+@@ -2627,6 +2627,11 @@ void AddPrivacyStrings(content::WebUIDataSource* html_source,
        {"doNotTrackDialogMessage", IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_TEXT},
        {"doNotTrackDialogLearnMoreA11yLabel",
         IDS_SETTINGS_ENABLE_DO_NOT_TRACK_DIALOG_LEARN_MORE_ACCESSIBILITY_LABEL},
@@ -469,10 +469,10 @@ index 3fad8a7681bca..ddd5171328e3c 100644
    registry->RegisterBooleanPref(prefs::kPrivacySandboxM1FledgeEnabled, false);
    registry->RegisterBooleanPref(prefs::kPrivacySandboxM1AdMeasurementEnabled,
 diff --git a/components/privacy_sandbox/privacy_sandbox_prefs.h b/components/privacy_sandbox/privacy_sandbox_prefs.h
-index d4708731fbc7e..fad0ca950f7b4 100644
+index 13ae1e0ea0320..36b4b5cb65829 100644
 --- a/components/privacy_sandbox/privacy_sandbox_prefs.h
 +++ b/components/privacy_sandbox/privacy_sandbox_prefs.h
-@@ -48,6 +48,8 @@ inline constexpr char
+@@ -47,6 +47,8 @@ inline constexpr char
  inline constexpr char kPrivacySandboxRelatedWebsiteSetsEnabled[] =
      "privacy_sandbox.first_party_sets_enabled";
  
@@ -496,7 +496,7 @@ index 01007b64935df..b2f4c0fe405ea 100644
    // this but it should be removed once we have a real setting to test.
    if (base::FeatureList::IsEnabled(features::kGlobalPrivacyControlForce)) {
 diff --git a/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc b/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc
-index 1401e99cb9e66..71173683a4cae 100644
+index 2855559ce5567..722d729f15415 100644
 --- a/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc
 +++ b/third_party/blink/common/renderer_preferences/renderer_preferences_mojom_traits.cc
 @@ -55,6 +55,7 @@ bool StructTraits<blink::mojom::RendererPreferencesDataView,
@@ -508,7 +508,7 @@ index 1401e99cb9e66..71173683a4cae 100644
  
    if (!data.ReadWebrtcIpHandlingPolicy(&out->webrtc_ip_handling_policy))
 diff --git a/third_party/blink/public/common/renderer_preferences/renderer_preferences.h b/third_party/blink/public/common/renderer_preferences/renderer_preferences.h
-index 336c8061e4251..67619f3ca7fe9 100644
+index 1d2053b4ca19d..957fd0f835b2b 100644
 --- a/third_party/blink/public/common/renderer_preferences/renderer_preferences.h
 +++ b/third_party/blink/public/common/renderer_preferences/renderer_preferences.h
 @@ -53,6 +53,7 @@ struct BLINK_COMMON_EXPORT RendererPreferences {
@@ -520,7 +520,7 @@ index 336c8061e4251..67619f3ca7fe9 100644
  #if BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_MAC) || \
      BUILDFLAG(IS_WIN)
 diff --git a/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h b/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h
-index d0279aa1ca308..ac5ccd40b576f 100644
+index 34defa989dfe2..16fae81cce158 100644
 --- a/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h
 +++ b/third_party/blink/public/common/renderer_preferences/renderer_preferences_mojom_traits.h
 @@ -125,6 +125,11 @@ struct BLINK_COMMON_EXPORT
@@ -536,7 +536,7 @@ index d0279aa1ca308..ac5ccd40b576f 100644
        const ::blink::RendererPreferences& data) {
      return data.enable_encrypted_media;
 diff --git a/third_party/blink/public/mojom/renderer_preferences.mojom b/third_party/blink/public/mojom/renderer_preferences.mojom
-index 026d009b9d728..daabb23d63a49 100644
+index c147ff6f38d3b..fa6b8b1eea795 100644
 --- a/third_party/blink/public/mojom/renderer_preferences.mojom
 +++ b/third_party/blink/public/mojom/renderer_preferences.mojom
 @@ -89,6 +89,8 @@ struct RendererPreferences {
@@ -549,10 +549,10 @@ index 026d009b9d728..daabb23d63a49 100644
    // the use of Clear Key key system which is always allowed as required by the
    // spec.
 diff --git a/third_party/blink/renderer/platform/runtime_enabled_features.json5 b/third_party/blink/renderer/platform/runtime_enabled_features.json5
-index b1d9c43f888b7..040fb591b9ad3 100644
+index 7dbe25340557c..347fc1661561d 100644
 --- a/third_party/blink/renderer/platform/runtime_enabled_features.json5
 +++ b/third_party/blink/renderer/platform/runtime_enabled_features.json5
-@@ -3421,6 +3421,7 @@
+@@ -3484,6 +3484,7 @@
      },
      {
        name: "GlobalPrivacyControl",

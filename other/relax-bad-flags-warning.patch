@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/startup/bad_flags_prompt.cc b/chrome/browser/ui/startup/bad_flags_prompt.cc
-index 75f26af3ddce3..81dc964fe24ec 100644
+index f212d0761b76b..02d8069ed0334 100644
 --- a/chrome/browser/ui/startup/bad_flags_prompt.cc
 +++ b/chrome/browser/ui/startup/bad_flags_prompt.cc
 @@ -1,4 +1,4 @@

@@ -1,5 +1,5 @@
 diff --git a/BUILD.gn b/BUILD.gn
-index 3c543f8e0cf..351c6fbd4df 100644
+index d136cdfb312..c0457a8bbb7 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -381,7 +381,14 @@ declare_args() {

@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
-index c7c218422c023..7433d1d63532d 100644
+index ee897b06f49c1..bfa157a1c2ba6 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
 @@ -4,6 +4,7 @@
@@ -10,20 +10,33 @@ index c7c218422c023..7433d1d63532d 100644
  #include "base/task/single_thread_task_runner.h"
  #include "build/build_config.h"
  #include "build/buildflag.h"
-@@ -583,7 +584,10 @@ void TabGroupHeaderView::OnDataChanged(
+@@ -533,7 +534,23 @@ void TabGroupHeaderView::OnDataChanged(
+ 
    UpdateIsCollapsed();
    UpdateAccessibleName();
- 
--  if (features::IsTabGroupHoverCardsEnabled()) {
+-  SetHoverCardDataFrom(tab_group_data);
 +  const bool tab_hover_cards_tooltip =
 +      base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
 +          "tab-hover-cards") == "tooltip";
-+  if (features::IsTabGroupHoverCardsEnabled() && !tab_hover_cards_tooltip) {
-     SetHoverCardDataFrom(tab_group_data);
-   } else {
-     UpdateTooltipText();
++  if (tab_hover_cards_tooltip) {
++    const std::u16string contents =
++        tab_groups::GetGroupContentString(&delegate_->GetTabGroup());
++    if (group_header_label_->GetText().empty()) {
++      SetTooltipText(l10n_util::GetStringFUTF16(
++          IDS_TAB_GROUPS_UNNAMED_GROUP_TOOLTIP, contents));
++    } else {
++      SetTooltipText(l10n_util::GetStringFUTF16(
++          IDS_TAB_GROUPS_NAMED_GROUP_TOOLTIP,
++          std::u16string(group_header_label_->GetText()), contents));
++    }
++  } else {
++    SetHoverCardDataFrom(tab_group_data);
++  }
+ }
+ 
+ void TabGroupHeaderView::OnTabCountChanged() {
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
-index 03bb87258a1d2..24ea6867e4fc0 100644
+index b1dd222cbccc3..5c30f124cb8b6 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
 @@ -54,6 +54,7 @@
@@ -34,7 +47,7 @@ index 03bb87258a1d2..24ea6867e4fc0 100644
  #include "chrome/browser/ui/views/tabs/tab/tab_close_button.h"
  #include "chrome/browser/ui/views/tabs/tab/tab_icon.h"
  #include "chrome/browser/ui/views/tabs/tab/tab_title.h"
-@@ -858,6 +859,16 @@ void TabView::PaintChildren(const views::PaintInfo& info) {
+@@ -892,6 +893,16 @@ void TabView::PaintChildren(const views::PaintInfo& info) {
    View::PaintChildren(info);
  }
  
@@ -95,10 +108,10 @@ index e9b830d6bc64b..a10a64ea4d428 100644
      anchor_target = nullptr;
      update_type = TabSlotController::HoverCardUpdateType::kAnimating;
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index 55ab248666cd5..fbdd313f1d232 100644
+index 1044fca32f0db..df2eee3d66879 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -1311,6 +1311,16 @@ float Tab::GetZValue() const {
+@@ -1330,6 +1330,16 @@ float Tab::GetZValue() const {
    return sort_value;
  }
  

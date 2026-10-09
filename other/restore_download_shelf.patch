@@ -1,8 +1,8 @@
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index b4d5eb8b8f8f7..4b0456d70ea54 100644
+index f5af58f1d4164..1205a11af160b 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -2327,6 +2327,10 @@ are declared in tools/grit/grit_args.gni.
+@@ -2323,6 +2323,10 @@ are declared in tools/grit/grit_args.gni.
           desc="Status that the file download will be opened when the download completes.">
          Opening when complete
        </message>
@@ -13,7 +13,7 @@ index b4d5eb8b8f8f7..4b0456d70ea54 100644
        <message name="IDS_DOWNLOAD_STATUS_IN_PROGRESS_SHORT" desc="Short status text that appears on unknown-sized downloads in progress.">
          In progress
        </message>
-@@ -2371,6 +2375,14 @@ are declared in tools/grit/grit_args.gni.
+@@ -2367,6 +2371,14 @@ are declared in tools/grit/grit_args.gni.
           desc="Message shown to the user to validate the download when the download content is classified as uncommon by safebrowsing. This variant is shown when the user is enrolled in the Advanced Protection program.">
          <ph name="FILE_NAME">$1<ex>bla.exe</ex></ph> was blocked by Advanced Protection.
        </message>
@@ -28,7 +28,7 @@ index b4d5eb8b8f8f7..4b0456d70ea54 100644
        <message name="IDS_PROMPT_DEEP_SCANNING_APP_DOWNLOAD"
          desc="Message shown in the download shelf when a download is being scanned for an Advanced Protection user">
          <ph name="FILE_NAME">$1<ex>bla.exe</ex></ph> is being scanned.
-@@ -2387,6 +2399,10 @@ are declared in tools/grit/grit_args.gni.
+@@ -2383,6 +2395,10 @@ are declared in tools/grit/grit_args.gni.
          desc="Message shown in the download shelf when a download is blocked for being encrypted">
          <ph name="FILE_NAME">$1<ex>bla.exe</ex></ph> is encrypted. Ask its owner to decrypt.
        </message>
@@ -39,7 +39,7 @@ index b4d5eb8b8f8f7..4b0456d70ea54 100644
        <message name="IDS_PROMPT_DOWNLOAD_SENSITIVE_CONTENT_WARNING"
          desc="Message shown in the download shelf when a download contains sensitive content, and the admin has chosen to warn the user">
          Your organization's policies aren't met
-@@ -2566,6 +2582,15 @@ are declared in tools/grit/grit_args.gni.
+@@ -2568,6 +2584,15 @@ are declared in tools/grit/grit_args.gni.
        <message name="IDS_DOWNLOAD_NO_DOWNLOADS" desc="A message shown when the user has no downloads to show on chrome://downloads.">
          Files you download appear here
        </message>
@@ -55,7 +55,7 @@ index b4d5eb8b8f8f7..4b0456d70ea54 100644
        <message name="IDS_DOWNLOAD_LINK_RESUME"
                 desc="In the download view, 'Resume' link text">
          Resume
-@@ -18722,6 +18747,37 @@ Please help our engineers fix this problem. Tell us what happened right before y
+@@ -18846,6 +18871,37 @@ Please help our engineers fix this problem. Tell us what happened right before y
        Data Sharing
      </message>
  
@@ -94,7 +94,7 @@ index b4d5eb8b8f8f7..4b0456d70ea54 100644
      <message name="IDS_SETTINGS_SAFEBROWSING_ENHANCED_IPH_BUBBLE_TEXT" desc="The text on an In-Product-Help bubble that is shown when a user navigates to the security settings page from an ESB promotion">
        Get more protection against dangerous websites and downloads
 diff --git a/chrome/browser/download/BUILD.gn b/chrome/browser/download/BUILD.gn
-index b87596ee9b91b..7f119b299b5b9 100644
+index fb1b41b07ca52..186042980d4c2 100644
 --- a/chrome/browser/download/BUILD.gn
 +++ b/chrome/browser/download/BUILD.gn
 @@ -115,6 +115,7 @@ source_set("download") {
@@ -142,7 +142,7 @@ index e1ad7a503c462..39665e7a134e2 100644
    // bubble and the toolbar icon.
    return DownloadCoreServiceFactory::GetForBrowserContext(
 diff --git a/chrome/browser/download/download_item_model.cc b/chrome/browser/download/download_item_model.cc
-index 723fe06b68cb4..8872d574ed7bf 100644
+index 2fef2ce8518fe..ce3897b62e3e0 100644
 --- a/chrome/browser/download/download_item_model.cc
 +++ b/chrome/browser/download/download_item_model.cc
 @@ -378,6 +378,42 @@ bool DownloadItemModel::IsInsecure() const {
@@ -189,7 +189,7 @@ index 723fe06b68cb4..8872d574ed7bf 100644
    return !download_->IsSavePackageDownload() &&
           !download_crx_util::IsTrustedExtensionDownload(profile(), *download_);
 diff --git a/chrome/browser/download/download_item_model.h b/chrome/browser/download/download_item_model.h
-index 1d2991027512b..3d597213deb87 100644
+index 63fc080e40ada..2d09c2303c832 100644
 --- a/chrome/browser/download/download_item_model.h
 +++ b/chrome/browser/download/download_item_model.h
 @@ -42,8 +42,6 @@ class DownloadItemModel : public DownloadUIModel,
@@ -614,10 +614,10 @@ index 03528cc8b0b39..dc4287fc35dd4 100644
    }
  #endif  // BUILDFLAG(IS_ANDROID)
 diff --git a/chrome/browser/download/download_ui_model.cc b/chrome/browser/download/download_ui_model.cc
-index 5fd2326b92df7..715c3840a6dbf 100644
+index fe9306f5618ab..1a738c9c0cdf9 100644
 --- a/chrome/browser/download/download_ui_model.cc
 +++ b/chrome/browser/download/download_ui_model.cc
-@@ -159,6 +159,9 @@ std::u16string FailStateDescription(FailState fail_state) {
+@@ -160,6 +160,9 @@ std::u16string FailStateDescription(FailState fail_state) {
  
  }  // namespace
  
@@ -627,7 +627,7 @@ index 5fd2326b92df7..715c3840a6dbf 100644
  DownloadUIModel::DownloadUIModel(
      std::unique_ptr<StatusTextBuilderBase> status_text_builder)
      : status_text_builder_(std::move(status_text_builder)) {
-@@ -429,6 +432,10 @@ bool DownloadUIModel::IsInsecure() const {
+@@ -430,6 +433,10 @@ bool DownloadUIModel::IsInsecure() const {
    return false;
  }
  
@@ -639,7 +639,7 @@ index 5fd2326b92df7..715c3840a6dbf 100644
    return true;
  }
 diff --git a/chrome/browser/download/download_ui_model.h b/chrome/browser/download/download_ui_model.h
-index a0b2eef645615..92a50d1c47941 100644
+index 329662b4db07a..8251fe162b848 100644
 --- a/chrome/browser/download/download_ui_model.h
 +++ b/chrome/browser/download/download_ui_model.h
 @@ -76,10 +76,6 @@ class DownloadUIModel {
@@ -683,10 +683,10 @@ index a0b2eef645615..92a50d1c47941 100644
    // towards the UI) should be displayed for this download.
    // Downloads that were initiated via "Save As" or are extension installs don't
 diff --git a/chrome/browser/download/offline_item_model.cc b/chrome/browser/download/offline_item_model.cc
-index e9172dd0377b8..97d9fdb6a3fd6 100644
+index 600df0c708f32..07d4275dde418 100644
 --- a/chrome/browser/download/offline_item_model.cc
 +++ b/chrome/browser/download/offline_item_model.cc
-@@ -265,6 +265,11 @@ GURL OfflineItemModel::GetURL() const {
+@@ -267,6 +267,11 @@ GURL OfflineItemModel::GetURL() const {
    return offline_item_ ? offline_item_->url : GURL();
  }
  
@@ -699,7 +699,7 @@ index e9172dd0377b8..97d9fdb6a3fd6 100644
    Profile* profile = Profile::FromBrowserContext(manager_->browser_context());
    offline_items_collection::OfflineContentAggregator* aggregator =
 diff --git a/chrome/browser/download/offline_item_model.h b/chrome/browser/download/offline_item_model.h
-index 943809d5fc11e..e802e7c5f8b94 100644
+index c574d3e325731..b1273b922be60 100644
 --- a/chrome/browser/download/offline_item_model.h
 +++ b/chrome/browser/download/offline_item_model.h
 @@ -79,6 +79,7 @@ class OfflineItemModel : public DownloadUIModel,
@@ -711,7 +711,7 @@ index 943809d5fc11e..e802e7c5f8b94 100644
    GURL GetOriginalURL() const override;
    bool ShouldPromoteOrigin() const override;
 diff --git a/chrome/browser/extensions/api/downloads/downloads_api.cc b/chrome/browser/extensions/api/downloads/downloads_api.cc
-index f49f09595a772..c4fddbfa204d6 100644
+index 778884804cf66..09dd3ed57a9c0 100644
 --- a/chrome/browser/extensions/api/downloads/downloads_api.cc
 +++ b/chrome/browser/extensions/api/downloads/downloads_api.cc
 @@ -43,6 +43,7 @@
@@ -722,20 +722,20 @@ index f49f09595a772..c4fddbfa204d6 100644
  #include "chrome/browser/download/download_stats.h"
  #include "chrome/browser/download/download_ui_safe_browsing_util.h"
  #include "chrome/browser/extensions/api/downloads/download_extension_errors.h"
-@@ -1758,6 +1759,8 @@ ExtensionFunction::ResponseAction DownloadsSetShelfEnabledFunction::Run() {
+@@ -1759,6 +1760,8 @@ ExtensionFunction::ResponseAction DownloadsSetShelfEnabledFunction::Run() {
      BrowserWindow* browser_window = BrowserWindow::FromBrowser(browser);
-     if (browser_window->GetDownloadBubbleUIController()) {
+     if (browser_window && browser_window->GetDownloadBubbleUIController()) {
        browser_window->GetDownloadBubbleUIController()->HideDownloadUi();
-+    } else if (browser_window->IsDownloadShelfVisible()) {
++    } else if (browser_window && browser_window->IsDownloadShelfVisible()) {
 +      browser_window->GetDownloadShelf()->Close();
      }
  #endif
    }
-@@ -1809,6 +1812,8 @@ ExtensionFunction::ResponseAction DownloadsSetUiOptionsFunction::Run() {
+@@ -1810,6 +1813,8 @@ ExtensionFunction::ResponseAction DownloadsSetUiOptionsFunction::Run() {
      BrowserWindow* browser_window = BrowserWindow::FromBrowser(browser);
-     if (browser_window->GetDownloadBubbleUIController()) {
+     if (browser_window && browser_window->GetDownloadBubbleUIController()) {
        browser_window->GetDownloadBubbleUIController()->HideDownloadUi();
-+    } else if (browser_window->IsDownloadShelfVisible()) {
++    } else if (browser_window && browser_window->IsDownloadShelfVisible()) {
 +      browser_window->GetDownloadShelf()->Close();
      }
  #endif
@@ -782,7 +782,7 @@ index f4ec15cb56fc7..f44f7822ade83 100644
    // Updates the loading state for the window and tabstrip.
    void UpdateWindowForLoadingStateChanged(content::WebContents* source,
 diff --git a/chrome/browser/ui/browser_window.h b/chrome/browser/ui/browser_window.h
-index c15b1d0de3cbb..097aec214e4e6 100644
+index 6e4b4388d9079..de4dcdc59a1d4 100644
 --- a/chrome/browser/ui/browser_window.h
 +++ b/chrome/browser/ui/browser_window.h
 @@ -35,6 +35,7 @@
@@ -793,7 +793,7 @@ index c15b1d0de3cbb..097aec214e4e6 100644
  class ExclusiveAccessContext;
  class FindBar;
  class GURL;
-@@ -73,6 +74,10 @@ class NativeTheme;
+@@ -74,6 +75,10 @@ class NativeTheme;
  class ThemeProvider;
  }  // namespace ui
  
@@ -804,7 +804,7 @@ index c15b1d0de3cbb..097aec214e4e6 100644
  namespace web_modal {
  class WebContentsModalDialogHost;
  }
-@@ -367,6 +372,19 @@ class BrowserWindow : public ui::BaseWindow {
+@@ -374,6 +379,19 @@ class BrowserWindow : public ui::BaseWindow {
        translate::TranslateErrors error_type,
        bool is_user_gesture) = 0;
  
@@ -825,7 +825,7 @@ index c15b1d0de3cbb..097aec214e4e6 100644
    // UI is not enabled, or if the download toolbar button does not exist.
    virtual DownloadBubbleUIController* GetDownloadBubbleUIController() = 0;
 diff --git a/chrome/browser/ui/chrome_pages.cc b/chrome/browser/ui/chrome_pages.cc
-index 7d078c2241af9..c92b78bef7b39 100644
+index e70ee6412075f..b12af12e2f0ec 100644
 --- a/chrome/browser/ui/chrome_pages.cc
 +++ b/chrome/browser/ui/chrome_pages.cc
 @@ -24,6 +24,7 @@
@@ -847,7 +847,7 @@ index 7d078c2241af9..c92b78bef7b39 100644
    ShowSingletonTabOverwritingNTP(browser, GURL(kChromeUIDownloadsURL));
  }
 diff --git a/chrome/browser/ui/color/chrome_color_id.h b/chrome/browser/ui/color/chrome_color_id.h
-index b7075255c509e..d656b59229fdf 100644
+index 7d82223c05645..e77121e828ba7 100644
 --- a/chrome/browser/ui/color/chrome_color_id.h
 +++ b/chrome/browser/ui/color/chrome_color_id.h
 @@ -160,16 +160,32 @@
@@ -885,10 +885,10 @@ index b7075255c509e..d656b59229fdf 100644
    E_CPONLY(kColorDownloadToolbarButtonAnimationBackground) \
    E_CPONLY(kColorDownloadToolbarButtonAnimationForeground) \
 diff --git a/chrome/browser/ui/color/chrome_color_mixer.cc b/chrome/browser/ui/color/chrome_color_mixer.cc
-index 8f06e8bbe7f69..420f5c778be06 100644
+index 83b4662b70fe4..53a0762949575 100644
 --- a/chrome/browser/ui/color/chrome_color_mixer.cc
 +++ b/chrome/browser/ui/color/chrome_color_mixer.cc
-@@ -431,10 +431,38 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
+@@ -439,10 +439,38 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
    mixer[kColorCastDialogHelpIcon] = {ui::kColorAccent};
    mixer[kColorDesktopMediaTabListBorder] = {ui::kColorMidground};
    mixer[kColorDesktopMediaTabListPreviewBackground] = {ui::kColorMidground};
@@ -927,7 +927,7 @@ index 8f06e8bbe7f69..420f5c778be06 100644
    mixer[kColorDownloadToolbarButtonActive] =
        ui::PickGoogleColor(ui::kColorThrobber, kColorToolbar,
                            color_utils::kMinimumVisibleContrastRatio);
-@@ -1206,6 +1234,8 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
+@@ -1217,6 +1245,8 @@ void AddChromeColorMixer(ui::ColorProvider* provider,
    if (!ShouldApplyHighContrastColors(key)) {
      return;
    }
@@ -950,10 +950,10 @@ index 81a7f6dbc87b4..521c1f976dba3 100644
    mixer[kColorInfoBarContentAreaSeparator] = {
        kColorToolbarContentAreaSeparator};
 diff --git a/chrome/browser/ui/color/material_chrome_color_mixer.cc b/chrome/browser/ui/color/material_chrome_color_mixer.cc
-index ec406e6d78796..530f66fb87987 100644
+index 6499a97f2d3a9..849d8842ecafb 100644
 --- a/chrome/browser/ui/color/material_chrome_color_mixer.cc
 +++ b/chrome/browser/ui/color/material_chrome_color_mixer.cc
-@@ -126,7 +126,8 @@ void AddMaterialChromeColorMixer(ui::ColorProvider* provider,
+@@ -127,7 +127,8 @@ void AddMaterialChromeColorMixer(ui::ColorProvider* provider,
    mixer[kColorDownloadToolbarButtonRingBackground] = {
        ui::kColorSysNeutralOutline};
    mixer[kColorDownloadToolbarButtonAnimationForeground] =
@@ -963,7 +963,7 @@ index ec406e6d78796..530f66fb87987 100644
  
    // Download History WebUI colors.
    mixer[kColorDownloadManagerItemError] = {ui::kColorSysError};
-@@ -430,10 +431,24 @@ void AddMaterialChromeColorMixer(ui::ColorProvider* provider,
+@@ -439,10 +440,24 @@ void AddMaterialChromeColorMixer(ui::ColorProvider* provider,
    mixer[kColorBookmarkDragImageBackground] = {ui::kColorSysPrimary};
    mixer[kColorBookmarkFolderIcon] = {kColorBookmarkBarForeground};
    mixer[kColorCapturedTabContentsBorder] = {ui::kColorSysPrimary};
@@ -989,10 +989,10 @@ index ec406e6d78796..530f66fb87987 100644
        ui::kColorSysNeutralContainer};
    mixer[kColorFindBarBackground] = {ui::kColorSysSurface};
 diff --git a/chrome/browser/ui/color/win/native_chrome_color_mixer_win.cc b/chrome/browser/ui/color/win/native_chrome_color_mixer_win.cc
-index 0552379dd864d..15cd42cf526f6 100644
+index a494a6fb24d43..3047b2a72d4f7 100644
 --- a/chrome/browser/ui/color/win/native_chrome_color_mixer_win.cc
 +++ b/chrome/browser/ui/color/win/native_chrome_color_mixer_win.cc
-@@ -137,6 +137,8 @@ ui::ColorTransform GetCaptionForegroundColor(
+@@ -148,6 +148,8 @@ ui::ColorTransform GetCaptionForegroundColor(
  }
  
  void AddNativeHighContrastColors(ui::ColorMixer& mixer) {
@@ -1163,10 +1163,10 @@ index 59704fdcb337e..3f8193e68a148 100644
      default:
        return default_height;
 diff --git a/chrome/browser/ui/views/download/BUILD.gn b/chrome/browser/ui/views/download/BUILD.gn
-index 0f3d97ac4cdd8..4bdf283a626de 100644
+index ea3c5cf3ebe5d..0da9e58065ac2 100644
 --- a/chrome/browser/ui/views/download/BUILD.gn
 +++ b/chrome/browser/ui/views/download/BUILD.gn
-@@ -65,6 +65,13 @@ source_set("download") {
+@@ -67,6 +67,13 @@ source_set("download") {
        "bubble/download_dialog_view.h",
        "bubble/download_toolbar_ui_controller.cc",
        "bubble/download_toolbar_ui_controller.h",
@@ -3601,7 +3601,7 @@ index 8354a9179ef79..6f8ef3cb45033 100644
  
    if (WindowFeatureController::From(GetBrowserView()->browser())
 diff --git a/chrome/browser/ui/views/frame/browser_view.cc b/chrome/browser/ui/views/frame/browser_view.cc
-index 90617107340ad..b0f34c344e5eb 100644
+index b68f089aebf83..9f18ee0b12bcf 100644
 --- a/chrome/browser/ui/views/frame/browser_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_view.cc
 @@ -42,6 +42,7 @@
@@ -3612,7 +3612,7 @@ index 90617107340ad..b0f34c344e5eb 100644
  #include "chrome/browser/browsing_data/browsing_data_important_sites_util.h"
  #include "chrome/browser/desktop_to_mobile_promos/promos_utils.h"
  #include "chrome/browser/devtools/devtools_ui_controller.h"
-@@ -87,6 +88,7 @@
+@@ -85,6 +86,7 @@
  #include "chrome/browser/ui/browser_element_identifiers.h"
  #include "chrome/browser/ui/browser_init_state.h"
  #include "chrome/browser/ui/browser_tabstrip.h"
@@ -3628,7 +3628,7 @@ index 90617107340ad..b0f34c344e5eb 100644
  #include "chrome/browser/ui/views/exclusive_access/exclusive_access_bubble_views.h"
  #include "chrome/browser/ui/views/exclusive_access/exclusive_access_bubble_views_context.h"
  #include "chrome/browser/ui/views/extensions/extension_keybinding_registry_views.h"
-@@ -1128,6 +1131,7 @@ BrowserView::~BrowserView() {
+@@ -1145,6 +1148,7 @@ BrowserView::~BrowserView() {
    toolbar_ = nullptr;
    top_container_separator_ = nullptr;
    find_bar_host_view_ = nullptr;
@@ -3636,7 +3636,7 @@ index 90617107340ad..b0f34c344e5eb 100644
    infobar_container_ = nullptr;
    multi_contents_view_ = nullptr;
    main_shadow_overlay_ = nullptr;
-@@ -1199,6 +1203,10 @@ BrowserView* BrowserView::GetBrowserViewForBrowser(
+@@ -1216,6 +1220,10 @@ BrowserView* BrowserView::GetBrowserViewForBrowser(
    return GetBrowserViewForNativeWindow(browser->GetWindow()->GetNativeWindow());
  }
  
@@ -3647,7 +3647,7 @@ index 90617107340ad..b0f34c344e5eb 100644
  // static
  void BrowserView::SetDisableRevealerDelayForTesting(bool disable) {
    g_disable_revealer_delay_for_testing = disable;
-@@ -3148,6 +3156,50 @@ ShowTranslateBubbleResult BrowserView::ShowTranslateBubble(
+@@ -3172,6 +3180,50 @@ ShowTranslateBubbleResult BrowserView::ShowTranslateBubble(
    return ShowTranslateBubbleResult::kSuccess;
  }
  
@@ -3698,7 +3698,7 @@ index 90617107340ad..b0f34c344e5eb 100644
  DownloadBubbleUIController* BrowserView::GetDownloadBubbleUIController() {
  #if !BUILDFLAG(IS_CHROMEOS)
    if (auto* download_controller =
-@@ -3878,6 +3930,14 @@ void BrowserView::EnsureFocusOrder() {
+@@ -3905,6 +3957,14 @@ void BrowserView::EnsureFocusOrder() {
      infobar_container_->InsertAfterInFocusList(top_container_);
    }
  
@@ -3713,7 +3713,7 @@ index 90617107340ad..b0f34c344e5eb 100644
  #if DCHECK_IS_ON()
    // Make sure we didn't create any cycles in the focus order.
    CheckFocusListForCycles(top_container_);
-@@ -4497,6 +4557,9 @@ void BrowserView::GetAccessiblePanes(std::vector<views::View*>* panes) {
+@@ -4524,6 +4584,9 @@ void BrowserView::GetAccessiblePanes(std::vector<views::View*>* panes) {
    if (side_panel_) {
      panes->push_back(side_panel_);
    }
@@ -3723,7 +3723,7 @@ index 90617107340ad..b0f34c344e5eb 100644
    for (views::View* pane : multi_contents_view_->GetAccessiblePanes()) {
      panes->push_back(pane);
    }
-@@ -5363,7 +5426,7 @@ bool BrowserView::MaybeShowBookmarkBar(WebContents* contents) {
+@@ -5400,7 +5463,7 @@ bool BrowserView::MaybeShowBookmarkBar(WebContents* contents) {
  
  bool BrowserView::MaybeShowInfoBar(WebContents* contents) {
    // TODO(beng): Remove this function once the interface between
@@ -3732,7 +3732,7 @@ index 90617107340ad..b0f34c344e5eb 100644
    //             view is sorted out.
    return true;
  }
-@@ -5958,6 +6021,23 @@ Profile* BrowserView::GetProfile() const {
+@@ -6009,6 +6072,23 @@ Profile* BrowserView::GetProfile() const {
    return browser_->GetProfile();
  }
  
@@ -3753,14 +3753,14 @@ index 90617107340ad..b0f34c344e5eb 100644
 +  }
 +}
 +
- ///////////////////////////////////////////////////////////////////////////////
- // BrowserView, ImmersiveModeController::Observer implementation:
- void BrowserView::OnImmersiveFullscreenEntered() {
+ void BrowserView::OnGlobalErrorsChanged() {
+   if (auto* provider = toolbar_button_provider()) {
+     if (auto* control = provider->GetAppMenuControl()) {
 diff --git a/chrome/browser/ui/views/frame/browser_view.h b/chrome/browser/ui/views/frame/browser_view.h
-index fa0df1178d6e2..2235b9ddd57a3 100644
+index 6c4807bbaaf0a..b3b3a400a5b44 100644
 --- a/chrome/browser/ui/views/frame/browser_view.h
 +++ b/chrome/browser/ui/views/frame/browser_view.h
-@@ -190,6 +190,8 @@ class BrowserView : public BrowserWindow,
+@@ -194,6 +194,8 @@ class BrowserView : public BrowserWindow,
      return top_controls_slide_controller_.get();
    }
  
@@ -3769,7 +3769,7 @@ index fa0df1178d6e2..2235b9ddd57a3 100644
    // Returns the constraining bounding box that should be used to lay out the
    // FindBar within. This is _not_ the size of the find bar, just the bounding
    // box it should be laid out within. The coordinate system of the returned
-@@ -589,6 +591,12 @@ class BrowserView : public BrowserWindow,
+@@ -592,6 +594,12 @@ class BrowserView : public BrowserWindow,
        translate::TranslateErrors error_type,
        bool is_user_gesture) override;
  
@@ -3782,7 +3782,7 @@ index fa0df1178d6e2..2235b9ddd57a3 100644
    DownloadBubbleUIController* GetDownloadBubbleUIController() override;
    void ConfirmBrowserCloseWithPendingDownloads(
        int download_count,
-@@ -621,6 +629,8 @@ class BrowserView : public BrowserWindow,
+@@ -624,6 +632,8 @@ class BrowserView : public BrowserWindow,
    ExclusiveAccessContext* GetExclusiveAccessContext() override;
    std::string GetWorkspace() const override;
    bool IsVisibleOnAllWorkspaces() const override;
@@ -3791,7 +3791,7 @@ index fa0df1178d6e2..2235b9ddd57a3 100644
  
    void ShowEmojiPanel() override;
    void ShowCaretBrowsingDialog() override;
-@@ -926,8 +936,8 @@ class BrowserView : public BrowserWindow,
+@@ -932,8 +942,8 @@ class BrowserView : public BrowserWindow,
    // updated and needs a layout.
    bool MaybeUpdateDevtools(content::WebContents* contents);
  
@@ -3802,7 +3802,7 @@ index fa0df1178d6e2..2235b9ddd57a3 100644
    // |contents|. |contents| can be null. In this case, all optional UI will be
    // removed.
    void UpdateUIForContents(content::WebContents* contents,
-@@ -1125,6 +1135,8 @@ class BrowserView : public BrowserWindow,
+@@ -1131,6 +1141,8 @@ class BrowserView : public BrowserWindow,
    // |------------------------------------------------------------------------|
    // | SidePanel (side_panel_)                                                |
    // |------------------------------------------------------------------------|
@@ -3811,7 +3811,7 @@ index fa0df1178d6e2..2235b9ddd57a3 100644
  
    // The view that draws the background the main_container and
    // side_panel are displayed on.
-@@ -1213,6 +1225,9 @@ class BrowserView : public BrowserWindow,
+@@ -1219,6 +1231,9 @@ class BrowserView : public BrowserWindow,
    // NativeView.
    raw_ptr<View> find_bar_host_view_ = nullptr;
  
@@ -3921,12 +3921,12 @@ index a44e84e3d40ec..b68e8c88ef555 100644
    CHECK(IsParentedToAndVisible(views().multi_contents_view,
                                 views().browser_view));
 diff --git a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
-index 29dfbde914c55..3d95cccfc667d 100644
+index 389c6f8c6e667..f03c63edb856f 100644
 --- a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
 +++ b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
-@@ -1146,6 +1146,9 @@ BrowserViewTabbedLayoutImpl::CalculateProposedLayout(
-   views().multi_contents_view->SetIsAnimatingContent(
-       side_panel_is_animating || vertical_tab_strip_animation.current_motion);
+@@ -1174,6 +1174,9 @@ BrowserViewTabbedLayoutImpl::CalculateProposedLayout(
+       side_panel_is_animating || vertical_tab_strip_animation.current_motion,
+       is_origin_changing);
  
 +  params.visual_client_area =
 +      LayoutDownloadShelf(layout, params.visual_client_area);
@@ -3935,7 +3935,7 @@ index 29dfbde914c55..3d95cccfc667d 100644
    // contents view when multi-contents are enabled. The checks here are to
    // force the logic to be updated when multi-contents is fully rolled-out.
 diff --git a/chrome/browser/ui/views/safe_browsing/BUILD.gn b/chrome/browser/ui/views/safe_browsing/BUILD.gn
-index fd6d7f754038e..5d5b17eafb423 100644
+index 3a713e16ff583..7b8f5923151b0 100644
 --- a/chrome/browser/ui/views/safe_browsing/BUILD.gn
 +++ b/chrome/browser/ui/views/safe_browsing/BUILD.gn
 @@ -14,13 +14,17 @@ assert(toolkit_views)
@@ -4336,10 +4336,10 @@ index 5168c9112656d..1dfe683078ff7 100644
    // change size immediately, with no hover.
    bool is_expanded_ = false;
 diff --git a/chrome/browser/ui/webui_browser/webui_browser_window.cc b/chrome/browser/ui/webui_browser/webui_browser_window.cc
-index 0a49a8ec67d5d..466e435b4ce14 100644
+index f83d1974094c1..3d051fe7c8950 100644
 --- a/chrome/browser/ui/webui_browser/webui_browser_window.cc
 +++ b/chrome/browser/ui/webui_browser/webui_browser_window.cc
-@@ -976,6 +976,21 @@ ShowTranslateBubbleResult WebUIBrowserWindow::ShowTranslateBubble(
+@@ -980,6 +980,21 @@ ShowTranslateBubbleResult WebUIBrowserWindow::ShowTranslateBubble(
    return ShowTranslateBubbleResult::kBrowserWindowNotValid;
  }
  
@@ -4362,10 +4362,10 @@ index 0a49a8ec67d5d..466e435b4ce14 100644
  WebUIBrowserWindow::GetDownloadBubbleUIController() {
    NOTIMPLEMENTED_LOG_ONCE();
 diff --git a/chrome/browser/ui/webui_browser/webui_browser_window.h b/chrome/browser/ui/webui_browser/webui_browser_window.h
-index 0e493cc3cff54..50034529ac5d9 100644
+index b7120f4f734f6..eee424545f082 100644
 --- a/chrome/browser/ui/webui_browser/webui_browser_window.h
 +++ b/chrome/browser/ui/webui_browser/webui_browser_window.h
-@@ -129,7 +129,10 @@ class WebUIBrowserWindow : public BrowserWindow,
+@@ -130,7 +130,10 @@ class WebUIBrowserWindow : public BrowserWindow,
        const std::string& target_language,
        translate::TranslateErrors error_type,
        bool is_user_gesture) override;
@@ -4378,7 +4378,7 @@ index 0e493cc3cff54..50034529ac5d9 100644
    void ConfirmBrowserCloseWithPendingDownloads(
        int download_count,
 diff --git a/ui/base/ui_base_features.cc b/ui/base/ui_base_features.cc
-index 424fbbd5abb85..c38a54f4b290d 100644
+index 6092850e1d9d3..335c26d0badc2 100644
 --- a/ui/base/ui_base_features.cc
 +++ b/ui/base/ui_base_features.cc
 @@ -431,6 +431,14 @@ bool EnableRestoreTabButton() {
@@ -4397,7 +4397,7 @@ index 424fbbd5abb85..c38a54f4b290d 100644
  BASE_FEATURE(kUseGammaContrastRegistrySettings,
               base::FEATURE_ENABLED_BY_DEFAULT);
 diff --git a/ui/base/ui_base_features.h b/ui/base/ui_base_features.h
-index 8bdfb5d1349d4..7f627fb70f208 100644
+index 1e7f0fa23e213..393b5f7fd66f6 100644
 --- a/ui/base/ui_base_features.h
 +++ b/ui/base/ui_base_features.h
 @@ -258,6 +258,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES) bool EnableRestoreTabButton();

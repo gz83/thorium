@@ -1,5 +1,5 @@
 diff --git a/media/base/media_switches.cc b/media/base/media_switches.cc
-index 3f75c218a35f4..e4f1056ead212 100644
+index 9e219d53cad36..f2f35bfb40eb8 100644
 --- a/media/base/media_switches.cc
 +++ b/media/base/media_switches.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 3f75c218a35f4..e4f1056ead212 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -392,6 +392,7 @@ BASE_FEATURE(kAutoPictureInPictureSurveys, base::FEATURE_DISABLED_BY_DEFAULT);
+@@ -386,6 +386,7 @@ BASE_FEATURE(kAutoPictureInPictureSurveys, base::FEATURE_DISABLED_BY_DEFAULT);
  BASE_FEATURE(kAutoplayBypassForMicCamera, base::FEATURE_ENABLED_BY_DEFAULT);
  
  // Whether we should show a setting to disable autoplay policy.
@@ -16,7 +16,7 @@ index 3f75c218a35f4..e4f1056ead212 100644
  BASE_FEATURE(kAutoplayDisableSettings, base::FEATURE_DISABLED_BY_DEFAULT);
  
  // Enables the Enterprise Autoplay policies (AutoplayAllowed and
-@@ -551,7 +552,7 @@ BASE_FEATURE(kDocumentPictureInPictureReparenting,
+@@ -549,7 +550,7 @@ BASE_FEATURE(kDocumentPictureInPictureReparenting,
  BASE_FEATURE(kEnableRtcpReporting, base::FEATURE_ENABLED_BY_DEFAULT);
  
  // Enables user control over muting tab audio from the tab strip.
@@ -25,7 +25,7 @@ index 3f75c218a35f4..e4f1056ead212 100644
  
  // Enables tracking the occlusion of HW secure encrypted video elements.
  // The HW secure check is OS agnostic, but this switch is currently only
-@@ -1186,7 +1187,7 @@ BASE_FEATURE(kOpenH264SoftwareEncoder, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -1199,7 +1200,7 @@ BASE_FEATURE(kOpenH264SoftwareEncoder, base::FEATURE_ENABLED_BY_DEFAULT);
  // Otherwise, this feature has no effect and neither encrypted nor clear Dolby
  // Vision is allowed.
  BASE_FEATURE(kAllowClearDolbyVisionInMseWhenPlatformEncryptedDvEnabled,
@@ -34,7 +34,7 @@ index 3f75c218a35f4..e4f1056ead212 100644
  
  // Enables clear Dolby Vision playback through a pure MFT processor in the GPU
  // process, working together with the D3D11 video decoder.
-@@ -1199,7 +1200,7 @@ BASE_FEATURE(kPlatformEncryptedDolbyVision,
+@@ -1212,7 +1213,7 @@ BASE_FEATURE(kPlatformEncryptedDolbyVision,
  #if BUILDFLAG(IS_WIN)
               base::FEATURE_ENABLED_BY_DEFAULT
  #else
@@ -43,7 +43,7 @@ index 3f75c218a35f4..e4f1056ead212 100644
  #endif
  );
  
-@@ -1759,7 +1760,9 @@ std::string GetEffectiveAutoplayPolicy(const base::CommandLine& command_line) {
+@@ -1782,7 +1783,9 @@ std::string GetEffectiveAutoplayPolicy(const base::CommandLine& command_line) {
      return command_line.GetSwitchValueASCII(switches::kAutoplayPolicy);
    }
  

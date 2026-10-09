@@ -1,5 +1,5 @@
 diff --git a/build/install-build-deps.py b/build/install-build-deps.py
-index 27fe9bb8d37d2..2de5a4749473a 100755
+index 1da10c63f8c08..0c2aaa7552d15 100755
 --- a/build/install-build-deps.py
 +++ b/build/install-build-deps.py
 @@ -1,6 +1,6 @@
@@ -18,7 +18,7 @@ index 27fe9bb8d37d2..2de5a4749473a 100755
          "autoconf",
          "binutils",
          "bison",
-@@ -256,6 +257,7 @@ def dev_list():
+@@ -257,6 +258,7 @@ def dev_list():
          "flex",
          "git-core",
          "gperf",
@@ -26,7 +26,7 @@ index 27fe9bb8d37d2..2de5a4749473a 100755
          "libasound2-dev",
          "libatspi2.0-dev",
          "libbrlapi-dev",
-@@ -297,15 +299,18 @@ def dev_list():
+@@ -298,15 +300,18 @@ def dev_list():
          "lighttpd",
          "locales",
          "openbox",
@@ -45,7 +45,7 @@ index 27fe9bb8d37d2..2de5a4749473a 100755
          "x11-utils",
          "xcompmgr",
          "xz-utils",
-@@ -411,12 +416,14 @@ def lib_list():
+@@ -412,12 +417,14 @@ def lib_list():
          "libpango-1.0-0",
          "libpangocairo-1.0-0",
          "libpci3",
@@ -60,7 +60,7 @@ index 27fe9bb8d37d2..2de5a4749473a 100755
          "libx11-6",
          "libx11-xcb1",
          "libxau6",
-@@ -532,6 +539,7 @@ def lib32_list(options):
+@@ -533,6 +540,7 @@ def lib32_list(options):
          "zlib1g:i386",
          # 32-bit libraries needed e.g. to compile V8 snapshot for Android or armhf
          "linux-libc-dev:i386",
@@ -68,7 +68,7 @@ index 27fe9bb8d37d2..2de5a4749473a 100755
          "libexpat1:i386",
          "libpci3:i386",
      ]
-@@ -736,7 +744,9 @@ def arm_list(options):
+@@ -737,7 +745,9 @@ def arm_list(options):
          "g++-arm-linux-gnueabihf",
          "gcc-arm-linux-gnueabihf",
          "libc6-dev-armhf-cross",

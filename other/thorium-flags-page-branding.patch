@@ -1,5 +1,5 @@
 diff --git a/components/webui/flags/resources/app.css b/components/webui/flags/resources/app.css
-index 9e7cfc8d38a49..822b2917fc229 100644
+index 1e42b9bb58eff..bfb59bcced0d5 100644
 --- a/components/webui/flags/resources/app.css
 +++ b/components/webui/flags/resources/app.css
 @@ -70,6 +70,20 @@
@@ -33,7 +33,7 @@ index 9e7cfc8d38a49..822b2917fc229 100644
    transform: translateY(300px);
    transition: all 225ms var(--ease-in-out);
 diff --git a/components/webui/flags/resources/app.html.ts b/components/webui/flags/resources/app.html.ts
-index bbf3b825cac13..9c0a4e0d38e70 100644
+index 9e16b140a9b1a..fb9d2d7aa1ef3 100644
 --- a/components/webui/flags/resources/app.html.ts
 +++ b/components/webui/flags/resources/app.html.ts
 @@ -1,4 +1,4 @@
@@ -42,7 +42,7 @@ index bbf3b825cac13..9c0a4e0d38e70 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -67,10 +67,13 @@ export function getHtml(this: AppElement) {
+@@ -75,10 +75,13 @@ export function getHtml(this: AppElement) {
  <div id="body-container">
    <div id="flagsTemplate">
      <div class="flex-container">

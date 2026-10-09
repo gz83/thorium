@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/tabs/tab_menu_model.cc b/chrome/browser/ui/tabs/tab_menu_model.cc
-index 97c6ded1ac589..37d1f088f996b 100644
+index 17ab4e685bec5..04698435ceec5 100644
 --- a/chrome/browser/ui/tabs/tab_menu_model.cc
 +++ b/chrome/browser/ui/tabs/tab_menu_model.cc
-@@ -340,6 +340,10 @@ void TabMenuModel::Build(int index) {
+@@ -341,6 +341,10 @@ void TabMenuModel::Build(int index) {
    }
    SetElementIdentifierAt(GetItemCount() - 1, kAddNewTabAdjacentMenuItem);
  
@@ -14,10 +14,10 @@ index 97c6ded1ac589..37d1f088f996b 100644
      if (tab_strip_->GetActiveTab()->IsSplit()) {
        swap_with_split_submenu_ =
 diff --git a/chrome/browser/ui/tabs/tab_strip_model.cc b/chrome/browser/ui/tabs/tab_strip_model.cc
-index 01f863a9f43a8..7937d9a4939e1 100644
+index e03b98f928807..8d900698a7fff 100644
 --- a/chrome/browser/ui/tabs/tab_strip_model.cc
 +++ b/chrome/browser/ui/tabs/tab_strip_model.cc
-@@ -2595,6 +2595,7 @@ bool TabStripModel::IsContextMenuCommandEnabled(
+@@ -2666,6 +2666,7 @@ bool TabStripModel::IsContextMenuCommandEnabled(
    }
  
    switch (command_id) {
@@ -25,7 +25,7 @@ index 01f863a9f43a8..7937d9a4939e1 100644
      case CommandNewTabToRight:
      case CommandCloseTab:
        return true;
-@@ -2703,6 +2704,15 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
+@@ -2794,6 +2795,15 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
      return;
    }
    switch (command_id) {
@@ -54,10 +54,10 @@ index 0ed448fdc4af7..684e8434e93a4 100644
  // LINT.ThenChange(//tools/metrics/histograms/metadata/tab/histograms.xml:TabContextMenuCommand)
  
 diff --git a/tools/metrics/histograms/metadata/tab/histograms.xml b/tools/metrics/histograms/metadata/tab/histograms.xml
-index 191c3eba1a610..7b26bf64c462d 100644
+index 773d91c5760ff..44eb332ffaa93 100644
 --- a/tools/metrics/histograms/metadata/tab/histograms.xml
 +++ b/tools/metrics/histograms/metadata/tab/histograms.xml
-@@ -93,6 +93,7 @@ chromium-metrics-reviews@google.com.
+@@ -88,6 +88,7 @@ chromium-metrics-reviews@google.com.
    <variant name="MoveToExistingWindow"
        summary="the Move to existing window command"/>
    <variant name="MoveToNewWindow" summary="the Move to new window command"/>

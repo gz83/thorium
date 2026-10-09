@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 91668d0aa24fa..c50299dc8fac9 100644
+index c4e8b88681977..f75095be894d4 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -4015,9 +4015,13 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
+@@ -4076,9 +4076,13 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
  #else  // !BUILDFLAG(IS_ANDROID)
    Profile* profile =
        Profile::FromBrowserContext(web_contents->GetBrowserContext());
@@ -83,10 +83,10 @@ index 6d7b24b67ff1f..ff0250adf59a5 100644
  }
  
 diff --git a/chrome/browser/themes/theme_service.cc b/chrome/browser/themes/theme_service.cc
-index cb1dd91e6d83b..d5b4e2ee7d2e9 100644
+index 404b10a09f126..4cbe547b2d153 100644
 --- a/chrome/browser/themes/theme_service.cc
 +++ b/chrome/browser/themes/theme_service.cc
-@@ -722,7 +722,10 @@ ui::ColorProviderKey ThemeService::GetColorProviderKey(
+@@ -732,7 +732,10 @@ ui::ColorProviderKey ThemeService::GetColorProviderKey(
    DCHECK_EQ(profile->GetOriginalProfile(), profile_);
  
    ui::ColorProviderKey key = base_key;
@@ -99,10 +99,10 @@ index cb1dd91e6d83b..d5b4e2ee7d2e9 100644
  
    // color_mode.
 diff --git a/chrome/browser/ui/views/frame/browser_widget.cc b/chrome/browser/ui/views/frame/browser_widget.cc
-index a335e2d5ccd0e..b69ef3e0301ee 100644
+index 6a221594b09f0..1ce1e6d742ca4 100644
 --- a/chrome/browser/ui/views/frame/browser_widget.cc
 +++ b/chrome/browser/ui/views/frame/browser_widget.cc
-@@ -613,6 +613,11 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
+@@ -616,6 +616,11 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
  }
  
  bool BrowserWidget::IsIncognitoBrowser() const {

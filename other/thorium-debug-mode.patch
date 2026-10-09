@@ -1,5 +1,5 @@
 diff --git a/base/BUILD.gn b/base/BUILD.gn
-index 44ffb6ee338ca..6abac4ccac5b2 100644
+index 9569528f10db0..6208e005bac31 100644
 --- a/base/BUILD.gn
 +++ b/base/BUILD.gn
 @@ -1196,6 +1196,7 @@ component("base") {
@@ -10,7 +10,7 @@ index 44ffb6ee338ca..6abac4ccac5b2 100644
    ]
  
    sources += [
-@@ -3029,6 +3030,7 @@ buildflag_header("debugging_buildflags") {
+@@ -3034,6 +3035,7 @@ buildflag_header("debugging_buildflags") {
      "ENABLE_ALLOCATION_TRACE_RECORDER_FULL_REPORTING=$build_allocation_trace_recorder_full_reporting",
      "PRINT_UNSYMBOLIZED_STACK_TRACES=$print_unsymbolized_stack_traces",
      "ENABLE_CHECK_ELISION_WARNING=$enable_check_elision_warning",
@@ -57,10 +57,10 @@ index 5b22ac50c50af..acbe6482224f1 100644
  
  declare_args() {
 diff --git a/base/files/file_util_win.cc b/base/files/file_util_win.cc
-index eccbd97cbbf80..d5c5e273f8504 100644
+index 4b3b7ee07ba65..59888a3abfda6 100644
 --- a/base/files/file_util_win.cc
 +++ b/base/files/file_util_win.cc
-@@ -1203,8 +1203,9 @@ bool IsLink(const FilePath& file_path) {
+@@ -1163,8 +1163,9 @@ bool IsLink(const FilePath& file_path) {
  }
  
  bool GetFileInfo(const FilePath& file_path, File::Info* results) {
@@ -186,10 +186,10 @@ index 2d72f112e9b9f..567503f15f329 100644
  BASE_EXPORT bool ShouldCreateLogMessage(int severity);
  
 diff --git a/content/browser/renderer_host/render_process_host_impl.cc b/content/browser/renderer_host/render_process_host_impl.cc
-index b8d41ae535d8a..5b29a0a89c299 100644
+index 22bf8ff11537d..c9e7d31b761c2 100644
 --- a/content/browser/renderer_host/render_process_host_impl.cc
 +++ b/content/browser/renderer_host/render_process_host_impl.cc
-@@ -4078,7 +4078,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
+@@ -4093,7 +4093,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
      }
    }
  

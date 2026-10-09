@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index 29fe8231c0a92..bd63e688dbb96 100644
+index 3148354138136..db9a1dd9c09b6 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -865,6 +865,8 @@ source_set("core") {
+@@ -867,6 +867,8 @@ source_set("core") {
      "startup_data.cc",
      "thorium_flag_choices.h",
      "thorium_flag_entries.h",
@@ -12,10 +12,10 @@ index 29fe8231c0a92..bd63e688dbb96 100644
      "unexpire_flags.h",
      "universal_web_contents_observers.cc",
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 19045777b3d81..91668d0aa24fa 100644
+index 2e0f287290b76..c4e8b88681977 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -192,6 +192,7 @@
+@@ -194,6 +194,7 @@
  #include "chrome/browser/subresource_filter/subresource_filter_navigation_download_policy.h"
  #include "chrome/browser/tab_group_sync/tab_group_sync_utils.h"
  #include "chrome/browser/task_manager/task_manager_interface.h"
@@ -23,7 +23,7 @@ index 19045777b3d81..91668d0aa24fa 100644
  #include "chrome/browser/tracing/chrome_tracing_delegate.h"
  #include "chrome/browser/translate/translate_service.h"
  #include "chrome/browser/ui/blocked_content/blocked_window_params.h"
-@@ -5032,6 +5033,8 @@ bool ChromeContentBrowserClient::
+@@ -5126,6 +5127,8 @@ bool ChromeContentBrowserClient::
  
  void ChromeContentBrowserClient::BrowserURLHandlerCreated(
      BrowserURLHandler* handler) {
@@ -33,10 +33,10 @@ index 19045777b3d81..91668d0aa24fa 100644
    // URL handlers below. Also register it before the "parts" handlers, so the
    // NTP policy takes precedence over extensions that override the NTP.
 diff --git a/chrome/browser/extensions/extension_tab_util.cc b/chrome/browser/extensions/extension_tab_util.cc
-index 71c4c9d19078d..45ec1925e2817 100644
+index dd919b9675f64..7706ae7687f96 100644
 --- a/chrome/browser/extensions/extension_tab_util.cc
 +++ b/chrome/browser/extensions/extension_tab_util.cc
-@@ -1096,7 +1096,8 @@ bool ExtensionTabUtil::IsKillURL(const GURL& url) {
+@@ -1100,7 +1100,8 @@ bool ExtensionTabUtil::IsKillURL(const GURL& url) {
      return true;
    }
  
@@ -219,10 +219,10 @@ index d5d9a14c8d3d5..887085a4f3ee2 100644
  
  }  // namespace url_formatter
 diff --git a/content/browser/browser_url_handler_impl.cc b/content/browser/browser_url_handler_impl.cc
-index 4ec1983b229cb..c2b9cf741b6be 100644
+index d4229cbfdf306..d18502824afd0 100644
 --- a/content/browser/browser_url_handler_impl.cc
 +++ b/content/browser/browser_url_handler_impl.cc
-@@ -98,6 +98,21 @@ BrowserURLHandlerImpl::BrowserURLHandlerImpl() {
+@@ -99,6 +99,21 @@ BrowserURLHandlerImpl::BrowserURLHandlerImpl() {
  BrowserURLHandlerImpl::~BrowserURLHandlerImpl() {
  }
  
@@ -244,7 +244,7 @@ index 4ec1983b229cb..c2b9cf741b6be 100644
  void BrowserURLHandlerImpl::AddHandlerPair(URLHandler handler,
                                             URLHandler reverse_handler) {
    url_handlers_.push_back(HandlerPair(handler, reverse_handler));
-@@ -112,20 +127,47 @@ void BrowserURLHandlerImpl::RewriteURLIfNecessary(
+@@ -113,20 +128,47 @@ void BrowserURLHandlerImpl::RewriteURLIfNecessary(
    RewriteURLIfNecessary(url, browser_context, &ignored_reverse_on_redirect);
  }
  
@@ -294,7 +294,7 @@ index 4ec1983b229cb..c2b9cf741b6be 100644
    return rewrites;
  }
  
-@@ -137,6 +179,18 @@ void BrowserURLHandlerImpl::RewriteURLIfNecessary(
+@@ -138,6 +180,18 @@ void BrowserURLHandlerImpl::RewriteURLIfNecessary(
    CHECK(browser_context, base::NotFatalUntil::M159);
    CHECK(reverse_on_redirect, base::NotFatalUntil::M159);
  
@@ -313,7 +313,7 @@ index 4ec1983b229cb..c2b9cf741b6be 100644
    if (!url->is_valid()) {
      *reverse_on_redirect = false;
      return;
-@@ -154,11 +208,13 @@ void BrowserURLHandlerImpl::RewriteURLIfNecessary(
+@@ -155,11 +209,13 @@ void BrowserURLHandlerImpl::RewriteURLIfNecessary(
  
  bool BrowserURLHandlerImpl::ReverseURLRewrite(
      GURL* url, const GURL& original, BrowserContext* browser_context) {
@@ -329,7 +329,7 @@ index 4ec1983b229cb..c2b9cf741b6be 100644
          if (reverse_rewriter(url, browser_context))
            return true;
 diff --git a/content/browser/browser_url_handler_impl.h b/content/browser/browser_url_handler_impl.h
-index 50c2903b4ff3a..9e6218c19c13c 100644
+index d1c01e0bada6d..ae426f648dab2 100644
 --- a/content/browser/browser_url_handler_impl.h
 +++ b/content/browser/browser_url_handler_impl.h
 @@ -32,8 +32,17 @@ class CONTENT_EXPORT BrowserURLHandlerImpl : public BrowserURLHandler {
@@ -350,7 +350,7 @@ index 50c2903b4ff3a..9e6218c19c13c 100644
    // Like the //content-public RewriteURLIfNecessary overload (overridden
    // above), but if the original URL needs to be adjusted if the modified URL is
    // redirected, this method sets |*reverse_on_redirect| to true.
-@@ -54,6 +63,14 @@ class CONTENT_EXPORT BrowserURLHandlerImpl : public BrowserURLHandler {
+@@ -53,6 +62,14 @@ class CONTENT_EXPORT BrowserURLHandlerImpl : public BrowserURLHandler {
    ~BrowserURLHandlerImpl() override;
    friend struct base::DefaultSingletonTraits<BrowserURLHandlerImpl>;
  
@@ -366,10 +366,10 @@ index 50c2903b4ff3a..9e6218c19c13c 100644
    typedef std::pair<URLHandler, URLHandler> HandlerPair;
    std::vector<HandlerPair> url_handlers_;
 diff --git a/content/browser/renderer_host/navigation_controller_impl.cc b/content/browser/renderer_host/navigation_controller_impl.cc
-index e5888868c9ef2..dcbd3f3571031 100644
+index 9a10bfdef7e09..f1a2385b05323 100644
 --- a/content/browser/renderer_host/navigation_controller_impl.cc
 +++ b/content/browser/renderer_host/navigation_controller_impl.cc
-@@ -456,9 +456,9 @@ void RewriteUrlForNavigation(const GURL& original_url,
+@@ -457,9 +457,9 @@ void RewriteUrlForNavigation(const GURL& original_url,
    // remove "view-source:" from the beginning of the URL to get the URL that
    // will actually be loaded. This real URL won't be shown to the user, just
    // used internally.
@@ -395,7 +395,7 @@ index f2eab738b0381..f3ec4c1ec5472 100644
    url::AddStandardScheme(kChromeErrorScheme, url::SCHEME_WITH_HOST);
    for (auto& scheme : schemes.standard_schemes)
 diff --git a/content/public/browser/browser_url_handler.h b/content/public/browser/browser_url_handler.h
-index 151eadaae94d5..e623e047866d7 100644
+index 1fe986b72eee6..c3658c907649c 100644
 --- a/content/public/browser/browser_url_handler.h
 +++ b/content/public/browser/browser_url_handler.h
 @@ -31,6 +31,11 @@ class CONTENT_EXPORT BrowserURLHandler {

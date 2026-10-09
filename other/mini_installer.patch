@@ -1,5 +1,5 @@
 diff --git a/chrome/app/chromium_strings.grd b/chrome/app/chromium_strings.grd
-index ec554cfceb6a9..87c6d8272faeb 100644
+index 3de8ca69c9248..167af1aec5795 100644
 --- a/chrome/app/chromium_strings.grd
 +++ b/chrome/app/chromium_strings.grd
 @@ -734,6 +734,21 @@ Chromium is unable to recover your settings.
@@ -25,7 +25,7 @@ index ec554cfceb6a9..87c6d8272faeb 100644
            An operating system error occurred during installation. Please download Chromium again.
          </message>
 diff --git a/chrome/installer/mini_installer/BUILD.gn b/chrome/installer/mini_installer/BUILD.gn
-index ce1f5a5711eeb..7e124474b9eed 100644
+index 39cbdeb5f067b..13dc88d7456a4 100644
 --- a/chrome/installer/mini_installer/BUILD.gn
 +++ b/chrome/installer/mini_installer/BUILD.gn
 @@ -1,8 +1,9 @@
@@ -269,7 +269,7 @@ index ce1f5a5711eeb..7e124474b9eed 100644
        "$target_name.exe",
        "--path_7za",
 diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index 037b80488cf24..4e0e1b71ee947 100644
+index 33e8546206ba6..adb6a07f9c927 100644
 --- a/chrome/installer/mini_installer/chrome.release
 +++ b/chrome/installer/mini_installer/chrome.release
 @@ -1,4 +1,4 @@
@@ -351,7 +351,7 @@ index 037b80488cf24..4e0e1b71ee947 100644
  
  #
  # VisualElements sub-dir.
-@@ -73,6 +108,8 @@ IwaKeyDistribution\manifest.json: %(VersionDir)s\IwaKeyDistribution\
+@@ -67,6 +102,8 @@ IwaKeyDistribution\manifest.json: %(VersionDir)s\IwaKeyDistribution\
  
  [HIDPI]
  chrome_200_percent.pak: %(VersionDir)s\
@@ -1560,7 +1560,7 @@ index 8967d1094ffe3..2ab7358f5124c 100644
        "//components/base32",
        "//components/crash/core/app",
 diff --git a/chrome/installer/setup/install_worker.cc b/chrome/installer/setup/install_worker.cc
-index 5ddec8caa708c..795ce039c9393 100644
+index 1a930947cc1e0..a80facaa7f06e 100644
 --- a/chrome/installer/setup/install_worker.cc
 +++ b/chrome/installer/setup/install_worker.cc
 @@ -1,4 +1,4 @@
@@ -1720,7 +1720,7 @@ index 5ddec8caa708c..795ce039c9393 100644
  // Adds work items to add the "store-dmtoken" command to Chrome's version key.
  // This method is a no-op if this is anything other than system-level Chrome.
  // The command is used when enrolling Chrome browser instances into enterprise
-@@ -1332,10 +1390,12 @@ void AddFinalizeUpdateWorkItems(const InstallationState& original_state,
+@@ -1324,10 +1382,12 @@ void AddFinalizeUpdateWorkItems(const InstallationState& original_state,
    AddWerHelperRegistration(installer_state.root_key(),
                             GetWerHelperPath(target_path, new_version), list);
  
@@ -1822,7 +1822,7 @@ index a5d073d214b6e..2448ea0a3bb69 100644
    }
    DCHECK_NE(ret, static_cast<int>(STILL_ACTIVE));
 diff --git a/chrome/installer/setup/setup_util.cc b/chrome/installer/setup/setup_util.cc
-index d7de103384061..0bf62853e86ce 100644
+index a9a4a51152518..489a67155b9f5 100644
 --- a/chrome/installer/setup/setup_util.cc
 +++ b/chrome/installer/setup/setup_util.cc
 @@ -1,4 +1,4 @@
@@ -1848,7 +1848,7 @@ index d7de103384061..0bf62853e86ce 100644
  #include "chrome/installer/util/util_constants.h"
  #include "chrome/installer/util/work_item.h"
  #include "chrome/installer/util/work_item_list.h"
-@@ -246,7 +249,43 @@ bool ContainsUnsupportedSwitch(const base::CommandLine& cmd_line) {
+@@ -250,7 +253,43 @@ bool ContainsUnsupportedSwitch(const base::CommandLine& cmd_line) {
  
  bool IsProcessorSupported() {
  #if defined(ARCH_CPU_X86_FAMILY)
@@ -1894,7 +1894,7 @@ index d7de103384061..0bf62853e86ce 100644
    return true;
  #else
 diff --git a/chrome/installer/util/BUILD.gn b/chrome/installer/util/BUILD.gn
-index 50897db71742d..cdbcc69d6bc9b 100644
+index d0dc85a334267..415634af1fcf3 100644
 --- a/chrome/installer/util/BUILD.gn
 +++ b/chrome/installer/util/BUILD.gn
 @@ -7,6 +7,10 @@ import("//build/config/chrome_build.gni")
@@ -2182,7 +2182,7 @@ index 0000000000000..fb3d431b6a02e
 +
 +#endif  // CHROME_INSTALLER_UTIL_THORIUM_CPU_FEATURES_H_
 diff --git a/chrome/installer/util/util_constants.h b/chrome/installer/util/util_constants.h
-index e9c61e09475af..aa7316978a9ce 100644
+index db44d24ec03f3..3fdba90596635 100644
 --- a/chrome/installer/util/util_constants.h
 +++ b/chrome/installer/util/util_constants.h
 @@ -1,4 +1,4 @@

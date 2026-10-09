@@ -59,7 +59,7 @@ index bc4236a4e7080..441163edcfdab 100644
  set_defaults("static_library") {
    configs = default_compiler_configs
 diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-index ccfe9692baf06..9defb7dde8645 100644
+index c106acfca9f33..c8db4e4c569f5 100644
 --- a/build/config/compiler/BUILD.gn
 +++ b/build/config/compiler/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -234,7 +234,7 @@ index ccfe9692baf06..9defb7dde8645 100644
    cflags = []
    ldflags = []
  
-@@ -2468,6 +2562,31 @@ config("no_incompatible_pointer_warnings") {
+@@ -2501,6 +2595,31 @@ config("no_incompatible_pointer_warnings") {
    }
  }
  
@@ -266,7 +266,7 @@ index ccfe9692baf06..9defb7dde8645 100644
  # Optimization -----------------------------------------------------------------
  #
  # The BUILDCONFIG file sets the "default_optimization" config on targets by
-@@ -2704,9 +2823,18 @@ config("optimize_max") {
+@@ -2737,9 +2856,18 @@ config("optimize_max") {
    if (is_win) {
      # Favor speed over size, /O2 must be before the common flags.
      # /O2 implies /Ot, /Oi, and /GF.

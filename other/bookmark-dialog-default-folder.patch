@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/bookmarks/recently_used_folders_combo_model.cc b/chrome/browser/ui/bookmarks/recently_used_folders_combo_model.cc
-index 5a9ef8bd89cad..1d4b57cfb7af7 100644
+index 285232a634e1f..28179ae8bb859 100644
 --- a/chrome/browser/ui/bookmarks/recently_used_folders_combo_model.cc
 +++ b/chrome/browser/ui/bookmarks/recently_used_folders_combo_model.cc
-@@ -68,9 +68,7 @@ RecentlyUsedFoldersComboModel::RecentlyUsedFoldersComboModel(
+@@ -66,9 +66,7 @@ RecentlyUsedFoldersComboModel::RecentlyUsedFoldersComboModel(
      }
  
      for (const BookmarkNode* mru_node : mru_bookmarks.account_nodes) {
@@ -13,7 +13,7 @@ index 5a9ef8bd89cad..1d4b57cfb7af7 100644
      }
  
      // Add local nodes to `items_`.
-@@ -79,9 +77,7 @@ RecentlyUsedFoldersComboModel::RecentlyUsedFoldersComboModel(
+@@ -77,9 +75,7 @@ RecentlyUsedFoldersComboModel::RecentlyUsedFoldersComboModel(
      }
  
      for (const BookmarkNode* mru_node : mru_bookmarks.local_nodes) {
@@ -24,7 +24,7 @@ index 5a9ef8bd89cad..1d4b57cfb7af7 100644
      }
    } else {
      for (const BookmarkNode* mru_node : mru_bookmarks.local_nodes) {
-@@ -149,10 +145,6 @@ std::optional<size_t> RecentlyUsedFoldersComboModel::GetDefaultIndex() const {
+@@ -147,10 +143,6 @@ std::optional<size_t> RecentlyUsedFoldersComboModel::GetDefaultIndex() const {
    // TODO(pbos): Look at returning -1 here if there's no default index. Right
    // now a lot of code in Combobox assumes an index within `items_` bounds.
    auto it = std::ranges::find(items_, Item(parent_node_, Item::TYPE_NODE));

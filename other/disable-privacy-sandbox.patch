@@ -1,16 +1,8 @@
 diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
-index 75a17f190c9e4..31fc552e3b417 100644
+index f02c32aa3dec3..8e0a1072c00c0 100644
 --- a/chrome/BUILD.gn
 +++ b/chrome/BUILD.gn
-@@ -385,7 +385,6 @@ if (!is_android && !is_mac) {
-     data_deps += [
-       "//chrome/browser/resources/media/mei_preload:component",
-       "//chrome/browser/web_applications/isolated_web_apps/key_distribution/preload:component",
--      "//components/privacy_sandbox/privacy_sandbox_attestations/preload:component",
-       "//third_party/widevine/cdm",
-     ]
- 
-@@ -1391,7 +1390,6 @@ if (is_win) {
+@@ -1399,7 +1399,6 @@ if (is_win) {
        ":widevine_cdm_library",
        "//chrome/browser/resources/media/mei_preload:component_bundle",
        "//chrome/browser/web_applications/isolated_web_apps/key_distribution/preload:component_bundle",
@@ -19,7 +11,7 @@ index 75a17f190c9e4..31fc552e3b417 100644
  
      if (is_chrome_branded) {
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index a85c5219ca5d5..3254274c4ce41 100644
+index 92faf6c6420d7..14fd6a17f2cd0 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
 @@ -1845,7 +1845,6 @@ if (_is_default_toolchain) {
@@ -31,10 +23,10 @@ index a85c5219ca5d5..3254274c4ce41 100644
    }
  
 diff --git a/chrome/browser/component_updater/registration.cc b/chrome/browser/component_updater/registration.cc
-index b11907b0f46d6..f39f20ac1ff03 100644
+index 9cf5a226c7f74..395f9abe18e47 100644
 --- a/chrome/browser/component_updater/registration.cc
 +++ b/chrome/browser/component_updater/registration.cc
-@@ -28,7 +28,6 @@
+@@ -27,7 +27,6 @@
  #include "chrome/browser/component_updater/mei_preload_component_installer.h"
  #include "chrome/browser/component_updater/pki_metadata_component_installer.h"
  #include "chrome/browser/component_updater/platform_runtime_component_installer.h"
@@ -50,85 +42,6 @@ index b11907b0f46d6..f39f20ac1ff03 100644
    RegisterActorSafetyListsComponent(cus, base::OnceClosure());
    if (history_embeddings::IsHistoryEmbeddingsFeatureEnabled()) {
      RegisterHistorySearchStringsComponent(cus);
-diff --git a/chrome/browser/resources/BUILD.gn b/chrome/browser/resources/BUILD.gn
-index 93f402ff8a5f8..04abcafbf534d 100644
---- a/chrome/browser/resources/BUILD.gn
-+++ b/chrome/browser/resources/BUILD.gn
-@@ -136,7 +136,6 @@ group("resources") {
-     public_deps += [
-       "unexportable_keys_internals:resources",
-       "//chrome/browser/resources/media/mei_preload:component",
--      "//components/privacy_sandbox/privacy_sandbox_attestations/preload:component",
-     ]
-   }
- 
-diff --git a/chrome/installer/linux/BUILD.gn b/chrome/installer/linux/BUILD.gn
-index 44842eef3d8f0..33a05266923ff 100644
---- a/chrome/installer/linux/BUILD.gn
-+++ b/chrome/installer/linux/BUILD.gn
-@@ -148,8 +148,6 @@ packaging_files = packaging_files_binaries + [
-                     "$root_out_dir/locales/en-US.pak",
-                     "$root_out_dir/MEIPreload/manifest.json",
-                     "$root_out_dir/MEIPreload/preloaded_data.pb",
--                    "$root_out_dir/PrivacySandboxAttestationsPreloaded/manifest.json",
--                    "$root_out_dir/PrivacySandboxAttestationsPreloaded/privacy-sandbox-attestations.dat",
-                   ]
- if (enable_swiftshader) {
-   packaging_files += [ "$root_out_dir/vk_swiftshader_icd.json" ]
-@@ -515,7 +513,6 @@ group("installer_deps") {
-     "//chrome/browser/enterprise/connectors/device_trust/key_management/installer/management_service:chrome_management_service",
-     "//chrome/browser/resources/media/mei_preload:component",
-     "//components/crash/core/app:chrome_crashpad_handler",
--    "//components/privacy_sandbox/privacy_sandbox_attestations/preload:component",
-     "//sandbox/linux:chrome_sandbox",
-     "//third_party/devtools-frontend/src/inspector_overlay:build_inspector_overlay",
-     "//ui/resources:copy_ui_resources_100_percent",
-diff --git a/chrome/installer/linux/common/installer.py b/chrome/installer/linux/common/installer.py
-index 50bb9dbfaa395..2183613ce354b 100644
---- a/chrome/installer/linux/common/installer.py
-+++ b/chrome/installer/linux/common/installer.py
-@@ -577,24 +577,6 @@ class Installer:
-         for pak in (self.output_dir / "locales").glob("*.pak"):
-             self._install_into_dir(pak, locales_dir, mode=0o644)
- 
--        # Privacy Sandbox Attestation
--        psa_manifest = (
--            self.output_dir
--            / "PrivacySandboxAttestationsPreloaded/manifest.json"
--        )
--        if psa_manifest.exists():
--            psa_dir = install_dir / "PrivacySandboxAttestationsPreloaded"
--            psa_dir.mkdir(parents=True, exist_ok=True)
--            psa_dir.chmod(0o755)
--            self._install_into_dir(psa_manifest, psa_dir, mode=0o644)
--            self._install_into_dir(
--                self.output_dir
--                / "PrivacySandboxAttestationsPreloaded"
--                / "privacy-sandbox-attestations.dat",
--                psa_dir,
--                mode=0o644,
--            )
--
-         # MEI Preload
-         mei_manifest = self.output_dir / "MEIPreload/manifest.json"
-         if mei_manifest.exists():
-diff --git a/chrome/installer/mini_installer/chrome.release b/chrome/installer/mini_installer/chrome.release
-index 4e0e1b71ee947..adb6a07f9c927 100644
---- a/chrome/installer/mini_installer/chrome.release
-+++ b/chrome/installer/mini_installer/chrome.release
-@@ -88,12 +88,6 @@ WidevineCdm\_platform_specific\win_arm64\widevinecdm.dll.sig: %(VersionDir)s\Wid
- Logo.png: %(VersionDir)s\VisualElements\
- SmallLogo.png: %(VersionDir)s\VisualElements\
- 
--#
--# Privacy Sandbox Attestation
--#
--PrivacySandboxAttestationsPreloaded\manifest.json: %(VersionDir)s\PrivacySandboxAttestationsPreloaded\
--PrivacySandboxAttestationsPreloaded\privacy-sandbox-attestations.dat: %(VersionDir)s\PrivacySandboxAttestationsPreloaded\
--
- #
- # MEI Preload sub dir
- #
 diff --git a/components/privacy_sandbox/privacy_sandbox_features.cc b/components/privacy_sandbox/privacy_sandbox_features.cc
 index 11ff98e135767..04eaa94b10729 100644
 --- a/components/privacy_sandbox/privacy_sandbox_features.cc
@@ -143,10 +56,10 @@ index 11ff98e135767..04eaa94b10729 100644
  
  BASE_FEATURE(kRelatedWebsiteSetsUi, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/content/common/features.cc b/content/common/features.cc
-index 7ac35b5a84b62..d6efdf61920c4 100644
+index 27f7314ba2503..236d7702da53f 100644
 --- a/content/common/features.cc
 +++ b/content/common/features.cc
-@@ -598,7 +598,7 @@ BASE_FEATURE(kPriorityOverridePendingViews, base::FEATURE_ENABLED_BY_DEFAULT);
+@@ -604,7 +604,7 @@ BASE_FEATURE(kPriorityOverridePendingViews, base::FEATURE_ENABLED_BY_DEFAULT);
  // Enables exposure of the core milestone 1 (M1) APIs in the renderer without an
  // origin trial token: Attribution Reporting, FLEDGE, Topics.
  BASE_FEATURE(kPrivacySandboxAdsAPIsM1Override,
@@ -156,10 +69,10 @@ index 7ac35b5a84b62..d6efdf61920c4 100644
  #if BUILDFLAG(IS_ANDROID)
  // When disabled("legacy behavior") it resets ongoing gestures when window loses
 diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/features.cc
-index 94a49a204a0a5..bbf67359cba07 100644
+index 248061c9a678d..6aa5d49158ea8 100644
 --- a/third_party/blink/common/features.cc
 +++ b/third_party/blink/common/features.cc
-@@ -126,7 +126,7 @@ BASE_FEATURE(kAllowDatapipeDrainedAsBytesConsumerInBFCache,
+@@ -129,7 +129,7 @@ BASE_FEATURE(kAllowDatapipeDrainedAsBytesConsumerInBFCache,
  
  // Enables URN URLs like those produced by Protected Audience auctions to be
  // displayed by iframes (instead of requiring fenced frames).

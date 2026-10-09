@@ -1,5 +1,5 @@
 diff --git a/ash/webui/sample_system_web_app_ui/BUILD.gn b/ash/webui/sample_system_web_app_ui/BUILD.gn
-index ce44da67bb222..73dbfa0bcce67 100644
+index 722340269f0cd..46808e4758944 100644
 --- a/ash/webui/sample_system_web_app_ui/BUILD.gn
 +++ b/ash/webui/sample_system_web_app_ui/BUILD.gn
 @@ -1,12 +1,10 @@
@@ -101,7 +101,7 @@ index 145ef702d8d25..241c3227f1ab3 100644
  namespace content {
  class WebUI;
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index bd63e688dbb96..9d22f1a5965aa 100644
+index db9a1dd9c09b6..7c372d16e4449 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
 @@ -714,12 +714,10 @@ if (is_chromeos) {
@@ -122,7 +122,7 @@ index bd63e688dbb96..9d22f1a5965aa 100644
  
    source_set("platform_util_ash") {
 diff --git a/chrome/browser/ash/system_web_apps/apps/BUILD.gn b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
-index c86dc6d2f2c5d..c3cdb2b91f37f 100644
+index fcc530574fa78..32455f28b3d48 100644
 --- a/chrome/browser/ash/system_web_apps/apps/BUILD.gn
 +++ b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
 @@ -186,17 +186,15 @@ static_library("apps") {
@@ -166,7 +166,7 @@ index c80f8c0a8995c..d30b7ca6de16f 100644
  class SampleSystemAppDelegate : public ash::SystemWebAppDelegate {
   public:
 diff --git a/chrome/browser/ash/system_web_apps/system_web_app_manager.cc b/chrome/browser/ash/system_web_apps/system_web_app_manager.cc
-index a05f8507ea252..6f3728044c9d1 100644
+index c0f35a08a3818..f3c0f7148154d 100644
 --- a/chrome/browser/ash/system_web_apps/system_web_app_manager.cc
 +++ b/chrome/browser/ash/system_web_apps/system_web_app_manager.cc
 @@ -94,9 +94,7 @@
@@ -190,10 +190,10 @@ index a05f8507ea252..6f3728044c9d1 100644
    SystemWebAppDelegateMap delegate_map;
    for (auto& info : info_vec) {
 diff --git a/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc b/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc
-index 5ceb0a65d293a..63308fcff49fe 100644
+index ec1d2d82dbe0a..2e8b28d2ff674 100644
 --- a/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc
 +++ b/chrome/browser/chrome_browser_interface_binders_webui_parts_chromeos.cc
-@@ -168,10 +168,10 @@
+@@ -166,10 +166,10 @@
  #include "media/capture/video/chromeos/mojom/camera_app.mojom.h"
  #include "mojo/public/cpp/bindings/binder_map.h"
  
@@ -205,7 +205,7 @@ index 5ceb0a65d293a..63308fcff49fe 100644
  #include "ash/webui/status_area_internals/mojom/status_area_internals.mojom.h"
  #include "ash/webui/status_area_internals/status_area_internals_ui.h"
  #endif  // defined(OFFICIAL_BUILD)
-@@ -587,10 +587,10 @@ void PopulateChromeWebUIFrameInterfaceBrokersTrustedPartsCros(
+@@ -579,10 +579,10 @@ void PopulateChromeWebUIFrameInterfaceBrokersTrustedPartsCros(
    registry.ForWebUI<ash::smb_dialog::SmbCredentialsDialogUI>();
    registry.ForWebUI<ash::MallUI>().Add<ash::mall::mojom::PageHandler>();
  
@@ -217,7 +217,7 @@ index 5ceb0a65d293a..63308fcff49fe 100644
    registry.ForWebUI<ash::StatusAreaInternalsUI>()
        .Add<ash::mojom::status_area_internals::PageHandler>();
  #endif  // !defined(OFFICIAL_BUILD)
-@@ -630,10 +630,8 @@ void PopulateChromeWebUIFrameInterfaceBrokersUntrustedPartsCros(
+@@ -622,10 +622,8 @@ void PopulateChromeWebUIFrameInterfaceBrokersUntrustedPartsCros(
    registry.ForWebUI<ash::ScannerFeedbackUntrustedUI>()
        .Add<ash::mojom::scanner_feedback_ui::PageHandler>();
  
@@ -229,10 +229,10 @@ index 5ceb0a65d293a..63308fcff49fe 100644
  
  }  // namespace chrome::internal
 diff --git a/chrome/browser/ui/webui/ash/config/BUILD.gn b/chrome/browser/ui/webui/ash/config/BUILD.gn
-index eafab5f60c6d5..8f8ca4d98e3d3 100644
+index c389b1b0a7838..49fa12060da74 100644
 --- a/chrome/browser/ui/webui/ash/config/BUILD.gn
 +++ b/chrome/browser/ui/webui/ash/config/BUILD.gn
-@@ -119,9 +119,7 @@ static_library("config") {
+@@ -118,9 +118,7 @@ static_library("config") {
      "//ui/webui",
    ]
  
@@ -244,7 +244,7 @@ index eafab5f60c6d5..8f8ca4d98e3d3 100644
  
  source_set("unit_tests") {
 diff --git a/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc b/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc
-index 8071c4efb25dd..7f8354eb2e70c 100644
+index 92df3040cc32c..b6a02bc8d5fb3 100644
 --- a/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc
 +++ b/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc
 @@ -148,10 +148,8 @@
@@ -258,17 +258,17 @@ index 8071c4efb25dd..7f8354eb2e70c 100644
  
  namespace content {
  class WebUI;
-@@ -482,8 +480,8 @@ void AshWebUIConfigManager::RegisterWebUIConfigs() {
-       base::BindRepeating(vc_background_ui::CreateVcBackgroundUI)));
+@@ -493,8 +491,8 @@ void AshWebUIConfigManager::RegisterWebUIConfigs() {
    AddWebUIConfig(std::make_unique<GrowthInternalsUIConfig>());
-   AddWebUIConfig(std::make_unique<FloatingWorkspaceUIConfig>());
+   AddWebUIConfig(
+       std::make_unique<FloatingWorkspaceUIConfig>(&local_state_.get()));
 -#if !defined(OFFICIAL_BUILD)
    AddWebUIConfig(std::make_unique<SampleSystemWebAppUIConfig>());
 +#if !defined(OFFICIAL_BUILD)
    AddWebUIConfig(std::make_unique<StatusAreaInternalsUIConfig>());
  #endif  // !defined(OFFICIAL_BUILD)
  }
-@@ -518,10 +516,8 @@ void AshWebUIConfigManager::RegisterUntrustedWebUIConfigs() {
+@@ -529,10 +527,8 @@ void AshWebUIConfigManager::RegisterUntrustedWebUIConfigs() {
    AddUntrustedWebUIConfig(std::make_unique<MakoUntrustedUIConfig>());
    AddUntrustedWebUIConfig(std::make_unique<FocusModeUntrustedUIConfig>());
    AddUntrustedWebUIConfig(std::make_unique<ScannerFeedbackUntrustedUIConfig>());
