@@ -2291,7 +2291,7 @@ index 5949c0061d4fe..f6e400ea86d96 100644
    subpage_icon_->SetProperty(
        views::kMarginsKey,
 diff --git a/chrome/browser/ui/views/download/download_shelf_view.cc b/chrome/browser/ui/views/download/download_shelf_view.cc
-index 53f9e178b486f..239652aafd2ba 100644
+index a3e10825eb48d..cac148d6548a3 100644
 --- a/chrome/browser/ui/views/download/download_shelf_view.cc
 +++ b/chrome/browser/ui/views/download/download_shelf_view.cc
 @@ -11,6 +11,7 @@

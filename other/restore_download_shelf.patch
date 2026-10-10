@@ -3004,7 +3004,7 @@ index 0000000000000..75a6a2b9e6bbd
 +#endif  // CHROME_BROWSER_UI_VIEWS_DOWNLOAD_DOWNLOAD_SHELF_STARTED_ANIMATION_VIEWS_H_
 diff --git a/chrome/browser/ui/views/download/download_shelf_view.cc b/chrome/browser/ui/views/download/download_shelf_view.cc
 new file mode 100644
-index 0000000000000..53f9e178b486f
+index 0000000000000..a3e10825eb48d
 --- /dev/null
 +++ b/chrome/browser/ui/views/download/download_shelf_view.cc
 @@ -0,0 +1,364 @@
@@ -3245,7 +3245,7 @@ index 0000000000000..53f9e178b486f
 +  // FocusManager to make this unnecessary.
 +  auto* focus_manager = GetFocusManager();
 +  if (focus_manager && Contains(focus_manager->GetFocusedView())) {
-+    parent_->contents_web_view()->RequestFocus();
++    parent_->GetActiveContentsWebView()->RequestFocus();
 +  }
 +  SetVisible(false);
 +}
