@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Thorium local navigation check</title>
+<h1>Thorium local navigation check</h1>
+<form action="/search" method="get">
+  <label for="query">Search</label>
+  <input id="query" name="q" autocomplete="off">
+  <button type="submit">Search</button>
+</form>
+<p id="result"></p>
+<script>
+if (location.pathname === '/search') {
+  const query = new URL(location.href).searchParams.get('q');
+  document.querySelector('form').hidden = true;
+  document.querySelector('#result').textContent = `Search result: ${query}`;
+  window.navigationProbe = {query};
+}
+</script>
+</html>

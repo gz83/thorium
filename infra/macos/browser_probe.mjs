@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawn, execFileSync} from 'node:child_process';
+import {createServer} from 'node:http';
 import {setTimeout as delay} from 'node:timers/promises';
 import {CDP} from './cdp.mjs';
 
@@ -12,6 +13,7 @@ fs.mkdirSync(root, {recursive: true});
 const report = {
   success: false, status: 'INCOMPLETE', core_status: 'INCOMPLETE', phase: 'startup',
   pages: [], external: [], crashes: [], warnings: [],
+  interaction: config.mode === 'gui' ? {status: 'INCOMPLETE', reason: 'Local input/navigation not reached'} : null,
   issues: config.mode === 'gui' ? {
     '1286': {status: 'INCOMPLETE', reason: 'Startup check not completed'},
     '1316': {status: 'INCOMPLETE', reason: 'Baidu search not started', steps: []},
@@ -25,7 +27,15 @@ const save = () => fs.writeFileSync(path.join(root, 'report.json'), JSON.stringi
 const phase = name => { report.phase = name; save(); };
 function updateStatus() {
   // Capabilities are diagnostics. Crashes/timeouts during them still fail core.
-  const statuses = [report.core_status, ...Object.values(report.issues).map(item => item.status)];
+  const baidu = report.issues['1316'];
+  report.external_blocked = baidu?.status === 'INCOMPLETE' &&
+    ['captcha', 'network'].includes(baidu.blocked_by) && baidu.renderer_responsive === true &&
+    report.interaction?.status === 'PASS';
+  const statuses = [report.core_status,
+    ...(report.interaction ? [report.interaction.status] : []),
+    ...Object.entries(report.issues)
+      .filter(([id]) => !(id === '1316' && report.external_blocked))
+      .map(([, item]) => item.status)];
   report.status = statuses.includes('FAIL') ? 'FAIL' : statuses.includes('INCOMPLETE') ? 'INCOMPLETE' : 'PASS';
   report.success = report.status === 'PASS';
 }
@@ -104,10 +114,82 @@ async function navigate(name, url, timeout = 30000) {
   return {name, ...state};
 }
 
-class Incomplete extends Error {}
+class Incomplete extends Error {
+  constructor(message, blockedBy) {
+    super(message);
+    this.blockedBy = blockedBy;
+  }
+}
 const transientContext = error => /context|Cannot find|Inspected target navigated/i.test(error.message)
   && !/timeout/i.test(error.message);
 const networkFailure = error => /Navigation failed: net::ERR_|Page did not finish loading:/.test(error.message);
+
+async function pressEnter() {
+  const enter = {key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13};
+  await cdp.call('Input.dispatchKeyEvent', {type: 'keyDown', ...enter, text: '\r', unmodifiedText: '\r'}, session);
+  await cdp.call('Input.dispatchKeyEvent', {type: 'keyUp', ...enter}, session);
+}
+
+async function localInteraction() {
+  const result = report.interaction;
+  const requests = [];
+  let server;
+  try {
+    phase('local-input');
+    const html = fs.readFileSync(new URL('./navigation.html', import.meta.url));
+    server = createServer((request, response) => {
+      const url = new URL(request.url, 'http://127.0.0.1');
+      requests.push({method: request.method, path: url.pathname, query: url.searchParams.get('q')});
+      const allowed = request.method === 'GET' && ['/', '/search'].includes(url.pathname);
+      response.writeHead(allowed ? 200 : 404, {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store'});
+      response.end(allowed ? html : 'Not found');
+    });
+    await new Promise((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', resolve);
+    });
+    const origin = `http://127.0.0.1:${server.address().port}`;
+    result.home = await navigate('local-form', `${origin}/`, 15000);
+    if (!await evaluate(`(() => {
+      const input = document.querySelector('#query');
+      input.focus();
+      input.select();
+      return document.activeElement === input;
+    })()`)) throw new Error('Local search field did not receive focus');
+    await cdp.call('Input.insertText', {text: 'hello'}, session);
+    if (await evaluate('document.querySelector("#query").value') !== 'hello') {
+      throw new Error('Local search field did not receive hello');
+    }
+    await screenshot('local-input');
+    phase('local-submit');
+    await pressEnter();
+    const expected = `${origin}/search?q=hello`;
+    result.result = await ready(expected, 15000);
+    await delay(2000);
+    result.state = await evaluate(`({url: location.href, ready: document.readyState,
+      query: window.navigationProbe?.query, text: document.querySelector('#result')?.textContent})`);
+    if (result.state.url !== expected || result.state.ready !== 'complete' || result.state.query !== 'hello' ||
+        result.state.text !== 'Search result: hello' || await evaluate('6 * 7') !== 42 ||
+        !requests.some(request => request.method === 'GET' && request.path === '/search' && request.query === 'hello')) {
+      throw new Error(`Local form submission/navigation failed: ${JSON.stringify(result.state)}`);
+    }
+    await screenshot('local-results');
+    if (cdp.failure) throw cdp.failure;
+    result.status = 'PASS';
+    result.reason = 'Local HTTP form input, Enter submission, result content and renderer liveness verified';
+  } catch (error) {
+    result.status = 'FAIL';
+    result.reason = error.message;
+    throw error;
+  } finally {
+    result.requests = requests;
+    if (server) {
+      server.closeAllConnections();
+      await new Promise(resolve => server.close(resolve));
+    }
+    save();
+  }
+}
 
 async function pageHTML(name) {
   try {
@@ -168,7 +250,7 @@ async function baiduSearch() {
     let input;
     do {
       issue.last_page = await baiduState();
-      if (issue.last_page.challenge) throw new Incomplete('Baidu presented a verification challenge');
+      if (issue.last_page.challenge) throw new Incomplete('Baidu presented a verification challenge', 'captcha');
       input = await evaluate(`(() => {
         // Prefer the current homepage editor, then the classic search form.
         // Keep editable fallbacks within Baidu's search container, not login forms.
@@ -220,9 +302,7 @@ async function baiduSearch() {
     await screenshot('baidu-input');
     await pageHTML('baidu-input');
     phase('baidu-submit');
-    const enter = {key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13};
-    await cdp.call('Input.dispatchKeyEvent', {type: 'keyDown', ...enter, text: '\r', unmodifiedText: '\r'}, session);
-    await cdp.call('Input.dispatchKeyEvent', {type: 'keyUp', ...enter}, session);
+    await pressEnter();
     issue.steps.push({name: 'submit', method: 'Enter'});
     phase('baidu-results');
     const deadline = Date.now() + 30000;
@@ -232,7 +312,7 @@ async function baiduSearch() {
         const state = await baiduState();
         issue.last_page = state;
         save();
-        if (state.challenge) throw new Incomplete('Baidu presented a verification challenge after submission');
+        if (state.challenge) throw new Incomplete('Baidu presented a verification challenge after submission', 'captcha');
         if (state.resultURL && state.query === 'hello' && state.ready === 'complete' && state.resultCount > 0) {
           // Require the result renderer to remain alive, not just commit the URL.
           await delay(2000);
@@ -261,7 +341,12 @@ async function baiduSearch() {
     issue.reason = error.message;
     if (!cdp.failure && (error instanceof Incomplete || networkFailure(error))) {
       try {
-        if (await evaluate('6 * 7', 5000) === 42) issue.status = 'INCOMPLETE';
+        if (await evaluate('6 * 7', 5000) === 42) {
+          issue.status = 'INCOMPLETE';
+          issue.renderer_responsive = true;
+          issue.blocked_by = error.blockedBy ?? (networkFailure(error) ? 'network' : null);
+          if (issue.blocked_by) report.warnings.push(`Baidu #1316 remains INCOMPLETE: ${issue.blocked_by}`);
+        }
       } catch (livenessError) { issue.reason += `; liveness check: ${livenessError.message}`; }
     }
     if (issue.status === 'FAIL') processSnapshot(true, 'baidu-');
@@ -392,7 +477,10 @@ try {
   report.pages.push(await navigate('local', config.local_url));
   report.javascript = await evaluate('window.smoke');
   if (!report.javascript?.success) throw new Error(`Local JS/Wasm failed: ${JSON.stringify(report.javascript)}`);
-  if (config.mode === 'gui') await baiduSearch();
+  if (config.mode === 'gui') {
+    await localInteraction();
+    await baiduSearch();
+  }
   phase('version');
   const version = await navigate('version', 'chrome://version/');
   report.pages.push(version);

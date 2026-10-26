@@ -28,8 +28,8 @@ architecture or Rosetta execution and validates every Mach-O file against the
 selected architecture. The jobs do not cancel each other on failure. A final
 comparison job shows every target's actual OS version, bundle version and
 baseline results.
-The comparison also shows separate GUI issue results for startup responsiveness
-(#1286) and the Baidu search reproduction (#1316).
+The comparison also shows local HTTP input/navigation, GUI startup responsiveness
+(#1286), and the separate Baidu search reproduction (#1316).
 
 ## Run the M156 comparison
 
@@ -90,6 +90,15 @@ Each baseline requires a responsive startup page, a local HTML page with
 JavaScript/typed-array/BigInt/RegExp/WebAssembly checks, `chrome://version`,
 `chrome://newtab`, and a final local renderer liveness check.
 
+The GUI baseline also requires a local HTTP interaction check. A temporary
+server bound to `127.0.0.1` serves `navigation.html`. The browser focuses the
+input, inserts `hello` through CDP, submits with Enter, and must load
+`/search?q=hello` with the expected result text. The harness verifies that the
+server received the GET request and that the renderer stays responsive. This
+exercises real input and document navigation without relying on a public site's
+availability. The server is closed after the check; screenshots and requests
+are retained under `interaction` and `local-*-page.png`.
+
 The GUI run records two issue-specific results before the capability checks:
 
 - **#1286:** wait for the startup page, obtain the browser window through CDP,
@@ -123,7 +132,11 @@ to help distinguish a hosted runner limitation from a browser regression.
 
 Google navigation remains an additional diagnostic. An explicit Google network
 failure alone does not prevent an overall pass if the renderer is responsive.
-An unverified Baidu reproduction always prevents an overall pass.
+A Baidu CAPTCHA or network block remains `INCOMPLETE`, with `blocked_by` set
+to `captcha` or `network`. It can coexist with an overall smoke `PASS` only when
+the local HTTP interaction check passes and Baidu's renderer still responds.
+No CAPTCHA is bypassed and no successful Baidu search is claimed. Missing or
+changed input fields, missing search results, crashes and hangs are not exempt.
 
 | Status | Meaning |
 | --- | --- |
@@ -134,10 +147,13 @@ An unverified Baidu reproduction always prevents an overall pass.
 Network/verification problems are only marked `INCOMPLETE` when the renderer
 still executes JavaScript. An unresponsive or crashed renderer is `FAIL`.
 The overall result gives failures precedence over incomplete checks, and is
-`PASS` only when both baselines and the required startup/Baidu checks pass;
+`PASS` only when both baselines and required startup/local interaction checks
+pass, and Baidu either passes or has a verified external block as described
+above. `external_blocked: true` records that exception in the probe JSON.
 WebGL/audio diagnostics are displayed separately. Headless does
 not run the GUI issue/capability checks; its issue columns show a dash. Missing
-GUI results in the final comparison are `INCOMPLETE`, never a pass. Exit codes
+GUI results in the final comparison are `INCOMPLETE`, never a pass. An overall
+smoke `PASS` does not mean the full #1316 reproduction passed. Exit codes
 are 0 for `PASS`, 1 for `FAIL`, and 2 for `INCOMPLETE`; Actions stays non-green
 for either unsuccessful outcome, while the summary explains the distinction.
 

@@ -236,8 +236,8 @@ jobs:
           expected = [('14', 'arm64'), ('15', 'x64'), ('15', 'arm64')] if selected == '14' else [
               (selected, 'x64'), (selected, 'arm64')]
           lines = ['### Native macOS comparison', '',
-                   '| Target | Actual macOS | Bundle version | Headless | GUI | Startup #1286 | Baidu #1316 | WebGL (diagnostic) | Audio (diagnostic) | Overall |',
-                   '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |']
+                   '| Target | Actual macOS | Bundle version | Headless | GUI | Local input/navigation | Startup #1286 | Baidu #1316 | WebGL (diagnostic) | Audio (diagnostic) | Overall |',
+                   '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |']
           def status(probe):
               return probe.get('status', 'INCOMPLETE')
           for os_version, arch in expected:
@@ -245,9 +245,11 @@ jobs:
               probes = report.get('probes', {})
               issues = probes.get('gui', {}).get('issues', {})
               capabilities = probes.get('gui', {}).get('capabilities', {})
+              interaction = probes.get('gui', {}).get('interaction') or {}
               version = report.get('bundle', {}).get('CFBundleShortVersionString', 'missing')
               lines.append(f"| macOS {os_version} / {arch} | {report.get('os_version', 'missing')} | {version} | "
                            f"{status(probes.get('headless', {}))} | {status(probes.get('gui', {}))} | "
+                           f"{status(interaction)} | "
                            f"{status(issues.get('1286', {}))} | {status(issues.get('1316', {}))} | "
                            f"{status(capabilities.get('webgl', {}))} | {status(capabilities.get('audio', {}))} | "
                            f"{status(report)} |")
@@ -255,7 +257,9 @@ jobs:
                     '(including network blocks, CAPTCHA, missing page elements or reports). Only PASS is green. '
                     'Startup checks browser/window/renderer responsiveness, not native control input. '
                     'WebGL/audio failures are diagnostic-only; crashes, required CDP timeouts and renderer hangs '
-                    'during them still fail the run. An incomplete Baidu search prevents an overall PASS. '
+                    'during them still fail the run. Baidu CAPTCHA/network blocks remain INCOMPLETE but may '
+                    'coexist with smoke PASS after local HTTP input/navigation and liveness pass. '
+                    'Missing inputs/results, crashes and hangs are not exempt. Smoke PASS does not mean #1316 passed. '
                     'Consult the artifacts for issue steps, capability results, logs, screenshots and crash data.']
           text = '\n'.join(lines) + '\n'
           Path('comparison.md').write_text(text)

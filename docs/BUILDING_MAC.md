@@ -50,6 +50,10 @@ Use:
 - [`other/Mac/mac_ARM_args.gn`](../other/Mac/mac_ARM_args.gn) for Apple Silicon
   ARM64.
 
+For Linux x64 cross-builds targeting ARM64, `setup.py --mac` applies the required
+V8 configuration automatically. No additional V8 overrides are needed in the
+release or debug `args.gn`.
+
 Confirm the selected target before building:
 
 ```shell

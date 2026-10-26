@@ -243,14 +243,15 @@ def main():
         write_json(results / "summary.json", report)
         lines = [f"### macOS {report.get('os_version', 'unknown')} / {args.arch}: {report['status']}",
                  f"Expected version: `{args.expected_version}`", "",
-                 "| Probe | Overall | Core | Startup #1286 | Baidu #1316 | WebGL (diagnostic) | Audio (diagnostic) |",
-                 "| --- | --- | --- | --- | --- | --- | --- |"]
+                 "| Probe | Overall | Core | Local input/navigation | Startup #1286 | Baidu #1316 | WebGL (diagnostic) | Audio (diagnostic) |",
+                 "| --- | --- | --- | --- | --- | --- | --- | --- |"]
         for name, probe in report["probes"].items():
             issues = probe.get("issues", {})
             capabilities = probe.get("capabilities", {})
             issue_statuses = [issues.get(key, {}).get("status", "—") for key in ("1286", "1316")]
             capability_statuses = [capabilities.get(key, {}).get("status", "—") for key in ("webgl", "audio")]
             values = [name, probe.get("status", "INCOMPLETE"), probe.get("core_status", "INCOMPLETE"),
+                      (probe.get("interaction") or {}).get("status", "—"),
                       *issue_statuses, *capability_statuses]
             lines.append("| " + " | ".join(values) + " |")
         lines.append("")
@@ -263,7 +264,9 @@ def main():
                   "", "WebGL and audio are independent diagnostics and do not determine the overall status. "
                   "Crashes, required CDP timeouts and unresponsive renderers during these checks still fail the run. "
                   "See gui/gpu-info.json and browser logs when investigating GPU capability failures.",
-                  "", "An incomplete Baidu reproduction prevents an overall PASS. "
+                  "", "Baidu CAPTCHA/network blocks remain INCOMPLETE and may coexist with an overall PASS "
+                  "only after local HTTP input/navigation and renderer liveness pass. "
+                  "Missing inputs/results, crashes and hangs are not exempt. A smoke PASS does not mean #1316 passed. "
                   "Diagnostic passes do not replace baseline results. See the uploaded JSON, logs and dumps."]
         lines += [f"\nError: {error}" for error in report["errors"]]
         summary = "\n".join(lines) + "\n"
