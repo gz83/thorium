@@ -1,0 +1,266 @@
+name: Compare macOS x64 and ARM64 artifacts
+
+on:
+  workflow_call:
+    inputs:
+      current_run_artifact:
+        description: Download architecture-specific artifacts from the caller run
+        type: boolean
+        default: true
+      source_run_id:
+        description: Earlier same-repository run containing the DMG artifacts
+        type: string
+        default: ""
+      artifact_prefix:
+        description: Artifact names are this prefix followed by -x64 or -arm64
+        type: string
+        default: thorium-macos
+      release_tag:
+        description: Same-repository release to test instead of artifacts
+        type: string
+        default: ""
+      x64_asset:
+        description: Exact x64 DMG filename in the release or artifact
+        type: string
+        default: Thorium_MacOS_x64.dmg
+      arm64_asset:
+        description: Exact ARM64 DMG filename in the release or artifact
+        type: string
+        default: Thorium_MacOS_ARM64.dmg
+      expected_version:
+        description: Version required in both application bundles
+        type: string
+        default: 156.0.8078.28
+      macos_version:
+        description: 14 tests Sonoma ARM64 plus native 15 controls; 15 or 26 tests both architectures
+        type: string
+        default: "14"
+      x64_sha256:
+        description: Optional expected x64 DMG SHA-256
+        type: string
+        default: ""
+      arm64_sha256:
+        description: Optional expected ARM64 DMG SHA-256
+        type: string
+        default: ""
+  workflow_dispatch:
+    inputs:
+      current_run_artifact:
+        description: Download artifacts from this run (normally false)
+        type: boolean
+        default: false
+      source_run_id:
+        description: Earlier run ID (clear release_tag when using this)
+        type: string
+        default: ""
+      artifact_prefix:
+        description: Artifact names are this prefix followed by -x64 or -arm64
+        type: string
+        default: thorium-macos
+      release_tag:
+        description: Same-repository release containing both DMGs
+        type: string
+        default: M156.0.8078.28
+      x64_asset:
+        description: Exact x64 DMG filename
+        type: string
+        default: Thorium_MacOS_x64.dmg
+      arm64_asset:
+        description: Exact ARM64 DMG filename
+        type: string
+        default: Thorium_MacOS_ARM64.dmg
+      expected_version:
+        description: Version required in both application bundles
+        type: string
+        default: 156.0.8078.28
+      macos_version:
+        description: 14 tests ARM64 plus x64/ARM64 controls on 15; 15 or 26 tests both architectures
+        type: choice
+        default: "14"
+        options:
+          - "14"
+          - "15"
+          - "26"
+      x64_sha256:
+        description: Optional expected x64 DMG SHA-256
+        type: string
+        default: ""
+      arm64_sha256:
+        description: Optional expected ARM64 DMG SHA-256
+        type: string
+        default: ""
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  smoke-test:
+    name: macOS ${{ matrix.os }} / ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Sonoma has a standard ARM64 runner; Intel Sonoma requires a paid
+        # larger runner. Keep a native x64/ARM64 pair on 15 as the control.
+        include: ${{ fromJSON(inputs.macos_version == '14' && '[{"os":"14","arch":"arm64","runner":"macos-14"},{"os":"15","arch":"x64","runner":"macos-15-intel"},{"os":"15","arch":"arm64","runner":"macos-15"}]' || inputs.macos_version == '26' && '[{"os":"26","arch":"x64","runner":"macos-26-intel"},{"os":"26","arch":"arm64","runner":"macos-26"}]' || '[{"os":"15","arch":"x64","runner":"macos-15-intel"},{"os":"15","arch":"arm64","runner":"macos-15"}]') }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    env:
+      INPUT_DIRECTORY: ${{ github.workspace }}/macos-input
+      RESULT_DIRECTORY: ${{ github.workspace }}/macos-smoke-results
+      ASSET_NAME: ${{ inputs[format('{0}_asset', matrix.arch)] }}
+      EXPECTED_SHA256: ${{ inputs[format('{0}_sha256', matrix.arch)] }}
+      EXPECTED_VERSION: ${{ inputs.expected_version }}
+      TARGET_ARCH: ${{ matrix.arch }}
+      TEST_MACOS_VERSION: ${{ matrix.os }}
+    steps:
+      - name: Check out Thorium test harness
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate input source
+        shell: bash
+        env:
+          CURRENT_RUN_ARTIFACT: ${{ inputs.current_run_artifact }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          MACOS_VERSION: ${{ inputs.macos_version }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$INPUT_DIRECTORY" "$RESULT_DIRECTORY"
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          e = os.environ
+          source = {key: e.get(key, '') for key in (
+              'CURRENT_RUN_ARTIFACT', 'SOURCE_RUN_ID', 'RELEASE_TAG', 'ASSET_NAME',
+              'EXPECTED_SHA256', 'EXPECTED_VERSION', 'MACOS_VERSION', 'TEST_MACOS_VERSION', 'TARGET_ARCH',
+              'GITHUB_REPOSITORY', 'GITHUB_SHA', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT')}
+          pathlib.Path(e['RESULT_DIRECTORY'], 'input.json').write_text(json.dumps(source, indent=2))
+          count = sum((e['CURRENT_RUN_ARTIFACT'] == 'true', bool(e['SOURCE_RUN_ID']), bool(e['RELEASE_TAG'])))
+          if count != 1:
+              raise SystemExit('Select exactly one of current_run_artifact, source_run_id, or release_tag.')
+          if e['MACOS_VERSION'] not in ('14', '15', '26'):
+              raise SystemExit('macos_version must be 14, 15 or 26.')
+          if e['SOURCE_RUN_ID'] and not re.fullmatch(r'[0-9]+', e['SOURCE_RUN_ID']):
+              raise SystemExit('source_run_id must be numeric.')
+          if e['RELEASE_TAG'] and not re.fullmatch(r'[0-9A-Za-z][0-9A-Za-z._+-]{0,127}', e['RELEASE_TAG']):
+              raise SystemExit('release_tag must be a safely named release tag.')
+          if not re.fullmatch(r'[0-9A-Za-z][0-9A-Za-z._+-]*\.dmg', e['ASSET_NAME']):
+              raise SystemExit('asset must be one exact DMG filename, without directory or wildcard.')
+          if not re.fullmatch(r'\d+\.\d+\.\d+\.\d+', e['EXPECTED_VERSION']):
+              raise SystemExit('expected_version must be a four-part version.')
+          if e['EXPECTED_SHA256'] and not re.fullmatch(r'[0-9a-fA-F]{64}', e['EXPECTED_SHA256']):
+              raise SystemExit('expected SHA-256 must have 64 hexadecimal characters.')
+          PY
+
+      - name: Download artifact from caller run
+        if: ${{ inputs.current_run_artifact }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ inputs.artifact_prefix }}-${{ matrix.arch }}
+          path: ${{ env.INPUT_DIRECTORY }}
+
+      - name: Download artifact from an earlier run
+        if: ${{ inputs.source_run_id != '' && !inputs.current_run_artifact }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ inputs.artifact_prefix }}-${{ matrix.arch }}
+          path: ${{ env.INPUT_DIRECTORY }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download DMG from a release
+        if: ${{ inputs.release_tag != '' && !inputs.current_run_artifact }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern "$ASSET_NAME" --dir "$INPUT_DIRECTORY"
+
+      - name: Install and test native Thorium
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 infra/macos/smoke_test.py \
+            --dmg "$INPUT_DIRECTORY/$ASSET_NAME" \
+            --arch "$TARGET_ARCH" \
+            --expected-version "$EXPECTED_VERSION" \
+            --expected-sha256 "$EXPECTED_SHA256" \
+            --results "$RESULT_DIRECTORY"
+
+      - name: Upload smoke-test report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos-smoke-${{ matrix.os }}-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.RESULT_DIRECTORY }}
+          if-no-files-found: error
+          retention-days: 14
+
+  compare:
+    name: Compare native results
+    if: ${{ always() }}
+    needs: smoke-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: macos-smoke-*-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports
+
+      - name: Summarize comparison
+        shell: bash
+        env:
+          MACOS_VERSION: ${{ inputs.macos_version }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          reports = {}
+          for source in Path('reports').glob('*/summary.json'):
+              data = json.loads(source.read_text())
+              reports[(data.get('expected_macos_version'), data['arch'])] = data
+          selected = os.environ['MACOS_VERSION']
+          expected = [('14', 'arm64'), ('15', 'x64'), ('15', 'arm64')] if selected == '14' else [
+              (selected, 'x64'), (selected, 'arm64')]
+          lines = ['### Native macOS comparison', '',
+                   '| Target | Actual macOS | Bundle version | Headless | GUI | Startup #1286 | Baidu #1316 | Overall |',
+                   '| --- | --- | --- | --- | --- | --- | --- | --- |']
+          def status(probe):
+              return probe.get('status', 'INCOMPLETE')
+          for os_version, arch in expected:
+              report = reports.get((os_version, arch), {})
+              probes = report.get('probes', {})
+              issues = probes.get('gui', {}).get('issues', {})
+              version = report.get('bundle', {}).get('CFBundleShortVersionString', 'missing')
+              lines.append(f"| macOS {os_version} / {arch} | {report.get('os_version', 'missing')} | {version} | "
+                           f"{status(probes.get('headless', {}))} | {status(probes.get('gui', {}))} | "
+                           f"{status(issues.get('1286', {}))} | {status(issues.get('1316', {}))} | "
+                           f"{status(report)} |")
+          lines += ['', 'PASS = completed successfully; FAIL = a check failed; INCOMPLETE = not verified '
+                    '(including network blocks, CAPTCHA, missing page elements or reports). Only PASS is green. '
+                    'Startup checks browser/window/renderer responsiveness, not native control input. '
+                    'Consult the artifacts for issue steps, capability results, logs, screenshots and crash data.']
+          text = '\n'.join(lines) + '\n'
+          Path('comparison.md').write_text(text)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write(text)
+          print(text)
+          statuses = [status(reports.get(target, {})) for target in expected]
+          if 'FAIL' in statuses:
+              raise SystemExit(1)
+          if any(value != 'PASS' for value in statuses):
+              raise SystemExit(2)
+          PY

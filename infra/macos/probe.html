@@ -1,0 +1,79 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Thorium macOS smoke test</title>
+<h1>Thorium macOS smoke test</h1>
+<pre id="result">PENDING</pre>
+<canvas id="canvas" width="64" height="64"></canvas>
+<script>
+window.smoke = {success: false};
+try {
+  if (new Uint32Array([3, 5, 8, 13]).reduce((a, b) => a + b) !== 29 ||
+      2n ** 64n !== 18446744073709551616n || !/^Thorium\s+macOS$/u.test('Thorium macOS')) {
+    throw new Error('JavaScript validation failed');
+  }
+  const wasm = new WebAssembly.Instance(new WebAssembly.Module(new Uint8Array([
+    0,97,115,109,1,0,0,0,1,5,1,96,0,1,127,3,2,1,0,
+    7,10,1,6,97,110,115,119,101,114,0,0,10,6,1,4,0,65,42,11
+  ])));
+  if (wasm.exports.answer() !== 42) throw new Error('WebAssembly validation failed');
+  window.smoke = {success: true, wasm: 42, typedArrays: true, bigint: true, regexp: true};
+  document.querySelector('#result').textContent = 'THORIUM_MACOS_SMOKE_OK';
+} catch (error) {
+  window.smoke.error = String(error);
+  document.querySelector('#result').textContent = String(error);
+}
+
+window.checkWebGL = () => {
+  const gl = document.querySelector('#canvas').getContext('webgl');
+  if (!gl) throw new Error('WebGL context unavailable');
+  const compile = (type, source) => {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      throw new Error(gl.getShaderInfoLog(shader));
+    }
+    return shader;
+  };
+  const program = gl.createProgram();
+  gl.attachShader(program, compile(gl.VERTEX_SHADER,
+    'attribute vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }'));
+  gl.attachShader(program, compile(gl.FRAGMENT_SHADER,
+    'precision mediump float; void main() { gl_FragColor = vec4(0.25, 0.5, 0.75, 1.0); }'));
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,3,-1,-1,3]), gl.STATIC_DRAW);
+  const position = gl.getAttribLocation(program, 'p');
+  gl.enableVertexAttribArray(position);
+  gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+  gl.viewport(0, 0, 64, 64);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  const pixel = new Uint8Array(4);
+  gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+  if (pixel.some((value, i) => Math.abs(value - [64,128,191,255][i]) > 2)) {
+    throw new Error(`WebGL readback mismatch: ${pixel}`);
+  }
+  const ext = gl.getExtension('WEBGL_debug_renderer_info');
+  const renderer = gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER);
+  return {renderer, pixel: Array.from(pixel)};
+};
+
+window.checkAudio = async () => {
+  const audio = new OfflineAudioContext(1, 4096, 48000);
+  const oscillator = audio.createOscillator();
+  const gain = audio.createGain();
+  oscillator.frequency.value = 440;
+  gain.gain.value = 0.25;
+  oscillator.connect(gain).connect(audio.destination);
+  oscillator.start();
+  const samples = (await audio.startRendering()).getChannelData(0);
+  const peak = samples.reduce((a, b) => Math.max(a, Math.abs(b)), 0);
+  const rms = Math.sqrt(samples.reduce((a, b) => a + b * b, 0) / samples.length);
+  if (!Number.isFinite(peak) || !Number.isFinite(rms) || peak < 0.2 || rms < 0.1) {
+    throw new Error(`OfflineAudioContext invalid: ${peak}, ${rms}`);
+  }
+  return {peak, rms};
+};
+</script>

@@ -109,6 +109,10 @@ The runner architecture does not have to match the application architecture;
 it performs packaging and ad-hoc signing rather than compilation. This process
 does not provide Developer ID signing or Apple notarization.
 
+To compare packaged x64 and ARM64 applications on native GitHub Actions
+runners, use the [macOS smoke-test workflow](../infra/macos/README.md). It tests
+both DMGs at the same version and preserves renderer crash and hang diagnostics.
+
 Thorium's macOS 26 icon pipeline is maintained under
 [`logos/NEW/mac/gen`](../logos/NEW/mac/gen). Generated `Assets.car` and
 `app.icns` are repository resources; follow that directory's README when they
