@@ -243,14 +243,15 @@ def main():
         write_json(results / "summary.json", report)
         lines = [f"### macOS {report.get('os_version', 'unknown')} / {args.arch}: {report['status']}",
                  f"Expected version: `{args.expected_version}`", "",
-                 "| Probe | Overall | Startup #1286 | Baidu #1316 | WebGL | Audio |",
-                 "| --- | --- | --- | --- | --- | --- |"]
+                 "| Probe | Overall | Core | Startup #1286 | Baidu #1316 | WebGL (diagnostic) | Audio (diagnostic) |",
+                 "| --- | --- | --- | --- | --- | --- | --- |"]
         for name, probe in report["probes"].items():
             issues = probe.get("issues", {})
             capabilities = probe.get("capabilities", {})
             issue_statuses = [issues.get(key, {}).get("status", "—") for key in ("1286", "1316")]
             capability_statuses = [capabilities.get(key, {}).get("status", "—") for key in ("webgl", "audio")]
-            values = [name, probe.get("status", "INCOMPLETE"), *issue_statuses, *capability_statuses]
+            values = [name, probe.get("status", "INCOMPLETE"), probe.get("core_status", "INCOMPLETE"),
+                      *issue_statuses, *capability_statuses]
             lines.append("| " + " | ".join(values) + " |")
         lines.append("")
         for issue, result in report["probes"].get("gui", {}).get("issues", {}).items():
@@ -259,6 +260,9 @@ def main():
         lines += ["", "PASS = completed successfully; FAIL = a check failed; INCOMPLETE = not verified. "
                   "Missing GUI issue results are unverified, not a pass. Startup checks browser/window/renderer "
                   "responsiveness, not native control input.",
+                  "", "WebGL and audio are independent diagnostics and do not determine the overall status. "
+                  "Crashes, required CDP timeouts and unresponsive renderers during these checks still fail the run. "
+                  "See gui/gpu-info.json and browser logs when investigating GPU capability failures.",
                   "", "An incomplete Baidu reproduction prevents an overall PASS. "
                   "Diagnostic passes do not replace baseline results. See the uploaded JSON, logs and dumps."]
         lines += [f"\nError: {error}" for error in report["errors"]]

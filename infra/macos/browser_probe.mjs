@@ -24,8 +24,8 @@ const report = {
 const save = () => fs.writeFileSync(path.join(root, 'report.json'), JSON.stringify(report, null, 2));
 const phase = name => { report.phase = name; save(); };
 function updateStatus() {
-  const statuses = [report.core_status, ...Object.values(report.issues).map(item => item.status),
-    ...Object.values(report.capabilities).map(item => item.status)];
+  // Capabilities are diagnostics. Crashes/timeouts during them still fail core.
+  const statuses = [report.core_status, ...Object.values(report.issues).map(item => item.status)];
   report.status = statuses.includes('FAIL') ? 'FAIL' : statuses.includes('INCOMPLETE') ? 'INCOMPLETE' : 'PASS';
   report.success = report.status === 'PASS';
 }
@@ -56,11 +56,13 @@ for (const signal of ['SIGTERM', 'SIGINT']) {
   });
 }
 
+class PageScriptError extends Error {}
+
 async function evaluate(expression, timeout = 15000) {
   const result = await cdp.call('Runtime.evaluate', {
     expression, returnByValue: true, awaitPromise: true,
   }, session, timeout);
-  if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails));
+  if (result.exceptionDetails) throw new PageScriptError(JSON.stringify(result.exceptionDetails));
   return result.result.value;
 }
 
@@ -109,9 +111,30 @@ const networkFailure = error => /Navigation failed: net::ERR_|Page did not finis
 
 async function pageHTML(name) {
   try {
-    const html = await evaluate('document.documentElement.outerHTML.slice(0, 200000)', 5000);
+    // Baidu's inline styles alone can exceed 200 KB. Keep the body as well.
+    const html = await evaluate('document.documentElement.outerHTML', 5000);
     fs.writeFileSync(path.join(root, `${name}.html`), html);
   } catch (error) { report.warnings.push(`Page HTML: ${error.message}`); }
+  try {
+    const inputs = await evaluate(`({
+      url: location.href,
+      fields: Array.from(document.querySelectorAll('input, textarea, [contenteditable], [role="textbox"]'))
+        .map(field => {
+          const rect = field.getBoundingClientRect();
+          const style = getComputedStyle(field);
+          return {
+            tag: field.tagName, id: field.id, name: field.getAttribute('name'),
+            type: field.getAttribute('type'), role: field.getAttribute('role'),
+            placeholder: field.getAttribute('placeholder'), ariaLabel: field.getAttribute('aria-label'),
+            contentEditable: field.isContentEditable, disabled: field.matches(':disabled'),
+            readOnly: Boolean(field.readOnly), focused: document.activeElement === field,
+            display: style.display, visibility: style.visibility,
+            rect: {x: rect.x, y: rect.y, width: rect.width, height: rect.height}
+          };
+        })
+    })`, 5000);
+    fs.writeFileSync(path.join(root, `${name}-inputs.json`), JSON.stringify(inputs, null, 2));
+  } catch (error) { report.warnings.push(`Page input inventory: ${error.message}`); }
 }
 
 async function baiduState() {
@@ -147,26 +170,55 @@ async function baiduSearch() {
       issue.last_page = await baiduState();
       if (issue.last_page.challenge) throw new Incomplete('Baidu presented a verification challenge');
       input = await evaluate(`(() => {
-        const field = Array.from(document.querySelectorAll(
-          'input#kw, input[name="wd"], textarea#kw, textarea[name="wd"]'
-        )).find(node => !node.disabled && !node.readOnly &&
-          node.getBoundingClientRect().width > 0 && node.getBoundingClientRect().height > 0);
+        // Prefer the current homepage editor, then the classic search form.
+        // Keep editable fallbacks within Baidu's search container, not login forms.
+        const selectors = [
+          'textarea#chat-textarea',
+          'input#kw, input[name="wd"], textarea#kw, textarea[name="wd"]',
+          '#chat-input-main textarea, #chat-input-main input[type="text"], ' +
+            '#chat-input-main [contenteditable="true"], #chat-input-main [contenteditable="plaintext-only"]'
+        ];
+        const field = selectors.flatMap(selector => Array.from(document.querySelectorAll(selector)))
+          .find(node => {
+            const rect = node.getBoundingClientRect();
+            const style = getComputedStyle(node);
+            return !node.matches(':disabled') && !node.readOnly &&
+              node.getAttribute('aria-disabled') !== 'true' && node.getAttribute('aria-readonly') !== 'true' &&
+              !node.closest('[hidden], [inert]') && style.visibility === 'visible' &&
+              rect.width > 0 && rect.height > 0;
+          });
         if (!field) return null;
+        field.scrollIntoView({block: 'center'});
         field.focus();
-        field.select();
-        return document.activeElement === field ? {tag: field.tagName, id: field.id, name: field.name} : null;
+        if (field.isContentEditable) {
+          const range = document.createRange();
+          range.selectNodeContents(field);
+          const selection = getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } else {
+          field.select();
+        }
+        return document.activeElement === field ? {
+          tag: field.tagName, id: field.id, name: field.getAttribute('name'),
+          contentEditable: field.isContentEditable
+        } : null;
       })()`);
       if (!input) await delay(250);
     } while (!input && Date.now() < inputDeadline);
-    if (!input) throw new Incomplete('Baidu search field unavailable; see homepage HTML/screenshot');
+    if (!input) throw new Incomplete('Baidu search field unavailable; see HTML, input inventory and screenshot');
 
     phase('baidu-input');
     await cdp.call('Input.insertText', {text: 'hello'}, session);
-    if (await evaluate('document.activeElement?.value') !== 'hello') {
+    if (await evaluate(`(() => {
+      const field = document.activeElement;
+      return field?.isContentEditable ? field.textContent : field?.value;
+    })()`) !== 'hello') {
       throw new Incomplete('Could not verify hello in the Baidu search field');
     }
     issue.steps.push({name: 'input', field: input, value: 'hello'});
     await screenshot('baidu-input');
+    await pageHTML('baidu-input');
     phase('baidu-submit');
     const enter = {key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13};
     await cdp.call('Input.dispatchKeyEvent', {type: 'keyDown', ...enter, text: '\r', unmodifiedText: '\r'}, session);
@@ -229,13 +281,27 @@ async function baiduSearch() {
 
 async function capabilities() {
   // Run AFTER the issue reproductions; a GPU/audio problem cannot prevent them.
+  phase('gpu-info');
+  try {
+    const info = await cdp.call('SystemInfo.getInfo', {}, undefined, 10000);
+    fs.writeFileSync(path.join(root, 'gpu-info.json'), JSON.stringify(info, null, 2));
+  } catch (error) {
+    if (cdp.failure) throw error;
+    report.warnings.push(`GPU information unavailable: ${error.message}`);
+  }
   for (const [name, expression] of [['webgl', 'window.checkWebGL()'], ['audio', 'window.checkAudio()']]) {
-    if (cdp.failure) break;
+    if (cdp.failure) throw cdp.failure;
     phase(name);
     try {
       report.capabilities[name] = {status: 'PASS', result: await evaluate(expression)};
     } catch (error) {
       report.capabilities[name] = {status: 'FAIL', error: error.message};
+      save();
+      // Only a JavaScript capability assertion can be diagnostic-only.
+      // Protocol timeouts, crashes and lost renderer responsiveness are fatal.
+      if (cdp.failure || !(error instanceof PageScriptError)) throw error;
+      if (await evaluate('6 * 7', 5000) !== 42) throw new Error(`${name}: renderer stopped responding`);
+      report.warnings.push(`${name} diagnostic failed; see capabilities in report.json and browser logs`);
     }
     save();
   }

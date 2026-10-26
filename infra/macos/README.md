@@ -97,20 +97,29 @@ The GUI run records two issue-specific results before the capability checks:
   window and renderer responsiveness; it does not exercise native toolbar/menu
   input or establish that every kind of UI freeze is absent.
 - **#1316:** open `https://www.baidu.com/`, focus a visible search field, insert
-  `hello` with CDP input, and submit with Enter. A pass requires a Baidu `/s`
+  `hello` with CDP input, and submit with Enter. Both the current `#chat-textarea`
+  editor and classic `#kw`/`name="wd"` fields are supported, with editable
+  fallbacks limited to the search container. A pass requires a Baidu `/s`
   URL with `wd=hello`, actual result entries/headings, a loaded document, and a
   renderer that remains responsive after a two-second observation. The original
   direct navigation to the result URL is not used. Homepage/input/result
-  screenshots, bounded HTML snapshots and step details are retained when
-  available. CAPTCHA is recorded without attempting to bypass it.
+  screenshots, full HTML snapshots, input inventories and step details are
+  retained when available. HTML is not truncated: inline styles can otherwise
+  consume the entire snapshot before the input DOM. The `*-inputs.json` files
+  record field identities, editability, focus and geometry to help diagnose
+  future page changes. CAPTCHA is recorded without attempting to bypass it.
 
 The GUI run then performs WebGL shader compilation, drawing and pixel readback,
 and `OfflineAudioContext` rendering as independent checks. A WebGL API/shader
 failure does not skip audio, and neither check can prevent the earlier issue
 reproductions. A renderer/process crash still stops checks that can no longer
-run. Capability failures remain failures in the overall report. The recorded
-WebGL renderer can indicate software rendering; a pass does not necessarily
-imply physical GPU acceleration.
+run. Capability assertion failures are shown separately as diagnostic `FAIL`
+results and do not determine the overall status or trigger flag retries. A
+required CDP timeout or renderer hang/crash during these checks still fails the
+baseline. The recorded WebGL renderer can indicate software rendering; a pass
+does not necessarily imply physical GPU acceleration. `gui/gpu-info.json`
+records CDP GPU devices, feature status and driver workarounds when available,
+to help distinguish a hosted runner limitation from a browser regression.
 
 Google navigation remains an additional diagnostic. An explicit Google network
 failure alone does not prevent an overall pass if the renderer is responsive.
@@ -125,7 +134,8 @@ An unverified Baidu reproduction always prevents an overall pass.
 Network/verification problems are only marked `INCOMPLETE` when the renderer
 still executes JavaScript. An unresponsive or crashed renderer is `FAIL`.
 The overall result gives failures precedence over incomplete checks, and is
-`PASS` only when both baselines and all required GUI checks pass. Headless does
+`PASS` only when both baselines and the required startup/Baidu checks pass;
+WebGL/audio diagnostics are displayed separately. Headless does
 not run the GUI issue/capability checks; its issue columns show a dash. Missing
 GUI results in the final comparison are `INCOMPLETE`, never a pass. Exit codes
 are 0 for `PASS`, 1 for `FAIL`, and 2 for `INCOMPLETE`; Actions stays non-green
@@ -140,8 +150,8 @@ After a baseline `FAIL`, three independent runs add only `--disable-extensions`,
 `--disable-gpu`, or `--no-sandbox`, using a fresh profile each time and repeating
 the same suite. If both baseline modes fail, diagnostics use headless mode;
 otherwise they use the failing mode. A diagnostic pass never changes a baseline
-failure into success. Disabling the GPU may itself make the GUI WebGL check fail;
-the earlier local JavaScript and issue results remain available in the report.
+failure into success. Disabling the GPU may itself make the GUI WebGL diagnostic
+fail without changing the core/issue result.
 An `INCOMPLETE` result alone does not trigger these diagnostic flag changes.
 
 ## Reading the evidence
@@ -152,8 +162,8 @@ Each `macos-smoke-<os>-<arch>-<run>-<attempt>` artifact contains:
   package hash, bundle identity, Mach-O architectures, UUIDs and load commands;
 - signature, entitlement and extended-attribute inspection output;
 - separate baseline and diagnostic directories with browser stdout/stderr,
-  phase-tagged DevTools events, page/issue/capability results, Baidu HTML
-  snapshots and available screenshots;
+  phase-tagged DevTools events, page/issue/capability results, GPU information,
+  full Baidu HTML snapshots, input inventories and available screenshots;
 - a dedicated Crashpad database, fallback profile crash files, and new Thorium
   system diagnostic reports;
 - process lists and attempted `sample` thread stacks captured **before** killing
