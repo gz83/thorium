@@ -872,6 +872,131 @@ index 12f3e94602ca7..f0be37c231e0f 100644
  
      if (glic::GlicEnabling::IsProfileEligible(browser_view->GetProfile())) {
        tab_strip_action_container =
+diff --git a/chrome/browser/ui/views/frame/immersive_mode_controller_mac.mm b/chrome/browser/ui/views/frame/immersive_mode_controller_mac.mm
+index 6b50d8b400261..7f7d656fb161a 100644
+--- a/chrome/browser/ui/views/frame/immersive_mode_controller_mac.mm
++++ b/chrome/browser/ui/views/frame/immersive_mode_controller_mac.mm
+@@ -19,6 +19,7 @@
+ #include "chrome/browser/ui/find_bar/find_bar.h"
+ #include "chrome/browser/ui/find_bar/find_bar_controller.h"
+ #include "chrome/browser/ui/fullscreen_util_mac.h"
++#include "chrome/browser/ui/layout_constants.h"
+ #include "chrome/browser/ui/views/frame/browser_frame_view_mac.h"
+ #include "chrome/browser/ui/views/frame/browser_view.h"
+ #include "chrome/browser/ui/views/frame/tab_strip_region_view.h"
+@@ -27,6 +28,7 @@
+ #include "chrome/browser/ui/views/omnibox/omnibox_popup_presenter_base.h"
+ #include "components/constrained_window/constrained_window_views.h"
+ #include "components/remote_cocoa/app_shim/features.h"
++#include "ui/base/ui_base_features.h"
+ #include "ui/gfx/geometry/insets.h"
+ #include "ui/gfx/geometry/rect.h"
+ #include "ui/gfx/geometry/size.h"
+@@ -104,11 +106,20 @@ void ImmersiveModeControllerMac::SetEnabled(bool enabled) {
+     // Vertical tab strip should stay visible and will not be reparented to the
+     // tab overlay.
+     if (separate_tab_strip_ && !browser_view_->ShouldDrawVerticalTabStrip()) {
++      const gfx::Insets tab_strip_insets = GetTabStripRegionViewInsets();
+       tab_widget_height_ = browser_view_->tab_strip_view()->height();
+       tab_widget_height_ += static_cast<BrowserFrameViewMac*>(
+                                 browser_view_->browser_widget()->GetFrameView())
+                                 ->GetTopInset(false);
+ 
++      if (features::IsThorium2024()) {
++        // The separate fullscreen overlay has its own top inset and no
++        // caption-button exclusion area. Size it for the compact tabs.
++        tab_widget_height_ =
++            GetLayoutConstant(LayoutConstant::kTabStripHeight) +
++            tab_strip_insets.height();
++      }
++
+       browser_view_->tab_overlay_widget()->SetSize(gfx::Size(
+           browser_view_->top_container()->size().width(), tab_widget_height_));
+       browser_view_->tab_overlay_widget()->Show();
+@@ -119,7 +130,13 @@ void ImmersiveModeControllerMac::SetEnabled(bool enabled) {
+           static_cast<views::View*>(browser_view_->tab_strip_view()));
+ 
+       browser_view_->tab_strip_view()->SetBorder(
+-          views::CreateEmptyBorder(GetTabStripRegionViewInsets()));
++          views::CreateEmptyBorder(tab_strip_insets));
++      if (features::IsThorium2024()) {
++        // Reparenting preserves bounds. Discard the normal window's caption
++        // offsets now that the overlay border provides the required insets.
++        browser_view_->tab_strip_view()->SetBoundsRect(
++            gfx::Rect(browser_view_->tab_overlay_widget()->GetSize()));
++      }
+ 
+       views::NativeWidgetMacNSWindowHost* tab_overlay_host =
+           views::NativeWidgetMacNSWindowHost::GetFromNativeWindow(
+diff --git a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
+index 389c6f8c6e667..c596777575cce 100644
+--- a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
++++ b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
+@@ -333,6 +333,27 @@ int BrowserViewTabbedLayoutImpl::GetHorizontalTabStripLeadingMargin(
+   return leading_margin;
+ }
+ 
++gfx::Rect BrowserViewTabbedLayoutImpl::GetHorizontalTabStripBounds(
++    const BrowserLayoutParams& params) const {
++  const TabStripRegionView* const tab_strip =
++      views().horizontal_tab_strip_region_view;
++  gfx::Rect bounds = GetBoundsWithExclusion(
++      params, tab_strip, GetHorizontalTabStripLeadingMargin(params));
++#if BUILDFLAG(IS_MAC)
++  if (features::IsThorium2024()) {
++    // macOS reserves space for the caption buttons that can exceed the compact
++    // tab height. Keep that space above the entire tab strip, including its
++    // buttons, so the fixed-height tabs still overlap the toolbar below.
++    const int tab_strip_height =
++        GetLayoutConstant(LayoutConstant::kTabStripHeight) +
++        tab_strip->GetInsets().height();
++    bounds.Inset(gfx::Insets::TLBR(
++        std::max(0, bounds.height() - tab_strip_height), 0, 0, 0));
++  }
++#endif
++  return bounds;
++}
++
+ int BrowserViewTabbedLayoutImpl::GetVerticalTabStripContentOverlap() const {
+ #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_WIN)
+   // On fractional display scaling (e.g. 1.25x, 1.5x), overlap the content area
+@@ -800,9 +821,7 @@ BrowserViewTabbedLayoutImpl::CalculateProposedLayout(
+                    views().browser_view)) {
+     gfx::Rect tabstrip_bounds;
+     if (layout_data_->tab_strip_type == TabStripType::kHorizontal) {
+-      const int leading_margin = GetHorizontalTabStripLeadingMargin(params);
+-      tabstrip_bounds = GetBoundsWithExclusion(
+-          params, views().horizontal_tab_strip_region_view, leading_margin);
++      tabstrip_bounds = GetHorizontalTabStripBounds(params);
+       params.SetTop(tabstrip_bounds.bottom() -
+                     GetLayoutConstant(LayoutConstant::kTabstripToolbarOverlap));
+       needs_exclusion = false;
+@@ -1371,9 +1390,7 @@ gfx::Rect BrowserViewTabbedLayoutImpl::CalculateTopContainerLayout(
+                    views().top_container)) {
+     gfx::Rect tabstrip_bounds;
+     if (layout_data_->tab_strip_type == TabStripType::kHorizontal) {
+-      const int leading_margin = GetHorizontalTabStripLeadingMargin(params);
+-      tabstrip_bounds = GetBoundsWithExclusion(
+-          params, views().horizontal_tab_strip_region_view, leading_margin);
++      tabstrip_bounds = GetHorizontalTabStripBounds(params);
+       params.SetTop(tabstrip_bounds.bottom() -
+                     GetLayoutConstant(LayoutConstant::kTabstripToolbarOverlap));
+       needs_exclusion = false;
+diff --git a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.h b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.h
+index 462a89218b72f..e35ae35a3d849 100644
+--- a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.h
++++ b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.h
+@@ -78,6 +78,10 @@ class BrowserViewTabbedLayoutImpl : public BrowserViewLayoutImpl {
+   int GetHorizontalTabStripLeadingMargin(
+       const BrowserLayoutParams& params) const;
+ 
++  // Returns the horizontal tab strip bounds, keeping compact tabs flush with
++  // the toolbar when the caption buttons require a taller region.
++  gfx::Rect GetHorizontalTabStripBounds(const BrowserLayoutParams& params) const;
++
+   // Returns the overlap in DIPs between the vertical tab strip and the content
+   // area to prevent subpixel seams on fractional displays.
+   int GetVerticalTabStripContentOverlap() const;
 diff --git a/chrome/browser/ui/views/frame/opaque_browser_frame_view.cc b/chrome/browser/ui/views/frame/opaque_browser_frame_view.cc
 index 62f69255e0ecb..e6437efa0838c 100644
 --- a/chrome/browser/ui/views/frame/opaque_browser_frame_view.cc

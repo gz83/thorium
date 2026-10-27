@@ -3921,10 +3921,10 @@ index a44e84e3d40ec..b68e8c88ef555 100644
    CHECK(IsParentedToAndVisible(views().multi_contents_view,
                                 views().browser_view));
 diff --git a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
-index 389c6f8c6e667..f03c63edb856f 100644
+index c596777575cce..9c5a06ce4b3b8 100644
 --- a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
 +++ b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
-@@ -1174,6 +1174,9 @@ BrowserViewTabbedLayoutImpl::CalculateProposedLayout(
+@@ -1193,6 +1193,9 @@ BrowserViewTabbedLayoutImpl::CalculateProposedLayout(
        side_panel_is_animating || vertical_tab_strip_animation.current_motion,
        is_origin_changing);
  
