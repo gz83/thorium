@@ -90,6 +90,12 @@
      "Shows a quick enable/disable section for installed extensions in the extensions menu.",
      kOsDesktop, FEATURE_VALUE_TYPE(features::kExtensionsMenuQuickToggle)},
 #endif  // BUILDFLAG(ENABLE_EXTENSIONS) && !BUILDFLAG(IS_ANDROID)
+#if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
+    {"allow-offstore-extension-downloads",
+     "Allow Third-Party Extension Downloads",
+     "Allows downloaded CRX files to be installed when developer mode is enabled on the extensions page. CRX signatures, permission prompts, and extension policies still apply. Android also requires experimental extension support. Only enable this for sources you trust.",
+     kOsAll, SINGLE_VALUE_TYPE("allow-offstore-extension-downloads")},
+#endif  // BUILDFLAG(ENABLE_EXTENSIONS_CORE)
     {"classic-omnibox",
      "Classic Omnibox UI",
      "Changes the omnibox shape to be more square.",

@@ -57,6 +57,7 @@ Choose a build that matches your CPU. A binary compiled for an unsupported SIMD 
 
 - Preinstalls classic uBlock Origin when Chromium's preinstall provider processes a new supported profile. Existing profiles are not force-backfilled, and uninstalling it prevents automatic reinstallation.
 - Includes Manifest V2 support, increased declarative-net-request limits, a quick extension toggle menu, and extension keyboard shortcuts.
+- In extension developer mode, **Install CRX file** on `thorium://extensions` opens a local file picker on desktop and Android. To also install third-party CRX files directly from downloads, enable `thorium://flags/#allow-offstore-extension-downloads`, relaunch, and enable developer mode on the extensions page. This option is off by default; CRX signatures, permission prompts, and extension policies still apply.
 - Includes experimental desktop-style extension support on Android, disabled by default, and an option to enable extensions in Incognito. To install and use Android extensions, open `chrome://flags/#enable-extensions-android`, select **Enabled**, and relaunch Thorium. **Default** currently leaves this feature disabled.
 
 #### Platform Integration and Tools

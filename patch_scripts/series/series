@@ -176,6 +176,7 @@ other/enable-extension-in-incognito.patch
 other/add-quick-extension-toggle-menu.patch
 other/enable-android-devtools-frontend.patch
 other/android-extensions-opt-in-ui.patch
+other/developer-crx-installation.patch
 
 # 95 - Conditional / platform-specific overlays that are still active.
 [raspi] other/linux-widevine-cdm-locations.patch

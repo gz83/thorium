@@ -1,0 +1,834 @@
+diff --git a/chrome/app/extensions_strings.grdp b/chrome/app/extensions_strings.grdp
+index 81b367007b76f..f3cd5c527f3bc 100644
+--- a/chrome/app/extensions_strings.grdp
++++ b/chrome/app/extensions_strings.grdp
+@@ -572,6 +572,9 @@
+   <message name="IDS_EXTENSIONS_SIDEBAR_KEYBOARD_SHORTCUTS" desc="The text for the link to manage keyboard shortcuts for extensions.">
+     Keyboard shortcuts
+   </message>
++  <message name="IDS_EXTENSIONS_TOOLBAR_INSTALL_CRX" desc="Button and file picker title for installing a local CRX extension file in developer mode.">
++    Install CRX file
++  </message>
+   <message name="IDS_EXTENSIONS_TOOLBAR_LOAD_UNPACKED" desc="The text displayed in the toolbar to load an unpacked extension.">
+     Load unpacked
+   </message>
+diff --git a/chrome/browser/download/android/download_manager_service.cc b/chrome/browser/download/android/download_manager_service.cc
+index bb457ce03611f..9e1a147a3efc4 100644
+--- a/chrome/browser/download/android/download_manager_service.cc
++++ b/chrome/browser/download/android/download_manager_service.cc
+@@ -25,6 +25,7 @@
+ #include "chrome/browser/download/android/download_startup_utils.h"
+ #include "chrome/browser/download/android/download_utils.h"
+ #include "chrome/browser/download/android/service/download_task_scheduler.h"
++#include "chrome/browser/download/download_crx_util.h"
+ #include "chrome/browser/download/offline_item_utils.h"
+ #include "chrome/browser/download/simple_download_manager_coordinator_factory.h"
+ #include "chrome/browser/flags/android/chrome_feature_list.h"
+@@ -46,6 +47,7 @@
+ #include "content/public/browser/browser_context.h"
+ #include "content/public/browser/download_item_utils.h"
+ #include "content/public/browser/download_request_utils.h"
++#include "extensions/buildflags/buildflags.h"
+ #include "net/url_request/referrer_policy.h"
+ #include "third_party/blink/public/common/mime_util/mime_util.h"
+ #include "url/android/gurl_android.h"
+@@ -216,6 +218,16 @@ void DownloadManagerService::OnOffTheRecordProfileCreated(
+ 
+ void DownloadManagerService::OpenDownload(download::DownloadItem* download,
+                                           int source) {
++#if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
++  auto* context = content::DownloadItemUtils::GetBrowserContext(download);
++  if (context && download_crx_util::OffStoreInstallAllowedByUser(
++                     Profile::FromBrowserContext(context), *download)) {
++    // Use the browser's CRX installer and permission dialog rather than an
++    // ACTION_VIEW intent that requires an external CRX handler.
++    download->OpenDownload();
++    return;
++  }
++#endif
+   if (java_ref_.is_null())
+     return;
+ 
+diff --git a/chrome/browser/download/chrome_download_manager_delegate.cc b/chrome/browser/download/chrome_download_manager_delegate.cc
+index d2f5facf033e2..db7bb6f502a93 100644
+--- a/chrome/browser/download/chrome_download_manager_delegate.cc
++++ b/chrome/browser/download/chrome_download_manager_delegate.cc
+@@ -1155,17 +1155,25 @@ bool ChromeDownloadManagerDelegate::ShouldOpenDownload(
+     DownloadItem* item,
+     content::DownloadOpenDelayedCallback callback) {
+ #if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
+-  if (extensions::util::IsExtensionDownload(*item) &&
++  const bool user_allows_offstore =
++      download_crx_util::OffStoreInstallAllowedByUser(profile_, *item);
++  if ((extensions::util::IsExtensionDownload(*item) || user_allows_offstore) &&
+       !extensions::WebstoreInstaller::GetAssociatedApproval(*item) &&
+       !profile_->IsOffTheRecord()) {
+     scoped_refptr<CrxInstaller> installer(
+         download_crx_util::CreateCrxInstaller(profile_, *item));
+ 
+-    if (download_crx_util::OffStoreInstallAllowedByPrefs(profile_, *item)) {
++    if (download_crx_util::OffStoreInstallAllowedByPrefs(profile_, *item) ||
++        user_allows_offstore) {
+       installer->set_off_store_install_allow_reason(
+           CrxInstaller::OffStoreInstallAllowedBecausePref);
+     }
+ 
++    if (user_allows_offstore) {
++      // Keep third-party downloads available for retries, including
++      // cancellation.
++      installer->set_delete_source(false);
++    }
+     auto token = base::UnguessableToken::Create();
+     running_crx_installs_[token] = installer;
+ 
+@@ -1415,6 +1423,14 @@ void ChromeDownloadManagerDelegate::OpenDownload(DownloadItem* download) {
+   MaybeSendDangerousDownloadOpenedReport(download,
+                                          false /* show_download_in_folder */);
+ 
++#if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
++  // Explicit opens (including saved application/octet-stream CRXs) do not pass
++  // through the completion-time ShouldOpenDownload hook again.
++  if (download_crx_util::OffStoreInstallAllowedByUser(profile_, *download)) {
++    ShouldOpenDownload(download, base::DoNothing());
++    return;
++  }
++#endif
+ #if BUILDFLAG(IS_ANDROID)
+   DownloadUtils::OpenDownload(download, DownloadOpenSource::kUnknown);
+ #else
+diff --git a/chrome/browser/download/download_crx_util.cc b/chrome/browser/download/download_crx_util.cc
+index 77e32a025e108..37ba7915bd982 100644
+--- a/chrome/browser/download/download_crx_util.cc
++++ b/chrome/browser/download/download_crx_util.cc
+@@ -9,13 +9,17 @@
+ #include <memory>
+ 
+ #include "base/auto_reset.h"
++#include "base/command_line.h"
++#include "base/feature_list.h"
+ #include "build/build_config.h"
+ #include "chrome/browser/extensions/browser_window_util.h"
+ #include "chrome/browser/extensions/extension_install_prompt.h"
+ #include "chrome/browser/extensions/extension_management.h"
+ #include "chrome/browser/profiles/profile.h"
+ #include "chrome/browser/tab_list/tab_list_interface.h"
++#include "chrome/common/pref_names.h"
+ #include "components/download/public/common/download_item.h"
++#include "components/prefs/pref_service.h"
+ #include "content/public/browser/browser_thread.h"
+ #include "content/public/browser/download_item_utils.h"
+ #include "extensions/browser/crx_installer.h"
+@@ -24,7 +28,9 @@
+ #include "extensions/browser/webstore_installer.h"
+ #include "extensions/buildflags/buildflags.h"
+ #include "extensions/common/extension.h"
++#include "extensions/common/extension_features.h"
+ #include "extensions/common/extension_urls.h"
++#include "extensions/common/switches.h"
+ #include "extensions/common/user_script.h"
+ 
+ #if !BUILDFLAG(IS_ANDROID)
+@@ -95,6 +101,32 @@ bool OffStoreInstallAllowedByPrefs(Profile* profile, const DownloadItem& item) {
+              ->IsOffstoreInstallAllowed(item.GetURL(), item.GetReferrerUrl());
+ }
+ 
++bool OffStoreInstallAllowedByUser(Profile* profile, const DownloadItem& item) {
++  const auto* command_line = base::CommandLine::ForCurrentProcess();
++  if (!command_line->HasSwitch("allow-offstore-extension-downloads") ||
++      command_line->HasSwitch(extensions::switches::kDisableExtensions) ||
++      profile->IsOffTheRecord() || profile->IsChild() ||
++      !profile->GetPrefs()->GetBoolean(prefs::kExtensionsUIDeveloperMode) ||
++      (item.GetMimeType() != extensions::Extension::kMimeType &&
++       !item.GetFileNameToReportUser().MatchesExtension(
++           FILE_PATH_LITERAL(".crx")))) {
++    return false;
++  }
++#if BUILDFLAG(IS_ANDROID)
++  if (!base::FeatureList::IsEnabled(
++          extensions_features::kEnableExtensionsAndroid)) {
++    return false;
++  }
++#endif
++  // Keep the Web Store's additional proof requirement, including approved
++  // installs and downloads redirected from a Web Store URL.
++  return !WebstoreInstaller::GetAssociatedApproval(item) &&
++         !extension_urls::IsWebstoreDomain(item.GetOriginalUrl()) &&
++         !extension_urls::IsWebstoreUpdateUrl(item.GetOriginalUrl()) &&
++         !extension_urls::IsWebstoreDomain(item.GetURL()) &&
++         !extension_urls::IsWebstoreUpdateUrl(item.GetURL());
++}
++
+ // Tests can call this method to inject a mock ExtensionInstallPrompt
+ // to be used to confirm permissions on a downloaded CRX.
+ void SetMockInstallPromptForTesting(
+diff --git a/chrome/browser/download/download_crx_util.h b/chrome/browser/download/download_crx_util.h
+index aed7efd0ce10a..32b80225e9ecf 100644
+--- a/chrome/browser/download/download_crx_util.h
++++ b/chrome/browser/download/download_crx_util.h
+@@ -44,6 +44,11 @@ bool IsTrustedExtensionDownload(Profile* profile,
+ std::unique_ptr<base::AutoReset<bool>> OverrideOffstoreInstallAllowedForTesting(
+     bool allowed);
+ 
++// Whether the user explicitly opted into downloaded CRX installation in
++// developer mode. This grants installation permission, not download trust.
++bool OffStoreInstallAllowedByUser(Profile* profile,
++                                  const download::DownloadItem& item);
++
+ // Returns true if an offstore extension download should be allowed to proceed.
+ // Takes into consideration what's set in
+ // OverrideOffstoreInstallAllowedForTesting
+diff --git a/chrome/browser/extensions/api/developer_private/developer_private_api_unittest.cc b/chrome/browser/extensions/api/developer_private/developer_private_api_unittest.cc
+index 590c3f975dca5..bc8636e887b0b 100644
+--- a/chrome/browser/extensions/api/developer_private/developer_private_api_unittest.cc
++++ b/chrome/browser/extensions/api/developer_private/developer_private_api_unittest.cc
+@@ -466,7 +466,12 @@ class DeveloperPrivateApiUnitTest : public ExtensionServiceTestWithInstall {
+       delete;
+ 
+  protected:
+-  DeveloperPrivateApiUnitTest() = default;
++  DeveloperPrivateApiUnitTest() {
++#if BUILDFLAG(IS_ANDROID)
++    feature_list_.InitAndEnableFeature(
++        extensions_features::kEnableExtensionsAndroid);
++#endif
++  }
+   ~DeveloperPrivateApiUnitTest() override = default;
+ 
+   // ExtensionServiceTestBase:
+diff --git a/chrome/browser/extensions/api/developer_private/developer_private_functions.cc b/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
+index 06dfe2db92208..b675715cb83d4 100644
+--- a/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
++++ b/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
+@@ -15,7 +15,9 @@
+ 
+ #include "base/barrier_closure.h"
+ #include "base/debug/crash_logging.h"
++#include "base/feature_list.h"
+ #include "base/files/file_util.h"
++#include "base/functional/bind.h"
+ #include "base/memory/ref_counted.h"
+ #include "base/metrics/histogram_functions.h"
+ #include "base/strings/strcat.h"
+@@ -64,6 +66,7 @@
+ #include "extensions/browser/extension_registry.h"
+ #include "extensions/browser/extension_system.h"
+ #include "extensions/browser/file_highlighter.h"
++#include "extensions/browser/install/crx_install_error.h"
+ #include "extensions/browser/install_verifier.h"
+ #include "extensions/browser/management_policy.h"
+ #include "extensions/browser/manifest_v2_handler.h"
+@@ -76,6 +79,7 @@
+ #include "extensions/browser/unpacked_installer.h"
+ #include "extensions/browser/user_script_manager.h"
+ #include "extensions/buildflags/buildflags.h"
++#include "extensions/common/extension_features.h"
+ #include "extensions/common/manifest_constants.h"
+ #include "extensions/common/manifest_handlers/background_info.h"
+ #include "extensions/common/manifest_handlers/options_page_info.h"
+@@ -92,7 +96,6 @@
+ #include "extensions/browser/extension_function.h"
+ #else  // BUILDFLAG(IS_ANDROID)
+ #include "base/check_is_test.h"
+-#include "base/functional/bind.h"
+ #include "base/functional/callback.h"
+ #include "base/functional/callback_helpers.h"
+ #include "base/lazy_instance.h"
+@@ -329,6 +332,23 @@ void UpdateSiteGroupCountsForExtensionHosts(
+   }
+ }
+ 
++std::optional<std::string> GetLocalInstallError(Profile* profile) {
++  if (profile->IsOffTheRecord() ||
++      supervised_user::AreExtensionsPermissionsEnabled(profile)) {
++    return "Local extension installation is unavailable for this profile.";
++  }
++  if (!profile->GetPrefs()->GetBoolean(prefs::kExtensionsUIDeveloperMode)) {
++    return "Must be in developer mode to install local extensions.";
++  }
++#if BUILDFLAG(IS_ANDROID)
++  if (!base::FeatureList::IsEnabled(
++          extensions_features::kEnableExtensionsAndroid)) {
++    return "Enable Android extension support and relaunch Thorium first.";
++  }
++#endif
++  return std::nullopt;
++}
++
+ // Sets the dropped path to DeveloperPrivateAPI.
+ base::expected<void, std::string> SetDroppedPath(
+     content::WebContents* web_contents,
+@@ -929,6 +949,13 @@ ExtensionFunction::ResponseAction DeveloperPrivateLoadUnpackedFunction::Run() {
+ 
+   if (params->options && params->options->use_dragged_path &&
+       *params->options->use_dragged_path) {
++#if BUILDFLAG(IS_ANDROID)
++    // Android only exposes file paths at drop time, not on dragenter.
++    auto result = SetDroppedPath(web_contents, browser_context());
++    if (!result.has_value()) {
++      return RespondNow(Error(result.error()));
++    }
++#endif
+     DeveloperPrivateAPI* api = DeveloperPrivateAPI::Get(browser_context());
+     ui::FileInfo file = api->GetDraggedFile(web_contents);
+     if (file.path.empty()) {
+@@ -1058,59 +1085,139 @@ void DeveloperPrivateLoadUnpackedFunction::Finish(
+ 
+ DeveloperPrivateInstallDroppedFileFunction::
+     DeveloperPrivateInstallDroppedFileFunction() = default;
++
+ DeveloperPrivateInstallDroppedFileFunction::
+-    ~DeveloperPrivateInstallDroppedFileFunction() = default;
++    ~DeveloperPrivateInstallDroppedFileFunction() {
++  if (select_file_dialog_) {
++    select_file_dialog_->ListenerDestroyed();
++  }
++}
+ 
+ ExtensionFunction::ResponseAction
+ DeveloperPrivateInstallDroppedFileFunction::Run() {
++  auto params = developer::InstallDroppedFile::Params::Create(args());
++  EXTENSION_FUNCTION_VALIDATE(params);
+   content::WebContents* web_contents = GetSenderWebContents();
+   if (!web_contents) {
+     return RespondNow(Error(kCouldNotFindWebContentsError));
+   }
++  if (auto error = GetLocalInstallError(
++          Profile::FromBrowserContext(browser_context()))) {
++    return RespondNow(Error(*error));
++  }
+ 
++  if (params->use_file_picker.value_or(false)) {
++    if (!user_gesture()) {
++      return RespondNow(Error(kRequiresUserGestureError));
++    }
++    AddRef();  // Balanced in Finish(), including cancellation.
++    ShowSelectFileDialog();
++  } else {
+ #if BUILDFLAG(IS_ANDROID)
+-  base::expected<void, std::string> result =
+-      SetDroppedPath(web_contents, browser_context());
+-  if (!result.has_value()) {
+-    return RespondNow(Error(result.error()));
++    auto result = SetDroppedPath(web_contents, browser_context());
++    if (!result.has_value()) {
++      return RespondNow(Error(result.error()));
++    }
++#endif
++    auto file = DeveloperPrivateAPI::Get(browser_context())
++                    ->GetDraggedFile(web_contents);
++    if (file.path.empty()) {
++      return RespondNow(Error("No dragged path"));
++    }
++    AddRef();  // Balanced in Finish().
++    StartInstall(file, /*from_picker=*/false);
+   }
+-#endif  // BUILDFLAG(IS_ANDROID)
++  return did_respond() ? AlreadyResponded() : RespondLater();
++}
+ 
+-  DeveloperPrivateAPI* api = DeveloperPrivateAPI::Get(browser_context());
+-  ui::FileInfo file = api->GetDraggedFile(web_contents);
+-  if (file.path.empty()) {
+-    return RespondNow(Error("No dragged path"));
+-  }
++void DeveloperPrivateInstallDroppedFileFunction::ShowSelectFileDialog() {
++  auto* web_contents = GetSenderWebContents();
++  select_file_dialog_ = ui::SelectFileDialog::Create(
++      this, std::make_unique<ChromeSelectFilePolicy>(web_contents));
++  ui::SelectFileDialog::FileTypeInfo types;
++  types.extensions = {{FILE_PATH_LITERAL("crx")}};
++  // Some Android providers report CRX files as application/octet-stream.
++  // Keep the picker usable for those providers; validate the name below.
++  types.include_all_files = true;
++#if BUILDFLAG(IS_ANDROID)
++  // Use the system document picker, as developerPrivate.choosePath does.
++  select_file_dialog_->SetOpenWritable(true);
++#endif
++  select_file_dialog_->SelectFile(
++      ui::SelectFileDialog::SELECT_OPEN_FILE,
++      l10n_util::GetStringUTF16(IDS_EXTENSIONS_TOOLBAR_INSTALL_CRX),
++      base::FilePath(), &types, 1, base::FilePath::StringType(),
++      platform_util::GetTopLevel(web_contents->GetNativeView()));
++}
++
++void DeveloperPrivateInstallDroppedFileFunction::FileSelected(
++    const ui::SelectedFileInfo& file,
++    int index) {
++  select_file_dialog_.reset();
++  StartInstall(ui::FileInfo(file.path(), base::FilePath(file.display_name)),
++               /*from_picker=*/true);
++}
++
++void DeveloperPrivateInstallDroppedFileFunction::FileSelectionCanceled() {
++  select_file_dialog_.reset();
++  Finish(Error(kFileSelectionCanceled));
++}
+ 
+-  if (MatchesExtension(file, FILE_PATH_LITERAL(".zip"))) {
++void DeveloperPrivateInstallDroppedFileFunction::StartInstall(
++    ui::FileInfo file,
++    bool from_picker) {
++  // The user may disable developer mode while the picker is open.
++  if (auto error = GetLocalInstallError(
++          Profile::FromBrowserContext(browser_context()))) {
++    Finish(Error(*error));
++    return;
++  }
++  auto* web_contents = GetSenderWebContents();
++  if (!web_contents) {
++    Finish(Error(kCouldNotFindWebContentsError));
++    return;
++  }
++  if (!from_picker && MatchesExtension(file, FILE_PATH_LITERAL(".zip"))) {
+     ExtensionRegistrar* registrar = ExtensionRegistrar::Get(browser_context());
+     ZipFileInstaller::Create(
+         GetExtensionFileTaskRunner(),
+         MakeRegisterInExtensionServiceCallback(browser_context()))
+         ->InstallZipFileToUnpackedExtensionsDir(
+             file.path, registrar->unpacked_install_directory());
+-  } else {
+-    auto prompt = std::make_unique<ExtensionInstallPrompt>(
+-        web_contents, std::make_unique<extensions::InstallPromptData>(
+-                          extensions::InstallPromptData::UNSET_PROMPT_TYPE));
+-    scoped_refptr<CrxInstaller> crx_installer =
+-        CrxInstaller::Create(browser_context(), std::move(prompt));
+-    crx_installer->set_error_on_unsupported_requirements(true);
+-    crx_installer->set_off_store_install_allow_reason(
+-        CrxInstaller::OffStoreInstallAllowedFromSettingsPage);
+-    crx_installer->set_install_immediately(true);
+-
+-    if (MatchesExtension(file, FILE_PATH_LITERAL(".crx"))) {
+-      crx_installer->InstallCrx(file.path);
+-    } else {
+-      EXTENSION_FUNCTION_VALIDATE(false);
+-    }
++    Finish(NoArguments());
++    return;
+   }
+-
+-  // TODO(devlin): We could optionally wait to return until we validate whether
+-  // the load succeeded or failed. For now, that's unnecessary, and just adds
+-  // complexity.
+-  return RespondNow(NoArguments());
++  if (!MatchesExtension(file, FILE_PATH_LITERAL(".crx"))) {
++    Finish(Error("Select a .crx extension file."));
++    return;
++  }
++  auto prompt = std::make_unique<ExtensionInstallPrompt>(
++      web_contents, std::make_unique<extensions::InstallPromptData>(
++                        extensions::InstallPromptData::UNSET_PROMPT_TYPE));
++  auto installer = CrxInstaller::Create(browser_context(), std::move(prompt));
++  installer->set_error_on_unsupported_requirements(true);
++  installer->set_off_store_install_allow_reason(
++      CrxInstaller::OffStoreInstallAllowedFromSettingsPage);
++  installer->set_install_immediately(true);
++  installer->AddInstallerCallback(base::BindOnce(
++      [](scoped_refptr<DeveloperPrivateInstallDroppedFileFunction> function,
++         const std::optional<CrxInstallError>& error) {
++        const bool cancelled =
++            error && error->type() == CrxInstallErrorType::OTHER &&
++            error->detail() == CrxInstallErrorDetail::USER_CANCELED;
++        function->Finish(
++            error && !cancelled
++                ? function->Error(base::UTF16ToUTF8(error->message()))
++                : function->NoArguments());
++      },
++      base::WrapRefCounted(this)));
++  installer->InstallCrx(file.path);
++}
++
++void DeveloperPrivateInstallDroppedFileFunction::Finish(
++    ResponseValue response) {
++  Respond(std::move(response));
++  Release();  // Balanced in Run().
+ }
+ 
+ DeveloperPrivateNotifyDragInstallInProgressFunction::
+diff --git a/chrome/browser/extensions/api/developer_private/developer_private_functions.h b/chrome/browser/extensions/api/developer_private/developer_private_functions.h
+index 187c9cf3cf737..40110acc330f9 100644
+--- a/chrome/browser/extensions/api/developer_private/developer_private_functions.h
++++ b/chrome/browser/extensions/api/developer_private/developer_private_functions.h
+@@ -374,12 +374,16 @@ class DeveloperPrivateLoadUnpackedFunction
+ };
+ 
+ class DeveloperPrivateInstallDroppedFileFunction
+-    : public DeveloperPrivateAPIFunction {
++    : public DeveloperPrivateAPIFunction,
++      public ui::SelectFileDialog::Listener {
+  public:
+   DECLARE_EXTENSION_FUNCTION("developerPrivate.installDroppedFile",
+                              DEVELOPERPRIVATE_INSTALLDROPPEDFILE)
+   DeveloperPrivateInstallDroppedFileFunction();
+ 
++  void FileSelected(const ui::SelectedFileInfo& file, int index) override;
++  void FileSelectionCanceled() override;
++
+   DeveloperPrivateInstallDroppedFileFunction(
+       const DeveloperPrivateInstallDroppedFileFunction&) = delete;
+   DeveloperPrivateInstallDroppedFileFunction& operator=(
+@@ -390,6 +394,11 @@ class DeveloperPrivateInstallDroppedFileFunction
+ 
+   // ExtensionFunction:
+   ResponseAction Run() override;
++  void ShowSelectFileDialog();
++  void StartInstall(ui::FileInfo file, bool from_picker);
++  void Finish(ResponseValue response);
++
++  scoped_refptr<ui::SelectFileDialog> select_file_dialog_;
+ };
+ 
+ class DeveloperPrivateNotifyDragInstallInProgressFunction
+diff --git a/chrome/browser/resources/extensions/drag_and_drop_handler.ts b/chrome/browser/resources/extensions/drag_and_drop_handler.ts
+index 111354c843a28..6205d9092ad8b 100644
+--- a/chrome/browser/resources/extensions/drag_and_drop_handler.ts
++++ b/chrome/browser/resources/extensions/drag_and_drop_handler.ts
+@@ -53,7 +53,8 @@ export class DragAndDropHandler implements DragWrapperDelegate {
+ 
+   doDrop(e: DragEvent) {
+     this.fireDragEnded_();
+-    if (e.dataTransfer!.files.length !== 1) {
++    if (!this.dragEnabled || !e.dataTransfer ||
++        e.dataTransfer.files.length !== 1) {
+       return;
+     }
+ 
+@@ -61,14 +62,14 @@ export class DragAndDropHandler implements DragWrapperDelegate {
+ 
+     // Files lack a check if they're a directory, but we can find out through
+     // its item entry.
+-    const item = e.dataTransfer!.items[0]!;
++    const item = e.dataTransfer.items[0];
+     // `DataTransferItem.webkitGetAsEntry()` returns null when the entry isn't
+     // a file or the `DataTransferItem` is not in read/write mode.
+-    const entry = item.webkitGetAsEntry();
+-    if (item.kind === 'file' && entry && entry.isDirectory) {
++    const entry = item?.webkitGetAsEntry();
++    if (item?.kind === 'file' && entry && entry.isDirectory) {
+       handled = true;
+       this.handleDirectoryDrop_();
+-    } else if (/\.(crx|zip)$/i.test(e.dataTransfer!.files[0]!.name)) {
++    } else if (/\.(crx|zip)$/i.test(e.dataTransfer.files[0]!.name)) {
+       // Only process files that look like extensions. Other files should
+       // navigate the browser normally.
+       handled = true;
+@@ -84,7 +85,10 @@ export class DragAndDropHandler implements DragWrapperDelegate {
+    * Handles a dropped file.
+    */
+   private handleFileDrop_() {
+-    Service.getInstance().installDroppedFile();
++    Service.getInstance().installDroppedFile().catch(loadError => {
++      this.eventTarget_.dispatchEvent(
++          new CustomEvent('drag-and-drop-load-error', {detail: loadError}));
++    });
+   }
+ 
+   /**
+diff --git a/chrome/browser/resources/extensions/extensions.ts b/chrome/browser/resources/extensions/extensions.ts
+index 12032e33269db..0f9bd402d160a 100644
+--- a/chrome/browser/resources/extensions/extensions.ts
++++ b/chrome/browser/resources/extensions/extensions.ts
+@@ -46,7 +46,7 @@ export {ExtensionsReviewPanelElement} from './review_panel.js';
+ export {ExtensionsRuntimeHostPermissionsElement} from './runtime_host_permissions.js';
+ export {ExtensionsRuntimeHostsDialogElement, getMatchingUserSpecifiedSites, getPatternFromSite} from './runtime_hosts_dialog.js';
+ export type {ServiceInterface} from './service.js';
+-export {Service} from './service.js';
++export {CrxInstallError, Service} from './service.js';
+ export {ExtensionsSidebarElement} from './sidebar.js';
+ export {ExtensionsSitePermissionsElement} from './site_permissions/site_permissions.js';
+ export {ExtensionsSitePermissionsBySiteElement} from './site_permissions/site_permissions_by_site.js';
+diff --git a/chrome/browser/resources/extensions/load_error.ts b/chrome/browser/resources/extensions/load_error.ts
+index 50ece1a22b04d..5cdf25cab2146 100644
+--- a/chrome/browser/resources/extensions/load_error.ts
++++ b/chrome/browser/resources/extensions/load_error.ts
+@@ -15,12 +15,14 @@ import type {PropertyValues} from 'chrome://resources/lit/v3_0/lit.rollup.js';
+ import type {ExtensionsCodeSectionElement} from './code_section.js';
+ import {getCss} from './load_error.css.js';
+ import {getHtml} from './load_error.html.js';
++import {CrxInstallError} from './service.js';
+ 
+ export interface LoadErrorDelegate {
+   /**
+    * Attempts to load the previously-attempted unpacked extension.
+    */
+   retryLoadUnpacked(retryGuid?: string): Promise<boolean>;
++  installCrxFile(): Promise<void>;
+ }
+ 
+ export interface LoadErrorElement {
+@@ -116,18 +118,19 @@ export class LoadErrorElement extends CrLitElement {
+     this.retrying_ = true;
+     assert(this.delegate);
+     assert(this.loadError);
+-    this.delegate
+-        .retryLoadUnpacked(
++    const retry = this.loadError instanceof CrxInstallError ?
++        this.delegate.installCrxFile() :
++        this.delegate.retryLoadUnpacked(
+             this.loadError instanceof Error ? undefined :
+-                                              this.loadError.retryGuid)
+-        .then(
+-            () => {
+-              this.close();
+-            },
+-            loadError => {
+-              this.loadError = loadError;
+-              this.retrying_ = false;
+-            });
++                                              this.loadError.retryGuid);
++    retry.then(
++        () => {
++          this.close();
++        },
++        loadError => {
++          this.loadError = loadError;
++          this.retrying_ = false;
++        });
+   }
+ }
+ 
+diff --git a/chrome/browser/resources/extensions/manager.html.ts b/chrome/browser/resources/extensions/manager.html.ts
+index 19c6e350823f8..7d3a13d12281b 100644
+--- a/chrome/browser/resources/extensions/manager.html.ts
++++ b/chrome/browser/resources/extensions/manager.html.ts
+@@ -8,8 +8,8 @@ import type {ExtensionsManagerElement} from './manager.js';
+ 
+ export function getHtml(this: ExtensionsManagerElement) {
+   // clang-format off
+-  if (this.androidExtensionsDisabled_) {
+-    return html`
++  return html`<!--_html_template_start_-->
++${this.androidExtensionsDisabled_ ? html`
+       <main id="android-extensions-disabled" aria-labelledby="disabled-title">
+         <h1 id="disabled-title">$i18n{androidExtensionsDisabledTitle}</h1>
+         <p id="disabled-description">$i18n{androidExtensionsDisabledDescription}</p>
+@@ -23,10 +23,8 @@ export function getHtml(this: ExtensionsManagerElement) {
+             aria-describedby="disabled-description">
+           $i18n{toolbarLoadUnpacked}
+         </cr-button>
+-      </main>`;
+-  }
+-
+-  return html`<!--_html_template_start_-->
++      </main>
++` : html`
+ <extensions-drop-overlay ?drag-enabled="${this.inDevMode}">
+ </extensions-drop-overlay>
+ <extensions-toolbar id="toolbar" ?in-dev-mode="${this.inDevMode}"
+@@ -144,6 +142,7 @@ ${this.showInstallWarningsDialog_ ? html`
+   </extensions-install-warnings-dialog>
+ ` : ''}
+ <cr-toast-manager></cr-toast-manager>
++`}
+ <!--_html_template_end_-->`;
+   // clang-format on
+ }
+diff --git a/chrome/browser/resources/extensions/manager.ts b/chrome/browser/resources/extensions/manager.ts
+index a9e1f8836e46d..77a23b3482ad2 100644
+--- a/chrome/browser/resources/extensions/manager.ts
++++ b/chrome/browser/resources/extensions/manager.ts
+@@ -105,6 +105,7 @@ export class ExtensionsManagerElement extends ExtensionsManagerElementBase {
+ 
+   static override get properties() {
+     return {
++      androidExtensionsDisabled_: {type: Boolean},
+       canLoadUnpacked: {type: Boolean},
+       delegate: {type: Object},
+       inDevMode: {type: Boolean},
+@@ -163,7 +164,7 @@ export class ExtensionsManagerElement extends ExtensionsManagerElementBase {
+   }
+ 
+   accessor canLoadUnpacked: boolean = false;
+-  protected readonly androidExtensionsDisabled_: boolean =
++  protected accessor androidExtensionsDisabled_: boolean =
+       loadTimeData.getBoolean('androidExtensionsDisabled');
+   accessor delegate: ServiceInterface = Service.getInstance();
+   accessor inDevMode: boolean = loadTimeData.getBoolean('inDevMode');
+diff --git a/chrome/browser/resources/extensions/service.ts b/chrome/browser/resources/extensions/service.ts
+index b70ac01c6aa25..d4da1442a7dfb 100644
+--- a/chrome/browser/resources/extensions/service.ts
++++ b/chrome/browser/resources/extensions/service.ts
+@@ -28,7 +28,7 @@ export interface ServiceInterface extends ActivityLogDelegate,
+                                           ToolbarDelegate {
+   notifyDragInstallInProgress(): void;
+   loadUnpackedFromDrag(): Promise<boolean>;
+-  installDroppedFile(): void;
++  installDroppedFile(): Promise<void>;
+   getProfileStateChangedTarget():
+       ChromeEvent<(info: chrome.developerPrivate.ProfileInfo) => void>;
+   getProfileConfiguration(): Promise<chrome.developerPrivate.ProfileInfo>;
+@@ -57,6 +57,10 @@ function throwIfIsUnexpectedError(error: Error, functionName: string): void {
+   }
+ }
+ 
++// Distinguish CRX failures so retry opens the file picker, not an unpacked
++// extension's directory chooser.
++export class CrxInstallError extends Error {}
++
+ export class Service implements ServiceInterface {
+   private isDeleting_: boolean = false;
+   private eventsToIgnoreOnce_: Set<string> = new Set();
+@@ -560,8 +564,22 @@ export class Service implements ServiceInterface {
+     return this.loadUnpackedHelper_({useDraggedPath: true});
+   }
+ 
+-  installDroppedFile() {
+-    chrome.developerPrivate.installDroppedFile();
++  async installDroppedFile(): Promise<void> {
++    try {
++      await chrome.developerPrivate.installDroppedFile();
++    } catch (error) {
++      throw new CrxInstallError((error as Error).message);
++    }
++  }
++
++  async installCrxFile(): Promise<void> {
++    try {
++      await chrome.developerPrivate.installDroppedFile(true);
++    } catch (error) {
++      if ((error as Error).message !== 'File selection was canceled.') {
++        throw new CrxInstallError((error as Error).message);
++      }
++    }
+   }
+ 
+   notifyDragInstallInProgress() {
+diff --git a/chrome/browser/resources/extensions/toolbar.html.ts b/chrome/browser/resources/extensions/toolbar.html.ts
+index 2625cca4da818..9b708238559b4 100644
+--- a/chrome/browser/resources/extensions/toolbar.html.ts
++++ b/chrome/browser/resources/extensions/toolbar.html.ts
+@@ -38,6 +38,10 @@ ${this.showPackDialog_ ? html`
+         @click="${this.onLoadUnpackedClick_}">
+       $i18n{toolbarLoadUnpacked}
+     </cr-button>
++    <cr-button ?hidden="${!this.canLoadUnpacked_()}" id="installCrx"
++        @click="${this.onInstallCrxClick_}">
++      $i18n{toolbarInstallCrx}
++    </cr-button>
+     <cr-button id="packExtensions" @click="${this.onPackClick_}">
+       $i18n{toolbarPack}
+     </cr-button>
+diff --git a/chrome/browser/resources/extensions/toolbar.ts b/chrome/browser/resources/extensions/toolbar.ts
+index 178a09a2e5a81..01c4091aaa46d 100644
+--- a/chrome/browser/resources/extensions/toolbar.ts
++++ b/chrome/browser/resources/extensions/toolbar.ts
+@@ -29,6 +29,8 @@ export interface ToolbarDelegate {
+   /** Opens the dialog to load unpacked extensions. */
+   loadUnpacked(): Promise<boolean>;
+ 
++  installCrxFile(): Promise<void>;
++
+   /** Updates all extensions. */
+   updateAllExtensions(extensions: chrome.developerPrivate.ExtensionInfo[]):
+       Promise<void>;
+@@ -36,6 +38,9 @@ export interface ToolbarDelegate {
+ 
+ class DummyToolbarDelegate {
+   setProfileInDevMode(_inDevMode: boolean) {}
++  installCrxFile() {
++    return Promise.resolve();
++  }
+   loadUnpacked() {
+     return Promise.resolve(true);
+   }
+@@ -49,6 +54,7 @@ export interface ExtensionsToolbarElement {
+     devDrawer: HTMLElement,
+     devMode: CrToggleElement,
+     loadUnpacked: HTMLElement,
++    installCrx: HTMLElement,
+     packExtensions: HTMLElement,
+     toolbar: CrToolbarElement,
+     updateNow: HTMLElement,
+@@ -194,6 +200,10 @@ export class ExtensionsToolbarElement extends ExtensionsToolbarElementBase {
+     chrome.metricsPrivate.recordUserAction('Options_LoadUnpackedExtension');
+   }
+ 
++  protected onInstallCrxClick_() {
++    this.delegate.installCrxFile().catch(error => this.fire('load-error', error));
++  }
++
+   protected onPackClick_() {
+     chrome.metricsPrivate.recordUserAction('Options_PackExtension');
+     this.showPackDialog_ = true;
+diff --git a/chrome/browser/ui/webui/extensions/extensions_ui.cc b/chrome/browser/ui/webui/extensions/extensions_ui.cc
+index b234844b437da..ff9e65c1fc290 100644
+--- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
++++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
+@@ -393,6 +393,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
+       {"itemSuspiciousInstallLearnMore",
+        IDS_EXTENSIONS_ADDED_WITHOUT_KNOWLEDGE_LEARN_MORE},
+       {"toolbarDevMode", IDS_EXTENSIONS_DEVELOPER_MODE},
++      {"toolbarInstallCrx", IDS_EXTENSIONS_TOOLBAR_INSTALL_CRX},
+       {"toolbarLoadUnpacked", IDS_EXTENSIONS_TOOLBAR_LOAD_UNPACKED},
+       {"toolbarLoadUnpackedDone", IDS_EXTENSIONS_TOOLBAR_LOAD_UNPACKED_DONE},
+       {"toolbarPack", IDS_EXTENSIONS_TOOLBAR_PACK},
+diff --git a/chrome/common/extensions/api/developer_private.webidl b/chrome/common/extensions/api/developer_private.webidl
+index 7969e26c3bf70..992be4b1d568b 100644
+--- a/chrome/common/extensions/api/developer_private.webidl
++++ b/chrome/common/extensions/api/developer_private.webidl
+@@ -670,9 +670,9 @@ interface DeveloperPrivate {
+   // |PromiseValue|: error
+   static Promise<LoadError?> loadUnpacked(optional LoadUnpackedOptions options);
+ 
+-  // Installs the file that was dragged and dropped onto the associated
+-  // page.
+-  static Promise<undefined> installDroppedFile();
++  // Installs a dropped file, or opens a CRX file picker when useFilePicker is
++  // true. Requires developer mode. Resolves after CRX installation completes.
++  static Promise<undefined> installDroppedFile(optional boolean useFilePicker);
+ 
+   // Notifies the browser that a user began a drag in order to install an
+   // extension.
+diff --git a/chrome/test/data/webui/extensions/test_service.ts b/chrome/test/data/webui/extensions/test_service.ts
+index dc3cc188a72a5..6e89e5ee4112a 100644
+--- a/chrome/test/data/webui/extensions/test_service.ts
++++ b/chrome/test/data/webui/extensions/test_service.ts
+@@ -49,6 +49,7 @@ export class TestService extends TestBrowserProxy implements ServiceInterface {
+       'getUserSiteSettingsChangedTarget',
+       'inspectItemView',
+       'installDroppedFile',
++      'installCrxFile',
+       'loadUnpacked',
+       'loadUnpackedFromDrag',
+       'notifyDragInstallInProgress',
+@@ -380,6 +381,12 @@ export class TestService extends TestBrowserProxy implements ServiceInterface {
+ 
+   installDroppedFile() {
+     this.methodCalled('installDroppedFile');
++    return Promise.resolve();
++  }
++
++  installCrxFile() {
++    this.methodCalled('installCrxFile');
++    return Promise.resolve();
+   }
+ 
+   getUserSiteSettings() {
+diff --git a/extensions/browser/sandboxed_unpacker.cc b/extensions/browser/sandboxed_unpacker.cc
+index f590c5f00affa..8196d0a8b4d53 100644
+--- a/extensions/browser/sandboxed_unpacker.cc
++++ b/extensions/browser/sandboxed_unpacker.cc
+@@ -310,8 +310,10 @@ void SandboxedUnpacker::StartWithCrx(const CRXFileInfo& crx_info) {
+   // or corrupt CRX files, but guarantees that validation operates on the
+   // isolated working copy. Since verification failing is an uncommon case,
+   // this isn't a major performance concern.
++  // Android document URIs may have an opaque, oversized basename rather
++  // than a filesystem filename. The archive's name is not part of its proof.
+   base::FilePath temp_crx_path =
+-      temp_dir_.GetPath().Append(crx_info.path.BaseName());
++      temp_dir_.GetPath().AppendASCII("extension.crx");
+ 
+   if (!base::CopyFile(crx_info.path, temp_crx_path)) {
+     // Failed to copy extension file to temporary directory.
+diff --git a/tools/typescript/definitions/developer_private.d.ts b/tools/typescript/definitions/developer_private.d.ts
+index 7e7fbc9ea96a5..c5be19d493def 100644
+--- a/tools/typescript/definitions/developer_private.d.ts
++++ b/tools/typescript/definitions/developer_private.d.ts
+@@ -454,7 +454,7 @@ declare global {
+           Promise<ExtensionInfo[]>;
+       export function getExtensionSize(id: string): Promise<string>;
+       export function getProfileConfiguration(): Promise<ProfileInfo>;
+-      export function installDroppedFile(): Promise<void>;
++      export function installDroppedFile(useFilePicker?: boolean): Promise<void>;
+       export function loadUnpacked(options: LoadUnpackedOptions):
+           Promise<LoadError|null>;
+       export function notifyDragInstallInProgress(): void;
