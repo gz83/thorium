@@ -67,6 +67,7 @@ overlay-derived, or still need separate provenance review.
 | [`keep-expired-flags.patch`](../other/keep-expired-flags.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) keep expired flags patch |
 | [`allow_manifest_v2_extensions.patch`](../other/allow_manifest_v2_extensions.patch) | [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium) Manifest V2 extension support patch |
 | [`android-extensions-support.patch`](../other/android-extensions-support.patch) | [uazo/Cromite](https://github.com/uazo/cromite) experimental Android extensions support patch |
+| [`android-extensions-opt-in-ui.patch`](../other/android-extensions-opt-in-ui.patch) | Thorium Android extension opt-in instructions and disabled-state UI |
 | [`enable-extension-in-incognito.patch`](../other/enable-extension-in-incognito.patch) | [uazo/Cromite](https://github.com/uazo/cromite) enable extension in incognito patch |
 | [`GPC.patch`](../other/GPC.patch) | Global Privacy Control behavior adapted from privacy-focused Chromium patch references |
 | [`disable-middle-click-paste-with-autoscroll.patch`](../other/disable-middle-click-paste-with-autoscroll.patch) | Thorium-maintained Linux behavior fix for disabling selection clipboard paste paths when Blink MiddleClickAutoscroll is enabled |
@@ -259,6 +260,7 @@ overlay-derived, or still need separate provenance review.
 - [`add-quick-extension-toggle-menu.patch`](../other/add-quick-extension-toggle-menu.patch) - Adds a default-off, `chrome://flags`-controlled quick enable/disable section to the extensions menu. Keeps the menu open when disabling the last extension so it can be re-enabled.
 
 - [`enable-android-devtools-frontend.patch`](../other/enable-android-devtools-frontend.patch) — Ports [Cromite’s Android DevTools frontend patch](https://github.com/uazo/cromite/blob/master/build/patches/Enable-Android-DevTools-Frontend.patch). Enables DevTools and Task Manager on phones, adds More tools to the mobile menu, and allows touch submenus. Uses native feature defaults and follows the Android extension patches.
+- [`android-extensions-opt-in-ui.patch`](../other/android-extensions-opt-in-ui.patch) — Keeps Android extensions opt-in. Exposes the existing feature state to Java and the extensions WebUI, shows localized enabling instructions and a disabled load button when off, and directs menu and toolbar entry points to that page. Follows the Android extension and Incognito bridge patches.
 
 ### 95 - Conditional / platform-specific overlays that are still active.
 

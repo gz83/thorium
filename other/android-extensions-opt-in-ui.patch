@@ -1,0 +1,254 @@
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
+index e19506022196e..9860d2ef16ac4 100644
+--- a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
+@@ -4376,6 +4376,13 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
+             @Nullable MotionEventInfo triggeringMotion) {
+         final Tab currentTab = getActivityTab();
+         boolean currentTabIsNtp = isTabNtp(currentTab);
++        if ((id == R.id.extensions_menu_menu_id || id == R.id.extensions_webstore_menu_id)
++                && !ChromeFeatureList.isEnabled(ChromeFeatureList.ENABLE_EXTENSIONS_ANDROID)) {
++            // The extensions page explains how to opt in before installing extensions.
++            // Reuse the manage-extensions action, including its regular-profile handling.
++            return onMenuOrKeyboardAction(
++                    R.id.manage_extensions_menu_id, fromMenu, menuItemData, triggeringMotion);
++        }
+         if (id == R.id.new_tab_menu_id) {
+             if (!mTabModelSelector.isTabStateInitialized()) {
+                 RecordUserAction.record("MobileMenuNewTab.BeforeTabRestore");
+diff --git a/chrome/app/extensions_strings.grdp b/chrome/app/extensions_strings.grdp
+index 87af106229fb3..81b367007b76f 100644
+--- a/chrome/app/extensions_strings.grdp
++++ b/chrome/app/extensions_strings.grdp
+@@ -1,6 +1,12 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <!-- MD Extensions strings (included from generated_resources.grd). -->
+ <grit-part>
++  <message name="IDS_EXTENSIONS_ANDROID_DISABLED_TITLE" desc="Heading on the extensions page when experimental Android extension support has not been enabled.">
++    Experimental extension support is not enabled
++  </message>
++  <message name="IDS_EXTENSIONS_ANDROID_DISABLED_DESCRIPTION" desc="Instructions above a link to chrome://flags/#enable-extensions-android. Enabled is the option to select in the flag's dropdown. Loading extensions is disabled until the browser is relaunched with this flag enabled.">
++    To install and use extensions, open the flag below, select Enabled, and relaunch Thorium.
++  </message>
+   <message name="IDS_EXTENSIONS_ALLOW_FILE_ACCESS" desc="The checkbox for allowing an extension access to run scripts on file URLs.">
+     Allow access to file URLs
+   </message>
+diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browser/flags/android/chrome_feature_list.cc
+index 7266d1cc1b76a..cb2cad0fc0e93 100644
+--- a/chrome/browser/flags/android/chrome_feature_list.cc
++++ b/chrome/browser/flags/android/chrome_feature_list.cc
+@@ -190,6 +190,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
+     &download::features::kShowDownloadScanningState,
+     &download::features::kSmartSuggestionForLargeDownloads,
+     &enterprise_data_protection::kEnableAndroidEnterpriseScreenshotProtection,
++    &extensions_features::kEnableExtensionsAndroid,
+     &feature_engagement::kIPHTabSwitcherButtonFeature,
+     &features::kAAPMBlocksWebGPU,
+     &features::kAbortNavigationsFromTabClosures,
+diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
+index 4ba732c93e0bf..33371d7fd90bf 100644
+--- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
++++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
+@@ -581,6 +581,7 @@ public abstract class ChromeFeatureList {
+     public static final String ENABLE_ESCAPE_HANDLING_FOR_SECONDARY_ACTIVITIES =
+             "EnableEscapeHandlingForSecondaryActivities";
+     public static final String ENABLE_EXCLUSIVE_ACCESS_MANAGER = "EnableExclusiveAccessManager";
++    public static final String ENABLE_EXTENSIONS_ANDROID = "EnableExtensionsAndroid";
+     public static final String ENABLE_FULLSCREEN_TO_ANY_SCREEN_ANDROID =
+             "EnableFullscreenToAnyScreenAndroid";
+     public static final String ENABLE_PIX_ACCOUNT_LINKING_NATIVE = "EnablePixAccountLinkingNative";
+diff --git a/chrome/browser/resources/extensions/manager.css b/chrome/browser/resources/extensions/manager.css
+index 2304ce6e59636..202bf1f928873 100644
+--- a/chrome/browser/resources/extensions/manager.css
++++ b/chrome/browser/resources/extensions/manager.css
+@@ -19,6 +19,25 @@
+   height: 100%;
+ }
+ 
++#android-extensions-disabled {
++  box-sizing: border-box;
++  line-height: 1.6;
++  margin: 32px auto;
++  max-width: 640px;
++  overflow-wrap: anywhere;
++  padding: 24px;
++  width: 100%;
++}
++
++#android-extensions-disabled h1 {
++  font-size: 1.5rem;
++  line-height: 1.4;
++}
++
++#android-extensions-disabled a {
++  color: var(--cr-link-color);
++}
++
+ #viewManager {
+   flex: 1 1 var(--cr-toolbar-field-width);
+   height: 100%;
+diff --git a/chrome/browser/resources/extensions/manager.html.ts b/chrome/browser/resources/extensions/manager.html.ts
+index 2d8fea7941db0..19c6e350823f8 100644
+--- a/chrome/browser/resources/extensions/manager.html.ts
++++ b/chrome/browser/resources/extensions/manager.html.ts
+@@ -8,6 +8,24 @@ import type {ExtensionsManagerElement} from './manager.js';
+ 
+ export function getHtml(this: ExtensionsManagerElement) {
+   // clang-format off
++  if (this.androidExtensionsDisabled_) {
++    return html`
++      <main id="android-extensions-disabled" aria-labelledby="disabled-title">
++        <h1 id="disabled-title">$i18n{androidExtensionsDisabledTitle}</h1>
++        <p id="disabled-description">$i18n{androidExtensionsDisabledDescription}</p>
++        <p>
++          <a id="enable-extensions-link"
++              href="chrome://flags/#enable-extensions-android">
++            chrome://flags/#enable-extensions-android
++          </a>
++        </p>
++        <cr-button id="loadUnpacked" disabled
++            aria-describedby="disabled-description">
++          $i18n{toolbarLoadUnpacked}
++        </cr-button>
++      </main>`;
++  }
++
+   return html`<!--_html_template_start_-->
+ <extensions-drop-overlay ?drag-enabled="${this.inDevMode}">
+ </extensions-drop-overlay>
+diff --git a/chrome/browser/resources/extensions/manager.ts b/chrome/browser/resources/extensions/manager.ts
+index 522e280c9365f..a9e1f8836e46d 100644
+--- a/chrome/browser/resources/extensions/manager.ts
++++ b/chrome/browser/resources/extensions/manager.ts
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+ import 'chrome://resources/cr_elements/cr_drawer/cr_drawer.js';
+ import 'chrome://resources/cr_elements/cr_lazy_render/cr_lazy_render_lit.js';
+ import 'chrome://resources/cr_elements/cr_toast/cr_toast_manager.js';
+@@ -162,6 +163,8 @@ export class ExtensionsManagerElement extends ExtensionsManagerElementBase {
+   }
+ 
+   accessor canLoadUnpacked: boolean = false;
++  protected readonly androidExtensionsDisabled_: boolean =
++      loadTimeData.getBoolean('androidExtensionsDisabled');
+   accessor delegate: ServiceInterface = Service.getInstance();
+   accessor inDevMode: boolean = loadTimeData.getBoolean('inDevMode');
+   accessor isMv2DeprecationNoticeDismissed: boolean =
+@@ -224,6 +227,10 @@ export class ExtensionsManagerElement extends ExtensionsManagerElementBase {
+     document.documentElement.classList.remove('loading');
+     document.fonts.load('bold 12px Roboto');
+ 
++    if (this.androidExtensionsDisabled_) {
++      return;
++    }
++
+     this.navigationListener_ = navigation.addListener(newPage => {
+       this.changePage_(newPage);
+     });
+@@ -231,6 +238,9 @@ export class ExtensionsManagerElement extends ExtensionsManagerElementBase {
+ 
+   override disconnectedCallback() {
+     super.disconnectedCallback();
++    if (this.androidExtensionsDisabled_) {
++      return;
++    }
+     assert(this.navigationListener_);
+     assert(navigation.removeListener(this.navigationListener_));
+     this.navigationListener_ = null;
+@@ -239,6 +249,11 @@ export class ExtensionsManagerElement extends ExtensionsManagerElementBase {
+   override firstUpdated(changedProperties: PropertyValues<this>) {
+     super.firstUpdated(changedProperties);
+ 
++    if (this.androidExtensionsDisabled_) {
++      this.pageInitializedResolver_.resolve();
++      return;
++    }
++
+     this.addEventListener('load-error', this.onLoadError_);
+     this.addEventListener('view-enter-start', this.onViewEnterStart_);
+     this.addEventListener('view-exit-start', this.onViewExitStart_);
+diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
+index 3dbae6c775cdd..077811174245e 100644
+--- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
++++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
+@@ -26,8 +26,10 @@ import org.chromium.base.supplier.NullableObservableSupplier;
+ import org.chromium.build.annotations.NullMarked;
+ import org.chromium.build.annotations.Nullable;
+ import org.chromium.chrome.browser.feature_engagement.TrackerFactory;
++import org.chromium.chrome.browser.flags.ChromeFeatureList;
+ import org.chromium.chrome.browser.profiles.Profile;
+ import org.chromium.chrome.browser.tab.Tab;
++import org.chromium.chrome.browser.tab.TabLaunchType;
+ import org.chromium.chrome.browser.tabmodel.TabCreator;
+ import org.chromium.chrome.browser.theme.ThemeColorProvider;
+ import org.chromium.chrome.browser.toolbar.MenuBuilderHelper;
+@@ -39,9 +41,12 @@ import org.chromium.chrome.browser.ui.theme.BrandedColorScheme;
+ import org.chromium.chrome.browser.user_education.IphCommandBuilder;
+ import org.chromium.chrome.browser.user_education.UserEducationHelper;
+ import org.chromium.components.browser_ui.styles.SemanticColorUtils;
++import org.chromium.components.embedder_support.util.UrlConstants;
+ import org.chromium.components.feature_engagement.EventConstants;
+ import org.chromium.components.feature_engagement.FeatureConstants;
++import org.chromium.content_public.browser.LoadUrlParams;
+ import org.chromium.content_public.browser.WebContents;
++import org.chromium.ui.base.PageTransition;
+ import org.chromium.ui.base.WindowAndroid;
+ import org.chromium.ui.hierarchicalmenu.FlyoutController;
+ import org.chromium.ui.listmenu.ListMenu;
+@@ -267,6 +272,22 @@ public class ExtensionsMenuCoordinator
+      * <p>This should only be called when the menu is about to be shown.
+      */
+     private void createMediator() {
++        if (!ChromeFeatureList.isEnabled(ChromeFeatureList.ENABLE_EXTENSIONS_ANDROID)) {
++            Tab currentTab = mCurrentTabSupplier.get();
++            if (mOpenUrlInCustomTab != null
++                    && currentTab != null
++                    && currentTab.isIncognitoBranded()) {
++                mOpenUrlInCustomTab.onResult(UrlConstants.CHROME_EXTENSIONS_URL);
++            } else {
++                mTabCreator.createNewTab(
++                        new LoadUrlParams(
++                                UrlConstants.CHROME_EXTENSIONS_URL, PageTransition.AUTO_TOPLEVEL),
++                        TabLaunchType.FROM_CHROME_UI,
++                        null);
++            }
++            return;
++        }
++
+         if (mMediator != null) {
+             return;
+         }
+diff --git a/chrome/browser/ui/webui/extensions/extensions_ui.cc b/chrome/browser/ui/webui/extensions/extensions_ui.cc
+index 1c8685d90cafa..b234844b437da 100644
+--- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
++++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
+@@ -9,6 +9,7 @@
+ #include <utility>
+ 
+ #include "base/command_line.h"
++#include "base/feature_list.h"
+ #include "base/functional/bind.h"
+ #include "base/metrics/field_trial_params.h"
+ #include "base/strings/string_util.h"
+@@ -434,6 +435,18 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
+   };
+   source->AddLocalizedStrings(kLocalizedStrings);
+ 
++  source->AddLocalizedString("androidExtensionsDisabledTitle",
++                             IDS_EXTENSIONS_ANDROID_DISABLED_TITLE);
++  source->AddLocalizedString("androidExtensionsDisabledDescription",
++                             IDS_EXTENSIONS_ANDROID_DISABLED_DESCRIPTION);
++#if BUILDFLAG(IS_ANDROID)
++  source->AddBoolean("androidExtensionsDisabled",
++                     !base::FeatureList::IsEnabled(
++                         extensions_features::kEnableExtensionsAndroid));
++#else
++  source->AddBoolean("androidExtensionsDisabled", false);
++#endif
++
+   // Add localized generic strings that need '&' to be removed from them.
+   webui::AddLocalizedString(source, "edit", IDS_EDIT);
+ 
