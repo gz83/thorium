@@ -168,6 +168,10 @@ overlay-derived, or still need separate provenance review.
 - [`add-flag-for-close-confirmation.patch`](../other/add-flag-for-close-confirmation.patch)
 - [`thorium-debug-mode.patch`](../other/thorium-debug-mode.patch)
 - [`thorium-first-run-welcome.patch`](../other/thorium-first-run-welcome.patch)
+- [`thorium-first-run-branding.patch`](../other/thorium-first-run-branding.patch) — Reuses the Thorium product SVG over the embedded Chromium logo in the refreshed first-run illustration shared by Windows, macOS, and Linux.
+
+  Android's first-run sign-in animation uses the matching black inner ring via
+  the [`signin_spin.json` resource overlay](../src/components/browser_ui/styles/android/java/res_chromium/raw/signin_spin.json).
 - [`disable-middle-click-paste-with-autoscroll.patch`](../other/disable-middle-click-paste-with-autoscroll.patch) - Disables Linux middle-click selection paste and paste-and-navigate paths when Blink MiddleClickAutoscroll is enabled.
 - [`views-menu-delay.patch`](../other/views-menu-delay.patch) - Adds `chrome://flags/#instant-menu-show` (disabled by default).
   Enabled preserves Thorium's legacy 1 ms submenu delay and, on Windows, its fixed 400 ms bookmark drag-and-drop hover delay.

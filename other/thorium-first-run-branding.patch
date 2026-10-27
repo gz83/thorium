@@ -1,0 +1,53 @@
+diff --git a/chrome/browser/resources/intro/default_browser/app_refresh.css b/chrome/browser/resources/intro/default_browser/app_refresh.css
+index 52d223a679d78..815ff71dcfa7b 100644
+--- a/chrome/browser/resources/intro/default_browser/app_refresh.css
++++ b/chrome/browser/resources/intro/default_browser/app_refresh.css
+@@ -75,17 +75,16 @@
+ 
+ #showcase-illustration {
+   align-items: flex-start;
++  container-type: size;
+   justify-content: flex-end;
+   position: relative;
+ }
+ 
+ #illustration {
+   border-radius: 1.5rem;
+-  content: url(images/refresh_showcase_illustration.png);
+-  max-height: 100%;
+-  max-width: 100%;
+-  object-fit: contain;
+-  object-position: right center;
++  /* Match the square artwork to the smaller dimension of its container. */
++  height: min(100cqw, 100cqh);
++  width: min(100cqw, 100cqh);
+ }
+ 
+ #showcase-description {
+@@ -186,6 +185,3 @@
+       + var(--header-height))) / 2)));
+ }
+ 
+-:host-context([dir='rtl']) #illustration {
+-  object-position: left center;
+-}
+diff --git a/chrome/browser/resources/intro/default_browser/app_refresh.html.ts b/chrome/browser/resources/intro/default_browser/app_refresh.html.ts
+index 89a20215052e3..d536e82d81ad4 100644
+--- a/chrome/browser/resources/intro/default_browser/app_refresh.html.ts
++++ b/chrome/browser/resources/intro/default_browser/app_refresh.html.ts
+@@ -16,7 +16,14 @@ export function getHtml(this: AppRefreshElement) {
+ <div id="content-div">
+ 
+   <div class="content-child" id="showcase-illustration">
+-    <img id="illustration" alt="">
++    <svg id="illustration" viewBox="0 0 800 800" aria-hidden="true">
++      <image href="images/refresh_showcase_illustration.png"
++          width="800" height="800"></image>
++      <!-- Keep the wallpaper and shadow, but use the same product logo as the
++           rest of first run instead of the logo baked into the illustration. -->
++      <image href="images/product-logo.svg" x="280" y="476"
++          width="240" height="240"></image>
++    </svg>
+   </div>
+ 
+   <div class="content-child" id="showcase-description">

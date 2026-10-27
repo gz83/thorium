@@ -91,6 +91,7 @@ other/GPC.patch
 other/add-flag-for-close-confirmation.patch
 other/thorium-debug-mode.patch
 other/thorium-first-run-welcome.patch
+other/thorium-first-run-branding.patch
 other/disable-middle-click-paste-with-autoscroll.patch
 other/views-menu-delay.patch
 other/new-tab-to-left-context-menu.patch
