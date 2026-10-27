@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 562d8529586fa..ad09b2f13b0a1 100644
+index 723f2e0310971..8b2ccd3b01ed5 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
 @@ -42,7 +42,7 @@ BASE_FEATURE(kAllowEyeDropperWGCScreenCapture,

@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 9073c9e0783f1..f330e247de6b1 100644
+index 458a5ca4a7688..d913d5499f5a9 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -218,6 +218,16 @@ BASE_FEATURE(kPressAndHoldEscToExitBrowserFullscreen,
+@@ -221,6 +221,16 @@ BASE_FEATURE(kPressAndHoldEscToExitBrowserFullscreen,
  BASE_FEATURE(kRightClickToCloseTab,
               base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -20,10 +20,10 @@ index 9073c9e0783f1..f330e247de6b1 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 558814b550ca1..fed34dd73e7aa 100644
+index efbfa8d91d264..bf436aa2a6083 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -392,6 +392,9 @@ bool IsTabGroupsFocusFreezingEnabled();
+@@ -394,6 +394,9 @@ bool IsTabGroupsFocusFreezingEnabled();
  // Enables closing tabs with a right click. Shift+right-click opens the menu.
  BASE_DECLARE_FEATURE(kRightClickToCloseTab);
  

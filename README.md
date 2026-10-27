@@ -39,6 +39,7 @@ Choose a build that matches your CPU. A binary compiled for an unsupported SIMD 
 - Provides the optional Thorium 2024 UI with translucent inactive tabs, plus classic Omnibox and bookmark styling, rectangular tabs, custom tab widths, expanded theme colors, and platform menu controls. See the [Thorium 2024 UI explainer](./docs/TH24.md).
 - Adds extensive tab controls: left- or right-aligned Tab Search, Pin/Unpin Tab Search, Restore Tab, Ctrl+Tab MRU, scrollable tabs, hover activation, custom close-button behavior, double-click/right-click tab closing, and "New tab to the left".
 - Restores the classic Download Shelf behind `thorium://flags/#download-shelf`, enhances the downloads page, enables parallel downloading by default, and provides additional download notifications and controls.
+- On desktop, full download URLs are shown by default. To show only Chromium's source information, set `thorium://flags/#downloads-show-full-url` to **Disabled** and relaunch. The copy download link button remains available.
 - Adds close confirmation, close-window-with-last-tab, background-mode, quiet-notification, custom New Tab Page, auto-dark-mode, theme, avatar-button, extension-menu, and tab-hover-card controls.
 
 #### Performance and Media

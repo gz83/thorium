@@ -189,7 +189,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-chrome-labs-experiments.patch`](../other/thorium-chrome-labs-experiments.patch)
 - [`add-flag-for-system-linux-theme.patch`](../other/add-flag-for-system-linux-theme.patch)
 - [`restore_download_shelf.patch`](../other/restore_download_shelf.patch) — Restores the desktop download shelf; ChromeOS retains system download notifications and does not instantiate the shelf.
-- [`downloads-page-enhancements.patch`](../other/downloads-page-enhancements.patch)
+- [`downloads-page-enhancements.patch`](../other/downloads-page-enhancements.patch) — Shows full download URLs by default. On desktop, set `thorium://flags/#downloads-show-full-url` to **Disabled** and relaunch to hide the full URL while retaining Chromium's source information and copy-link action. Keeps Thorium's action-button spacing and always-visible more-actions menu. Addresses [#1309](https://github.com/Alex313031/thorium/issues/1309).
 
 ### 60 - Installer, shell integration, and context-menu behavior.
 

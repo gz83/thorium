@@ -75,10 +75,10 @@ index 5de0ad6e04cc3..eee8ef63e7df9 100644
    virtual void OnReloadPageButtonClicked() = 0;
  
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 6c91f2bf1aa92..b61ad97c56edf 100644
+index 51d01e955a54c..3d7d4eb80006b 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -149,6 +149,9 @@ BASE_FEATURE(kLegacySearchIntegrityCheck, base::FEATURE_DISABLED_BY_DEFAULT);
+@@ -152,6 +152,9 @@ BASE_FEATURE(kLegacySearchIntegrityCheck, base::FEATURE_DISABLED_BY_DEFAULT);
  
  BASE_FEATURE(kExtensionsCollapseMainMenu, base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -89,10 +89,10 @@ index 6c91f2bf1aa92..b61ad97c56edf 100644
  // default.
  BASE_FEATURE(kExtensionsPinnedByDefault, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index f0ffd93108e2c..e14d037217046 100644
+index d4fdcab19fee6..3089fcddc4856 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -72,6 +72,8 @@ bool IsSettingsRefresh2026Enabled();
+@@ -74,6 +74,8 @@ bool IsSettingsRefresh2026Enabled();
  // the "Discover Chrome Extensions" item will be present.
  BASE_DECLARE_FEATURE(kExtensionsCollapseMainMenu);
  

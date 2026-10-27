@@ -25,20 +25,22 @@ index 71ae0c1a7626d..e785d05249cd8 100644
    margin-inline-start: 12px;
    margin-inline-end: 12px;
 diff --git a/chrome/browser/resources/downloads/item.html.ts b/chrome/browser/resources/downloads/item.html.ts
-index f06e438b416df..edba5cf513bc7 100644
+index f06e438b416df..f46ae88c400b0 100644
 --- a/chrome/browser/resources/downloads/item.html.ts
 +++ b/chrome/browser/resources/downloads/item.html.ts
-@@ -45,6 +45,9 @@ export function getHtml(this: DownloadsItemElement) {
+@@ -45,6 +45,11 @@ export function getHtml(this: DownloadsItemElement) {
          <div id="initiator-origin">
            ${this.computeInitiatorOriginText_()}
          </div>
-+        <a id="url" target="_blank"
-+          @click="${this.onUrlClick_}" focus-row-control
-+          focus-type="url">${this.data?.url || ''}</a>
++        ${this.showFullDownloadUrls_ ? html`
++          <a id="url" target="_blank"
++            @click="${this.onUrlClick_}" focus-row-control
++            focus-type="url">${this.data?.url || ''}</a>
++        ` : ''}
        </div>
  
        <div class="description" role="gridcell"
-@@ -92,7 +95,7 @@ export function getHtml(this: DownloadsItemElement) {
+@@ -92,7 +97,7 @@ export function getHtml(this: DownloadsItemElement) {
              focus-type="copyDownloadLink">
          </cr-icon-button>
          <cr-icon-button id="more-actions" iron-icon="cr:more-vert"
@@ -47,3 +49,74 @@ index f06e438b416df..edba5cf513bc7 100644
              title="$i18n{moreActions}" @click="${this.onMoreActionsClick_}"
              aria-haspopup="menu" focus-row-control
              focus-type="actionMenuButton">
+diff --git a/chrome/browser/resources/downloads/item.ts b/chrome/browser/resources/downloads/item.ts
+index 3b41624ed37a0..0bd6fca4ba9ac 100644
+--- a/chrome/browser/resources/downloads/item.ts
++++ b/chrome/browser/resources/downloads/item.ts
+@@ -79,6 +79,7 @@ export class DownloadsItemElement extends DownloadsItemElementBase {
+   static override get properties() {
+     return {
+       webuiRoundedIconsEnabled_: {type: Boolean},
++      showFullDownloadUrls_: {type: Boolean},
+       data: {type: Object},
+       completelyOnDisk_: {type: Boolean},
+       shouldLinkFilename_: {type: Boolean},
+@@ -121,6 +122,8 @@ export class DownloadsItemElement extends DownloadsItemElementBase {
+   protected accessor shouldLinkFilename_: boolean = true;
+   protected accessor webuiRoundedIconsEnabled_: boolean =
+       loadTimeData.getBoolean('webuiRoundedIconsEnabled');
++  protected accessor showFullDownloadUrls_: boolean =
++      loadTimeData.getBoolean('showFullDownloadUrls');
+   override overrideCustomEquivalent: boolean = true;
+ 
+   override willUpdate(changedProperties: PropertyValues<this>) {
+diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
+index 562d8529586fa..723f2e0310971 100644
+--- a/chrome/browser/ui/ui_features.cc
++++ b/chrome/browser/ui/ui_features.cc
+@@ -48,6 +48,9 @@ BASE_FEATURE(kImportExportFlags, base::FEATURE_DISABLED_BY_DEFAULT);
+ 
+ BASE_FEATURE(kInfoBarInlineLinks, base::FEATURE_ENABLED_BY_DEFAULT);
+ 
++// Shows the full download URL below the source on the downloads page.
++BASE_FEATURE(kThoriumDownloadsShowFullUrl, base::FEATURE_ENABLED_BY_DEFAULT);
++
+ // Kill switch for crbug.com/559656985. When enabled, the press-and-hold Esc
+ // timer also exits tab fullscreen (unless browser fullscreen is underneath)
+ // when it fires while Esc is locked via the Keyboard Lock API. When disabled,
+diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
+index 6fd5a4ff30629..a2040749b4197 100644
+--- a/chrome/browser/ui/ui_features.h
++++ b/chrome/browser/ui/ui_features.h
+@@ -37,6 +37,8 @@ BASE_DECLARE_FEATURE(kImportExportFlags);
+ 
+ BASE_DECLARE_FEATURE(kInfoBarInlineLinks);
+ 
++BASE_DECLARE_FEATURE(kThoriumDownloadsShowFullUrl);
++
+ BASE_DECLARE_FEATURE(kKeyboardLockHeldEscExitsTabFullscreen);
+ 
+ // All feature flags associated with Glow Up, apart from those in
+diff --git a/chrome/browser/ui/webui/downloads/downloads_ui.cc b/chrome/browser/ui/webui/downloads/downloads_ui.cc
+index 8955c4bf86a64..b34529491cc2c 100644
+--- a/chrome/browser/ui/webui/downloads/downloads_ui.cc
++++ b/chrome/browser/ui/webui/downloads/downloads_ui.cc
+@@ -7,6 +7,7 @@
+ #include <memory>
+ #include <utility>
+ 
++#include "base/feature_list.h"
+ #include "base/functional/bind.h"
+ #include "base/memory/singleton.h"
+ #include "base/metrics/histogram_functions.h"
+@@ -73,6 +74,10 @@ content::WebUIDataSource* CreateAndAddDownloadsUIHTMLSource(Profile* profile) {
+           ->IsUnderAdvancedProtection();
+   source->AddBoolean("requestsApVerdicts", requests_ap_verdicts);
+ 
++  source->AddBoolean("showFullDownloadUrls",
++                     base::FeatureList::IsEnabled(
++                         features::kThoriumDownloadsShowFullUrl));
++
+   static constexpr webui::LocalizedString kStrings[] = {
+       {"title", IDS_DOWNLOAD_HISTORY_TITLE},
+       {"searchResultsPlural", IDS_SEARCH_RESULTS_PLURAL},

@@ -25,10 +25,10 @@ index 25138f218528f..feaaf4e58171e 100644
                              features::IsRoundedIconsEnabled()
                                  ? kCastIcon
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 92650d9943e48..6c91f2bf1aa92 100644
+index 3cf33b0d4c9c1..51d01e955a54c 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -252,6 +252,10 @@ BASE_FEATURE_PARAM(std::string,
+@@ -255,6 +255,10 @@ BASE_FEATURE_PARAM(std::string,
  BASE_FEATURE(kThoriumDisableQRCodeGenerator,
               base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -40,10 +40,10 @@ index 92650d9943e48..6c91f2bf1aa92 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 92496d7a267f4..f0ffd93108e2c 100644
+index d6bbfa6f31836..d4fdcab19fee6 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -404,6 +404,9 @@ BASE_DECLARE_FEATURE_PARAM(std::string, kOpenOmniboxUrlInNewTabMode);
+@@ -406,6 +406,9 @@ BASE_DECLARE_FEATURE_PARAM(std::string, kOpenOmniboxUrlInNewTabMode);
  // Disables the QR code generator entry points for sharing page links.
  BASE_DECLARE_FEATURE(kThoriumDisableQRCodeGenerator);
  

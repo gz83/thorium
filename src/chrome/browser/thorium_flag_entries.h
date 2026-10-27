@@ -182,6 +182,12 @@
      "Restore Download Shelf",
      "When enabled, the traditional download shelf is used instead of the download bubble in the toolbar. Thorium flag",
      kOsDesktop, FEATURE_VALUE_TYPE(features::kDownloadShelf)},
+    {"downloads-show-full-url",
+     "Show Full Download URLs",
+     "Shows full download URLs below the source on the downloads page. "
+     "Enabled by default. Disable to show only the source, as in Chromium. "
+     "The copy download link button remains available.",
+     kOsDesktop, FEATURE_VALUE_TYPE(features::kThoriumDownloadsShowFullUrl)},
 #endif // BUILDFLAG(IS_ANDROID)
 
     {"show-avatar-button",

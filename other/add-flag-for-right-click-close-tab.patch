@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index ad09b2f13b0a1..9073c9e0783f1 100644
+index 8b2ccd3b01ed5..458a5ca4a7688 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -213,6 +213,11 @@ BASE_FEATURE(kPreloadTopChromeWebUILessNavigations,
+@@ -216,6 +216,11 @@ BASE_FEATURE(kPreloadTopChromeWebUILessNavigations,
  BASE_FEATURE(kPressAndHoldEscToExitBrowserFullscreen,
               base::FEATURE_ENABLED_BY_DEFAULT);
  
@@ -15,10 +15,10 @@ index ad09b2f13b0a1..9073c9e0783f1 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 6fd5a4ff30629..558814b550ca1 100644
+index a2040749b4197..efbfa8d91d264 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -389,6 +389,9 @@ BASE_DECLARE_FEATURE(kTabGroupsFocusing);
+@@ -391,6 +391,9 @@ BASE_DECLARE_FEATURE(kTabGroupsFocusing);
  BASE_DECLARE_FEATURE_PARAM(bool, kTabGroupsFocusFreezing);
  bool IsTabGroupsFocusFreezingEnabled();
  
