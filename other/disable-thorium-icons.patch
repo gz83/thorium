@@ -472,6 +472,24 @@ index 3bbec48ae06f2..bcd73ecc26393 100644
        ui::kColorAlertHighSeverity, kIconSize));
    error_icon->SetImageSize(gfx::Size(kIconSize, kIconSize));
    error_icon->SetVisible(show_error_label_);
+diff --git a/chrome/browser/browser_resources.grd b/chrome/browser/browser_resources.grd
+index e8b4901c99423..d0b1751df6cd7 100644
+--- a/chrome/browser/browser_resources.grd
++++ b/chrome/browser/browser_resources.grd
+@@ -92,6 +92,13 @@
+       </if>
+     </structures>
+     <includes>
++      <if expr="not is_android">
++        <!-- Select Incognito page icons at runtime instead of flattening them. -->
++        <include name="IDR_INCOGNITO_ICON_SVG" file="../../ui/webui/resources/images/incognito_icon.svg" type="BINDATA" />
++        <include name="IDR_INCOGNITO_ICON_THORIUM_SVG" file="../../ui/webui/resources/images/incognito_icon_thorium.svg" type="BINDATA" />
++        <include name="IDR_INCOGNITO_SPLASH_SVG" file="../../ui/webui/resources/images/incognito_splash.svg" type="BINDATA" />
++        <include name="IDR_INCOGNITO_SPLASH_THORIUM_SVG" file="../../ui/webui/resources/images/incognito_splash_thorium.svg" type="BINDATA" />
++      </if>
+       <if expr="is_win or is_macosx or is_linux">
+         <!-- First Run audio resources -->
+         <include name="IDR_INTRO_SOUND_ALL_SET_FLAC" file="resources\intro\sounds\all_set.flac" type="BINDATA" />
 diff --git a/chrome/browser/contextual_cueing/contextual_cueing_menu_model.cc b/chrome/browser/contextual_cueing/contextual_cueing_menu_model.cc
 index 9645fcbe2aa19..e571643e35fd1 100644
 --- a/chrome/browser/contextual_cueing/contextual_cueing_menu_model.cc
@@ -568,6 +586,32 @@ index 6c1e1061cd56c..42c21c506d175 100644
    height: 15px;
    margin-left: 20px;
    width: 15px;
+diff --git a/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.css b/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.css
+index 0ca655b4a6908..3de408eef7100 100644
+--- a/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.css
++++ b/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.css
+@@ -49,7 +49,7 @@ em {
+ /** Icon -------------------------------------------------------------------- */
+ 
+ .icon {
+-  content: url(../../../../ui/webui/resources/images/incognito_splash.svg);
++  content: url('data:image/svg+xml;base64,$i18n{incognitoIcon}');
+   height: 120px;
+   width: 120px;
+ }
+diff --git a/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.html b/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.html
+index 04e88e027a85a..5e79b5c8f8427 100644
+--- a/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.html
++++ b/chrome/browser/resources/new_tab_page_incognito_guest/incognito_tab.html
+@@ -7,7 +7,7 @@
+ <meta charset="utf-8">
+ <meta name="color-scheme" content="light dark">
+ <title>$i18n{title}</title>
+-<link rel="icon" type="image/svg+xml" href="../../../../ui/webui/resources/images/incognito_icon.svg">
++<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,$i18n{incognitoFavicon}">
+ <meta name="viewport" content="width=device-width">
+ <link id="incognitothemecss" rel="stylesheet">
+ <script>
 diff --git a/chrome/browser/supervised_user/linux_mac_windows/parent_access_view.cc b/chrome/browser/supervised_user/linux_mac_windows/parent_access_view.cc
 index 4f33ab60642b2..c2f9beb3a156a 100644
 --- a/chrome/browser/supervised_user/linux_mac_windows/parent_access_view.cc
@@ -4977,6 +5021,38 @@ index bbd5bab0b8484..8f61ff3d54450 100644
          l10n_util::GetStringUTF16(IDS_FLAGS_IGNORED_SECONDARY_USERS),
          /*auto_expire=*/false, /*should_animate=*/true, /*closeable=*/true,
          /*infobar_priority=*/
+diff --git a/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc b/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
+index 1a580fc7a5c8d..a4beaa9f7e9f9 100644
+--- a/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
++++ b/chrome/browser/ui/webui/ntp/ntp_resource_cache.cc
+@@ -7,6 +7,8 @@
+ #include <string>
+ #include <utility>
+ 
++#include "base/base64.h"
++#include "base/command_line.h"
+ #include "base/feature_list.h"
+ #include "base/functional/bind.h"
+ #include "base/memory/ref_counted_memory.h"
+@@ -259,6 +261,18 @@ void NTPResourceCache::CreateNewTabIncognitoHTML(
+   DCHECK(!profile_->IsOffTheRecord());
+   DCHECK(profile_->HasAnyOffTheRecordProfile());
+ 
++  // Keep the SVGs as data URLs, but choose their resources at runtime so the
++  // icon preference applies to both the page icon and favicon.
++  const bool disable_thorium_icons =
++      base::CommandLine::ForCurrentProcess()->HasSwitch("disable-thorium-icons");
++  const ui::ResourceBundle& rb = ui::ResourceBundle::GetSharedInstance();
++  replacements["incognitoIcon"] = base::Base64Encode(rb.LoadDataResourceString(
++      disable_thorium_icons ? IDR_INCOGNITO_SPLASH_SVG
++                            : IDR_INCOGNITO_SPLASH_THORIUM_SVG));
++  replacements["incognitoFavicon"] = base::Base64Encode(rb.LoadDataResourceString(
++      disable_thorium_icons ? IDR_INCOGNITO_ICON_SVG
++                            : IDR_INCOGNITO_ICON_THORIUM_SVG));
++
+   replacements["incognitoTabDescription"] =
+       l10n_util::GetStringUTF8(IDS_NEW_TAB_OTR_SUBTITLE_WITH_READING_LIST);
+   replacements["incognitoTabHeading"] =
 diff --git a/chrome/browser/ui/webui/theme_source.cc b/chrome/browser/ui/webui/theme_source.cc
 index b76ecf6ba9f00..2199e6730c9f1 100644
 --- a/chrome/browser/ui/webui/theme_source.cc

@@ -236,7 +236,7 @@ overlay-derived, or still need separate provenance review.
 - [`thoriumos-sample-system-web-app.patch`](../other/thoriumos-sample-system-web-app.patch) — Enables the sample system web app in official builds using M154’s `is_chromeos` guard, preserving trusted/untrusted TypeScript resource mappings.
 - [`thoriumos-disable-stats-reporting.patch`](../other/thoriumos-disable-stats-reporting.patch)
 - [`add-flag-for-auto-dark-mode.patch`](../other/add-flag-for-auto-dark-mode.patch)
-- [`disable-thorium-icons.patch`](../other/disable-thorium-icons.patch) — Selects separate Thorium vector icons, shared WebUI SVGs and common folder PNGs; `--disable-thorium-icons` preserves upstream rounded and legacy resources, including WebUI icon mappings.
+- [`disable-thorium-icons.patch`](../other/disable-thorium-icons.patch) — Selects separate Thorium vector icons, shared WebUI SVGs and common folder PNGs; `--disable-thorium-icons` preserves upstream rounded and legacy resources, including WebUI icon mappings. The Incognito new-tab page selects its central icon and favicon at runtime, restoring Chromium's original SVGs when the flag is enabled ([#1307](https://github.com/Alex313031/thorium/issues/1307)).
 - [`always-enable-reload-menu.patch`](../other/always-enable-reload-menu.patch)
 
 ### 80 - Extensions, privacy, install branding, and late platform overlays.
