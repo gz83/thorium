@@ -248,10 +248,10 @@ index 50e546251e9f8..25e05bd1dab99 100644
    raw_ptr<PerformanceInterventionButton> performance_intervention_button_ =
        nullptr;
 diff --git a/ui/base/ui_base_features.cc b/ui/base/ui_base_features.cc
-index 040c7ba3d8363..6092850e1d9d3 100644
+index f553bc885b7fd..706b3b9995a1f 100644
 --- a/ui/base/ui_base_features.cc
 +++ b/ui/base/ui_base_features.cc
-@@ -421,6 +421,14 @@ bool IsThorium2024() {
+@@ -424,6 +424,14 @@ bool IsThorium2024() {
    return base::FeatureList::IsEnabled(kThorium2024) || th24_flag;
  }
  
@@ -267,10 +267,10 @@ index 040c7ba3d8363..6092850e1d9d3 100644
  
  #if BUILDFLAG(IS_WIN)
 diff --git a/ui/base/ui_base_features.h b/ui/base/ui_base_features.h
-index 5fdec4715c4eb..1e7f0fa23e213 100644
+index fc25496c8e83c..64d6d62b73e56 100644
 --- a/ui/base/ui_base_features.h
 +++ b/ui/base/ui_base_features.h
-@@ -251,6 +251,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES) bool IsVariableRefreshRateAlwaysOn();
+@@ -254,6 +254,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES) bool IsVariableRefreshRateAlwaysOn();
  COMPONENT_EXPORT(UI_BASE_FEATURES) BASE_DECLARE_FEATURE(kThorium2024);
  COMPONENT_EXPORT(UI_BASE_FEATURES) bool IsThorium2024();
  

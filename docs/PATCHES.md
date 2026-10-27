@@ -168,7 +168,11 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-debug-mode.patch`](../other/thorium-debug-mode.patch)
 - [`thorium-first-run-welcome.patch`](../other/thorium-first-run-welcome.patch)
 - [`disable-middle-click-paste-with-autoscroll.patch`](../other/disable-middle-click-paste-with-autoscroll.patch) - Disables Linux middle-click selection paste and paste-and-navigate paths when Blink MiddleClickAutoscroll is enabled.
-- [`views-menu-delay.patch`](../other/views-menu-delay.patch)
+- [`views-menu-delay.patch`](../other/views-menu-delay.patch) - Adds `chrome://flags/#instant-menu-show` (disabled by default).
+  Enabled preserves Thorium's legacy 1 ms submenu delay and, on Windows, its fixed 400 ms bookmark drag-and-drop hover delay.
+  Default/Disabled preserves Chromium's 400 ms submenu delay, with Windows using the system setting for both submenu and bookmark drag-and-drop hover delays.
+  Non-Windows bookmark drag-and-drop timing is unchanged. The submenu override runs after platform initialization and is independent of the Thorium 2024 UI flag. Restart the browser after changing the flag.
+  See [issue #1303](https://github.com/Alex313031/thorium/issues/1303).
 - [`new-tab-to-left-context-menu.patch`](../other/new-tab-to-left-context-menu.patch)
 - [`status-bubble-instant-expand.patch`](../other/status-bubble-instant-expand.patch)
 - [`enable-sharing-hub-page-action.patch`](../other/enable-sharing-hub-page-action.patch) - Makes the Sharing Hub address-bar action visible by default in eligible normal windows using Chromium's current Page Action framework, while preserving policy, profile, window-mode, platform-icon, metrics, and bubble-anchor behavior.

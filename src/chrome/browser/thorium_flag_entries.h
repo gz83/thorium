@@ -26,6 +26,12 @@
      "Enable a new \"hybrid\" UI, which restores many parts of the pre-Chrome Refresh 2023 UI. Good for people "
      "who find the new UI ugly or harder to use.",
      kOsDesktop, FEATURE_VALUE_TYPE(features::kThorium2024)},
+    {"instant-menu-show",
+     "Instant Menu Show",
+     "Reduces submenu hover delay to 1 ms. Disabled by default; when "
+     "disabled, uses 400 ms or the Windows system setting. On Windows, "
+     "enabling this also fixes bookmark drag-and-drop hover delay at 400 ms.",
+     kOsDesktop, FEATURE_VALUE_TYPE(features::kThoriumInstantMenus)},
     {"thorium-internal-url-scheme",
      "Use thorium:// for internal URLs",
      "Displays and copies internal browser URLs using the thorium:// alias. "

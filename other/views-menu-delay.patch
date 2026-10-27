@@ -1,43 +1,79 @@
-diff --git a/ui/views/controls/menu/menu_config.h b/ui/views/controls/menu/menu_config.h
-index 953cfa206baaf..5f530b921f3da 100644
---- a/ui/views/controls/menu/menu_config.h
-+++ b/ui/views/controls/menu/menu_config.h
-@@ -171,7 +171,7 @@ struct VIEWS_EXPORT MenuConfig {
+diff --git a/ui/base/ui_base_features.cc b/ui/base/ui_base_features.cc
+index 75d95b11bbc67..022434ba045f6 100644
+--- a/ui/base/ui_base_features.cc
++++ b/ui/base/ui_base_features.cc
+@@ -25,6 +25,9 @@
  
-   // Delay, in ms, between when menus are selected or moused over and the menu
-   // appears.
--  int show_delay = 400;
-+  int show_delay = 1;
+ namespace features {
  
-   // Radius of selection background on menu items.
-   int item_corner_radius = 0;
-diff --git a/ui/views/controls/menu/menu_config_win.cc b/ui/views/controls/menu/menu_config_win.cc
-index a2dae078ccbd3..d1461bbffb758 100644
---- a/ui/views/controls/menu/menu_config_win.cc
-+++ b/ui/views/controls/menu/menu_config_win.cc
-@@ -21,7 +21,6 @@ void MenuConfig::InitPlatform() {
-       (SystemParametersInfo(SPI_GETKEYBOARDCUES, 0, &show_cues, 0) &&
-        show_cues == TRUE);
++// Restores Thorium's legacy menu timing when enabled.
++BASE_FEATURE(kThoriumInstantMenus, base::FEATURE_DISABLED_BY_DEFAULT);
++
+ // If enabled, generates an empty GestureScrollUpdate if the preceding TouchMove
+ // event had no gestures and sends both events together.
+ BASE_FEATURE(kSendEmptyGestureScrollUpdate, base::FEATURE_ENABLED_BY_DEFAULT);
+diff --git a/ui/base/ui_base_features.h b/ui/base/ui_base_features.h
+index a3a92c4c4ee9e..d0dcca6226ed4 100644
+--- a/ui/base/ui_base_features.h
++++ b/ui/base/ui_base_features.h
+@@ -13,6 +13,9 @@
  
--  SystemParametersInfo(SPI_GETMENUSHOWDELAY, 0, &show_delay, 0);
-   separator_upper_height = 5;
-   separator_lower_height = 7;
+ namespace features {
  
++// Restores Thorium's legacy menu timing when enabled.
++COMPONENT_EXPORT(UI_BASE_FEATURES) BASE_DECLARE_FEATURE(kThoriumInstantMenus);
++
+ COMPONENT_EXPORT(UI_BASE_FEATURES)
+ BASE_DECLARE_FEATURE(kSendEmptyGestureScrollUpdate);
+ COMPONENT_EXPORT(UI_BASE_FEATURES)
+diff --git a/ui/views/controls/menu/menu_config.cc b/ui/views/controls/menu/menu_config.cc
+index a711c503287a7..c0bb621bd44e6 100644
+--- a/ui/views/controls/menu/menu_config.cc
++++ b/ui/views/controls/menu/menu_config.cc
+@@ -5,6 +5,7 @@
+ #include "ui/views/controls/menu/menu_config.h"
+ 
+ #include "base/debug/dump_without_crashing.h"
++#include "base/feature_list.h"
+ #include "base/no_destructor.h"
+ #include "ui/base/ui_base_features.h"
+ #include "ui/views/controls/menu/menu_controller.h"
+@@ -22,6 +23,11 @@ namespace views {
+ MenuConfig::MenuConfig() {
+   InitCommon();
+   InitPlatform();
++
++  // Preserve the legacy 1 ms submenu delay only when explicitly requested.
++  if (base::FeatureList::IsEnabled(features::kThoriumInstantMenus)) {
++    show_delay = 1;
++  }
+ }
+ 
+ MenuConfig::~MenuConfig() = default;
 diff --git a/ui/views/metrics_aura.cc b/ui/views/metrics_aura.cc
-index 63e9c8530135b..b2d1799c8bb36 100644
+index 63e9c8530135b..7af8b359bd4a1 100644
 --- a/ui/views/metrics_aura.cc
 +++ b/ui/views/metrics_aura.cc
-@@ -25,12 +25,7 @@ base::TimeDelta GetDoubleClickInterval() {
+@@ -2,8 +2,10 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include "base/feature_list.h"
+ #include "base/time/time.h"
+ #include "build/build_config.h"
++#include "ui/base/ui_base_features.h"
+ #include "ui/views/metrics.h"
+ 
+ #if BUILDFLAG(IS_WIN)
+@@ -25,6 +27,11 @@ base::TimeDelta GetDoubleClickInterval() {
  
  base::TimeDelta GetMenuShowDelay() {
  #if BUILDFLAG(IS_WIN)
--  static base::TimeDelta delay = []() {
--    DWORD show_delay;
--    return SystemParametersInfo(SPI_GETMENUSHOWDELAY, 0, &show_delay, 0)
--               ? base::Milliseconds(show_delay)
--               : kDefaultMenuShowDelay;
--  }();
-+  static const base::TimeDelta delay = kDefaultMenuShowDelay;
-   return delay;
- #else
-   return base::Milliseconds(0);
++  // Preserve the legacy Windows bookmark drag-and-drop hover delay.
++  if (base::FeatureList::IsEnabled(features::kThoriumInstantMenus)) {
++    return kDefaultMenuShowDelay;
++  }
++
+   static base::TimeDelta delay = []() {
+     DWORD show_delay;
+     return SystemParametersInfo(SPI_GETMENUSHOWDELAY, 0, &show_delay, 0)

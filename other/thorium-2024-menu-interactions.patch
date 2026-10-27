@@ -15,7 +15,7 @@ index a4c8e33535fc9..d417a6a51fe53 100644
    if (thorium_2024) {
      menu_horizontal_border_size = 1;
 diff --git a/ui/views/controls/menu/menu_config_win.cc b/ui/views/controls/menu/menu_config_win.cc
-index 3b7bfe91f15f6..b8fa6cde2fd89 100644
+index 0ecd33a3af66e..0aa697edaf2a6 100644
 --- a/ui/views/controls/menu/menu_config_win.cc
 +++ b/ui/views/controls/menu/menu_config_win.cc
 @@ -20,10 +20,14 @@ void MenuConfig::InitPlatform() {
@@ -35,5 +35,5 @@ index 3b7bfe91f15f6..b8fa6cde2fd89 100644
 +         show_cues == TRUE);
 +  }
  
+   SystemParametersInfo(SPI_GETMENUSHOWDELAY, 0, &show_delay, 0);
    static const bool is_win11 =
-       base::win::GetVersion() >= base::win::Version::WIN11;

@@ -4378,10 +4378,10 @@ index b7120f4f734f6..eee424545f082 100644
    void ConfirmBrowserCloseWithPendingDownloads(
        int download_count,
 diff --git a/ui/base/ui_base_features.cc b/ui/base/ui_base_features.cc
-index 6092850e1d9d3..335c26d0badc2 100644
+index 706b3b9995a1f..8867bc4834a23 100644
 --- a/ui/base/ui_base_features.cc
 +++ b/ui/base/ui_base_features.cc
-@@ -431,6 +431,14 @@ bool EnableRestoreTabButton() {
+@@ -434,6 +434,14 @@ bool EnableRestoreTabButton() {
  
  BASE_FEATURE(kBubbleMetricsApi, base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -4397,10 +4397,10 @@ index 6092850e1d9d3..335c26d0badc2 100644
  BASE_FEATURE(kUseGammaContrastRegistrySettings,
               base::FEATURE_ENABLED_BY_DEFAULT);
 diff --git a/ui/base/ui_base_features.h b/ui/base/ui_base_features.h
-index 1e7f0fa23e213..393b5f7fd66f6 100644
+index 64d6d62b73e56..5b12226b8c5d1 100644
 --- a/ui/base/ui_base_features.h
 +++ b/ui/base/ui_base_features.h
-@@ -258,6 +258,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES) bool EnableRestoreTabButton();
+@@ -261,6 +261,10 @@ COMPONENT_EXPORT(UI_BASE_FEATURES) bool EnableRestoreTabButton();
  COMPONENT_EXPORT(UI_BASE_FEATURES)
  BASE_DECLARE_FEATURE(kBubbleMetricsApi);
  
