@@ -14,6 +14,8 @@ import subprocess
 import sys
 from typing import Sequence
 
+from chromium_sync import CheckoutError, prepare_dependencies, prepare_git_checkout
+
 
 EXIT_FAILURE = 111
 CHROMIUM_NESTED_CHECKOUTS = (
@@ -151,7 +153,7 @@ def remove_readonly(function, path: str, error_info) -> None:
 
 
 def clean_checkout(git: str, path: Path) -> None:
-    run([git, "restore", "."], path)
+    prepare_git_checkout(git, path)
     run([git, "clean", "-ffd"], path)
 
 
@@ -193,6 +195,8 @@ def synchronize(
     print("\nScript to Rebase/Sync the Chromium repo.\n")
     print(f"Rebasing/Syncing and running hooks in {chromium_src}")
 
+    prepare_git_checkout(git, chromium_src)
+
     for path, _ in nested_checkouts:
         clean_checkout(git, path)
 
@@ -202,6 +206,8 @@ def synchronize(
     run([git, "clean", "-ffd"], chromium_src)
     run([git, "rebase-update"], chromium_src)
     run([git, "fetch", "--tags"], chromium_src)
+
+    prepare_dependencies(gclient, git, chromium_src, run)
 
     print("\ngclient sync", flush=True)
     run(
@@ -237,7 +243,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     try:
         synchronize(args.chromium_src, args.thorium_root, args.depot_tools)
-    except TrunkError as error:
+    except (TrunkError, CheckoutError) as error:
         print(f"{Path(sys.argv[0]).name}: {error}", file=sys.stderr)
         return EXIT_FAILURE
     except OSError as error:

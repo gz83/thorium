@@ -72,6 +72,10 @@ python3 setup.py
 
 `version.py` force-checks out the Chromium tag pinned by Thorium, removes
 untracked files from Chromium, synchronizes dependencies, and runs hooks.
+Before synchronization, both `version.py` and `trunk.py` quit unfinished Git
+rebases and detach dependency checkouts so switching between release and trunk
+revisions does not rebase local branches. Local branch refs are retained;
+unfinished rebase state and tracked edits are discarded.
 `setup.py` then copies Thorium overlays, applies the ordered patch series, and
 merges GRD/XTB translations. Do not run either command over Chromium work you
 need to preserve.

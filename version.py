@@ -14,6 +14,8 @@ import subprocess
 import sys
 from typing import Sequence
 
+from chromium_sync import CheckoutError, prepare_dependencies, prepare_git_checkout
+
 
 EXIT_FAILURE = 111
 THORIUM_VERSION = "156.0.8078.28"
@@ -142,8 +144,11 @@ def prepare_checkout(
     print(f"\nCurrent Thorium version is: {THORIUM_VERSION}\n")
     print(f"Checking out tags/{THORIUM_VERSION} in {chromium_src}")
 
+    prepare_git_checkout(git, chromium_src)
     run([git, "checkout", "-f", f"tags/{THORIUM_VERSION}"], chromium_src)
     run([git, "clean", "-ffd"], chromium_src)
+
+    prepare_dependencies(gclient, git, chromium_src, run)
 
     print("\ngclient sync", flush=True)
     run(
@@ -194,7 +199,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     try:
         prepare_checkout(args.chromium_src, args.depot_tools)
-    except VersionError as error:
+    except (VersionError, CheckoutError) as error:
         print(f"{Path(sys.argv[0]).name}: {error}", file=sys.stderr)
         return EXIT_FAILURE
     except OSError as error:
