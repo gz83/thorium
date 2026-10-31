@@ -1684,15 +1684,17 @@ index efb5b0b4bb31f..2d5752d8c09b9 100644
      // The following are some properties used during animation.  We use explicit property classes
      // to avoid the cost of reflection for each animation setup.
  
-@@ -514,6 +517,14 @@ public class ToolbarPhone extends ToolbarLayout
+@@ -514,6 +517,16 @@ public class ToolbarPhone extends ToolbarLayout
          }
      }
  
 +    @Override
 +    public void setExtensionsToolbarCoordinator(
-+            ExtensionsToolbarCoordinator extensionsToolbarCoordinator) {
++            @Nullable ExtensionsToolbarCoordinator extensionsToolbarCoordinator) {
 +        mExtensionsToolbarCoordinator = extensionsToolbarCoordinator;
-+        mExtensionsToolbarCoordinator.getMenuButtonWidthConsumer().updateVisibility(99999);
++        if (mExtensionsToolbarCoordinator != null) {
++            mExtensionsToolbarCoordinator.getMenuButtonWidthConsumer().updateVisibility(99999);
++        }
 +        updateRippleBackground();
 +    }
 +
