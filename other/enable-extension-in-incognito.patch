@@ -776,18 +776,16 @@ diff --git a/chrome/browser/ui/android/extensions/java/src/org/chromium/chrome/b
 index 30bf2a17c93b2..9db3e9b08c5b0 100644
 --- a/chrome/browser/ui/android/extensions/java/src/org/chromium/chrome/browser/ui/extensions/ExtensionsToolbarBridge.java
 +++ b/chrome/browser/ui/android/extensions/java/src/org/chromium/chrome/browser/ui/extensions/ExtensionsToolbarBridge.java
-@@ -4,7 +4,10 @@
+@@ -4,7 +4,8 @@
  
  package org.chromium.chrome.browser.ui.extensions;
  
-+import static org.chromium.build.NullUtil.assumeNonNull;
-+
  import android.graphics.Bitmap;
 +import android.util.ArrayMap;
  import android.view.KeyEvent;
  
  import org.jni_zero.CalledByNative;
-@@ -18,62 +21,148 @@ import org.chromium.base.lifetime.LifetimeAssert;
+@@ -18,62 +19,150 @@ import org.chromium.base.lifetime.LifetimeAssert;
  import org.chromium.build.annotations.NullMarked;
  import org.chromium.build.annotations.Nullable;
  import org.chromium.chrome.browser.profiles.Profile;
@@ -924,8 +922,10 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
 +        Instance().mMenuDelegate = delegate;
 +    }
 +
-+    private Profile getActiveProfile() {
-+        return assumeNonNull(Instance().mProfile);
++    /** True once the bridge is tearing down; callers must not reach JNI. */
++    private boolean isShutdownStarted() {
++        Profile profile = Instance().mProfile;
++        return profile == null || profile.shutdownStarted();
      }
  
      public long getNativePtr() {
@@ -939,7 +939,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
      public ExtensionAction getAction(String actionId, @Nullable WebContents webContents) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            // TODO(crbug.com/459079170): This is to prevent tests from breaking. {@code
 +            // ExtensionsToolbarCoordinatorImpl} should ideally be destroyed following {@code
 +            // ChromeAndroidTask}'s destruction, and it is currently being worked on.
@@ -957,7 +957,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
              float scaleFactor) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            // TODO(crbug.com/459079170): This is to prevent tests from breaking. {@code
 +            // ExtensionsToolbarCoordinatorImpl} should ideally be destroyed following {@code
 +            // ChromeAndroidTask}'s destruction, and it is currently being worked on.
@@ -970,14 +970,14 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
                          actionId,
                          webContents,
                          canvasWidthDp,
-@@ -95,44 +190,81 @@ public class ExtensionsToolbarBridge implements Destroyable {
+@@ -95,44 +190,84 @@ public class ExtensionsToolbarBridge implements Destroyable {
      }
  
      public String[] getAllActionIds() {
 -        assert mNativeExtensionsToolbarAndroid != 0;
 -        return ExtensionsToolbarBridgeJni.get().getAllActionIds(mNativeExtensionsToolbarAndroid);
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            // TODO(crbug.com/459079170): This is to prevent tests from breaking. {@code
 +            // ExtensionsToolbarCoordinatorImpl} should ideally be destroyed following {@code
 +            // ChromeAndroidTask}'s destruction, and it is currently being worked on.
@@ -991,7 +991,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
 -        assert mNativeExtensionsToolbarAndroid != 0;
 -        return ExtensionsToolbarBridgeJni.get().getPinnedActionIds(mNativeExtensionsToolbarAndroid);
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            // TODO(crbug.com/459079170): This is to prevent tests from breaking. {@code
 +            // ExtensionsToolbarCoordinatorImpl} should ideally be destroyed following {@code
 +            // ChromeAndroidTask}'s destruction, and it is currently being worked on.
@@ -1004,7 +1004,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
      public boolean isActionDraggable(String actionId) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            // TODO(crbug.com/459079170): This is to prevent tests from breaking. {@code
 +            // ExtensionsToolbarCoordinatorImpl} should ideally be destroyed following {@code
 +            // ChromeAndroidTask}'s destruction, and it is currently being worked on.
@@ -1018,7 +1018,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
      public void executeUserAction(String actionId, @InvocationSource int source) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            // TODO(crbug.com/459079170): This is to prevent tests from breaking. {@code
 +            // ExtensionsToolbarCoordinatorImpl} should ideally be destroyed following {@code
 +            // ChromeAndroidTask}'s destruction, and it is currently being worked on.
@@ -1032,7 +1032,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
      public void movePinnedAction(String actionId, int targetIndex) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            // TODO(crbug.com/459079170): This is to prevent tests from breaking. {@code
 +            // ExtensionsToolbarCoordinatorImpl} should ideally be destroyed following {@code
 +            // ChromeAndroidTask}'s destruction, and it is currently being worked on.
@@ -1046,7 +1046,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
      public boolean onRequestAccessButtonClicked(WebContents webContents) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            return false;
 +        }
          return ExtensionsToolbarBridgeJni.get()
@@ -1057,6 +1057,9 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
  
      public RequestAccessButtonParams getRequestAccessButtonParams(WebContents webContents) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
++        if (isShutdownStarted()) {
++            return new RequestAccessButtonParams(new String[0], "");
++        }
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
          RequestAccessButtonParams params =
                  ExtensionsToolbarBridgeJni.get()
@@ -1066,11 +1069,14 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
          assert params != null;
          return params;
      }
-@@ -143,10 +275,10 @@ public class ExtensionsToolbarBridge implements Destroyable {
+@@ -143,10 +278,13 @@ public class ExtensionsToolbarBridge implements Destroyable {
              int canvasHeightDp,
              float scaleFactor,
              int color) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
++        if (isShutdownStarted()) {
++            return new ExtensionsMenuButtonState("", "", null);
++        }
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
          return ExtensionsToolbarBridgeJni.get()
                  .getMenuButtonState(
@@ -1079,11 +1085,14 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
                          webContents,
                          canvasWidthDp,
                          canvasHeightDp,
-@@ -156,21 +288,25 @@ public class ExtensionsToolbarBridge implements Destroyable {
+@@ -156,21 +294,28 @@ public class ExtensionsToolbarBridge implements Destroyable {
  
      /** Handles the key down event and returns the result. */
      public boolean handleKeyDownEvent(KeyEvent event) {
 -        assert mNativeExtensionsToolbarAndroid != 0;
++        if (isShutdownStarted()) {
++            return false;
++        }
 +        assert Instance().mNativeExtensionsToolbarAndroid != 0;
          return ExtensionsToolbarBridgeJni.get()
 -                .handleKeyDownEvent(mNativeExtensionsToolbarAndroid, event);
@@ -1093,7 +1102,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
      @CalledByNative
      public void showManageExtensionsIPH() {
 -        for (Observer observer : mObservers) {
-+        if (getActiveProfile().shutdownStarted()) {
++        if (isShutdownStarted()) {
 +            return;
 +        }
 +
@@ -1109,7 +1118,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
              observer.showPinnedByDefaultIPH(extensionId);
          }
      }
-@@ -182,30 +318,30 @@ public class ExtensionsToolbarBridge implements Destroyable {
+@@ -182,30 +327,30 @@ public class ExtensionsToolbarBridge implements Destroyable {
              boolean inspectWithDevTools) {
          // {@link mActionListDelegate} should be set in {@code ExtensionActionListMediator}'s
          // constructor.
@@ -1146,7 +1155,7 @@ index 30bf2a17c93b2..9db3e9b08c5b0 100644
              observer.onToolbarControlStateUpdated();
          }
      }
-@@ -214,75 +350,75 @@ public class ExtensionsToolbarBridge implements Destroyable {
+@@ -214,75 +359,75 @@ public class ExtensionsToolbarBridge implements Destroyable {
      public boolean hasPoppedOutAction() {
          // {@link mActionListDelegate} should be set in {@code ExtensionActionListMediator}'s
          // constructor.
