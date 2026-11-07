@@ -1,7 +1,9 @@
 # Windows on ARM64 smoke test
 
 [`smoke_test.ps1`](smoke_test.ps1) is the native Windows ARM64 test harness
-used by [the WOA smoke-test workflow](../../.github/workflows/woa-smoke-test.yml).
+used by [the WOA smoke-test workflow](https://github.com/gz83/thorium-build/actions/workflows/woa-smoke-test.yml).
+The workflow is a separate, optional diagnostic in the private orchestration
+repository; browser builds do not invoke it automatically.
 It validates a raw `thorium_ARM64_installer.exe` without depending on whether
 the installer was built on Linux or Windows.
 
@@ -134,7 +136,7 @@ expected_sha256: optional 64-character digest
 require_gui: false for the first capability-probing run
 ```
 
-The run must belong to the same repository. The workflow deliberately does not
+The run must belong to `gz83/thorium-build`. The workflow deliberately does not
 download artifacts or executables from arbitrary external URLs.
 
 ## Call it after an online build
@@ -155,6 +157,7 @@ jobs:
       contents: read
     uses: ./.github/workflows/woa-smoke-test.yml
     with:
+      thorium_commit: ${{ inputs.thorium_commit }}
       artifact_name: thorium-woa-installer
       current_run_artifact: true
       require_gui: true
@@ -166,30 +169,27 @@ unambiguous.
 
 ## Test a local Linux cross-build
 
-For a one-off local build, upload the raw installer to a temporary draft release
-in your own repository, then select that tag in the manual workflow:
+For a one-off local build, use an artifact from the private orchestration
+repository or an installer in a published `gz83/thorium` release. The private
+workflow token cannot read public-repository draft releases. The reusable
+workflow example above belongs in `gz83/thorium-build`.
+
+To inspect a published release, replace the commit, installer path and tag:
 
 ```shell
-repo=OWNER/REPOSITORY
+repo=gz83/thorium-build
+thorium_commit=FULL_REVIEWED_THORIUM_COMMIT
 installer=/path/to/thorium_ARM64_installer.exe
-tag=woa-smoke-$(date +%Y%m%d-%H%M%S)
+tag=PUBLISHED_RELEASE_TAG
 sha256=$(sha256sum "$installer" | cut -d' ' -f1)
-gh release create "$tag" --repo "$repo" --draft \
-  --title "$tag" --notes "Temporary WOA smoke input"
-gh release upload "$tag" "$installer" --repo "$repo"
 gh workflow run woa-smoke-test.yml \
   --repo "$repo" \
+  -f thorium_commit="$thorium_commit" \
   -f release_tag="$tag" \
   -f release_asset_pattern=thorium_ARM64_installer.exe \
   -f installer_pattern=thorium_ARM64_installer.exe \
   -f expected_sha256="$sha256" \
   -f require_gui=false
-```
-
-After the test has downloaded the asset, remove the temporary draft and tag:
-
-```shell
-gh release delete "$tag" --repo "$repo" --cleanup-tag --yes
 ```
 
 Only test artifacts that you built or otherwise trust: the workflow installs

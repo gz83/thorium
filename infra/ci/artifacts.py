@@ -37,7 +37,7 @@ def validate(run_id, artifact_id):
             run["event"] != "workflow_dispatch" or
             run["path"] != workflow or
             run["head_repository"]["full_name"] != os.environ["GITHUB_REPOSITORY"]):
-        raise ValueError("resume must come from this workflow, repository and exact commit")
+        raise ValueError("resume must come from this workflow, repository and exact orchestration commit")
     artifact = api(f"actions/artifacts/{artifact_id}")
     if artifact["expired"] or artifact["workflow_run"]["id"] != int(run_id):
         raise ValueError("artifact expired or belongs to another run")
@@ -62,7 +62,7 @@ def main():
         output("status", status)
         output("artifact-id", args.artifact_id)
         output("run-id", args.run_id)
-        summary(f"Using artifact `{artifact['name']}` ({args.artifact_id}) with verified provenance; content digests will be checked during restore.")
+        summary(f"Using artifact `{artifact['name']}` ({args.artifact_id}) with verified workflow provenance; the Thorium source commit and content digests will be checked during restore.")
     else:
         # Never remove the manually selected checkpoint of an earlier run.
         if args.run_id != os.environ["GITHUB_RUN_ID"] or status != "checkpointed":

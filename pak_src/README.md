@@ -161,8 +161,9 @@ sha256sum --check SHA256SUMS
 
 Maintainers who do not want to install cross-compilation toolchains locally
 can run the manual
-[`Build PAK 3.x binaries`](../.github/workflows/build-pak-binaries.yml)
-workflow. It validates pinned PAK fixtures, builds all four bundled targets in
+[`Build PAK 3.x binaries`](https://github.com/gz83/thorium-build/actions/workflows/build-pak-binaries.yml)
+workflow in the private orchestration repository, supplying the reviewed
+Thorium source commit. It validates pinned PAK fixtures, builds all four bundled targets in
 their appropriate hosted environments, and performs a byte-identical PAK
 round trip with each generated binary. It uploads `thorium-pak-3x-binaries`
 containing the binaries,

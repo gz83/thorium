@@ -1,7 +1,9 @@
 # macOS native smoke tests
 
 [`smoke_test.py`](smoke_test.py) is the native macOS test harness used by
-[the macOS smoke-test workflow](../../.github/workflows/macos-smoke-test.yml).
+[the macOS smoke-test workflow](https://github.com/gz83/thorium-build/actions/workflows/macos-smoke-test.yml).
+The workflow is a separate, optional diagnostic in the private orchestration
+repository; browser builds do not invoke it automatically.
 It validates packaged `Thorium.app` bundles from x64 and ARM64 DMGs, including
 applications cross-built on Linux. It does not compile Chromium or create DMGs;
 see the [macOS build and packaging guide](../../docs/BUILDING_MAC.md) for those
@@ -153,13 +155,13 @@ x64_sha256: optional expected DMG digest
 arm64_sha256: optional expected DMG digest
 ```
 
-The run must belong to the same repository. `artifact_prefix` changes the
+The run must belong to `gz83/thorium-build`. `artifact_prefix` changes the
 common artifact prefix; `x64_asset` and `arm64_asset` must match the exact DMG
 filenames. Do not include source trees or build directories in these artifacts.
 
 ## Call it after a build
 
-A producing workflow can upload both DMGs and call the reusable comparison.
+A producing workflow in `gz83/thorium-build` can upload both DMGs and call the reusable comparison.
 In this example, the build job exposes the application version as an output:
 
 ```yaml
@@ -176,6 +178,7 @@ jobs:
       contents: read
     uses: ./.github/workflows/macos-smoke-test.yml
     with:
+      thorium_commit: ${{ inputs.thorium_commit }}
       current_run_artifact: true
       expected_version: ${{ needs.build.outputs.version }}
       # Set macos_version to a supported choice for this build.
@@ -183,29 +186,28 @@ jobs:
 
 ## Test DMGs from a release
 
-Upload both DMGs to a release in the workflow's repository, then select its
+Upload both DMGs to a published release in `gz83/thorium`, then select its
 exact tag in `release_tag`. Leave `source_run_id` empty and
 `current_run_artifact` false. Asset inputs are exact filenames, not URLs or
 wildcards. The workflow accepts exactly one input source per run.
 
-For a local build, create a temporary draft release. Replace the repository,
-paths, application version and OS choice below before running the commands on
-Linux:
+The private workflow token cannot read draft releases in the public repository.
+For a published release, replace the source commit, paths, release tag,
+application version and OS choice below before running the commands on Linux:
 
 ```shell
-repo=OWNER/REPOSITORY
+repo=gz83/thorium-build
+thorium_commit=FULL_REVIEWED_THORIUM_COMMIT
 x64_dmg=/path/to/Thorium_MacOS_x64.dmg
 arm64_dmg=/path/to/Thorium_MacOS_ARM64.dmg
 version=MAJOR.MINOR.BUILD.PATCH
 macos_version=SUPPORTED_OS_MAJOR
-tag=macos-smoke-$(date +%Y%m%d-%H%M%S)
+tag=PUBLISHED_RELEASE_TAG
 x64_sha256=$(sha256sum "$x64_dmg" | cut -d' ' -f1)
 arm64_sha256=$(sha256sum "$arm64_dmg" | cut -d' ' -f1)
 
-gh release create "$tag" --repo "$repo" --draft \
-  --title "$tag" --notes "Temporary macOS smoke input"
-gh release upload "$tag" "$x64_dmg" "$arm64_dmg" --repo "$repo"
 gh workflow run macos-smoke-test.yml --repo "$repo" \
+  -f thorium_commit="$thorium_commit" \
   -f current_run_artifact=false \
   -f source_run_id= \
   -f release_tag="$tag" \

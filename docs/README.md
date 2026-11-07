@@ -13,6 +13,12 @@ the corresponding upstream documentation instead of freezing tool versions.
 - [Cross-compile Windows on Linux](BUILDING_WIN_CROSS.md)
 - [ARM and Android builds](../arm/README.md)
 - [GN arguments used by Thorium](ABOUT_GN_ARGS.md)
+- [Private Actions orchestration](https://github.com/gz83/thorium-build)
+
+GitHub Actions workflows are maintained in the private `gz83/thorium-build`
+repository. They check out a reviewed Thorium commit from this repository;
+source files and build scripts are not mirrored into the orchestration repo.
+Access to its workflows and logs requires permission to that private repository.
 
 All repository Python entry points require Python 3.11 or newer. Run each
 script with `--help` for its authoritative options.

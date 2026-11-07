@@ -90,9 +90,10 @@ symbolic links in a tar archive:
 tar -C "$CR_DIR/out/thorium" -czf Thorium.app.tar.gz Thorium.app
 ```
 
-Upload `Thorium.app.tar.gz` to a draft release, then manually run
-[`Package macOS DMG`](../.github/workflows/package-macos-dmg.yml). Supply the
-same release tag, the exact archive filename, a four-part Chromium tag or full
+Upload `Thorium.app.tar.gz` to a published release in `gz83/thorium`, then manually run
+[`Package macOS DMG`](https://github.com/gz83/thorium-build/actions/workflows/package-macos-dmg.yml)
+in the private orchestration repository. Supply the reviewed Thorium source
+commit, the release tag, the exact archive filename, a four-part Chromium tag or full
 40-character commit used for the build, and the application's target
 architecture. Supplying the source archive SHA-256 is optional but recommended.
 
@@ -104,9 +105,10 @@ After invoking `create_dmg.py` in a read-scoped macOS packaging job, the
 workflow mounts the resulting image and repeats the layout, architecture,
 property-list, and code-signature checks. Workflow artifacts include complete
 success or failure architecture reports and package provenance; available
-diagnostics are uploaded even when packaging fails. A separate write-scoped
-job can publish the DMG, its SHA-256 file, and architecture-specific package
-information to the selected release. When a four-part Chromium tag is
+diagnostics are uploaded even when packaging fails. Download the resulting
+artifacts, inspect them and publish manually; the workflow has no Release write
+job. The private repository's token cannot read public-repository draft
+releases. When a four-part Chromium tag is
 supplied, it must match the application version.
 
 The runner architecture does not have to match the application architecture;

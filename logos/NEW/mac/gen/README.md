@@ -86,11 +86,10 @@ next run.
 ## Generate with GitHub Actions
 
 Without a Mac, run the
-[`Generate macOS app icon`](../../../../.github/workflows/generate-macos-app-icon.yml)
-workflow manually. GitHub normally lists a manually dispatched workflow only
-after its workflow file exists on the repository's default branch. In the
-Actions page, choose the branch containing the icon sources from the **Run
-workflow** branch selector.
+[`Generate macOS app icon`](https://github.com/gz83/thorium-build/actions/workflows/generate-macos-app-icon.yml)
+workflow manually in the private orchestration repository. Run its `main`
+branch and supply the full reviewed Thorium commit in `thorium_commit`; the
+workflow checks out the icon sources from that public-repository commit.
 
 The workflow uses a fixed `MACOSX_DEPLOYMENT_TARGET` because it does not check
 out Chromium. Synchronize that value with

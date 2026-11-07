@@ -104,17 +104,7 @@ def input_identity():
     files = {}
     for relative in ("setup.py", "build.py", "create_dmg.py", "version.py", "args.gn", "win_args.gn", "arm", "src", "other",
                      "patch_scripts", "pak_src", "thorium_shell", "infra/ci",
-                     "infra/portable", "infra/APPIMAGE", "infra/macos/package_dmg.py", "logos",
-                     ".github/workflows/build-linux.yml",
-                     ".github/workflows/build-android.yml",
-                     ".github/workflows/build-windows.yml",
-                     ".github/workflows/build-windows-profile.yml",
-                     ".github/workflows/build-windows-stage.yml",
-                     ".github/workflows/build-macos.yml",
-                     ".github/workflows/build-macos-profile.yml",
-                     ".github/workflows/build-macos-stage.yml",
-                     ".github/workflows/build-profile.yml",
-                     ".github/workflows/build-stage.yml"):
+                     "infra/portable", "infra/APPIMAGE", "infra/macos/package_dmg.py", "logos"):
         path = ROOT / relative
         candidates = path.rglob("*") if path.is_dir() else [path]
         for item in candidates:
@@ -125,10 +115,14 @@ def input_identity():
                 files[str(rel)] = "link:" + os.readlink(item)
             elif item.is_file():
                 files[str(rel)] = sha256(item)
-    return {
-        "schema_version": 2, "profile": profile_name(),
-        "thorium_commit": subprocess.check_output(
-            ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip(),
+    thorium_commit = subprocess.check_output(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
+    requested = os.environ.get("THORIUM_SOURCE_COMMIT")
+    if requested and requested != thorium_commit:
+        raise ValueError("Thorium checkout does not match the requested source commit")
+    identity = {
+        "schema_version": 3, "profile": profile_name(),
+        "thorium_commit": thorium_commit,
         "chromium_version": sources["chromium_version"],
         "chromium_revision": sources["chromium_revision"],
         "source_sha256": sources["chromium"]["sha256"],
@@ -136,6 +130,14 @@ def input_identity():
         "configuration_sha256": digest_json([sources, profile]),
         "backend": "siso", "remote_execution": False, "pruning_mode": "none",
     }
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        # GITHUB_SHA belongs to the private workflow repository. Source identity
+        # comes from the public checkout above, not the workflow event.
+        identity["orchestration"] = {
+            "repository": os.environ["GITHUB_REPOSITORY"],
+            "commit": os.environ["GITHUB_SHA"],
+        }
+    return identity
 
 
 def checked_path(root, relative):
