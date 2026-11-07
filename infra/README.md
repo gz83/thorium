@@ -5,6 +5,10 @@ standalone packaging resources, and supporting metadata. Platform build
 instructions are maintained in the
 [`docs`](../docs/README.md) directory rather than duplicated here.
 
+CI scripts, dependency locks, runner management and platform automation live
+in the private [thorium-build repository](https://github.com/gz83/thorium-build).
+The tools below remain available for local development and packaging.
+
 ## Primary tools
 
 - [`APPIMAGE`](APPIMAGE/README.md) builds and extracts Linux AppImages from a
@@ -13,11 +17,6 @@ instructions are maintained in the
   configurations, `build_debug.py`, and the Thorium UI Debug Shell resources.
 - [`portable`](portable/README.md) creates Linux and Windows portable ZIP
   archives from existing release packages.
-- [`macos/package_dmg.py`](macos/package_dmg.py) safely extracts macOS
-  application archives and validates complete Mach-O and mounted-DMG payloads
-  for the online packaging workflow.
-- [`woa`](woa/README.md) validates a Windows ARM64 mini installer on a native
-  GitHub-hosted ARM64 runner, independently of the build host.
 - [`build_llvm.py`](build_llvm.py) builds the optimized LLVM/Clang, LLD, and
   Polly toolchain required by Thorium's LLVM optimization patch.
 
@@ -95,6 +94,6 @@ and should not be treated as an enabled product component.
 - [Linux build guide](../docs/BUILDING.md)
 - [GN argument guide](../docs/ABOUT_GN_ARGS.md)
 - [Debugging infrastructure](DEBUG/README.md)
-- [Windows on ARM64 smoke testing](woa/README.md)
+- [Private CI infrastructure and platform diagnostics](https://github.com/gz83/thorium-build)
 
 <img src="https://github.com/Alex313031/thorium/blob/main/logos/NEW/thorium_infra_256.png" alt="Thorium infrastructure" width="200">

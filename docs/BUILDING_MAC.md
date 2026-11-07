@@ -83,41 +83,11 @@ chromium`. The script is macOS-only and uses Chromium's `pkg-dmg` tool.
 
 ### Package a Linux-built application on GitHub Actions
 
-When cross-building the application on Linux, preserve its executable modes and
-symbolic links in a tar archive:
-
-```shell
-tar -C "$CR_DIR/out/thorium" -czf Thorium.app.tar.gz Thorium.app
-```
-
-Upload `Thorium.app.tar.gz` to a published release in `gz83/thorium`, then manually run
-[`Package macOS DMG`](https://github.com/gz83/thorium-build/actions/workflows/package-macos-dmg.yml)
-in the private orchestration repository. Supply the reviewed Thorium source
-commit, the release tag, the exact archive filename, a four-part Chromium tag or full
-40-character commit used for the build, and the application's target
-architecture. Supplying the source archive SHA-256 is optional but recommended.
-
-The workflow safely extracts an archive containing only `Thorium.app`, obtains
-the matching Chromium `pkg-dmg`, verifies the Thorium bundle identity, and
-validates every Mach-O file in the bundle. Extraction is transactional, so an
-invalid archive does not leave a partial application in the packaging tree.
-After invoking `create_dmg.py` in a read-scoped macOS packaging job, the
-workflow mounts the resulting image and repeats the layout, architecture,
-property-list, and code-signature checks. Workflow artifacts include complete
-success or failure architecture reports and package provenance; available
-diagnostics are uploaded even when packaging fails. Download the resulting
-artifacts, inspect them and publish manually; the workflow has no Release write
-job. The private repository's token cannot read public-repository draft
-releases. When a four-part Chromium tag is
-supplied, it must match the application version.
-
-The runner architecture does not have to match the application architecture;
-it performs packaging and ad-hoc signing rather than compilation. This process
-does not provide Developer ID signing or Apple notarization.
-
-To compare packaged x64 and ARM64 applications on native GitHub Actions
-runners, use the [macOS smoke-test workflow](../infra/macos/README.md). It tests
-both DMGs at the same version and preserves renderer crash and hang diagnostics.
+The private `gz83/thorium-build` repository maintains the
+[macOS DMG packaging workflow and usage guide](https://github.com/gz83/thorium-build/blob/main/infra/macos/PACKAGING.md),
+including archive preparation, source selection and artifact downloads.
+Native platform diagnostics are also maintained there and run separately from
+browser compilation and packaging.
 
 Thorium's macOS 26 icon pipeline is maintained under
 [`logos/NEW/mac/gen`](../logos/NEW/mac/gen). Generated `Assets.car` and

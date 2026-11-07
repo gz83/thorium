@@ -15,9 +15,11 @@ the corresponding upstream documentation instead of freezing tool versions.
 - [GN arguments used by Thorium](ABOUT_GN_ARGS.md)
 - [Private Actions orchestration](https://github.com/gz83/thorium-build)
 
-GitHub Actions workflows are maintained in the private `gz83/thorium-build`
-repository. They check out a reviewed Thorium commit from this repository;
-source files and build scripts are not mirrored into the orchestration repo.
+GitHub Actions workflows, CI scripts, dependency locks, runner configuration
+and platform diagnostics are maintained in the private `gz83/thorium-build`
+repository. Jobs check out a reviewed Thorium commit; browser source is not
+mirrored into the private repository. Local build scripts, patches, GN args
+and standalone packaging tools remain here.
 Access to its workflows and logs requires permission to that private repository.
 
 All repository Python entry points require Python 3.11 or newer. Run each

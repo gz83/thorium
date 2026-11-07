@@ -8,6 +8,17 @@ Crashpad, assembler, signing, or installer workflow available on a native
 Windows host. Consult Chromium's current Windows cross-build implementation
 before relying on a particular target.
 
+## Persistent server builds from the full tarball
+
+The private [thorium-build repository](https://github.com/gz83/thorium-build)
+contains the Windows cross-build workflow, automatic tarball preparation,
+dependency locks, runner configuration and usage instructions. It selects a
+reviewed commit from this source repository. CI fixes do not require copying
+scripts into Thorium or maintaining a source mirror.
+
+The instructions below describe a manually maintained Git checkout. The local
+build scripts, patches, GN args and standalone packaging tools remain here.
+
 ## Prerequisites
 
 Prepare Linux as described in the [Linux build guide](BUILDING.md). In the
