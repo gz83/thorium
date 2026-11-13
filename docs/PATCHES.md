@@ -205,7 +205,6 @@ overlay-derived, or still need separate provenance review.
 
 - [`add-flag-to-close-window-with-last-tab.patch`](../other/add-flag-to-close-window-with-last-tab.patch)
 - [`add-flag-to-scroll-tabs.patch`](../other/add-flag-to-scroll-tabs.patch)
-- [`enable-ctrl-tab-mru.patch`](../other/enable-ctrl-tab-mru.patch)
 - [`add-flag-for-double-click-close-tab.patch`](../other/add-flag-for-double-click-close-tab.patch)
 - [`add-flag-for-right-click-close-tab.patch`](../other/add-flag-for-right-click-close-tab.patch)
 - [`add-flag-for-hover-activate-tab.patch`](../other/add-flag-for-hover-activate-tab.patch)
