@@ -161,7 +161,6 @@ other/allow_manifest_v2_extensions.patch
 other/increase-dnr-limits.patch
 other/show-hosted-apps-in-extensions.patch
 other/thorium_webui.patch
-other/keyboard_shortcuts.patch
 other/keep-expired-flags.patch
 other/disable-privacy-sandbox.patch
 other/disable-encryption.patch

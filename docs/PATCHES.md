@@ -248,7 +248,6 @@ overlay-derived, or still need separate provenance review.
 - [`increase-dnr-limits.patch`](../other/increase-dnr-limits.patch)
 - [`show-hosted-apps-in-extensions.patch`](../other/show-hosted-apps-in-extensions.patch)
 - [`thorium_webui.patch`](../other/thorium_webui.patch)
-- [`keyboard_shortcuts.patch`](../other/keyboard_shortcuts.patch)
 - [`keep-expired-flags.patch`](../other/keep-expired-flags.patch)
 - [`disable-privacy-sandbox.patch`](../other/disable-privacy-sandbox.patch) — Defaults iframe URNs and the M1 advertising API override to disabled; the other advertising override is already disabled upstream. Removes production attestation preload packaging and component-update registration, and disables Android APK fallback loading by default. Preserves upstream Fenced Frames compatibility behavior, attestation enforcement, RWS, CHIPS, FedCM, Storage Access API and account capabilities. Feature overrides can re-enable these defaults; existing user data is not deleted.
 - [`disable-encryption.patch`](../other/disable-encryption.patch)

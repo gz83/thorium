@@ -41,7 +41,7 @@ const FeatureEntry::Choice kAutoplayPolicyChoices[] = {
     {flags_ui::kGenericExperimentChoiceDefault, "", ""},
     {"No User Gesture Required",
      switches::kAutoplayPolicy, "no-user-gesture-required"},
-    {"User Gesture Required",
+    {"User Gesture Required (Per Media Element)",
      switches::kAutoplayPolicy, "user-gesture-required"},
     {"Document User Activation Required",
      switches::kAutoplayPolicy, "document-user-activation-required"},

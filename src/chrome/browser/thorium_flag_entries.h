@@ -112,7 +112,7 @@
     {"custom-tab-width",
      "Custom Tab Width",
      "Allows setting the default tab width, in DIP. Normally 1 DIP = 1 Pixel, and the standard width for tabs is 240.",
-     kOsAll, MULTI_VALUE_TYPE(kCustomTabWidthChoices)},
+     kOsDesktop, MULTI_VALUE_TYPE(kCustomTabWidthChoices)},
     {"disable-thorium-dns-config",
      "Disable Thorium Secure DNS Fallback",
      "Disables Thorium's fallback that keeps explicitly configured Secure DNS-over-HTTPS available when the platform DNS configuration is unavailable. "
@@ -168,9 +168,9 @@
 
     {"autoplay-policy",
      "Configure AutoPlay Policy",
-     "Allows setting the AutoPlay policy. `No User Gesture Required` enables AutoPlay. `Document User Activation Required` disables AutoPlay, "
-     "and forces all sites to require a click to initiate media playback; this is the default if unset. `User Gesture Required` blocks "
-     "most AutoPlay annoyances, while still allowing some (i.e. WebAudio) to continue.",
+     "Controls the autoplay policy for HTML audio and video elements. "
+     "On desktop, Web Audio contexts bypass autoplay user-gesture checks "
+     "regardless of this setting.",
      kOsDesktop, MULTI_VALUE_TYPE(kAutoplayPolicyChoices)},
     {"allow-insecure-downloads",
      "Allow Insecure Downloads",
@@ -255,10 +255,6 @@
      "Note that this flag does not ensure that a GPU context will never be lost in any situation, like say, a GPU reset. "
      "Useful for fixing blank or pink screens/videos upon system resume, etc.",
      kOsDesktop, SINGLE_VALUE_TYPE(switches::kGpuNoContextLost)},
-    {"enable-ui-devtools",
-     "Enable Native UI Inspection in DevTools",
-     "Enables inspection of native UI elements in devtools. Inspect at `chrome://inspect/#native-ui`",
-     kOsAll, SINGLE_VALUE_TYPE(ui_devtools::switches::kEnableUiDevTools)},
     {"tab-hover-cards",
      "Tab Hover Cards",
      "Allows removing the tab hover cards or using a tooltip as a replacement.",
