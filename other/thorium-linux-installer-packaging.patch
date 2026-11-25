@@ -12,10 +12,10 @@ index a4ad87db54e3c..65a42ceb6409c 100644
      deps = [ "//chrome/installer/linux" ]
    }
 diff --git a/chrome/installer/linux/BUILD.gn b/chrome/installer/linux/BUILD.gn
-index 2a75b4c07d1e7..33a05266923ff 100644
+index 71b0e79cb00db..25e2ee29843ba 100644
 --- a/chrome/installer/linux/BUILD.gn
 +++ b/chrome/installer/linux/BUILD.gn
-@@ -1,16 +1,16 @@
+@@ -1,9 +1,10 @@
 -# Copyright 2015 The Chromium Authors
 +# Copyright 2026 The Chromium Authors and Alex313031
  # Use of this source code is governed by a BSD-style license that can be
@@ -27,21 +27,15 @@ index 2a75b4c07d1e7..33a05266923ff 100644
  import("//build/config/sanitizers/sanitizers.gni")
  import("//build/config/sysroot.gni")
  import("//build/linux/strip_binary.gni")
- import("//build/timestamp.gni")
- import("//build/util/lastchange.gni")
- import("//build/util/process_version.gni")
--import("//chrome/installer/installers.gni")
- import("//chrome/version.gni")
- import("//components/optimization_guide/features.gni")
- import("//services/on_device_model/on_device_model.gni")
-@@ -23,10 +23,14 @@ if (bundle_widevine_cdm) {
+@@ -19,14 +20,14 @@ import("//third_party/widevine/cdm/widevine.gni")
+ import("//ui/gl/features.gni")
+ import("//ui/qt/qt.gni")
+ 
+-if (bundle_widevine_cdm) {
++if (bundle_widevine_cdm || enable_library_cdms) {
    import("//media/cdm/library_cdm/cdm_paths.gni")
  }
  
-+if (enable_library_cdms && !bundle_widevine_cdm) {
-+  import("//media/cdm/library_cdm/cdm_paths.gni")
-+}
-+
  declare_args() {
    # Enables checks that ensure the packages are installable on all supported
    # distributions.
@@ -50,17 +44,18 @@ index 2a75b4c07d1e7..33a05266923ff 100644
  
    # Enables building Flatpak package bundles (.flatpak).
    enable_flatpak = false
-@@ -34,6 +38,9 @@ declare_args() {
+@@ -37,6 +38,10 @@ declare_args() {
  
  assert(is_linux)
  
-+# Thorium's installer uses its own DEB/RPM staging and template context.
++# Thorium distributes stable DEB and RPM packages.
 +assert(!enable_flatpak, "Thorium packaging does not support Flatpak.")
++assert(!enable_snap_package, "Thorium packaging does not support Snap.")
 +
  if (current_cpu == "x86") {
    deb_arch = "i386"
    rpm_arch = "i386"
-@@ -70,11 +77,29 @@ if (current_cpu == "x86") {
+@@ -73,11 +78,29 @@ if (current_cpu == "x86") {
    assert(false, "Linux installer not configured for this architecture.")
  }
  
@@ -91,7 +86,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
  ]
  
  packaging_files_shlibs = []
-@@ -105,12 +130,21 @@ if (build_with_internal_optimization_guide) {
+@@ -108,12 +131,21 @@ if (build_with_internal_optimization_guide) {
    }
  }
  
@@ -113,7 +108,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
                      "$root_out_dir/locales/en-US.pak",
                      "$root_out_dir/MEIPreload/manifest.json",
                      "$root_out_dir/MEIPreload/preloaded_data.pb",
-@@ -130,7 +164,11 @@ if (use_qt6) {
+@@ -133,7 +165,11 @@ if (use_qt6) {
  }
  
  action_foreach("calculate_deb_dependencies") {
@@ -126,7 +121,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
    script = "debian/calculate_package_deps.py"
    sources = packaging_files_binaries
    inputs = [
-@@ -153,6 +191,7 @@ action_foreach("calculate_deb_dependencies") {
+@@ -156,6 +192,7 @@ action_foreach("calculate_deb_dependencies") {
  }
  
  action("merge_deb_dependencies") {
@@ -134,7 +129,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
    deps = [ ":calculate_deb_dependencies" ]
    script = "debian/merge_package_versions.py"
    additional_deps = "debian/additional_deps"
-@@ -172,7 +211,11 @@ action("merge_deb_dependencies") {
+@@ -175,7 +212,11 @@ action("merge_deb_dependencies") {
  }
  
  action_foreach("calculate_rpm_dependencies") {
@@ -147,7 +142,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
    script = "rpm/calculate_package_deps.py"
    sources = packaging_files_binaries
    inputs = [
-@@ -191,6 +234,7 @@ action_foreach("calculate_rpm_dependencies") {
+@@ -194,6 +235,7 @@ action_foreach("calculate_rpm_dependencies") {
  }
  
  action("merge_rpm_dependencies") {
@@ -155,7 +150,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
    deps = [ ":calculate_rpm_dependencies" ]
    script = "rpm/merge_package_deps.py"
    additional_deps = "rpm/additional_deps"
-@@ -208,7 +252,7 @@ action("merge_rpm_dependencies") {
+@@ -211,7 +253,7 @@ action("merge_rpm_dependencies") {
  }
  
  strip_binary("strip_chrome_binary") {
@@ -164,7 +159,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
    deps = [ "//chrome" ]
  }
  
-@@ -227,12 +271,42 @@ strip_binary("strip_chrome_sandbox") {
+@@ -230,12 +272,42 @@ strip_binary("strip_chrome_sandbox") {
    deps = [ "//sandbox/linux:chrome_sandbox" ]
  }
  
@@ -211,7 +206,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      deps = [ "//ui/gl:dummy_libEGL" ]
    } else {
      deps = [ "//third_party/angle:libEGL" ]
-@@ -241,7 +315,7 @@ strip_binary("strip_libEGL_shlib") {
+@@ -244,7 +316,7 @@ strip_binary("strip_libEGL_shlib") {
  
  strip_binary("strip_libGLESv2_shlib") {
    binary_input = "$root_out_dir/libGLESv2.so"
@@ -220,7 +215,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      deps = [ "//ui/gl:dummy_libGLESv2" ]
    } else {
      deps = [ "//third_party/angle:libGLESv2" ]
-@@ -288,61 +362,11 @@ if (use_qt6) {
+@@ -291,61 +363,11 @@ if (use_qt6) {
    }
  }
  
@@ -285,8 +280,11 @@ index 2a75b4c07d1e7..33a05266923ff 100644
  }
  
  branding_dir = "//chrome/app/theme/$branding_path_component"
-@@ -355,17 +379,12 @@ copy("common_packaging_files") {
-     "//chrome/app/resources/manpage.1.in",
+@@ -355,21 +377,15 @@ branding_dir_100 =
+ copy("common_packaging_files") {
+   visibility = [ ":*" ]
+   sources = [
+-    "//chrome/app/resources/manpage.1.in",
      "common/apparmor.template",
      "common/appdata.xml.template",
 -    "common/apt.include",
@@ -298,18 +296,27 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      "common/prerm.include",
 -    "common/repo.cron",
 -    "common/repo_variables.include",
-     "common/rpm.include",
+-    "common/rpm.include",
 -    "common/rpmrepo.cron",
      "common/symlinks.include",
++    "common/thorium/manpage.1.in",
      "common/variables.include",
      "common/wrapper",
-@@ -385,16 +404,20 @@ copy("deb_packaging_files") {
+   ]
+@@ -377,7 +393,7 @@ copy("common_packaging_files") {
+   if (is_chrome_branded) {
+     sources += [ "common/google-chrome.info" ]
+   } else {
+-    sources += [ "common/chromium-browser.info" ]
++    sources += [ "common/thorium/chromium-browser.info" ]
+   }
+ 
+   outputs = [ "$root_out_dir/installer/common/{{source_file_part}}" ]
+@@ -388,16 +404,18 @@ copy("deb_packaging_files") {
    sources = [
      "debian/changelog.template",
      "debian/control.template",
 -    "debian/control_repo.template",
-+
-+    # "debian/manual_recommends",
      "debian/postinst",
 -    "debian/postinst_repo",
      "debian/postrm",
@@ -327,7 +334,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
  copy("theme_files") {
    visibility = [ ":*" ]
    sources = [
-@@ -438,7 +461,7 @@ copy("theme_files") {
+@@ -441,7 +459,7 @@ copy("theme_files") {
  if (!is_chromeos) {
    copy("rpm_packaging_files") {
      visibility = [ ":*" ]
@@ -336,7 +343,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      outputs = [ "$root_out_dir/installer/rpm/{{source_file_part}}" ]
    }
  
-@@ -482,6 +505,7 @@ group("installer_deps") {
+@@ -485,6 +503,7 @@ group("installer_deps") {
      ":strip_chrome_management_service",
      ":strip_chrome_sandbox",
      ":theme_files",
@@ -344,7 +351,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      "//chrome",
    ]
    public_deps += [
-@@ -490,6 +514,8 @@ group("installer_deps") {
+@@ -493,6 +512,8 @@ group("installer_deps") {
      "//chrome/browser/resources/media/mei_preload:component",
      "//components/crash/core/app:chrome_crashpad_handler",
      "//sandbox/linux:chrome_sandbox",
@@ -353,7 +360,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
    ]
    if (bundle_widevine_cdm) {
      public_deps += [ "//third_party/widevine/cdm" ]
-@@ -498,7 +524,7 @@ group("installer_deps") {
+@@ -501,7 +522,7 @@ group("installer_deps") {
      ":strip_libEGL_shlib",
      ":strip_libGLESv2_shlib",
    ]
@@ -362,13 +369,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      public_deps += [
        "//ui/gl:dummy_libEGL",
        "//ui/gl:dummy_libGLESv2",
-@@ -559,23 +585,34 @@ group("installer_deps") {
- # channel:
- #   Name of the channel.
- template("linux_package") {
--  assert(defined(invoker.channel))
--  channel = invoker.channel
--
+@@ -568,17 +589,31 @@ template("linux_package") {
    if (is_chrome_branded) {
      package = "google-chrome"
    } else {
@@ -403,8 +404,12 @@ index 2a75b4c07d1e7..33a05266923ff 100644
  
      args = [
        "-a",
-@@ -586,22 +623,38 @@ template("linux_package") {
-       invoker.channel,
+@@ -586,9 +621,14 @@ template("linux_package") {
+       "-b",
+       build_timestamp,
+       "-c",
+-      invoker.channel,
++      channel,
        "-d",
        branding_path_component,
 +      "-n",
@@ -414,12 +419,11 @@ index 2a75b4c07d1e7..33a05266923ff 100644
 +      "--simd-variant=$_simd_variant",
        "-o",
        rebase_path(root_out_dir, root_build_dir),
--      "-s",
--      rebase_path(sysroot, root_build_dir),
-       "-t",
+       "-s",
+@@ -597,14 +637,29 @@ template("linux_package") {
        target_os,
--      "--xz-nthreads",
--      "$linux_debian_pkg_xz_nthreads",
+       "--xz-nthreads",
+       "$linux_debian_pkg_xz_nthreads",
 +      "--build-with-internal-optimization-guide=$build_with_internal_optimization_guide",
 +      "--bundle-widevine-cdm=$bundle_widevine_cdm",
 +      "--enable-ml-internal=$enable_ml_internal",
@@ -446,7 +450,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      ]
    }
  
-@@ -609,11 +662,23 @@ template("linux_package") {
+@@ -612,11 +667,23 @@ template("linux_package") {
      rpm_target_name = "${target_name}_rpm"
  
      action(rpm_target_name) {
@@ -472,7 +476,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
  
        args = [
          "-a",
-@@ -624,18 +689,38 @@ template("linux_package") {
+@@ -627,18 +694,38 @@ template("linux_package") {
          invoker.channel,
          "-d",
          branding_path_component,
@@ -511,7 +515,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
        ]
      }
  
-@@ -673,6 +758,7 @@ template("linux_package") {
+@@ -726,6 +813,7 @@ template("linux_package") {
    }
  
    group(target_name) {
@@ -519,7 +523,7 @@ index 2a75b4c07d1e7..33a05266923ff 100644
      deps = [ ":$deb_target_name" ]
      if (!is_chromeos) {
        deps += [ ":$rpm_target_name" ]
-@@ -687,34 +773,3 @@ template("linux_package") {
+@@ -743,39 +831,3 @@ template("linux_package") {
  linux_package("stable") {
    channel = "stable"
  }
@@ -553,43 +557,18 @@ index 2a75b4c07d1e7..33a05266923ff 100644
 -      deps = [ ":unstable_flatpak" ]
 -    }
 -  }
+-  if (enable_snap_package) {
+-    group("dev_snap") {
+-      deps = [ ":unstable_snap" ]
+-    }
+-  }
 -}
-diff --git a/chrome/installer/linux/common/apparmor.template b/chrome/installer/linux/common/apparmor.template
-index 3e034ccac4b22..fa0d33195b411 100644
---- a/chrome/installer/linux/common/apparmor.template
-+++ b/chrome/installer/linux/common/apparmor.template
-@@ -6,9 +6,9 @@
- abi <abi/4.0>,
- include <tunables/global>
- 
--profile @@usr_bin_symlink_name @@INSTALLDIR/@@PROGNAME flags=(unconfined) {
-+profile @@USR_BIN_SYMLINK_NAME@@ @@INSTALLDIR@@/@@PROGNAME@@ flags=(unconfined) {
-   userns,
- 
-   # Site-specific additions and overrides. See local/README for details.
--  include if exists <local/@@usr_bin_symlink_name>
-+  include if exists <local/@@USR_BIN_SYMLINK_NAME@@>
- }
 diff --git a/chrome/installer/linux/common/appdata.xml.template b/chrome/installer/linux/common/appdata.xml.template
-index ce6e867eae06b..7b4b82a1d2a15 100644
+index ce6e867eae06b..88d458a46f3e6 100644
 --- a/chrome/installer/linux/common/appdata.xml.template
 +++ b/chrome/installer/linux/common/appdata.xml.template
-@@ -1,26 +1,34 @@
- <?xml version="1.0" encoding="UTF-8"?>
--<!-- Copyright 2024 The Chromium Authors -->
-+<!-- Copyright 2026 The Chromium Authors and Alex313031 -->
- <component type="desktop">
--  <id>@@PACKAGE.desktop</id>
--  <update_contact>@@MAINTMAIL</update_contact>
-+  <id>@@PACKAGE@@.desktop</id>
-+  <update_contact>@@MAINTMAIL@@</update_contact>
-   <metadata_license>CC0-1.0</metadata_license>
--  <project_license>@@PROJECT_LICENSE</project_license>
--  <name>@@MENUNAME</name>
--  <summary>@@SHORTDESC</summary>
-+  <project_license>@@PROJECT_LICENSE@@</project_license>
-+  <name>@@MENUNAME@@</name>
-+  <summary>@@SHORTDESC@@</summary>
+@@ -9,7 +9,15 @@
+   <summary>@@SHORTDESC</summary>
    <description>
      <p>
 -    @@FULLDESC
@@ -604,173 +583,35 @@ index ce6e867eae06b..7b4b82a1d2a15 100644
 +    Thorium supports Vorbis, Theora, WebM, AAC, H.264, H.265, MP3, and HTML5 audio and video standards.
      </p>
    </description>
--  <url type="homepage">@@PRODUCTURL</url>
-+  <url type="homepage">@@PRODUCTURL@@</url>
-   <screenshots>
-     <screenshot type="default">
--      <image>@@appstream_screenshot_url</image>
-+      <image>https://raw.githubusercontent.com/Alex313031/Thorium/main/logos/STAGING/Thorium_Screenshot.png</image>
-       <caption/>
-     </screenshot>
-   </screenshots>
-   <translation/>
--  <developer_name>@@DEVELOPER_NAME</developer_name>
--  <url type="bugtracker">@@BUGTRACKERURL</url>
--  <url type="help">@@HELPURL</url>
-+  <developer_name>@@DEVELOPER_NAME@@</developer_name>
-+  <url type="bugtracker">@@BUGTRACKERURL@@</url>
-+  <url type="help">@@HELPURL@@</url>
- </component>
-diff --git a/chrome/installer/linux/common/chromium-browser.info b/chrome/installer/linux/common/chromium-browser.info
-index 395c019f7dd5f..5296b3d418254 100644
---- a/chrome/installer/linux/common/chromium-browser.info
-+++ b/chrome/installer/linux/common/chromium-browser.info
-@@ -1,4 +1,4 @@
--# Copyright 2009 The Chromium Authors
-+# Copyright 2026 The Chromium Authors and Alex313031
- # Use of this source code is governed by a BSD-style license that can be
- # found in the LICENSE file.
- #
-@@ -6,37 +6,38 @@
- # chromium-browser packages for various platforms.
- 
- # Base name of the package.
--PACKAGE="chromium-browser"
-+PACKAGE="thorium-browser"
- 
- # Filename of the main executable (for generating launcher scripts, etc.)
--PROGNAME=chrome
-+PROGNAME=thorium
- 
- # Base directory for package installation.
--INSTALLDIR=/opt/chromium.org/chromium
-+INSTALLDIR=/opt/chromium.org/thorium
- 
- # Directory for device policy enrollments.
- ENROLLMENTDIR=/etc/chromium/policies/enrollment
- 
- # Display string for desktop menu/icon.
--MENUNAME="Chromium Web Browser"
-+MENUNAME="Thorium Browser"
- 
- # Brief package description.
--SHORTDESC="The web browser from the Chromium projects"
-+SHORTDESC="The web browser from Alex313031"
- 
- # Detailed package description.
--FULLDESC="Chromium is a browser that combines a minimal design with sophisticated technology to make the web faster, safer, and easier."
-+FULLDESC="Thorium is a browser that combines a minimal design with sophisticated technology to make the web faster, safer, and easier."
- 
- # Package maintainer information.
--MAINTNAME="Chromium Linux Team"
--MAINTMAIL="chromium-packagers@chromium.org"
--PRODUCTURL="https://www.chromium.org/Home"
-+
-+MAINTNAME="Thorium Linux Maintainers"
-+MAINTMAIL="alex313031@gmail.com"
-+PRODUCTURL="https://thorium.rocks/"
- 
- PROJECT_LICENSE="BSD-3-Clause and LGPL-2.1+ and Apache-2.0 and IJG and MIT and GPL-2.0+ and ISC and OpenSSL and (MPL-1.1 or GPL-2.0 or LGPL-2.0)"
- 
--DEVELOPER_NAME="The Chromium Authors"
-+DEVELOPER_NAME="The Chromium Authors and Alex313031"
- 
--BUGTRACKERURL="https://www.chromium.org/for-testers/bug-reporting-guidelines"
-+BUGTRACKERURL="https://github.com/Alex313031/thorium/issues"
- 
- HELPURL="https://chromium.googlesource.com/chromium/src/+/main/docs/linux/debugging.md"
- 
--RDN="org.chromium.Chromium"
-+RDN="org.chromium.Thorium"
-diff --git a/chrome/installer/linux/common/default-app-block.template b/chrome/installer/linux/common/default-app-block.template
-index 4fd9143619164..6c5a7bfa5fc34 100644
---- a/chrome/installer/linux/common/default-app-block.template
-+++ b/chrome/installer/linux/common/default-app-block.template
-@@ -1,10 +1,10 @@
-     <web-browser>
--      <name>@@MENUNAME</name>
--      <executable>@@INSTALLDIR/@@PACKAGE</executable>
--      <command>@@INSTALLDIR/@@PACKAGE %s</command>
--      <icon-name>@@PACKAGE</icon-name>
-+      <name>@@MENUNAME@@</name>
-+      <executable>@@INSTALLDIR@@/@@PACKAGE@@</executable>
-+      <command>@@INSTALLDIR@@/@@PACKAGE@@ %s</command>
-+      <icon-name>@@PACKAGE@@</icon-name>
-       <run-in-terminal>false</run-in-terminal>
-       <netscape-remote>true</netscape-remote>
--      <tab-command>@@INSTALLDIR/@@PACKAGE %s</tab-command>
--      <win-command>@@INSTALLDIR/@@PACKAGE --new-window %s</win-command>
-+      <tab-command>@@INSTALLDIR@@/@@PACKAGE@@ %s</tab-command>
-+      <win-command>@@INSTALLDIR@@/@@PACKAGE@@ --new-window %s</win-command>
-     </web-browser>
-diff --git a/chrome/installer/linux/common/default-app.template b/chrome/installer/linux/common/default-app.template
-index 4b6ea67c64bbc..3f7e6f7dca019 100644
---- a/chrome/installer/linux/common/default-app.template
-+++ b/chrome/installer/linux/common/default-app.template
-@@ -7,14 +7,14 @@
- <default-apps>
-   <web-browsers>
-     <web-browser>
--      <name>@@MENUNAME</name>
--      <executable>@@INSTALLDIR/@@PACKAGE</executable>
--      <command>@@INSTALLDIR/@@PACKAGE %s</command>
--      <icon-name>@@PACKAGE</icon-name>
-+      <name>@@MENUNAME@@</name>
-+      <executable>@@INSTALLDIR@@/@@PACKAGE@@</executable>
-+      <command>@@INSTALLDIR@@/@@PACKAGE@@ %s</command>
-+      <icon-name>@@PACKAGE@@</icon-name>
-       <run-in-terminal>false</run-in-terminal>
-       <netscape-remote>true</netscape-remote>
--      <tab-command>@@INSTALLDIR/@@PACKAGE %s</tab-command>
--      <win-command>@@INSTALLDIR/@@PACKAGE --new-window %s</win-command>
-+      <tab-command>@@INSTALLDIR@@/@@PACKAGE@@ %s</tab-command>
-+      <win-command>@@INSTALLDIR@@/@@PACKAGE@@ --new-window %s</win-command>
-     </web-browser>
-   </web-browsers>
- </default-apps>
+   <url type="homepage">@@PRODUCTURL</url>
 diff --git a/chrome/installer/linux/common/desktop.template b/chrome/installer/linux/common/desktop.template
-index 48902a2279194..046a705a153d7 100644
+index 48902a2279194..04e3490b1f445 100644
 --- a/chrome/installer/linux/common/desktop.template
 +++ b/chrome/installer/linux/common/desktop.template
-@@ -1,6 +1,6 @@
- [Desktop Entry]
- Version=1.0
--Name=@@MENUNAME
-+Name=Thorium Browser
- # Only KDE 4 seems to use GenericName, so we reuse the KDE strings.
- # From Ubuntu's language-pack-kde-XX-base packages, version 9.04-20090413.
- GenericName=Web Browser
-@@ -105,16 +105,18 @@ Comment[vi]=Truy cập Internet
- Comment[zh_CN]=访问互联网
+@@ -106,14 +106,16 @@ Comment[zh_CN]=访问互联网
  Comment[zh_HK]=連線到網際網路
  Comment[zh_TW]=連線到網際網路
--Exec=@@desktop_exec %U
-+Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ %U
+ Exec=@@desktop_exec %U
 +Keywords=browser
  StartupNotify=true
--StartupWMClass=@@startup_wm_class
-+StartupWMClass=thorium-browser
+ StartupWMClass=@@startup_wm_class
  Terminal=false
--Icon=@@desktop_icon
 +X-MultipleArgs=true
-+Icon=@@PACKAGE@@
+ Icon=@@desktop_icon
  Type=Application
  Categories=Network;WebBrowser;
--MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;@@uri_scheme
+ MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;@@uri_scheme
 -Actions=new-window;new-private-window;
--@@extra_desktop_entries
-+MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
 +Actions=new-window;new-private-window;temp-profile;content-shell;safe-mode;dark-mode;
-+@@EXTRA_DESKTOP_ENTRIES@@
+ @@extra_desktop_entries
  
  [Desktop Action new-window]
- Name=New Window
 @@ -168,7 +170,7 @@ Name[uk]=Нове вікно
  Name[vi]=Cửa sổ Mới
  Name[zh_CN]=新建窗口
  Name[zh_TW]=開新視窗
 -Exec=@@desktop_exec
-+Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ --new-window %U
++Exec=@@desktop_exec --new-window %U
  
  [Desktop Action new-private-window]
  Name=New Incognito Window
@@ -779,7 +620,7 @@ index 48902a2279194..046a705a153d7 100644
  Name[zh_CN]=新建隐身窗口
  Name[zh_TW]=新增無痕式視窗
 -Exec=@@desktop_exec --incognito
-+Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ --incognito %U
++Exec=@@desktop_exec --incognito %U
 +
 +[Desktop Action temp-profile]
 +Name=Open New Window with a temporary profile
@@ -817,7 +658,7 @@ index 48902a2279194..046a705a153d7 100644
 +Name[vi]=Mở cửa sổ mới với hồ sơ tạm
 +Name[zh_CN]=以临时配置文件打开新窗口
 +Name[zh_TW]=以暫時性個人身分開啟新視窗
-+Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ --temp-profile %U
++Exec=@@desktop_exec --temp-profile %U
 +
 +[Desktop Action content-shell]
 +Name=Open Thorium Shell
@@ -825,211 +666,59 @@ index 48902a2279194..046a705a153d7 100644
 +
 +[Desktop Action safe-mode]
 +Name=Open in Safe Mode
-+Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ --no-experiments %U
++Exec=@@desktop_exec --no-experiments %U
 +
 +[Desktop Action dark-mode]
 +Name=Open in Dark Mode
-+Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ --force-dark-mode %U
++Exec=@@desktop_exec --force-dark-mode %U
 diff --git a/chrome/installer/linux/common/installer.py b/chrome/installer/linux/common/installer.py
-index b2b6f8c06d07c..2183613ce354b 100644
+index 24e379aba76a0..4eb6f99a03c78 100644
 --- a/chrome/installer/linux/common/installer.py
 +++ b/chrome/installer/linux/common/installer.py
-@@ -1,115 +1,19 @@
--# Copyright 2025 The Chromium Authors
-+# Copyright 2026 The Chromium Authors and Alex313031
- # Use of this source code is governed by a BSD-style license that can be
- # found in the LICENSE file.
- 
--import argparse
--import dataclasses
- import datetime
--import enum
--import hashlib
- import logging
- import os
- import pathlib
- import re
--import shlex
- import shutil
- import stat
--import string
- import subprocess
- import sys
--import typing
--
--
--class PackageFormat(enum.Enum):
--    DEB = "deb"
--    RPM = "rpm"
--    FLATPAK = "flatpak"
--
--
--class StandardPermissions:
--    EXECUTABLE = 0o755
--    REGULAR = 0o644
--    SANDBOX = 0o4755
--
--
--class ArtifactType:
--    BINARY = "binary"
--    DIRECTORY = "directory"
--    GENERATED = "generated"
--    ICON = "icon"
--    RESOURCE = "resource"
--    SYMLINK = "symlink"
--    TEMPLATE = "template"
--
--
--@dataclasses.dataclass
--class Artifact:
--    src: str | pathlib.Path
--    dst: str | pathlib.Path
--    artifact_type: str
--    mode: int = StandardPermissions.REGULAR
--    strip: bool = False
--    is_optional: bool = False
--    dst_base: str = "install_dir"  # install_dir or staging_dir
--    symlink_target: str = ""
--    content: str = ""
--    template_context: dict | None = None
--    compress: bool = False
--
--
--class StagingContext:
--    def __init__(self, *dirs: pathlib.Path) -> None:
--        self.dirs = dirs
--
--    def __enter__(self) -> None:
--        for d in self.dirs:
--            if d.exists():
--                shutil.rmtree(d)
--            d.mkdir(parents=True, exist_ok=True)
--
--    def __exit__(self, exc_type, exc_value, traceback) -> None:
--        for d in self.dirs:
--            if d.exists():
--                shutil.rmtree(d)
+@@ -33,6 +33,19 @@ class StandardPermissions:
+     SANDBOX = 0o4755
  
  
--def parse_common_args(
--    parser: argparse.ArgumentParser = None,
--) -> argparse.Namespace:
--    if parser is None:
--        parser = argparse.ArgumentParser()
--    parser.add_argument(
--        "-a", "--arch", required=True, help="package architecture"
--    )
--    parser.add_argument(
--        "-b", "--build-time", required=True, help="build timestamp"
--    )
--    parser.add_argument(
--        "-c", "--channel", required=True, help="package channel"
--    )
--    parser.add_argument("-d", "--branding", required=True, help="branding")
--    parser.add_argument(
--        "-f", "--official", action="store_true", help="official build"
--    )
--    parser.add_argument(
--        "-o", "--output-dir", required=True, help="output directory"
--    )
--    parser.add_argument("-t", "--target-os", required=True, help="target os")
--    parser.add_argument(
--        "--use-static-angle",
--        choices=["true", "false"],
--        default="false",
--        help="whether ANGLE is statically linked",
--    )
--    return parser
--
--
--def run_command(
--    cmd: list[str],
--    cwd: pathlib.Path | None = None,
--    env: dict[str, str] | None = None,
--    stdout: typing.IO | int | None = None,
--) -> None:
-+def run_command(cmd, cwd=None, env=None, stdout=None):
-     logging.info(" ".join(cmd))
- 
-     if os.environ.get("VERBOSE"):
-@@ -136,9 +40,7 @@ def run_command(
-             sys.exit(proc.returncode)
- 
- 
--def verify_package_deps(
--    expected_deps: list[str], actual_deps: list[str]
--) -> None:
-+def verify_package_deps(expected_deps, actual_deps):
-     expected = set(expected_deps)
-     actual = set(actual_deps)
- 
-@@ -156,22 +58,14 @@ def verify_package_deps(
-     sys.exit(1)
- 
- 
--def normalize_channel(channel: str) -> tuple[str, str]:
-+def normalize_channel(channel):
-+    thorium_releases = "https://github.com/Alex313031/Thorium/releases"
-     if channel == "stable":
--        return (
--            "stable",
--            "https://chromereleases.googleblog.com/search/label/Stable%20updates",
--        )
-+        return "stable", thorium_releases
-     elif channel in ["beta", "testing"]:
--        return (
--            "beta",
--            "https://chromereleases.googleblog.com/search/label/Beta%20updates",
--        )
-+        return "beta", thorium_releases
-     elif channel in ["dev", "unstable", "alpha"]:
--        return (
--            "unstable",
--            "https://chromereleases.googleblog.com/search/label/Dev%20updates",
--        )
-+        return "unstable", thorium_releases
-     elif channel == "canary":
-         return "canary", "N/A"
-     else:
-@@ -181,25 +75,20 @@ def normalize_channel(channel: str) -> tuple[str, str]:
-         sys.exit(1)
- 
- 
--def gen_changelog(
--    config: "InstallerConfig", deb_changelog: pathlib.Path
--) -> None:
-+def gen_changelog(context, staging_dir, deb_changelog):
-     if deb_changelog.exists():
-         deb_changelog.unlink()
- 
--    timestamp = int(config.build_timestamp)
-+    timestamp = int(context["BUILD_TIMESTAMP"])
-     dt = datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
-     # RFC 5322 format: Mon, 24 Nov 2025 14:00:00 +0000
--    config.deb_date_rfc5322 = dt.strftime("%a, %d %b %Y %H:%M:%S %z")
-+    date_rfc5322 = dt.strftime("%a, %d %b %Y %H:%M:%S %z")
-+    context["DATE_RFC5322"] = date_rfc5322
- 
--    # Assuming SCRIPTDIR is provided in config and points to the debian
-+    # Assuming SCRIPTDIR is provided in context and points to the debian
-     # directory where changelog.template resides.
--    script_dir = config.script_dir
--    process_template(
--        script_dir / "changelog.template",
--        deb_changelog,
--        config.get_template_context(),
--    )
-+    script_dir = pathlib.Path(context["SCRIPTDIR"])
-+    process_template(script_dir / "changelog.template", deb_changelog, context)
- 
-     run_command(
-         [
-@@ -209,14 +98,11 @@ def gen_changelog(
-             "-m",
-             "--changelog",
-             str(deb_changelog),
--            f"Release Notes: {config.releasenotes}",
-+            f"Release Notes: {context['RELEASENOTES']}",
++THORIUM_PACKAGE = "thorium-browser"
++THORIUM_PACKAGE_FEATURES = (
++    "build_with_internal_optimization_guide",
++    "bundle_widevine_cdm",
++    "enable_ml_internal",
++    "enable_swiftshader",
++    "package_libcxx",
++    "package_vulkan",
++    "use_qt5",
++    "use_qt6",
++)
++
++
+ class ArtifactType:
+     BINARY = "binary"
+     DIRECTORY = "directory"
+@@ -96,6 +109,22 @@ def parse_common_args(
+         "-o", "--output-dir", required=True, help="output directory"
+     )
+     parser.add_argument("-t", "--target-os", required=True, help="target os")
++    parser.add_argument(
++        "-n", "--name-suffix", default="", help="Thorium package filename suffix"
++    )
++    parser.add_argument(
++        "--simd-variant", default="", help="SIMD variant shown by the Thorium launcher"
++    )
++    parser.add_argument(
++        "--clearkey-cdm-path", type=pathlib.Path,
++        help="relative path to the stripped ClearKey CDM",
++    )
++    for feature in THORIUM_PACKAGE_FEATURES:
++        parser.add_argument(
++            "--" + feature.replace("_", "-"),
++            choices=["true", "false"],
++            default="false",
++        )
+     parser.add_argument(
+         "--use-static-angle",
+         choices=["true", "false"],
+@@ -214,10 +243,7 @@ def gen_changelog(
          ]
      )
  
@@ -1037,593 +726,87 @@ index b2b6f8c06d07c..2183613ce354b 100644
 -        config.staging_dir
 -        / f"usr/share/doc/{config.info_vars['PACKAGE']}-{config.channel}"
 -    )
-+    gzlog_dir = staging_dir / f"usr/share/doc/{context['PACKAGE']}"
++    gzlog_dir = config.staging_dir / f"usr/share/doc/{config.usr_bin_symlink_name}"
      gzlog_dir.mkdir(parents=True, exist_ok=True)
      gzlog = gzlog_dir / "changelog.gz"
  
-@@ -234,13 +120,7 @@ def gen_changelog(
-     gzlog.chmod(0o644)
- 
- 
--class InstallerTemplate(string.Template):
--    delimiter = "@@"
--
--
--def _process_template_includes(
--    input_file: pathlib.Path, include_stack: list[pathlib.Path]
--) -> str:
-+def _process_template_includes(input_file, include_stack):
-     input_file = pathlib.Path(input_file)
-     if input_file in include_stack:
-         print(
-@@ -276,532 +156,442 @@ def _process_template_includes(
-     return "".join(output_lines)
- 
- 
--def process_template(
--    input_file: pathlib.Path, output_file: pathlib.Path, context: dict[str, str]
--) -> None:
-+def process_template(input_file, output_file, context):
+@@ -282,6 +308,20 @@ def process_template(
+ ) -> None:
      content = _process_template_includes(input_file, [])
  
--    template = InstallerTemplate(content)
--    try:
--        content = template.substitute(context)
--    except KeyError as e:
-+    for var_name, value in context.items():
-+        # Check if the variable is present in the content
-+        placeholder = f"@@{var_name}@@"
-+        if placeholder in content:
-+            content = content.replace(placeholder, str(value))
++    # Thorium's profile launchers and manpage also use delimited placeholders.
++    if pathlib.Path(input_file).name in ("wrapper", "manpage.1.in"):
++        def native_placeholder(match: re.Match) -> str:
++            key = match[1]
++            if key in ("CHANNEL", "SIMD_VARIANT"):
++                key = key.lower()
++            return "@@{" + key + "}"
 +
-+    with open(output_file, "w") as f:
-+        f.write(content)
-+
-+    if "@@" in content:
-         print(
--            f"Error: Var {e} was not found in context for {output_file}",
-+            f"Error: Some placeholders remain unfilled in {output_file}:",
-             file=sys.stderr,
-         )
-+        for line in content.splitlines():
-+            if "@@" in line:
-+                print(line, file=sys.stderr)
-         sys.exit(1)
--    except ValueError as e:
--        print(f"Error: {e} in {output_file}", file=sys.stderr)
--        sys.exit(1)
--
--    with open(output_file, "w") as f:
--        f.write(content)
- 
- 
--@dataclasses.dataclass
--class InstallerConfig:
--    output_dir: pathlib.Path
--    staging_dir: pathlib.Path
--    channel: str
--    branding: str
--    arch: str
--    target_os: str
--    is_official_build: bool
--    shlib_perms: int
--    use_static_angle: bool = False
--
--    # From chromium-browser.info or google-chrome.info
--    info_vars: dict[str, str] = dataclasses.field(default_factory=dict)
--
--    # From version.txt
--    version_vars: dict[str, str] = dataclasses.field(default_factory=dict)
--    version: str = ""
--
--    # From BRANDING
--    branding_vars: dict[str, str] = dataclasses.field(default_factory=dict)
--
--    # Computed
--    package_release: str = "1"
--    releasenotes: str = ""
--    versionfull: str = ""
--    package_orig: str = ""
--    usr_bin_symlink_name: str = ""
--    rdn_desktop: str = ""
--
--    # Build script extras
--    architecture: str = ""
--    build_timestamp: str = ""
--    script_dir: pathlib.Path = None
--    tmp_file_dir: pathlib.Path = None
--    common_deps: str = ""
--    common_predeps: str = ""
--    repoconfig: str = ""
--    repoconfigregex: str = ""
--
--    # Package Format
--    package_format: PackageFormat = PackageFormat.DEB
--
--    # Deb
--    deb_pre_depends: str = ""
--    deb_depends: str = ""
--    deb_provides: str = ""
--    deb_date_rfc5322: str = ""
--
--    # RPM
--    rpm_build_dir: pathlib.Path = None
--    rpm_spec_file: pathlib.Path = None
--    rpm_optional_man_page: str = ""
--    rpm_package_filename: str = ""
--    rpm_depends: str = ""
--    rpm_provides: str = ""
--
--    # Flatpak
--    flatpak_arch: str = ""
--    flatpak_runtime_version: str = "24.08"
--    flatpak_command: str = ""
--    flatpak_app_id: str = ""
--    flatpak_tags: str = ""
--    developer_id: str = ""
--    project_license_spdx: str = ""
--    release_date: str = ""
--    flatpak_package_filename: str = ""
--    app_id: str = ""
--
--    # Runtime/Installer
--    appstream_screenshot_url: str = (
--        "https://www.gstatic.com/chrome/appstream/chrome-2.png"
--    )
--    desktop_exec: str = ""
--    desktop_icon: str = ""
--    logo_resources_png: str = ""
--    uri_scheme: str = ""
--    extra_desktop_entries: str = ""
--    startup_wm_class: str = ""
--    include_setuid_sandbox: bool = True
--
--    @classmethod
--    def from_args(
--        cls,
--        args: argparse.Namespace,
--        output_dir: pathlib.Path,
--        package_format: PackageFormat,
--    ) -> "InstallerConfig":
--        data = cls._load_branding_and_version(
--            output_dir, args.branding, args.channel
-+class Installer:
-+    def __init__(
-+        self,
-+        output_dir,
-+        staging_dir,
-+        channel,
-+        branding,
-+        arch,
-+        target_os,
-+        is_official_build,
-+        clearkey_cdm_path=None,
-+        build_with_internal_optimization_guide=False,
-+        bundle_widevine_cdm=False,
-+        enable_ml_internal=False,
-+        enable_swiftshader=False,
-+        package_libcxx=False,
-+        package_vulkan=False,
-+        use_qt5=False,
-+        use_qt6=False,
-+        use_static_angle=False,
-+    ):
-+        self.output_dir = pathlib.Path(output_dir)
-+        self.staging_dir = pathlib.Path(staging_dir)
-+        self.channel = channel
-+        self.branding = branding
-+        self.arch = arch
-+        self.target_os = target_os
-+        self.is_official_build = is_official_build
-+        self.clearkey_cdm_path = (
-+            pathlib.Path(clearkey_cdm_path) if clearkey_cdm_path else None
-         )
--        data.update(
--            {
--                "package_format": package_format,
--                "arch": args.arch,
--                "target_os": args.target_os,
--                "architecture": args.arch,
--                "branding": args.branding,
--                "build_timestamp": args.build_time,
--                "is_official_build": args.official,
--                "output_dir": output_dir,
--                "shlib_perms": StandardPermissions.EXECUTABLE,
--                "use_static_angle": args.use_static_angle == "true",
--                # Placeholder for build specific paths, set by caller if needed
--                "script_dir": pathlib.Path("."),
--                "staging_dir": pathlib.Path("."),
--                "tmp_file_dir": pathlib.Path("."),
--            }
-+        self.build_with_internal_optimization_guide = (
-+            build_with_internal_optimization_guide
-         )
--
--        if hasattr(args, "sysroot"):
--            # Debian specific
--            (
--                data["repoconfig"],
--                data["repoconfigregex"],
--            ) = cls._compute_deb_repoconfig(args.arch, data["package_orig"])
--        else:
--            # RPM specific
--            (
--                data["repoconfig"],
--                data["repoconfigregex"],
--            ) = cls._compute_rpm_repoconfig(data["package_orig"])
--
--        config = cls(**data)
--        config.rpm_package_filename = f"{config.package_orig}-{config.channel}"
--        config.desktop_exec = f"/usr/bin/{config.usr_bin_symlink_name}"
--        config.desktop_icon = config.info_vars["PACKAGE"]
--        return config
--
--    def flatpak_init(self) -> None:
--        if self.branding == "google_chrome":
--            self.developer_id = "com.google"
--            self.project_license_spdx = "LicenseRef-proprietary"
--            self.flatpak_command = "chrome"
--            self.flatpak_tags = "\ntags=proprietary;"
--            base_id = "com.google.Chrome"
--        else:
--            self.developer_id = "org.chromium"
--            self.project_license_spdx = (
--                "BSD-3-Clause and LGPL-2.1+ and Apache-2.0 and IJG and MIT "
--                "and GPL-2.0+ and ISC and OpenSSL and (MPL-1.1 or GPL-2.0 or "
--                "LGPL-2.0)"
--            )
--            self.flatpak_command = "chromium"
--            self.flatpak_tags = ""
--            base_id = "org.chromium.Chromium"
--
--        if self.channel == "stable":
--            self.app_id = base_id
--        elif self.channel == "beta":
--            self.app_id = f"{base_id}.beta"
--        elif self.channel in ["unstable", "dev"]:
--            self.app_id = f"{base_id}.unstable"
--        elif self.channel == "canary":
--            self.app_id = f"{base_id}.canary"
--        else:
--            self.app_id = base_id
--
--        self.flatpak_app_id = self.app_id
--        self.desktop_exec = self.flatpak_command
--        self.desktop_icon = self.app_id
--        self.flatpak_arch = self.arch
--        self.include_setuid_sandbox = False
--
--        if self.build_timestamp:
--            ts = int(self.build_timestamp)
--            dt = datetime.datetime.fromtimestamp(ts, datetime.timezone.utc)
--            self.release_date = dt.strftime("%Y-%m-%d")
--
--        self.flatpak_package_filename = (
--            f"{self.package_orig}-{self.channel}_{self.versionfull}_"
--            f"{self.arch}.flatpak"
-+        self.bundle_widevine_cdm = bundle_widevine_cdm
-+        self.enable_ml_internal = enable_ml_internal
-+        self.enable_swiftshader = enable_swiftshader
-+        self.package_libcxx = package_libcxx
-+        self.package_vulkan = package_vulkan
-+        self.use_qt5 = use_qt5
-+        self.use_qt6 = use_qt6
-+        self.use_static_angle = use_static_angle
-+        self.context = {}
-+
-+    def initialize(self):
-+        # Load branding info
-+        filename = (
-+            "google-chrome.info"
-+            if self.branding == "google_chrome"
-+            else "chromium-browser.info"
-         )
-+        info_file = self.output_dir / "installer/common" / filename
-+
-+        with info_file.open("r") as f:
-+            for line in f:
-+                line = line.strip()
-+                if line and not line.startswith("#") and "=" in line:
-+                    key, val = line.split("=", 1)
-+                    if val.startswith('"') and val.endswith('"'):
-+                        val = val[1:-1]
-+                    self.context[key] = val
-+
-+        # Load theme branding
-+        branding_file = self.output_dir / "installer/theme/BRANDING"
-+        with branding_file.open("r") as f:
-+            for line in f:
-+                line = line.strip()
-+                if line and not line.startswith("#") and "=" in line:
-+                    key, val = line.split("=", 1)
-+                    if val.startswith('"') and val.endswith('"'):
-+                        val = val[1:-1]
-+                    self.context[key] = val
-+
-+        self.get_version_info()
- 
--    @staticmethod
--    def _load_branding_and_version(
--        output_dir: pathlib.Path, branding: str, channel: str
--    ) -> dict[str, typing.Any]:
--        data = {}
--
--        def parse_shell(file_path: pathlib.Path) -> dict[str, str]:
--            env = {}
--            with file_path.open("r") as f:
--                for token in shlex.split(f.read()):
--                    if "=" in token:
--                        key, val = token.split("=", 1)
--                        env[key] = val
--            return env
--
--        def parse_simple(file_path: pathlib.Path) -> dict[str, str]:
--            return dict(
--                line.strip().split("=") for line in file_path.open("r") if line
--            )
-+        # Verify channel
-+        self.channel, self.context["RELEASENOTES"] = normalize_channel(
-+            self.channel
++        content = re.sub(
++            r"@@(CHANNEL|SIMD_VARIANT|PROGNAME|PACKAGE|MENUNAME)@@(?![A-Za-z_{])",
++            native_placeholder,
++            content,
 +        )
- 
--        data["info_vars"] = parse_shell(
--            output_dir
--            / "installer/common"
--            / (
--                "google-chrome.info"
--                if branding == "google_chrome"
--                else "chromium-browser.info"
--            )
-+        self.context["CHANNEL"] = self.channel
-+        self.context["VERSIONFULL"] = (
-+            f"{self.context['VERSION']}-{self.context['PACKAGE_RELEASE']}"
-         )
- 
--        data["branding_vars"] = parse_simple(
--            output_dir / "installer/theme/BRANDING"
-+        self.context["PACKAGE_ORIG"] = self.context["PACKAGE"]
-+        self.context["USR_BIN_SYMLINK_NAME"] = self.context["PACKAGE"]
-+        self.context["RDN_DESKTOP"] = self.context["RDN"]
++
+     template = InstallerTemplate(content)
+     try:
+         content = template.substitute(context)
+@@ -379,6 +419,13 @@ class InstallerConfig:
+     extra_desktop_entries: str = ""
+     startup_wm_class: str = ""
+     include_setuid_sandbox: bool = True
++    simd_variant: str = ""
++    clearkey_cdm_path: pathlib.Path | None = None
++    package_features: frozenset[str] = frozenset()
 +
 +    @property
-+    def shlib_perms(self):
-+        return self.context.get("SHLIB_PERMS", 0o755)
-+
-+    def set_context(self, context):
-+        self.context.update(context)
-+
-+    def prep_staging_common(self):
-+        install_dir = self.staging_dir / self.context["INSTALLDIR"].lstrip("/")
-+        dirs = [
-+            install_dir,
-+            self.staging_dir / "usr/bin",
-+            self.staging_dir / "usr/share/applications",
-+            self.staging_dir / "usr/share/appdata",
-+            self.staging_dir / "usr/share/gnome-control-center/default-apps",
-+            self.staging_dir / "usr/share/man/man1",
-+            install_dir / "apparmor.d",
-+        ]
-+        for d in dirs:
-+            d.mkdir(parents=True, exist_ok=True)
-+            d.chmod(0o755)
-+
-+    def get_version_info(self):
-+        version_file = self.output_dir / "installer" / "version.txt"
-+        with version_file.open("r") as f:
-+            for line in f:
-+                key, val = line.strip().split("=", 1)
-+                self.context[key] = val
-+
-+        self.context["VERSION"] = (
-+            f"{self.context['MAJOR']}.{self.context['MINOR']}."
-+            f"{self.context['BUILD']}.{self.context['PATCH']}"
-         )
-+        self.context["PACKAGE_RELEASE"] = "1"
-+
-+    def stage_install_common(self):
-+        logging.info(f"Staging common install files in '{self.staging_dir}'...")
-+        install_dir = self.staging_dir / self.context["INSTALLDIR"].lstrip("/")
++    def is_thorium(self) -> bool:
++        return self.package_orig == THORIUM_PACKAGE
  
--        data["version_vars"] = parse_simple(
--            output_dir / "installer" / "version.txt"
-+        self._stage_binaries(install_dir)
-+        self._stage_resources(install_dir)
-+        self._stage_thorium_extras(install_dir)
-+        self._stage_theme_icons(install_dir)
-+        self._stage_desktop_integration(install_dir)
-+
-+        # Verify ELF binaries
-+        self._verify_elf_binaries(install_dir)
-+        self._verify_file_permissions()
-+
-+    def _stage_binaries(self, install_dir):
-+        # app
-+        progname = self.context["PROGNAME"]
-+        stripped_file = self.output_dir / f"{progname}.stripped"
-+        self._install(stripped_file, install_dir / progname, mode=0o755)
-+
-+        # crashpad
-+        stripped_file = self.output_dir / "chrome_crashpad_handler.stripped"
-+        self._install(
-+            stripped_file,
-+            install_dir / "chrome_crashpad_handler",
-+            mode=0o755,
+     @classmethod
+     def from_args(
+@@ -390,6 +437,17 @@ class InstallerConfig:
+         data = cls._load_branding_and_version(
+             output_dir, args.branding, args.channel
          )
--        data["version"] = (
--            f"{data['version_vars']['MAJOR']}.{data['version_vars']['MINOR']}."
--            f"{data['version_vars']['BUILD']}.{data['version_vars']['PATCH']}"
-+
-+        # chrome-management-service
-+        stripped_file = self.output_dir / "chrome_management_service.stripped"
-+        self._install(
-+            stripped_file,
-+            install_dir / "chrome-management-service",
-+            mode=0o755,
-         )
--        data["package_release"] = "1"
- 
--        # Verify channel
--        channel, data["releasenotes"] = normalize_channel(channel)
--        data["channel"] = channel
--        data["versionfull"] = f"{data['version']}-{data['package_release']}"
--        data["package_orig"] = data["info_vars"]["PACKAGE"]
--        data["usr_bin_symlink_name"] = (
--            f"{data['info_vars']['PACKAGE']}-{channel}"
-+        # sandbox
-+        stripped_file = self.output_dir / "chrome_sandbox.stripped"
-+        self._install(
-+            stripped_file, install_dir / "chrome-sandbox", mode=0o4755
++        if data["package_orig"] == THORIUM_PACKAGE:
++            data["simd_variant"] = args.simd_variant
++            data["clearkey_cdm_path"] = args.clearkey_cdm_path
++            data["appstream_screenshot_url"] = (
++                "https://raw.githubusercontent.com/Alex313031/Thorium/main/"
++                "logos/STAGING/Thorium_Screenshot.png"
++            )
++            data["package_features"] = frozenset(
++                feature for feature in THORIUM_PACKAGE_FEATURES
++                if getattr(args, feature) == "true"
++            )
+         data.update(
+             {
+                 "package_format": package_format,
+@@ -524,7 +582,12 @@ class InstallerConfig:
+         data["usr_bin_symlink_name"] = (
+             f"{data['info_vars']['PACKAGE']}-{channel}"
          )
 -        if channel != "stable":
--            data["info_vars"]["INSTALLDIR"] += f"-{channel}"
--            data["info_vars"]["PACKAGE"] += f"-{channel}"
--            data["info_vars"]["MENUNAME"] += f" ({channel})"
--            data["rdn_desktop"] = f"{data['info_vars']['RDN']}.{channel}"
--        else:
--            data["rdn_desktop"] = data["info_vars"]["RDN"]
- 
--        data["startup_wm_class"] = data["info_vars"]["PACKAGE"] or ""
-+        # Widevine CDM
-+        widevine_src = self.output_dir / "WidevineCdm"
-+        if self.bundle_widevine_cdm:
-+            # Need to copy recursively
-+            widevine_dest = install_dir / "WidevineCdm"
-+            if widevine_dest.exists():
-+                shutil.rmtree(widevine_dest)
-+            shutil.copytree(widevine_src, widevine_dest)
-+
-+            # Fix permissions
-+            for root, dirs, files in os.walk(widevine_dest):
-+                os.chmod(root, 0o755)
-+                for d in dirs:
-+                    os.chmod(os.path.join(root, d), 0o755)
-+                for f in files:
-+                    path = os.path.join(root, f)
-+                    if f in ["libwidevinecdm.so", "libwidevinecdm_real.so"]:
-+                        os.chmod(path, self.shlib_perms)
-+                    else:
-+                        os.chmod(path, 0o644)
- 
--        return data
-+        # ANGLE
-+        if not self.use_static_angle:
-+            for f in ["libEGL.so", "libGLESv2.so"]:
-+                self._install(
-+                    self.output_dir / f"{f}.stripped",
-+                    install_dir / f,
-+                    mode=self.shlib_perms,
-+                )
- 
--    @staticmethod
--    def _compute_deb_repoconfig(arch: str, package: str) -> tuple[str, str]:
--        base_repo_config = "dl.google.com/linux/chrome/deb/ stable main"
--        default = f"deb [arch={arch}] https://{base_repo_config}"
--        repoconfig = os.environ.get("REPOCONFIG", default)
-+        if self.package_vulkan:
-+            self._install(
-+                self.output_dir / "libvulkan.so.1.stripped",
-+                install_dir / "libvulkan.so.1",
-+                mode=self.shlib_perms,
-+            )
- 
--        repo_config_regex = f"deb (\\[arch=[^]]*\\b{arch}\\b[^]]*\\]"
--        repo_config_regex += f"[[:space:]]*) https?://{base_repo_config}"
--        return repoconfig, repo_config_regex
-+        if self.enable_swiftshader:
-+            self._install(
-+                self.output_dir / "libvk_swiftshader.so.stripped",
-+                install_dir / "libvk_swiftshader.so",
-+                mode=self.shlib_perms,
-+            )
-+            self._install_into_dir(
-+                self.output_dir / "vk_swiftshader_icd.json",
-+                install_dir,
-+                mode=0o644,
-+            )
-+
-+        if self.build_with_internal_optimization_guide:
-+            self._install(
-+                self.output_dir / "liboptimization_guide_internal.so.stripped",
-+                install_dir / "liboptimization_guide_internal.so",
-+                mode=self.shlib_perms,
-+            )
-+
-+        if (
-+            self.build_with_internal_optimization_guide
-+            and self.enable_ml_internal
-+        ):
-+            self._install(
-+                self.output_dir / "libLiteRtWebGpuAccelerator.so.stripped",
-+                install_dir / "libLiteRtWebGpuAccelerator.so",
-+                mode=self.shlib_perms,
-+            )
-+
-+        # Qt shims
-+        for qt_ver, enabled in [("5", self.use_qt5), ("6", self.use_qt6)]:
-+            libname = f"libqt{qt_ver}_shim.so"
-+            if enabled:
-+                self._install(
-+                    self.output_dir / f"{libname}.stripped",
-+                    install_dir / libname,
-+                    mode=self.shlib_perms,
-+                )
- 
--    @staticmethod
--    def _compute_rpm_repoconfig(package: str) -> tuple[str, str]:
--        # ${PACKAGE#google-} removes "google-" prefix.
--        if package.startswith("google-"):
--            repo_package = package[7:]
--        else:
--            repo_package = package
--        repoconfig = f"https://dl.google.com/linux/{repo_package}/rpm/stable"
--        return repoconfig, ""
--
--    def get_template_context(self) -> dict[str, str]:
--        ctx = self.info_vars | self.version_vars | self.branding_vars
--        for field in dataclasses.fields(self):
--            val = getattr(self, field.name)
--            if isinstance(val, enum.Enum):
--                ctx[field.name] = val.value
--            elif val is not None and type(val) is not dict:
--                ctx[field.name] = val
--        return ctx
--
--    def get_binary_artifacts(self) -> list[Artifact]:
--        progname = self.info_vars["PROGNAME"]
--        artifacts = [
--            Artifact(
--                f"{progname}.stripped",
--                progname,
--                ArtifactType.BINARY,
--                StandardPermissions.EXECUTABLE,
--            ),
--            Artifact(
--                "chrome_crashpad_handler.stripped",
--                "chrome_crashpad_handler",
--                ArtifactType.BINARY,
--                StandardPermissions.EXECUTABLE,
--            ),
--            Artifact(
--                "chrome_management_service.stripped",
--                "chrome-management-service",
--                ArtifactType.BINARY,
--                StandardPermissions.EXECUTABLE,
--            ),
++        if data["package_orig"] == THORIUM_PACKAGE:
++            data["usr_bin_symlink_name"] = data["package_orig"]
++            data["rdn_desktop"] = data["info_vars"]["RDN"]
++            if channel != "canary":
++                data["releasenotes"] = "https://github.com/Alex313031/Thorium/releases"
++        elif channel != "stable":
+             data["info_vars"]["INSTALLDIR"] += f"-{channel}"
+             data["info_vars"]["PACKAGE"] += f"-{channel}"
+             data["info_vars"]["MENUNAME"] += f" ({channel})"
+@@ -587,68 +650,38 @@ class InstallerConfig:
+                 ArtifactType.BINARY,
+                 StandardPermissions.EXECUTABLE,
+             ),
 -            Artifact(
 -                "lib/libc++.so",
 -                "lib/libc++.so",
 -                ArtifactType.BINARY,
 -                self.shlib_perms,
-+        # libc++
-+        if self.package_libcxx:
-+            lib_dir = install_dir / "lib"
-+            lib_dir.mkdir(parents=True, exist_ok=True)
-+            lib_dir.chmod(0o755)
-+            self._install(
-+                self.output_dir / "lib/libc++.so",
-+                lib_dir / "libc++.so",
-+                mode=self.shlib_perms,
-                 strip=True,
+-                strip=True,
 -                is_optional=True,
 -            ),
 -            Artifact(
@@ -1675,803 +858,172 @@ index b2b6f8c06d07c..2183613ce354b 100644
 -                StandardPermissions.REGULAR,
 -                is_optional=True,
 -            ),
--        ]
--        if self.include_setuid_sandbox:
--            artifacts.append(
--                Artifact(
+         ]
++        # Native packages discover optional libraries in the output directory.
++        # Thorium packages require precisely the features selected by GN.
++        features = self.package_features
++        if not self.is_thorium or "package_libcxx" in features:
++            artifacts.append(Artifact(
++                "lib/libc++.so", "lib/libc++.so", ArtifactType.BINARY,
++                self.shlib_perms, strip=True, is_optional=not self.is_thorium,
++            ))
++        optimization_guide = "build_with_internal_optimization_guide" in features
++        for library, enabled in (
++            ("libLiteRtWebGpuAccelerator.so", optimization_guide and "enable_ml_internal" in features),
++            ("liboptimization_guide_internal.so", optimization_guide),
++            ("libqt5_shim.so", "use_qt5" in features),
++            ("libqt6_shim.so", "use_qt6" in features),
++            ("libvk_swiftshader.so", "enable_swiftshader" in features),
++            ("libvulkan.so.1", "package_vulkan" in features),
++        ):
++            if not self.is_thorium or enabled:
++                artifacts.append(Artifact(
++                    library + ".stripped", library, ArtifactType.BINARY,
++                    self.shlib_perms, is_optional=not self.is_thorium,
++                ))
++        if not self.is_thorium or "enable_swiftshader" in features:
++            artifacts.append(Artifact(
++                "vk_swiftshader_icd.json", "vk_swiftshader_icd.json",
++                ArtifactType.BINARY, is_optional=not self.is_thorium,
++            ))
+         if self.include_setuid_sandbox:
+             artifacts.append(
+                 Artifact(
 -                    f"{progname}_sandbox.stripped",
--                    "chrome-sandbox",
--                    ArtifactType.BINARY,
--                    StandardPermissions.SANDBOX,
--                )
++                    "chrome_sandbox.stripped" if self.is_thorium else f"{progname}_sandbox.stripped",
+                     "chrome-sandbox",
+                     ArtifactType.BINARY,
+                     StandardPermissions.SANDBOX,
+@@ -656,7 +689,11 @@ class InstallerConfig:
              )
  
--        # Widevine CDM
+         # Widevine CDM
 -        if (self.output_dir / "WidevineCdm").is_dir():
--            artifacts.append(
--                Artifact(
--                    "WidevineCdm",
--                    "WidevineCdm",
--                    ArtifactType.DIRECTORY,
--                    StandardPermissions.EXECUTABLE,
--                )
-+    def _stage_thorium_extras(self, install_dir):
-+        required_files = [
-+            "chromedriver",
-+            "content_shell.pak",
-+            "resources/inspector_overlay/inspector_overlay_resources.grd",
-+            "resources/inspector_overlay/main.js",
-+            "shell_resources.pak",
-+            "thorium.svg",
-+            "thorium_shell.stripped",
-+            "thorium_shell.png",
-+            "thorium-shell",
-+            "thorium-shell.desktop",
-+            "ui_resources_100_percent.pak",
-+            "pak",
-+        ]
-+        if self.clearkey_cdm_path:
-+            required_files.append(str(self.clearkey_cdm_path))
-+        missing_files = [
-+            filename
-+            for filename in required_files
-+            if not (self.output_dir / filename).is_file()
-+        ]
-+        if missing_files:
-+            missing_list = ", ".join(missing_files)
-+            raise FileNotFoundError(
-+                "Missing declared Thorium package inputs: "
-+                f"{missing_list}. Run setup.py and rebuild the package target."
-+            )
-+
-+        for filename in [
-+            "content_shell.pak",
-+            "shell_resources.pak",
-+            "thorium.svg",
-+            "thorium_shell.png",
-+            "ui_resources_100_percent.pak",
-+        ]:
-+            self._install_into_dir(
-+                self.output_dir / filename,
-+                install_dir,
-+                mode=0o644,
-             )
- 
--        if not self.use_static_angle:
--            artifacts.extend(
--                [
--                    Artifact(
--                        "libEGL.so.stripped",
--                        "libEGL.so",
--                        ArtifactType.BINARY,
--                        self.shlib_perms,
++        bundle_widevine = (
++            "bundle_widevine_cdm" in features if self.is_thorium
++            else (self.output_dir / "WidevineCdm").is_dir()
++        )
++        if bundle_widevine:
+             artifacts.append(
+                 Artifact(
+                     "WidevineCdm",
+@@ -674,20 +711,53 @@ class InstallerConfig:
+                         "libEGL.so",
+                         ArtifactType.BINARY,
+                         self.shlib_perms,
 -                        is_optional=True,
--                    ),
--                    Artifact(
--                        "libGLESv2.so.stripped",
--                        "libGLESv2.so",
--                        ArtifactType.BINARY,
--                        self.shlib_perms,
++                        is_optional=not self.is_thorium,
+                     ),
+                     Artifact(
+                         "libGLESv2.so.stripped",
+                         "libGLESv2.so",
+                         ArtifactType.BINARY,
+                         self.shlib_perms,
 -                        is_optional=True,
--                    ),
--                ]
--            )
-+        self._install(
-+            self.output_dir / "thorium_shell.stripped",
-+            install_dir / "thorium_shell",
-+            mode=0o755,
-+        )
-+        self._install(
-+            self.output_dir / "chromedriver",
-+            install_dir / "chromedriver",
-+            mode=0o755,
-+        )
-+        self._install(
-+            self.output_dir / "pak",
-+            install_dir / "pak",
-+            mode=0o755,
-+        )
-+        self._install(
-+            self.output_dir / "thorium-shell",
-+            self.staging_dir / "usr/bin/thorium-shell",
-+            mode=0o755,
-+        )
-+        self._install(
-+            self.output_dir / "thorium-shell.desktop",
-+            self.staging_dir / "usr/share/applications/thorium-shell.desktop",
-+            mode=0o644,
-+        )
++                        is_optional=not self.is_thorium,
+                     ),
+                 ]
+             )
  
--        return artifacts
--
--    def get_resource_artifacts(self) -> list[Artifact]:
--        artifacts = [
--            Artifact(
--                "resources.pak",
--                "resources.pak",
--                ArtifactType.RESOURCE,
--                StandardPermissions.REGULAR,
--            ),
--            Artifact(
--                "icudtl.dat",
--                "icudtl.dat",
--                ArtifactType.RESOURCE,
--                StandardPermissions.REGULAR,
--            ),
--        ]
+         return artifacts
+ 
++    def get_thorium_artifacts(self) -> list[Artifact]:
++        artifacts = [
++            Artifact(name, name, ArtifactType.RESOURCE)
++            for name in (
++                "content_shell.pak",
++                "shell_resources.pak",
++                "thorium.svg",
++                "thorium_shell.png",
++                "resources/inspector_overlay/inspector_overlay_resources.grd",
++                "resources/inspector_overlay/main.js",
++            )
++        ]
++        for source, destination in (
++            ("thorium_shell.stripped", "thorium_shell"),
++            ("chromedriver", "chromedriver"),
++            ("pak", "pak"),
++        ):
++            artifacts.append(Artifact(source, destination, ArtifactType.BINARY,
++                                      StandardPermissions.EXECUTABLE))
++        artifacts.extend([
++            Artifact("thorium-shell", "usr/bin/thorium-shell", ArtifactType.RESOURCE,
++                     StandardPermissions.EXECUTABLE, dst_base="staging_dir"),
++            Artifact("thorium-shell.desktop", "usr/share/applications/thorium-shell.desktop",
++                     ArtifactType.RESOURCE, dst_base="staging_dir"),
++            Artifact("", "usr/bin/pak", ArtifactType.SYMLINK, dst_base="staging_dir",
++                     symlink_target=f"{self.info_vars['INSTALLDIR']}/pak"),
++        ])
 +        if self.clearkey_cdm_path:
-+            self._install(
-+                self.output_dir / self.clearkey_cdm_path,
-+                install_dir / self.clearkey_cdm_path.with_suffix(""),
-+                mode=self.shlib_perms,
-+            )
++            artifacts.append(Artifact(self.clearkey_cdm_path,
++                                      self.clearkey_cdm_path.with_suffix(""),
++                                      ArtifactType.BINARY, self.shlib_perms))
++        return artifacts
 +
-+        inspector_overlay_dir = install_dir / "resources/inspector_overlay"
-+        for filename in [
-+            "inspector_overlay_resources.grd",
-+            "main.js",
-+        ]:
-+            self._install(
-+                self.output_dir / "resources/inspector_overlay" / filename,
-+                inspector_overlay_dir / filename,
-+                mode=0o644,
-+            )
-+
-+        pak_link = self.staging_dir / "usr/bin/pak"
-+        if pak_link.exists() or pak_link.is_symlink():
-+            pak_link.unlink()
-+        os.symlink(f"{self.context['INSTALLDIR']}/pak", pak_link)
-+
-+    def _stage_resources(self, install_dir):
-+        # resources
-+        self._install_into_dir(
-+            self.output_dir / "resources.pak",
-+            install_dir,
-+            mode=0o644,
-+            strip=False,
-+        )
+     def get_resource_artifacts(self) -> list[Artifact]:
+         artifacts = [
+             Artifact(
+@@ -704,7 +774,8 @@ class InstallerConfig:
+             ),
+         ]
  
-         if (self.output_dir / "chrome_100_percent.pak").exists():
--            artifacts.append(
--                Artifact(
--                    "chrome_100_percent.pak",
--                    "chrome_100_percent.pak",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
-+            self._install_into_dir(
-+                self.output_dir / "chrome_100_percent.pak",
-+                install_dir,
-+                mode=0o644,
+-        if (self.output_dir / "chrome_100_percent.pak").exists():
++        has_chrome_paks = (self.output_dir / "chrome_100_percent.pak").exists()
++        if has_chrome_paks:
+             artifacts.append(
+                 Artifact(
+                     "chrome_100_percent.pak",
+@@ -730,6 +801,7 @@ class InstallerConfig:
+                     StandardPermissions.REGULAR,
+                 )
              )
--            artifacts.append(
--                Artifact(
--                    "chrome_200_percent.pak",
--                    "chrome_200_percent.pak",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
-+            self._install_into_dir(
-+                self.output_dir / "chrome_200_percent.pak",
-+                install_dir,
-+                mode=0o644,
-             )
-         else:
--            artifacts.append(
--                Artifact(
--                    "theme_resources_100_percent.pak",
--                    "theme_resources_100_percent.pak",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
--            )
--            artifacts.append(
--                Artifact(
--                    "ui_resources_100_percent.pak",
--                    "ui_resources_100_percent.pak",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
-+            self._install_into_dir(
-+                self.output_dir / "theme_resources_100_percent.pak",
-+                install_dir,
-+                mode=0o644,
++        if self.is_thorium or not has_chrome_paks:
+             artifacts.append(
+                 Artifact(
+                     "ui_resources_100_percent.pak",
+@@ -759,14 +831,15 @@ class InstallerConfig:
              )
  
-+        # ICU
-+        self._install_into_dir(
-+            self.output_dir / "icudtl.dat", install_dir, mode=0o644
-+        )
-+
-+        # V8 snapshot
-         if (self.output_dir / "v8_context_snapshot.bin").exists():
--            artifacts.append(
--                Artifact(
--                    "v8_context_snapshot.bin",
--                    "v8_context_snapshot.bin",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
-+            self._install_into_dir(
-+                self.output_dir / "v8_context_snapshot.bin",
-+                install_dir,
-+                mode=0o644,
-             )
-         else:
--            artifacts.append(
--                Artifact(
--                    "snapshot_blob.bin",
--                    "snapshot_blob.bin",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
-+            self._install_into_dir(
-+                self.output_dir / "snapshot_blob.bin",
-+                install_dir,
-+                mode=0o644,
-             )
- 
--        # Default apps (Recursive)
+         # Default apps (Recursive)
 -        artifacts.append(
 -            Artifact(
 -                "default_apps",
 -                "default_apps",
 -                ArtifactType.DIRECTORY,
 -                is_optional=True,
--            )
++        if not self.is_thorium:
++            artifacts.append(
++                Artifact(
++                    "default_apps",
++                    "default_apps",
++                    ArtifactType.DIRECTORY,
++                    is_optional=True,
++                )
+             )
 -        )
--
--        # Locales
-+        # l10n paks
-+        locales_dir = install_dir / "locales"
-+        locales_dir.mkdir(parents=True, exist_ok=True)
-+        locales_dir.chmod(0o755)
+ 
+         # Locales
          for pak in (self.output_dir / "locales").glob("*.pak"):
--            artifacts.append(
--                Artifact(
--                    pak.relative_to(self.output_dir),
--                    pathlib.Path("locales") / pak.name,
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
--            )
-+            self._install_into_dir(pak, locales_dir, mode=0o644)
- 
-         # MEI Preload
-         mei_manifest = self.output_dir / "MEIPreload/manifest.json"
-         if mei_manifest.exists():
--            artifacts.append(
--                Artifact(
--                    "MEIPreload/manifest.json",
--                    "MEIPreload/manifest.json",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
--            )
--            artifacts.append(
--                Artifact(
--                    "MEIPreload/preloaded_data.pb",
--                    "MEIPreload/preloaded_data.pb",
--                    ArtifactType.RESOURCE,
--                    StandardPermissions.REGULAR,
--                )
--            )
--
--        return artifacts
--
--    def get_icon_artifacts(self) -> list[Artifact]:
--        artifacts = []
-+            mei_dir = install_dir / "MEIPreload"
-+            mei_dir.mkdir(parents=True, exist_ok=True)
-+            mei_dir.chmod(0o755)
-+            self._install_into_dir(mei_manifest, mei_dir, mode=0o644)
-+            self._install_into_dir(
-+                self.output_dir / "MEIPreload/preloaded_data.pb",
-+                mei_dir,
-+                mode=0o644,
-+            )
-+
-+    def _stage_theme_icons(self, install_dir):
-+        # app icons
-         icon_suffix = ""
-         if self.branding == "google_chrome":
-             if self.channel == "beta":
-@@ -816,127 +606,107 @@ class InstallerConfig:
-         for size in icon_sizes:
-             logo = f"product_logo_{size}{icon_suffix}.png"
-             logo_resources_png.append(logo)
--            artifacts.append(
--                Artifact(
--                    pathlib.Path("installer/theme") / logo,
--                    logo,
--                    ArtifactType.ICON,
--                    StandardPermissions.REGULAR,
--                )
--            )
--        self.logo_resources_png = " " + " ".join(logo_resources_png)
--        return artifacts
--
--    def get_desktop_integration_artifacts(self) -> list[Artifact]:
--        artifacts = []
-+            src = self.output_dir / "installer/theme" / logo
-+            self._install(src, install_dir / logo, mode=0o644)
-+        self.context["LOGO_RESOURCES_PNG"] = " " + " ".join(logo_resources_png)
- 
-+    def _stage_desktop_integration(self, install_dir):
-         # CHROME_VERSION_EXTRA
-         if self.branding == "google_chrome":
--            artifacts.append(
--                Artifact(
--                    "",
--                    "CHROME_VERSION_EXTRA",
--                    ArtifactType.GENERATED,
--                    StandardPermissions.REGULAR,
--                    content=self.channel + "\n",
--                )
--            )
-+            version_extra_file = install_dir / "CHROME_VERSION_EXTRA"
-+            with version_extra_file.open("w") as f:
-+                f.write(self.channel + "\n")
-+            version_extra_file.chmod(0o644)
- 
-         # wrapper script
--        artifacts.append(
--            Artifact(
--                "installer/common/wrapper",
--                self.info_vars["PACKAGE"],
--                ArtifactType.TEMPLATE,
--                StandardPermissions.EXECUTABLE,
--            )
-+        wrapper_file = install_dir / self.context["PACKAGE"]
-+        process_template(
-+            self.output_dir / "installer/common/wrapper",
-+            wrapper_file,
-+            self.context,
-+        )
-+        wrapper_file.chmod(0o755)
-+        logging.info(
-+            f"DEBUG: Chmod 755 {wrapper_file}. "
-+            f"Stat: {oct(stat.S_IMODE(wrapper_file.stat().st_mode))}"
-         )
- 
--        # Host system integration files are only applicable to DEB and RPM
--        # packages. Flatpak exports applications via standard Flatpak
--        # directories (share/applications, share/metainfo, share/icons) staged
--        # separately.
--        if self.package_format == PackageFormat.FLATPAK:
--            return artifacts
-+        apparmor_file = (
-+            install_dir / "apparmor.d" / self.context["USR_BIN_SYMLINK_NAME"]
-+        )
-+        process_template(
-+            self.output_dir / "installer/common/apparmor.template",
-+            apparmor_file,
-+            self.context,
-+        )
-+        apparmor_file.chmod(0o644)
- 
-         # symlink for PACKAGE_ORIG
--        package_orig = self.package_orig
--        if package_orig and package_orig != self.info_vars["PACKAGE"]:
--            link_target = os.path.join(
--                self.info_vars["INSTALLDIR"],
--                self.info_vars["PACKAGE"],
--            )
--            artifacts.append(
--                Artifact(
--                    "",
--                    package_orig,
--                    ArtifactType.SYMLINK,
--                    dst_base="install_dir",
--                    symlink_target=link_target,
-+        package_orig = self.context.get("PACKAGE_ORIG")
-+        if package_orig:
-+            link_path = install_dir / package_orig
-+            if not link_path.exists():
-+                os.symlink(
-+                    os.path.join(
-+                        self.context["INSTALLDIR"], self.context["PACKAGE"]
-+                    ),
-+                    link_path,
-                 )
--            )
- 
-         # /usr/bin symlink
--        if self.usr_bin_symlink_name:
--            link_target = os.path.join(
--                self.info_vars["INSTALLDIR"],
--                self.info_vars["PACKAGE"],
--            )
--            artifacts.append(
--                Artifact(
--                    "",
--                    pathlib.Path("usr/bin") / self.usr_bin_symlink_name,
--                    ArtifactType.SYMLINK,
--                    dst_base="staging_dir",
--                    symlink_target=link_target,
--                )
-+        usr_bin_symlink_name = self.context.get("USR_BIN_SYMLINK_NAME")
-+        if usr_bin_symlink_name:
-+            link_path = self.staging_dir / "usr/bin" / usr_bin_symlink_name
-+            if link_path.is_symlink() or link_path.exists():
-+                link_path.unlink()
-+            os.symlink(
-+                os.path.join(
-+                    self.context["INSTALLDIR"], self.context["PACKAGE"]
-+                ),
-+                link_path,
+@@ -895,7 +968,9 @@ class InstallerConfig:
              )
  
--        # URI_SCHEME logic
-+        # URI_SCHEME
-+        uri_scheme = ""
-         if self.branding == "google_chrome":
+         # URI_SCHEME logic
+-        if self.branding == "google_chrome":
++        if self.is_thorium:
++            self.uri_scheme = "x-scheme-handler/ftp;"
++        elif self.branding == "google_chrome":
              if self.channel not in ["beta", "unstable", "canary"]:
--                self.uri_scheme = "x-scheme-handler/google-chrome;"
-+                uri_scheme = "x-scheme-handler/google-chrome;"
+                 self.uri_scheme = "x-scheme-handler/google-chrome;"
          else:
--            self.uri_scheme = "x-scheme-handler/chromium;"
--
--        # apparmor profile
--        artifacts.append(
--            Artifact(
--                "installer/common/apparmor.template",
--                pathlib.Path("apparmor.d") / self.usr_bin_symlink_name,
--                ArtifactType.TEMPLATE,
--                StandardPermissions.REGULAR,
--            )
--        )
-+            uri_scheme = "x-scheme-handler/chromium;"
-+        self.context["URI_SCHEME"] = uri_scheme
- 
--        # appdata.xml
--        artifacts.append(
--            Artifact(
--                "installer/common/appdata.xml.template",
--                pathlib.Path("usr/share/appdata")
--                / f"{self.info_vars['PACKAGE']}.appdata.xml",
--                ArtifactType.TEMPLATE,
--                StandardPermissions.REGULAR,
--                dst_base="staging_dir",
--            )
-+        appdata_file = (
-+            self.staging_dir
-+            / "usr/share/appdata"
-+            / f"{self.context['PACKAGE']}.appdata.xml"
+@@ -1021,6 +1096,7 @@ class InstallerConfig:
+         return (
+             self.get_binary_artifacts()
+             + self.get_resource_artifacts()
++            + (self.get_thorium_artifacts() if self.is_thorium else [])
+             + self.get_icon_artifacts()
+             + self.get_desktop_integration_artifacts()
          )
-+        process_template(
-+            self.output_dir / "installer/common/appdata.xml.template",
-+            appdata_file,
-+            self.context,
-+        )
-+        appdata_file.chmod(0o644)
- 
--        # desktop file
--        self.extra_desktop_entries = ""
--        artifacts.append(
--            Artifact(
--                "installer/common/desktop.template",
--                pathlib.Path("usr/share/applications")
--                / f"{self.info_vars['PACKAGE']}.desktop",
--                ArtifactType.TEMPLATE,
--                StandardPermissions.REGULAR,
--                dst_base="staging_dir",
--            )
-+        desktop_file = (
-+            self.staging_dir
-+            / "usr/share/applications"
-+            / f"{self.context['PACKAGE']}.desktop"
-+        )
-+        self.context["EXTRA_DESKTOP_ENTRIES"] = ""
-+        process_template(
-+            self.output_dir / "installer/common/desktop.template",
-+            desktop_file,
-+            self.context,
-         )
-+        desktop_file.chmod(0o644)
- 
--        # rdn desktop file
--        rdn_extra_desktop_entries = (
--            f"# This is the same as {self.info_vars['PACKAGE']}.desktop except "
-+        rdn_desktop_file = (
-+            self.staging_dir
-+            / "usr/share/applications"
-+            / f"{self.context['RDN_DESKTOP']}.desktop"
-+        )
-+        self.context["EXTRA_DESKTOP_ENTRIES"] = (
-+            f"# This is the same as {self.context['PACKAGE']}.desktop except "
-             "NoDisplay=true prevents\n"
-             "# duplicate menu entries. This is required to match "
-             "the application ID\n"
-@@ -946,229 +716,64 @@ class InstallerConfig:
-             "browser settings.\n"
-             "NoDisplay=true\n"
-         )
--
--        artifacts.append(
--            Artifact(
--                "installer/common/desktop.template",
--                pathlib.Path("usr/share/applications")
--                / f"{self.rdn_desktop}.desktop",
--                ArtifactType.TEMPLATE,
--                StandardPermissions.REGULAR,
--                dst_base="staging_dir",
--                template_context={
--                    "extra_desktop_entries": rdn_extra_desktop_entries
--                },
--            )
-+        process_template(
-+            self.output_dir / "installer/common/desktop.template",
-+            rdn_desktop_file,
-+            self.context,
-         )
-+        rdn_desktop_file.chmod(0o644)
- 
--        # default-apps
--        artifacts.append(
--            Artifact(
--                "installer/common/default-app.template",
--                pathlib.Path("usr/share/gnome-control-center/default-apps")
--                / f"{self.info_vars['PACKAGE']}.xml",
--                ArtifactType.TEMPLATE,
--                StandardPermissions.REGULAR,
--                dst_base="staging_dir",
--            )
-+        default_app_file = (
-+            self.staging_dir
-+            / "usr/share/gnome-control-center/default-apps"
-+            / f"{self.context['PACKAGE']}.xml"
-+        )
-+        process_template(
-+            self.output_dir / "installer/common/default-app.template",
-+            default_app_file,
-+            self.context,
-         )
-+        default_app_file.chmod(0o644)
- 
--        # default-app-block
--        artifacts.append(
--            Artifact(
--                "installer/common/default-app-block.template",
--                "default-app-block",
--                ArtifactType.TEMPLATE,
--                StandardPermissions.REGULAR,
--            )
-+        default_app_block_file = install_dir / "default-app-block"
-+        process_template(
-+            self.output_dir / "installer/common/default-app-block.template",
-+            default_app_block_file,
-+            self.context,
-         )
-+        default_app_block_file.chmod(0o644)
- 
--        # documentation (manpage)
--        man_page_dst = (
--            pathlib.Path("usr/share/man/man1")
--            / f"{self.usr_bin_symlink_name}.1"
-+        # documentation
-+        man_page = (
-+            self.staging_dir
-+            / "usr/share/man/man1"
-+            / f"{self.context['USR_BIN_SYMLINK_NAME']}.1"
-         )
--        artifacts.append(
--            Artifact(
--                "installer/common/manpage.1.in",
--                man_page_dst,
--                ArtifactType.TEMPLATE,
--                StandardPermissions.REGULAR,
--                dst_base="staging_dir",
--                compress=True,
--            )
-+        process_template(
-+            self.output_dir / "installer/common/manpage.1.in",
-+            man_page,
-+            self.context,
-         )
-+        run_command(["gzip", "-9nf", str(man_page)])
-+        (man_page.parent / (man_page.name + ".gz")).chmod(0o644)
- 
-         # Link for stable channel app-without-channel case
--        if self.info_vars["PACKAGE"] != self.usr_bin_symlink_name:
--            artifacts.append(
--                Artifact(
--                    "",
--                    pathlib.Path("usr/share/man/man1")
--                    / f"{self.info_vars['PACKAGE']}.1.gz",
--                    ArtifactType.SYMLINK,
--                    dst_base="staging_dir",
--                    symlink_target=f"{self.usr_bin_symlink_name}.1.gz",
--                    is_optional=True,
--                )
--            )
--
--        return artifacts
--
--    def get_artifacts(self) -> list[Artifact]:
--        return (
--            self.get_binary_artifacts()
--            + self.get_resource_artifacts()
--            + self.get_icon_artifacts()
--            + self.get_desktop_integration_artifacts()
-+        package_man_page = (
-+            self.staging_dir
-+            / "usr/share/man/man1"
-+            / f"{self.context['PACKAGE']}.1.gz"
-         )
-+        if not package_man_page.exists():
-+            os.symlink(
-+                f"{self.context['USR_BIN_SYMLINK_NAME']}.1.gz",
-+                package_man_page,
-+            )
- 
--
--class Installer:
--    def __init__(self, config: InstallerConfig) -> None:
--        self.config = config
--
--    def prep_staging_common(self) -> None:
--        install_dir = self.config.staging_dir / self.config.info_vars[
--            "INSTALLDIR"
--        ].lstrip("/")
--        if self.config.package_format == PackageFormat.FLATPAK:
--            dirs = [install_dir]
--        else:
--            dirs = [
--                install_dir,
--                self.config.staging_dir / "usr/bin",
--                self.config.staging_dir / "usr/share/applications",
--                self.config.staging_dir / "usr/share/appdata",
--                (
--                    self.config.staging_dir
--                    / "usr/share/gnome-control-center/default-apps"
--                ),
--                self.config.staging_dir / "usr/share/man/man1",
--                install_dir / "apparmor.d",
--            ]
--        for d in dirs:
--            d.mkdir(parents=True, exist_ok=True)
--            d.chmod(StandardPermissions.EXECUTABLE)
--
--    def stage_install_common(self) -> None:
--        logging.info(
--            f"Staging common install files in '{self.config.staging_dir}'..."
--        )
--        install_dir = self.config.staging_dir / self.config.info_vars[
--            "INSTALLDIR"
--        ].lstrip("/")
--
--        artifacts = self.config.get_artifacts()
--        self._process_artifacts(artifacts, install_dir)
--
--        # Verify ELF binaries
--        self._verify_elf_binaries(install_dir)
--        self._verify_file_permissions()
--
--    def _process_artifacts(
--        self, artifacts: list[Artifact], install_dir: pathlib.Path
--    ) -> None:
--        for artifact in artifacts:
--            # Determine destination
--            dst = install_dir / artifact.dst
--            if artifact.dst_base == "staging_dir":
--                dst = self.config.staging_dir / artifact.dst
--
--            # Determine source (if applicable)
--            src = None
--            if artifact.src:
--                src = self.config.output_dir / artifact.src
--                if not src.exists():
--                    if artifact.is_optional:
--                        continue
--                    raise FileNotFoundError(
--                        f"Required artifact not found: {src}"
--                    )
--            elif not artifact.is_optional and artifact.artifact_type not in (
--                ArtifactType.GENERATED,
--                ArtifactType.SYMLINK,
--            ):
--                # Only GENERATED and SYMLINK are allowed to have no src
--                # (unless is_optional is True)
--                raise ValueError(f"Artifact {artifact.dst} missing source")
--
--            if artifact.artifact_type == ArtifactType.DIRECTORY:
--                if dst.exists():
--                    shutil.rmtree(dst)
--                shutil.copytree(src, dst)
--                # Apply permissions
--                for root, dirs, files in os.walk(dst):
--                    os.chmod(root, StandardPermissions.EXECUTABLE)
--                    for d in dirs:
--                        os.chmod(
--                            os.path.join(root, d),
--                            StandardPermissions.EXECUTABLE,
--                        )
--                    for f in files:
--                        # Heuristic for shared libraries inside directories
--                        # (like Widevine)
--                        path = os.path.join(root, f)
--                        if f.endswith(".so") or ".so." in f:
--                            os.chmod(path, self.config.shlib_perms)
--                        else:
--                            os.chmod(path, StandardPermissions.REGULAR)
--
--            elif artifact.artifact_type == ArtifactType.TEMPLATE:
--                dst.parent.mkdir(parents=True, exist_ok=True)
--                context = self.config.get_template_context()
--                if artifact.template_context:
--                    context.update(artifact.template_context)
--                process_template(src, dst, context)
--                if artifact.compress:
--                    run_command(["gzip", "-9nf", str(dst)])
--                    dst = dst.parent / (dst.name + ".gz")
--                dst.chmod(artifact.mode)
--
--            elif artifact.artifact_type == ArtifactType.GENERATED:
--                dst.parent.mkdir(parents=True, exist_ok=True)
--                with dst.open("w") as f:
--                    f.write(artifact.content)
--                dst.chmod(artifact.mode)
--
--            elif artifact.artifact_type == ArtifactType.SYMLINK:
--                if dst.is_symlink() or dst.exists():
--                    dst.unlink()
--                # Create parent if needed
--                dst.parent.mkdir(parents=True, exist_ok=True)
--                os.symlink(artifact.symlink_target, dst)
--
--            elif artifact.artifact_type == ArtifactType.ICON:
--                self._install(src, dst, artifact.mode)
--
--            elif artifact.artifact_type in (
--                ArtifactType.BINARY,
--                ArtifactType.RESOURCE,
--            ):
--                self._install(src, dst, artifact.mode, artifact.strip)
--
--            else:
--                raise ValueError(
--                    f"Unknown artifact type: {artifact.artifact_type}"
--                )
--
--    def _install_into_dir(
--        self,
--        src: pathlib.Path,
--        dest_dir: pathlib.Path,
--        mode: int | None = None,
--        strip: bool = False,
--    ) -> None:
-+    def _install_into_dir(self, src, dest_dir, mode=None, strip=False):
-         dest = dest_dir / src.name
-         self._install(src, dest, mode, strip)
- 
--    def _install(
--        self,
--        src: pathlib.Path,
--        dest: pathlib.Path,
--        mode: int | None = None,
--        strip: bool = False,
--    ) -> None:
-+    def _install(self, src, dest, mode=None, strip=False):
-         dest.parent.mkdir(parents=True, exist_ok=True)
- 
-         shutil.copy(src, dest)
-@@ -1177,12 +782,12 @@ class Installer:
-         if mode is not None:
-             dest.chmod(mode)
- 
--    def _verify_elf_binaries(self, install_dir: pathlib.Path) -> None:
-+    def _verify_elf_binaries(self, install_dir):
-         unstripped = []
-         rpath_bins = []
-         elf_outside = []
- 
--        for root, _, files in os.walk(self.config.staging_dir):
-+        for root, _, files in os.walk(self.staging_dir):
-             for f in files:
-                 path = pathlib.Path(root) / f
-                 if path.is_symlink():
-@@ -1199,13 +804,13 @@ class Installer:
+@@ -1204,7 +1280,7 @@ class Installer:
  
                  if "ELF" in output:
                      # Check if outside install dir
@@ -2480,599 +1032,75 @@ index b2b6f8c06d07c..2183613ce354b 100644
                          elf_outside.append(path)
  
                      if "not stripped" in output:
-                         unstripped.append(path)
- 
--                    if self.config.target_os != "chromeos":
-+                    if self.target_os != "chromeos":
-                         # Check RPATH
-                         try:
-                             readelf_out = subprocess.check_output(
-@@ -1225,10 +830,9 @@ class Installer:
+@@ -1229,11 +1305,13 @@ class Installer:
+             sys.exit(1)
  
          if rpath_bins:
++            level = "WARNING" if self.config.is_thorium else "ERROR"
              print(
 -                f"ERROR: Found binaries with RPATH set: {rpath_bins}",
-+                f"WARNING: Found binaries with RPATH set: {rpath_bins}",
++                f"{level}: Found binaries with RPATH set: {rpath_bins}",
                  file=sys.stderr,
              )
 -            sys.exit(1)
++            if not self.config.is_thorium:
++                sys.exit(1)
  
          if elf_outside:
              print(
-@@ -1238,10 +842,10 @@ class Installer:
-             )
-             sys.exit(1)
- 
--    def _verify_file_permissions(self) -> None:
-+    def _verify_file_permissions(self):
-         # Verify file permissions
-         on_cog = False
--        if not self.config.is_official_build:
-+        if not self.is_official_build:
-             # On Cog, permission is always 0664 or 0775
-             if os.getcwd().startswith("/google/cog/cloud/"):
-                 on_cog = True
-@@ -1250,11 +854,7 @@ class Installer:
-                     file=sys.stderr,
-                 )
- 
--        for root, dirs, files in os.walk(self.config.staging_dir):
--            # Check directories
--            for d in dirs:
--                pass
--
-+        for root, dirs, files in os.walk(self.staging_dir):
-             # We iterate everything.
-             for item in dirs + files:
-                 path = pathlib.Path(root) / item
-@@ -1262,16 +862,14 @@ class Installer:
-                 actual_perms = stat.S_IMODE(st.st_mode)
- 
-                 base_name = item
--                expected_perms = StandardPermissions.REGULAR  # Default
-+                expected_perms = 0o644  # Default
- 
-                 if path.is_dir():
--                    expected_perms = StandardPermissions.EXECUTABLE
-+                    expected_perms = 0o755
-                 elif path.is_symlink():
-                     target = os.readlink(path)
-                     if target.startswith("/"):
--                        expect_exists = self.config.staging_dir / target.lstrip(
--                            "/"
--                        )
-+                        expect_exists = self.staging_dir / target.lstrip("/")
-                     else:
-                         expect_exists = path.parent / target
- 
-@@ -1293,26 +891,26 @@ class Installer:
-                     file_type = ""
- 
-                 if base_name == "chrome-management-service":
--                    expected_perms = StandardPermissions.EXECUTABLE
-+                    expected_perms = 0o755
-                 elif base_name == "chrome-sandbox":
--                    expected_perms = StandardPermissions.SANDBOX
-+                    expected_perms = 0o4755
-                 elif "shell script" in file_type:
--                    expected_perms = StandardPermissions.EXECUTABLE
-+                    expected_perms = 0o755
-                 elif "ELF" in file_type:
-                     if base_name.endswith(".so") or ".so." in base_name:
--                        expected_perms = self.config.shlib_perms
-+                        expected_perms = self.shlib_perms
-                     else:
--                        expected_perms = StandardPermissions.EXECUTABLE
-+                        expected_perms = 0o755
- 
-                 if expected_perms != actual_perms:
-                     ok = False
-                     relaxed_expected_perms = expected_perms
-                     if on_cog:
--                        if expected_perms == StandardPermissions.SANDBOX:
-+                        if expected_perms == 0o4755:
-                             relaxed_expected_perms = 0o775
--                        elif expected_perms == StandardPermissions.REGULAR:
-+                        elif expected_perms == 0o644:
-                             relaxed_expected_perms = 0o664
--                        elif expected_perms == StandardPermissions.EXECUTABLE:
-+                        elif expected_perms == 0o755:
-                             relaxed_expected_perms = 0o775
- 
-                         if relaxed_expected_perms == actual_perms:
-@@ -1328,83 +926,3 @@ class Installer:
-                         msg += f", but they were {oct(actual_perms)}"
-                         print(msg, file=sys.stderr)
-                         sys.exit(1)
--
--
--def compute_repo_package_hash_for_presubmit(
--    chrome_installer_linux_dir: str | pathlib.Path,
--    out_dir: str | pathlib.Path,
--) -> str:
--    """Builds the repo .deb package in out_dir and returns its SHA-256 hash.
--
--    This function is used during presubmit and key update to build a minimal,
--    deterministic version of the repository package ('google-chrome-repo') and
--    return its hash.
--
--    Since this is only used to verify that modifications to repository package
--    templates or packaging scripts are accompanied by version, timestamp, and
--    hash updates in 'repo_package.include', the package configuration (like
--    version, timestamp, architecture, branding, etc.) can be hardcoded.
--    This avoids needing a real, fully compiled Chrome/Chromium build output
--    directory, making the presubmit check extremely fast and lightweight.
--
--    'google-chrome-repo' is used as the representative package for verification
--    because the repo package scripts (postinst, postrm, etc.) are identical or
--    structurally equivalent under both brandings, and verifying a single
--    representative branding is sufficient to enforce version and hash updates.
--    """
--    old_umask = os.umask(0o022)
--    try:
--        local_root = os.path.abspath(str(chrome_installer_linux_dir))
--        out_dir = os.path.abspath(str(out_dir))
--        common_out = os.path.join(out_dir, "installer", "common")
--        theme_out = os.path.join(out_dir, "installer", "theme")
--        os.makedirs(common_out, exist_ok=True)
--        os.makedirs(theme_out, exist_ok=True)
--
--        # Copy the required 'google-chrome.info' directly from the source repository.
--        # This file must exist as it is a vital part of the repository structure.
--        info_path = os.path.join(local_root, "common", "google-chrome.info")
--        shutil.copy(info_path, os.path.join(common_out, "google-chrome.info"))
--
--        # Write mock files simulating a build directory so build_repo_package.py
--        # can execute in a standalone/presubmit context without requiring a real,
--        # fully-built Chromium/Chrome binary.
--        with open(os.path.join(theme_out, "BRANDING"), "w") as f:
--            f.write("COMPANY_FULLNAME=Google\n")
--        with open(os.path.join(out_dir, "installer", "version.txt"), "w") as f:
--            f.write("MAJOR=130\nMINOR=0\nBUILD=6723\nPATCH=44\n")
--
--        script = os.path.join(local_root, "debian", "build_repo_package.py")
--        cmd = [
--            sys.executable,
--            script,
--            "-a",
--            "amd64",
--            "-b",
--            "1700000000",
--            "-c",
--            "stable",
--            "-d",
--            "google_chrome",
--            "-o",
--            out_dir,
--            "-s",
--            out_dir,
--            "-t",
--            "linux",
--        ]
--        res = subprocess.run(cmd, capture_output=True, text=True)
--        if res.returncode != 0:
--            error_msg = f"build_repo_package.py failed (rc={res.returncode})"
--            if res.stdout:
--                error_msg += f"\nstdout:\n{res.stdout}"
--            if res.stderr:
--                error_msg += f"\nstderr:\n{res.stderr}"
--            raise RuntimeError(error_msg)
--        deb_path = os.path.join(out_dir, "google-chrome-repo_amd64.deb")
--        if not os.path.exists(deb_path):
--            raise RuntimeError(f"deb package was not created at {deb_path}")
--        with open(deb_path, "rb") as f:
--            return hashlib.sha256(f.read()).hexdigest()
--    finally:
--        os.umask(old_umask)
-diff --git a/chrome/installer/linux/common/postinst.include b/chrome/installer/linux/common/postinst.include
-index d237a1affe90b..378a6b7e012a1 100644
---- a/chrome/installer/linux/common/postinst.include
-+++ b/chrome/installer/linux/common/postinst.include
-@@ -4,10 +4,10 @@ if [ ! -x "$XDG_ICON_RESOURCE" ]; then
-   echo "Error: Could not find xdg-icon-resource" >&2
-   exit 1
- fi
--for icon in @@logo_resources_png; do
-+for icon in @@LOGO_RESOURCES_PNG@@; do
-   size="$(echo ${icon} | sed 's/[^0-9]//g')"
--  "$XDG_ICON_RESOURCE" install --size "${size}" "@@INSTALLDIR/${icon}" \
--    "@@PACKAGE"
-+  "$XDG_ICON_RESOURCE" install --size "${size}" "@@INSTALLDIR@@/${icon}" \
-+    "@@PACKAGE@@"
- done
- 
- # Update cache of .desktop file MIME types. Non-fatal since it's just a cache.
-@@ -45,7 +45,7 @@ update_defaults_list() {
-   done
- }
- 
--update_defaults_list "@@PACKAGE.desktop"
-+update_defaults_list "@@PACKAGE@@.desktop"
- 
- # This function uses sed to insert the contents of one file into another file,
- # after the first line matching a given regular expression. If there is no
-@@ -67,10 +67,10 @@ GNOME_DFL_APPS=/usr/share/gnome-control-center/default-apps/gnome-default-applic
- if [ -f "$GNOME_DFL_APPS" ]; then
- # Conditionally insert the contents of the file "default-app-block" after the
- # first "<web-browsers>" line we find in gnome-default-applications.xml
--  fgrep -q "@@MENUNAME" "$GNOME_DFL_APPS" || insert_after_first_match \
-+  fgrep -q "@@MENUNAME@@" "$GNOME_DFL_APPS" || insert_after_first_match \
-     "$GNOME_DFL_APPS" \
-     "^[ 	]*<web-browsers>[ 	]*$" \
--    "@@INSTALLDIR/default-app-block"
-+    "@@INSTALLDIR@@/default-app-block"
- fi
- 
- # This function performs the setup for the chrome management service process.
-@@ -88,11 +88,11 @@ chrome_management_service_setup() {
- 
-   getent group chromemgmt > /dev/null || groupadd chromemgmt
- 
--  chgrp chromemgmt "@@INSTALLDIR/chrome-management-service"
--  chmod 2755 "@@INSTALLDIR/chrome-management-service"
-+  chgrp chromemgmt "@@INSTALLDIR@@/chrome-management-service"
-+  chmod 2755 "@@INSTALLDIR@@/chrome-management-service"
- 
--  mkdir -p "@@ENROLLMENTDIR"
--  SIGNING_KEY_FILE="@@ENROLLMENTDIR/DeviceTrustSigningKey"
-+  mkdir -p "@@ENROLLMENTDIR@@"
-+  SIGNING_KEY_FILE="@@ENROLLMENTDIR@@/DeviceTrustSigningKey"
-   if [ ! -e "$SIGNING_KEY_FILE" ]; then
-     touch "$SIGNING_KEY_FILE"
-   fi
-@@ -104,17 +104,17 @@ chrome_management_service_setup() {
- chrome_management_service_setup
- 
- # Reload AppArmor profile
--if [ -f "@@INSTALLDIR/apparmor.d/@@usr_bin_symlink_name" ]; then
--  if [ -f "/etc/apparmor.d/abi/4.0" ] && [ -x /sbin/apparmor_parser ]; then
-+if [ -f "@@INSTALLDIR@@/apparmor.d/@@USR_BIN_SYMLINK_NAME@@" ] && \
-+   [ -f "/etc/apparmor.d/abi/4.0" ] && \
-+   [ -x /sbin/apparmor_parser ]; then
-     # Check for exact attachment collision with Ubuntu's native chrome profile.
--    if [ "@@usr_bin_symlink_name" = "google-chrome-stable" ] && \
-+    if [ "@@USR_BIN_SYMLINK_NAME@@" = "google-chrome-stable" ] && \
-        [ -f "/etc/apparmor.d/chrome" ]; then
-       # Skip installation if a conflicting profile exists.
-       true
-     else
--      cp "@@INSTALLDIR/apparmor.d/@@usr_bin_symlink_name" \
--        "/etc/apparmor.d/@@usr_bin_symlink_name"
--      /sbin/apparmor_parser -r "/etc/apparmor.d/@@usr_bin_symlink_name" || true
-+      cp "@@INSTALLDIR@@/apparmor.d/@@USR_BIN_SYMLINK_NAME@@" \
-+        "/etc/apparmor.d/@@USR_BIN_SYMLINK_NAME@@"
-+      /sbin/apparmor_parser -r "/etc/apparmor.d/@@USR_BIN_SYMLINK_NAME@@" || true
-     fi
--  fi
- fi
-diff --git a/chrome/installer/linux/common/prerm.include b/chrome/installer/linux/common/prerm.include
-index 3ca7333a9eff0..f4baec809b042 100644
---- a/chrome/installer/linux/common/prerm.include
-+++ b/chrome/installer/linux/common/prerm.include
-@@ -4,9 +4,9 @@ if [ ! -x "$XDG_ICON_RESOURCE" ]; then
-   echo "Error: Could not find xdg-icon-resource" >&2
-   exit 1
- fi
--for icon in @@logo_resources_png; do
-+for icon in @@LOGO_RESOURCES_PNG@@; do
-   size="$(echo ${icon} | sed 's/[^0-9]//g')"
--  "$XDG_ICON_RESOURCE" uninstall --size "${size}" "@@PACKAGE"
-+  "$XDG_ICON_RESOURCE" uninstall --size "${size}" "@@PACKAGE@@"
- done
- 
- # Update cache of .desktop file MIME types. Non-fatal since it's just a cache.
-@@ -15,10 +15,10 @@ update-desktop-database > /dev/null 2>&1 || true
- # Unload AppArmor profile
- # "remove" is for Debian/Ubuntu, "0" is for RPM distributions.
- if [ "$1" = "remove" ] || [ "$1" = "0" ]; then
--  if [ -f "/etc/apparmor.d/@@usr_bin_symlink_name" ]; then
-+  if [ -f "/etc/apparmor.d/@@USR_BIN_SYMLINK_NAME@@" ]; then
-     if [ -x /sbin/apparmor_parser ]; then
--      /sbin/apparmor_parser -R "/etc/apparmor.d/@@usr_bin_symlink_name" || true
-+      /sbin/apparmor_parser -R "/etc/apparmor.d/@@USR_BIN_SYMLINK_NAME@@" || true
-     fi
--    rm -f "/etc/apparmor.d/@@usr_bin_symlink_name"
-+    rm -f "/etc/apparmor.d/@@USR_BIN_SYMLINK_NAME@@"
-   fi
- fi
-diff --git a/chrome/installer/linux/common/rpm.include b/chrome/installer/linux/common/rpm.include
-index 9b87ef588baa2..45add57c7075e 100644
---- a/chrome/installer/linux/common/rpm.include
-+++ b/chrome/installer/linux/common/rpm.include
-@@ -1,253 +1,4 @@
--@@include@@repo_variables.include
--@@include@@key.include
--
--# Install the repository signing key (see also:
--# https://www.google.com/linuxrepositories/)
--install_rpm_key() {
--  # The version of the gpg-pubkey package is the short key ID for rpm < 6.0
--  # (gpg-pubkey-d38b4796-570c8cd3) and the full key fingerprint for rpm >= 6.0
--  # (gpg-pubkey-eb4c1bfd4f042f6dddccec917721f63bd38b4796-570c8cd3), so look for
--  # either form rather than hardcoding a package name.
--  # Use an explicit query format since the default is configurable via the
--  # %_query_all_fmt rpm macro.
--  KEY_PACKAGES=$(rpm -q --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' gpg-pubkey \
--    2>/dev/null | grep -Ei \
--    '^gpg-pubkey-(eb4c1bfd4f042f6dddccec917721f63b)?d38b4796-570c8cd3$')
--
--  # Check to see if all keys already exist.
--  # Make sure all the most recent signing subkeys are installed.
--  NEED_KEYS=0
--
--  if [ -z "$KEY_PACKAGES" ]; then
--    NEED_KEYS=1
--  else
--    INSTALLED_SUBKEYS=$(rpm -q --qf '%{Pubkeys:armor}\n' $KEY_PACKAGES \
--      2>/dev/null | gpg --with-colons - 2>/dev/null)
--    for SUB_KEY in $PGP_SUBKEYS; do
--      # The key ID is the fifth field of the colon-delimited subkey record.
--      if ! printf '%s\n' "$INSTALLED_SUBKEYS" | \
--          grep -qiE "^sub(:[^:]*){3}:$SUB_KEY:"; then
--        NEED_KEYS=1
--        break
--      fi
--    done
--  fi
--
--  if [ $NEED_KEYS -ne 1 ]; then
--    return
--  fi
--
--  # Make sure no older version of the key is installed because it appears
--  # 'rpm --import' won't overwrite an existing key package.
--  if [ -n "$KEY_PACKAGES" ]; then
--    # Note, if this is run during the package install, it will fail because rpm
--    # can't recursively run rpm, but it should work when run later as part of
--    # the installed cron job (and probably nothing needs the new keys before
--    # then).
--    rpm -e --allmatches $KEY_PACKAGES >/dev/null 2>&1 || return
--  fi
--
--  # RPM on Mandriva 2009 is dumb and does not understand "rpm --import -"
--  TMPKEY=$(mktemp /tmp/google.sig.XXXXXX)
--  if [ -n "$TMPKEY" ]; then
--    cat > "$TMPKEY" <<KEYDATA
-------BEGIN PGP PUBLIC KEY BLOCK-----
--
--$PGP_KEY_DATA
--$PGP_KEY_CHECKSUM
-------END PGP PUBLIC KEY BLOCK-----
--KEYDATA
--    rpm --import "$TMPKEY"
--    rc=$?
--    rm -f "$TMPKEY"
--    if [ "$rc" -eq "0" ]; then
--      return 0
--    fi
--  fi
--  return 1
--}
--
--determine_rpm_package_manager() {
--  local RELEASE
--
--  # Modern method using os-release(5)
--  if [ -f "/etc/os-release" ]; then
--    RELEASE=$(. "/etc/os-release"; echo "$ID")
--    case $RELEASE in
--    "fedora"|"rhel"|"centos"|"amzn"|"mageia"|"openmandriva")
--      PACKAGEMANAGERS=(yum)
--      ;;
--    "suse"|"sles"|"sled"|"opensuse"|"opensuse-leap"|"opensuse-tumbleweed")
--      PACKAGEMANAGERS=(zypp)
--      ;;
--    esac
--  fi
--
--  if [ "$PACKAGEMANAGERS" ]; then
--    return
--  fi
--
--  # Fallback method using lsb_release(1)
--  LSB_RELEASE="$(command -v lsb_release 2> /dev/null)"
--  if [ -x "$LSB_RELEASE" ]; then
--    RELEASE=$(lsb_release -i 2> /dev/null | sed 's/:\t/:/' | cut -d ':' -f 2-)
--    case $RELEASE in
--    "Fedora"|"Amazon"|"Mageia"|"OpenMandrivaLinux")
--      PACKAGEMANAGERS=(yum)
--      ;;
--    "SUSE LINUX"|"openSUSE")
--      PACKAGEMANAGERS=(zypp)
--      ;;
--    esac
--  fi
--
--  if [ "$PACKAGEMANAGERS" ]; then
--    return
--  fi
--
--  # Fallback methods that are probably unnecessary on modern systems.
--  if [ -f "/etc/fedora-release" ] || [ -f "/etc/redhat-release" ]; then
--    PACKAGEMANAGERS=(yum)
--  elif [ -f "/etc/system-release" ] && grep -Fq "Amazon Linux" "/etc/system-release"; then
--    PACKAGEMANAGERS=(yum)
--  elif [ -f "/etc/SuSE-release" ]; then
--    PACKAGEMANAGERS=(zypp)
--  fi
--}
--
--DEFAULT_ARCH="@@architecture"
--YUM_REPO_FILE="/etc/yum.repos.d/@@PACKAGE.repo"
--ZYPPER_REPO_FILE="/etc/zypp/repos.d/@@PACKAGE.repo"
--
--install_yum() {
--  install_rpm_key
--
--  if [ ! "$REPOCONFIG" ]; then
--    return 0
--  fi
--
--  if [ -d "/etc/yum.repos.d" ]; then
--cat > "$YUM_REPO_FILE" << REPOCONTENT
--[@@PACKAGE]
--name=@@PACKAGE
--baseurl=$REPOCONFIG/$DEFAULT_ARCH
--enabled=1
--gpgcheck=1
--gpgkey=https://dl.google.com/linux/linux_signing_key.pub
--REPOCONTENT
--  fi
--}
--
--install_zypp() {
--  if [ ! "$REPOCONFIG" ]; then
--    return 0
--  fi
--
--  # Ideally, we would run: zypper addrepo -t YUM -f \
--  # "$REPOCONFIG/$DEFAULT_ARCH" "@@PACKAGE"
--  # but that does not work when zypper is running.
--  if [ -d "/etc/zypp/repos.d" ]; then
--cat > "$ZYPPER_REPO_FILE" << REPOCONTENT
--[@@PACKAGE]
--name=@@PACKAGE
--enabled=1
--autorefresh=1
--baseurl=$REPOCONFIG/$DEFAULT_ARCH
--gpgcheck=1
--gpgkey=https://dl.google.com/linux/linux_signing_key.pub
--type=rpm-md
--keeppackages=0
--REPOCONTENT
--  fi
--}
--
--# Check if the automatic repository configuration is done, so we know when to
--# stop trying.
--verify_install() {
--  # It's probably enough to see that the repo configs have been created. If they
--  # aren't configured properly, update_bad_repo should catch that when it's run.
--  case $1 in
--  "yum")
--    [ -f "$YUM_REPO_FILE" ]
--    ;;
--  "zypp")
--    [ -f "$ZYPPER_REPO_FILE" ]
--    ;;
--  esac
--}
--
--# Update the Google repository if it's not set correctly.
--update_bad_repo() {
--  if [ ! "$REPOCONFIG" ]; then
--    return 0
--  fi
--
--  determine_rpm_package_manager
--
--  for PACKAGEMANAGER in ${PACKAGEMANAGERS[*]}
--  do
--    case $PACKAGEMANAGER in
--    "yum")
--      update_repo_file "$YUM_REPO_FILE"
--      ;;
--    "zypp")
--      update_repo_file "$ZYPPER_REPO_FILE"
--      ;;
--    esac
--  done
--}
--
--update_repo_file() {
--  REPO_FILE="$1"
--
--  # Don't do anything if the file isn't there, since that probably means the
--  # user disabled it.
--  if [ ! -r "$REPO_FILE" ]; then
--    return 0
--  fi
--
--  # Check if the correct repository configuration is in there.
--  REPOMATCH=$(grep "^baseurl=$REPOCONFIG/$DEFAULT_ARCH" "$REPO_FILE" \
--    2>/dev/null)
--  # If it's there, nothing to do
--  if [ "$REPOMATCH" ]; then
--    return 0
--  fi
--
--  # Check if it's there but disabled by commenting out (as opposed to using the
--  # 'enabled' setting).
--  MATCH_DISABLED=$(grep "^[[:space:]]*#.*baseurl=$REPOCONFIG/$DEFAULT_ARCH" \
--    "$REPO_FILE" 2>/dev/null)
--  if [ "$MATCH_DISABLED" ]; then
--    # It's OK for it to be disabled, as long as nothing bogus is enabled in its
--    # place.
--    ACTIVECONFIGS=$(grep "^baseurl=.*" "$REPO_FILE" 2>/dev/null)
--    if [ ! "$ACTIVECONFIGS" ]; then
--      return 0
--    fi
--  fi
--
--  # If we get here, the correct repository wasn't found, or something else is
--  # active, so fix it. This assumes there is a 'baseurl' setting, but if not,
--  # then that's just another way of disabling, so we won't try to add it.
--  sed -i -e "s,^baseurl=.*,baseurl=$REPOCONFIG/$DEFAULT_ARCH," "$REPO_FILE"
--}
--
--# We only remove the repository configuration during a purge. Since RPM has
--# no equivalent to dpkg --purge, the code below is actually never used. We
--# keep it only for reference purposes, should we ever need it.
--#
--#remove_yum() {
--#  rm -f "$YUM_REPO_FILE"
--#}
--#
--#remove_zypp() {
--#  # Ideally, we would run: zypper removerepo "@@PACKAGE"
--#  # but that does not work when zypper is running.
--#  rm -f /etc/zypp/repos.d/@@PACKAGE.repo
--#}
--
--DEFAULT_ARCH="@@architecture"
-+DEFAULT_ARCH="@@ARCHITECTURE@@"
- 
- get_lib_dir() {
-   if [ "$DEFAULT_ARCH" = "i386" ] || [ "$DEFAULT_ARCH" = "armhf" ] || \
-diff --git a/chrome/installer/linux/common/symlinks.include b/chrome/installer/linux/common/symlinks.include
-index 3574a81f6b0b2..700215c4c9d1b 100644
---- a/chrome/installer/linux/common/symlinks.include
-+++ b/chrome/installer/linux/common/symlinks.include
-@@ -7,9 +7,9 @@ add_nss_symlinks() {
-   do
-     target=$(echo $f | sed 's/\.[01]d$//')
-     if [ -f "/$LIBDIR/$target" ]; then
--      ln -snf "/$LIBDIR/$target" "@@INSTALLDIR/$f"
-+      ln -snf "/$LIBDIR/$target" "@@INSTALLDIR@@/$f"
-     elif [ -f "/usr/$LIBDIR/$target" ]; then
--      ln -snf "/usr/$LIBDIR/$target" "@@INSTALLDIR/$f"
-+      ln -snf "/usr/$LIBDIR/$target" "@@INSTALLDIR@@/$f"
-     else
-       echo $f not found in "/$LIBDIR/$target" or "/usr/$LIBDIR/$target".
-       exit 1
-@@ -20,10 +20,10 @@ add_nss_symlinks() {
- remove_nss_symlinks() {
-   for f in $NSS_FILES
-   do
--    rm -rf "@@INSTALLDIR/$f"
-+    rm -rf "@@INSTALLDIR@@/$f"
-   done
- }
- 
- remove_udev_symlinks() {
--  rm -rf "@@INSTALLDIR/libudev.so.0"
-+  rm -rf "@@INSTALLDIR@@/libudev.so.0"
- }
-diff --git a/chrome/installer/linux/common/variables.include b/chrome/installer/linux/common/variables.include
-index 2722dc0fbfe6b..5533249633665 100644
---- a/chrome/installer/linux/common/variables.include
-+++ b/chrome/installer/linux/common/variables.include
-@@ -1,2 +1,2 @@
- # System-wide package configuration.
--DEFAULTS_FILE="/etc/default/@@PACKAGE"
-+DEFAULTS_FILE="/etc/default/@@PACKAGE@@"
+diff --git a/chrome/installer/linux/common/thorium/chromium-browser.info b/chrome/installer/linux/common/thorium/chromium-browser.info
+new file mode 100644
+index 0000000000000..7bd64f6e58228
+--- /dev/null
++++ b/chrome/installer/linux/common/thorium/chromium-browser.info
+@@ -0,0 +1,45 @@
++# Copyright 2009 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++#
++# This file provides common configuration information for building
++# Thorium Browser packages for various platforms.
++
++# Base name of the package.
++PACKAGE="thorium-browser"
++
++# Base name of the snap package
++SNAPNAME="chromium"
++
++# Filename of the main executable (for generating launcher scripts, etc.)
++PROGNAME=thorium
++
++# Base directory for package installation.
++INSTALLDIR=/opt/chromium.org/thorium
++
++# Directory for device policy enrollments.
++ENROLLMENTDIR=/etc/thorium/policies/enrollment
++
++# Display string for desktop menu/icon.
++MENUNAME="Thorium Browser"
++
++# Brief package description.
++SHORTDESC="The web browser from Alex313031"
++
++# Detailed package description.
++FULLDESC="Thorium is a browser that combines a minimal design with sophisticated technology to make the web faster, safer, and easier."
++
++# Package maintainer information.
++MAINTNAME="Thorium Linux Maintainers"
++MAINTMAIL="alex313031@gmail.com"
++PRODUCTURL="https://thorium.rocks/"
++
++PROJECT_LICENSE="BSD-3-Clause and LGPL-2.1+ and Apache-2.0 and IJG and MIT and GPL-2.0+ and ISC and OpenSSL and (MPL-1.1 or GPL-2.0 or LGPL-2.0)"
++
++DEVELOPER_NAME="The Chromium Authors and Alex313031"
++
++BUGTRACKERURL="https://github.com/Alex313031/thorium/issues"
++
++HELPURL="https://chromium.googlesource.com/chromium/src/+/main/docs/linux/debugging.md"
++
++RDN="org.chromium.Thorium"
 diff --git a/chrome/installer/linux/common/wrapper b/chrome/installer/linux/common/wrapper
-index 5ee3f9ff0f521..b68a104cd7eb7 100755
+index 5ee3f9ff0f521..6d5ec9fc22181 100755
 --- a/chrome/installer/linux/common/wrapper
 +++ b/chrome/installer/linux/common/wrapper
 @@ -1,6 +1,6 @@
@@ -3117,10 +1145,10 @@ index 5ee3f9ff0f521..b68a104cd7eb7 100755
 +export CHROME_DESKTOP="thorium-browser.desktop"
 +
 +# Set the build variant displayed in the About dialog.
-+if [[ -n "@@SIMD_VARIANT@@" ]]; then
-+  export CHROME_VERSION_EXTRA="@@CHANNEL@@ (@@SIMD_VARIANT@@)"
++if [[ -n "@@simd_variant" ]]; then
++  export CHROME_VERSION_EXTRA="@@channel (@@simd_variant)"
 +else
-+  export CHROME_VERSION_EXTRA="@@CHANNEL@@"
++  export CHROME_VERSION_EXTRA="@@channel"
 +fi
 +
 +# We don't want bug-buddy intercepting our crashes. http://crbug.com/24120
@@ -3197,331 +1225,54 @@ index 5ee3f9ff0f521..b68a104cd7eb7 100755
 +# Launch Thorium
  # Note: exec -a below is a bashism.
 -exec -a "$0" "$HERE/@@PROGNAME" "$@"
-+exec -a "$0" "$HERE/@@PROGNAME@@" $CHROME_USER_FLAGS "$@"
-diff --git a/chrome/installer/linux/debian/additional_deps b/chrome/installer/linux/debian/additional_deps
-index 5f37c6777e7d1..33fc56feb33f7 100644
---- a/chrome/installer/linux/debian/additional_deps
-+++ b/chrome/installer/linux/debian/additional_deps
-@@ -1,4 +1,4 @@
--# Copyright 2018 The Chromium Authors
-+# Copyright 2026 The Chromium Authors and Alex313031
- # Use of this source code is governed by a BSD-style license that can be
- # found in the LICENSE file.
- #
-@@ -21,6 +21,11 @@ libnss3 (>= 2:3.35)
- wget
- libcurl3-gnutls | libcurl3-nss | libcurl4 | libcurl3
- 
-+# u2f udev rules have moved from being installed by default by systemd on Debian
-+# systems to a separate package called libu2f-udev. Pull it in manually so that
-+# u2f keys will work.
-+# libu2f-udev
-+
- # Try to use Vulkan when possible.
- libvulkan1
- 
++exec -a "$0" "$HERE/@@PROGNAME" $CHROME_USER_FLAGS "$@"
 diff --git a/chrome/installer/linux/debian/build.py b/chrome/installer/linux/debian/build.py
-index e9d12851e35b3..d1e21f312ff5f 100755
+index e9d12851e35b3..89ea6fc23c02e 100755
 --- a/chrome/installer/linux/debian/build.py
 +++ b/chrome/installer/linux/debian/build.py
-@@ -1,5 +1,5 @@
- #!/usr/bin/env python3
--# Copyright 2025 The Chromium Authors
-+# Copyright 2026 The Chromium Authors and Alex313031
- # Use of this source code is governed by a BSD-style license that can be
- # found in the LICENSE file.
- 
-@@ -11,36 +11,101 @@ import shutil
- import subprocess
- import sys
- 
--
- sys.path.append(os.path.join(os.path.dirname(__file__), "..", "common"))
- import installer
- 
- 
--def parse_args() -> argparse.Namespace:
--    parser = installer.parse_common_args()
--    parser.add_argument("-s", "--sysroot", required=True, help="sysroot")
-+def parse_args():
-+    parser = argparse.ArgumentParser()
-+    parser.add_argument(
-+        "-a", "--arch", required=True, help="deb package architecture"
-+    )
-+    parser.add_argument(
-+        "-b", "--build-time", required=True, help="build timestamp"
-+    )
-+    parser.add_argument(
-+        "-c", "--channel", required=True, help="package channel"
-+    )
-+    parser.add_argument("-d", "--branding", required=True, help="branding")
-+    parser.add_argument(
-+        "-f", "--official", action="store_true", help="official build"
-+    )
-+    parser.add_argument(
-+        "-n", "--name-suffix", default="", help="package filename suffix"
-+    )
-+    parser.add_argument(
-+        "--simd-variant", default="", help="SIMD variant shown by the browser"
-+    )
-+    parser.add_argument(
-+        "--clearkey-cdm-path", help="relative path to the stripped ClearKey CDM"
-+    )
-+    parser.add_argument(
-+        "-o", "--output-dir", required=True, help="output directory"
-+    )
-+    parser.add_argument("-t", "--target-os", required=True, help="target os")
-+    parser.add_argument(
-+        "--build-with-internal-optimization-guide",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the internal Optimization Guide library",
-+    )
-+    parser.add_argument(
-+        "--bundle-widevine-cdm",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package a bundled Widevine CDM",
-+    )
-+    parser.add_argument(
-+        "--enable-ml-internal",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the internal LiteRT accelerator",
-+    )
-+    parser.add_argument(
-+        "--enable-swiftshader",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package SwiftShader",
-+    )
-+    parser.add_argument(
-+        "--package-libcxx",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the shared libc++ runtime",
-+    )
-+    parser.add_argument(
-+        "--package-vulkan",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the Vulkan loader",
-+    )
-+    parser.add_argument(
-+        "--use-qt5",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the Qt 5 shim",
-+    )
-     parser.add_argument(
--        "-T",
--        "--xz-nthreads",
--        required=False,
--        help="Number of threads to run xz",
--        type=int,
--        default=0,
-+        "--use-qt6",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the Qt 6 shim",
-+    )
-+    parser.add_argument(
-+        "--use-static-angle",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether ANGLE is statically linked",
-     )
-     return parser.parse_args()
- 
- 
- def gen_control(
--    config: installer.InstallerConfig,
--    staging_dir: pathlib.Path,
--    deb_control: pathlib.Path,
--    deb_changelog: pathlib.Path,
--    deb_files: pathlib.Path,
--    pkg_name: str,
--) -> None:
-+    context, staging_dir, deb_control, deb_changelog, deb_files, pkg_name
-+):
-     cmd = [
-         "dpkg-gencontrol",
--        f"-v{config.versionfull}",
-+        f"-v{context['VERSIONFULL']}",
-         f"-c{deb_control}",
-         f"-l{deb_changelog}",
-         f"-f{deb_files}",
-@@ -59,10 +124,8 @@ def gen_control(
-     deb_control.unlink()
- 
- 
--def verify_package(
--    config: installer.InstallerConfig, deb_file: pathlib.Path
--) -> None:
--    depends = config.deb_depends
-+def verify_package(context, deb_file):
-+    depends = context["DEPENDS"]
-     expected_depends = [d.strip() for d in depends.split(", ") if d.strip()]
- 
-     output = subprocess.check_output(["dpkg", "-I", str(deb_file)], text=True)
-@@ -76,9 +139,10 @@ def verify_package(
-     installer.verify_package_deps(expected_depends, actual_depends)
- 
- 
--def main() -> None:
-+def main():
-     os.umask(0o022)
-     args = parse_args()
-+    is_official_build = args.official
- 
-     log_level = logging.INFO if os.environ.get("VERBOSE") else logging.ERROR
-     logging.basicConfig(level=log_level, format="%(message)s")
-@@ -86,162 +150,168 @@ def main() -> None:
-     script_dir = pathlib.Path(__file__).parent.absolute()
-     output_dir = pathlib.Path(args.output_dir)
- 
--    staging_dir = output_dir / f"deb-staging-{args.channel}"
--    tmp_file_dir = output_dir / f"deb-tmp-{args.channel}"
--
--    with installer.StagingContext(staging_dir, tmp_file_dir):
--        deb_changelog = tmp_file_dir / "changelog"
--        deb_files = tmp_file_dir / "files"
--        deb_control = tmp_file_dir / "control"
--
--        config = installer.InstallerConfig.from_args(
--            args, output_dir, package_format=installer.PackageFormat.DEB
--        )
--        config.script_dir = script_dir
--        config.staging_dir = staging_dir
--        config.tmp_file_dir = tmp_file_dir
--        config.shlib_perms = installer.StandardPermissions.REGULAR
--
--        # Calculate deps
--        deb_common_deps_file = output_dir / "deb_common.deps"
--        with deb_common_deps_file.open("r") as f:
--            common_deps = f.read().strip().replace("\n", ", ")
--        config.common_deps = common_deps
--        config.common_predeps = "dpkg (>= 1.14.0)"
--
--        inst = installer.Installer(config)
--
--        # Export variables for dpkg tools
--        os.environ["ARCHITECTURE"] = args.arch
--        os.environ["DEBEMAIL"] = config.info_vars["MAINTMAIL"]
--        os.environ["DEBFULLNAME"] = config.info_vars["MAINTNAME"]
--
--        # Prep staging debian
--        inst.prep_staging_common()
--        (staging_dir / "DEBIAN").mkdir(parents=True, exist_ok=True)
--        (staging_dir / "DEBIAN").chmod(installer.StandardPermissions.EXECUTABLE)
+@@ -120,10 +120,6 @@ def main() -> None:
+         inst.prep_staging_common()
+         (staging_dir / "DEBIAN").mkdir(parents=True, exist_ok=True)
+         (staging_dir / "DEBIAN").chmod(installer.StandardPermissions.EXECUTABLE)
 -        (staging_dir / "etc/cron.daily").mkdir(parents=True, exist_ok=True)
 -        (staging_dir / "etc/cron.daily").chmod(
 -            installer.StandardPermissions.EXECUTABLE
 -        )
--        (staging_dir / f"usr/share/doc/{config.usr_bin_symlink_name}").mkdir(
--            parents=True, exist_ok=True
--        )
--        (staging_dir / f"usr/share/doc/{config.usr_bin_symlink_name}").chmod(
--            installer.StandardPermissions.EXECUTABLE
--        )
--
--        inst.stage_install_common()
-+    staging_dir = output_dir / "deb-staging"
-+    tmp_file_dir = output_dir / "deb-tmp"
-+
-+    if staging_dir.exists():
-+        shutil.rmtree(staging_dir)
-+    if tmp_file_dir.exists():
-+        shutil.rmtree(tmp_file_dir)
-+
-+    staging_dir.mkdir(parents=True, exist_ok=True)
-+    tmp_file_dir.mkdir(parents=True, exist_ok=True)
-+
-+    deb_changelog = tmp_file_dir / "changelog"
-+    deb_files = tmp_file_dir / "files"
-+    deb_control = tmp_file_dir / "control"
-+
-+    inst = installer.Installer(
-+        output_dir,
-+        staging_dir,
-+        args.channel,
-+        args.branding,
-+        args.arch,
-+        args.target_os,
-+        is_official_build,
-+        args.clearkey_cdm_path,
-+        build_with_internal_optimization_guide=(
-+            args.build_with_internal_optimization_guide == "true"
-+        ),
-+        bundle_widevine_cdm=args.bundle_widevine_cdm == "true",
-+        enable_ml_internal=args.enable_ml_internal == "true",
-+        enable_swiftshader=args.enable_swiftshader == "true",
-+        package_libcxx=args.package_libcxx == "true",
-+        package_vulkan=args.package_vulkan == "true",
-+        use_qt5=args.use_qt5 == "true",
-+        use_qt6=args.use_qt6 == "true",
-+        use_static_angle=args.use_static_angle == "true",
-+    )
+         (staging_dir / f"usr/share/doc/{config.usr_bin_symlink_name}").mkdir(
+             parents=True, exist_ok=True
+         )
+@@ -134,32 +130,37 @@ def main() -> None:
+         inst.stage_install_common()
  
--        logging.info(f"Staging Debian install files in '{staging_dir}'...")
+         logging.info(f"Staging Debian install files in '{staging_dir}'...")
 -        install_dir = staging_dir / config.info_vars["INSTALLDIR"].lstrip("/")
 -        cron_dir = install_dir / "cron"
 -        cron_dir.mkdir(parents=True, exist_ok=True)
 -        cron_dir.chmod(installer.StandardPermissions.EXECUTABLE)
-+    inst.set_context(
-+        {
-+            "ARCHITECTURE": args.arch,
-+            "BRANDING": args.branding,
-+            "BUILD_TIMESTAMP": args.build_time,
-+            "IS_OFFICIAL_BUILD": "1" if is_official_build else "0",
-+            "SIMD_VARIANT": args.simd_variant,
-+            "OUTPUTDIR": output_dir,
-+            "SCRIPTDIR": script_dir,
-+            "STAGEDIR": staging_dir,
-+            "TMPFILEDIR": tmp_file_dir,
-+        }
-+    )
++        if not config.is_thorium:
++            (staging_dir / "etc/cron.daily").mkdir(parents=True, exist_ok=True)
++            (staging_dir / "etc/cron.daily").chmod(
++                installer.StandardPermissions.EXECUTABLE
++            )
++            install_dir = staging_dir / config.info_vars["INSTALLDIR"].lstrip("/")
++            cron_dir = install_dir / "cron"
++            cron_dir.mkdir(parents=True, exist_ok=True)
++            cron_dir.chmod(installer.StandardPermissions.EXECUTABLE)
  
 -        cron_file = cron_dir / config.info_vars["PACKAGE"]
-+    inst.initialize()
-+    # Export variables for dpkg tools
-+    os.environ["ARCHITECTURE"] = args.arch
-+    os.environ["DEBEMAIL"] = inst.context["MAINTMAIL"]
-+    os.environ["DEBFULLNAME"] = inst.context["MAINTNAME"]
-+
-+    # Calculate deps
-+    deb_common_deps_file = output_dir / "deb_common.deps"
-+    with deb_common_deps_file.open("r") as f:
-+        common_deps = f.read().strip().replace("\n", ", ")
-+    inst.context["COMMON_DEPS"] = common_deps
-+    inst.context["COMMON_PREDEPS"] = "dpkg (>= 1.14.0)"
-+
-+    inst.context["SHLIB_PERMS"] = 0o644
-+
-+    # Prep staging debian
-+    inst.prep_staging_common()
-+    (staging_dir / "DEBIAN").mkdir(parents=True, exist_ok=True)
-+    (staging_dir / "DEBIAN").chmod(0o755)
-+    (
-+        staging_dir / f"usr/share/doc/{inst.context['USR_BIN_SYMLINK_NAME']}"
-+    ).mkdir(parents=True, exist_ok=True)
-+    (
-+        staging_dir / f"usr/share/doc/{inst.context['USR_BIN_SYMLINK_NAME']}"
-+    ).chmod(0o755)
-+
-+    inst.stage_install_common()
-+
-+    logging.info(f"Staging Debian install files in '{staging_dir}'...")
-+    for script in ["postinst", "prerm", "postrm"]:
-+        dest = staging_dir / "DEBIAN" / script
-         installer.process_template(
+-        installer.process_template(
 -            output_dir / "installer/common/repo.cron",
 -            cron_file,
 -            config.get_template_context(),
-+            output_dir / f"installer/debian/{script}", dest, inst.context
-         )
+-        )
 -        cron_file.chmod(installer.StandardPermissions.EXECUTABLE)
-+        dest.chmod(0o755)
++            cron_file = cron_dir / config.info_vars["PACKAGE"]
++            installer.process_template(
++                output_dir / "installer/common/repo.cron",
++                cron_file,
++                config.get_template_context(),
++            )
++            cron_file.chmod(installer.StandardPermissions.EXECUTABLE)
  
 -        cron_daily_link = (
 -            staging_dir / "etc/cron.daily" / config.info_vars["PACKAGE"]
@@ -3536,202 +1287,102 @@ index e9d12851e35b3..d1e21f312ff5f 100755
 -            ),
 -            cron_daily_link,
 -        )
-+    # Restore PACKAGE for control template
-+    inst.context["PACKAGE"] = inst.context["PACKAGE_ORIG"]
++            cron_daily_link = (
++                staging_dir / "etc/cron.daily" / config.info_vars["PACKAGE"]
++            )
++            if cron_daily_link.is_symlink() or cron_daily_link.exists():
++                cron_daily_link.unlink()
++            os.symlink(
++                os.path.join(
++                    config.info_vars["INSTALLDIR"],
++                    "cron",
++                    config.info_vars["PACKAGE"],
++                ),
++                cron_daily_link,
++            )
  
--        for script in ["postinst", "prerm", "postrm"]:
--            dest = staging_dir / "DEBIAN" / script
--            installer.process_template(
--                output_dir / f"installer/debian/{script}",
--                dest,
--                config.get_template_context(),
--            )
--            dest.chmod(installer.StandardPermissions.EXECUTABLE)
-+    logging.info(f"Packaging {args.arch}...")
-+    inst.context["PREDEPENDS"] = inst.context["COMMON_PREDEPS"]
-+    inst.context["DEPENDS"] = inst.context["COMMON_DEPS"]
-+    inst.context["PROVIDES"] = "www-browser"
- 
--        # Restore PACKAGE for control template
--        config.info_vars["PACKAGE"] = config.package_orig
-+    installer.gen_changelog(inst.context, staging_dir, deb_changelog)
-+    installer.process_template(
-+        script_dir / "control.template", deb_control, inst.context
-+    )
- 
--        logging.info(f"Packaging {args.arch}...")
--        config.deb_pre_depends = config.common_predeps
--        config.deb_depends = config.common_deps
--        config.deb_provides = "www-browser"
-+    os.environ["DEB_HOST_ARCH"] = args.arch
-+    pkg_name = inst.context["PACKAGE_ORIG"]
- 
--        installer.gen_changelog(config, deb_changelog)
--        installer.process_template(
--            script_dir / "control.template",
-+    if deb_control.exists():
-+        gen_control(
-+            inst.context,
-+            staging_dir,
-             deb_control,
--            config.get_template_context(),
-+            deb_changelog,
-+            deb_files,
-+            pkg_name,
+         for script in ["postinst", "prerm", "postrm"]:
+             dest = staging_dir / "DEBIAN" / script
+@@ -186,7 +187,7 @@ def main() -> None:
          )
  
--        os.environ["DEB_HOST_ARCH"] = args.arch
+         os.environ["DEB_HOST_ARCH"] = args.arch
 -        pkg_name = f"{config.package_orig}-{config.channel}"
--
--        if deb_control.exists():
--            gen_control(
--                config,
--                staging_dir,
--                deb_control,
--                deb_changelog,
--                deb_files,
--                pkg_name,
--            )
--
--        os.environ["SOURCE_DATE_EPOCH"] = args.build_time
--        staging_dir.chmod(0o750)
-+    os.environ["SOURCE_DATE_EPOCH"] = args.build_time
-+    staging_dir.chmod(0o750)
-+    installer.run_command(
-+        [
-+            "fakeroot",
-+            "dpkg-deb",
-+            "-Znone",
-+            "-b",
-+            str(staging_dir),
-+            str(tmp_file_dir),
-+        ]
-+    )
-+
-+    package_file = f"{pkg_name}_{inst.context['VERSIONFULL']}_{args.arch}.deb"
-+    package_path = tmp_file_dir / package_file
-+
-+    if is_official_build:
-+        pkg_basename = package_path.name
-+        installer.run_command(["ar", "-x", pkg_basename], cwd=tmp_file_dir)
-         installer.run_command(
-             [
--                "fakeroot",
--                "dpkg-deb",
--                "-Znone",
--                "-b",
--                str(staging_dir),
--                str(tmp_file_dir),
-+                "xz",
-+                "-z6",
-+                "-e",
-+                "-T0",
-+                str(tmp_file_dir / "data.tar"),
-             ]
-         )
-+        installer.run_command(["xz", "-z0", str(tmp_file_dir / "control.tar")])
-+        installer.run_command(
-+            ["ar", "-d", pkg_basename, "control.tar", "data.tar"],
-+            cwd=tmp_file_dir,
-+        )
-+        installer.run_command(
-+            ["ar", "-r", pkg_basename, "control.tar.xz", "data.tar.xz"],
-+            cwd=tmp_file_dir,
-+        )
-+
-+    final_package_path = output_dir / (
-+        f"{inst.context['PACKAGE_ORIG']}_{inst.context['VERSION']}"
-+        f"{args.name_suffix}.deb"
-+    )
-+    shutil.move(package_path, final_package_path)
-+
-+    verify_package(inst.context, final_package_path)
++        pkg_name = config.usr_bin_symlink_name
  
--        package_file = f"{pkg_name}_{config.versionfull}_{args.arch}.deb"
--        package_path = tmp_file_dir / package_file
--
--        if args.official:
--            pkg_basename = package_path.name
--            installer.run_command(["ar", "-x", pkg_basename], cwd=tmp_file_dir)
--            installer.run_command(
--                [
--                    "xz",
+         if deb_control.exists():
+             gen_control(
+@@ -217,12 +218,16 @@ def main() -> None:
+         if args.official:
+             pkg_basename = package_path.name
+             installer.run_command(["ar", "-x", pkg_basename], cwd=tmp_file_dir)
++            compression_options = (
++                ["-z6", "-e"]
++                if config.is_thorium
++                else ["-z9", "--lzma2=dict=256MiB"]
++            )
+             installer.run_command(
+                 [
+                     "xz",
 -                    "-z9",
--                    f"-T{args.xz_nthreads}",
++                    *compression_options,
+                     f"-T{args.xz_nthreads}",
 -                    "--lzma2=dict=256MiB",
--                    str(tmp_file_dir / "data.tar"),
--                ]
--            )
--            installer.run_command(
--                ["xz", "-z0", str(tmp_file_dir / "control.tar")]
--            )
--            installer.run_command(
--                ["ar", "-d", pkg_basename, "control.tar", "data.tar"],
--                cwd=tmp_file_dir,
--            )
--            installer.run_command(
--                ["ar", "-r", pkg_basename, "control.tar.xz", "data.tar.xz"],
--                cwd=tmp_file_dir,
--            )
--
+                     str(tmp_file_dir / "data.tar"),
+                 ]
+             )
+@@ -238,7 +243,12 @@ def main() -> None:
+                 cwd=tmp_file_dir,
+             )
+ 
 -        final_package_path = output_dir / package_file
--        shutil.move(package_path, final_package_path)
--
--        verify_package(config, final_package_path)
-+    # cleanup
-+    shutil.rmtree(staging_dir)
-+    shutil.rmtree(tmp_file_dir)
++        if config.is_thorium:
++            final_package_path = output_dir / (
++                f"{config.package_orig}_{config.version}{args.name_suffix}.deb"
++            )
++        else:
++            final_package_path = output_dir / package_file
+         shutil.move(package_path, final_package_path)
  
- 
- if __name__ == "__main__":
+         verify_package(config, final_package_path)
 diff --git a/chrome/installer/linux/debian/changelog.template b/chrome/installer/linux/debian/changelog.template
-index 6fbb229542894..7327a756b7ce7 100644
+index 6fbb229542894..2441aceecf0c6 100644
 --- a/chrome/installer/linux/debian/changelog.template
 +++ b/chrome/installer/linux/debian/changelog.template
-@@ -1,5 +1,5 @@
+@@ -1,4 +1,4 @@
 -@@PACKAGE-@@channel (@@versionfull) @@channel; urgency=low
-+@@PACKAGE@@ (@@VERSIONFULL@@) @@CHANNEL@@; urgency=low
++@@usr_bin_symlink_name (@@versionfull) @@channel; urgency=low
  
--  * Build spec: https://chromium.googlesource.com/chromium/src.git/+/@@version/
-+  * Build spec: https://chromium.googlesource.com/chromium/src.git/+/@@VERSION@@/
+   * Build spec: https://chromium.googlesource.com/chromium/src.git/+/@@version/
  
-- -- @@MAINTNAME <@@MAINTMAIL>  @@deb_date_rfc5322
-+ -- @@MAINTNAME@@ <@@MAINTMAIL@@>  @@DATE_RFC5322@@
 diff --git a/chrome/installer/linux/debian/control.template b/chrome/installer/linux/debian/control.template
-index 1d7dff3e689ed..78e723e7fac87 100644
+index 1d7dff3e689ed..517e3d75acce4 100644
 --- a/chrome/installer/linux/debian/control.template
 +++ b/chrome/installer/linux/debian/control.template
 @@ -1,14 +1,17 @@
 -Source: @@PACKAGE-@@channel
-+Source: @@PACKAGE@@
++Source: @@usr_bin_symlink_name
  Section: web
  Priority: optional
--Maintainer: @@MAINTNAME <@@MAINTMAIL>
+ Maintainer: @@MAINTNAME <@@MAINTMAIL>
 -Build-Depends: dpkg-dev, devscripts, fakeroot, xz-utils
 -Standards-Version: 3.8.0
-+Maintainer: @@MAINTNAME@@ <@@MAINTMAIL@@>
 +Build-Depends: dpkg-dev, devscripts, fakeroot, xz-utils, zip
 +Standards-Version: 3.9.8
  
 -Package: @@PACKAGE-@@channel
--Provides: @@deb_provides
--Pre-Depends: @@deb_pre_depends
--Depends: @@deb_depends
--Architecture: @@architecture
--Description: @@SHORTDESC
-- @@FULLDESC
-+Package: @@PACKAGE@@
-+Provides: @@PROVIDES@@
-+Pre-Depends: @@PREDEPENDS@@
-+Depends: @@DEPENDS@@
++Package: @@usr_bin_symlink_name
+ Provides: @@deb_provides
+ Pre-Depends: @@deb_pre_depends
+ Depends: @@deb_depends
 +Recommends: vdpau-driver-all
 +Conflicts: thorium-browser-unstable
 +Replaces: thorium-browser-unstable
-+Architecture: @@ARCHITECTURE@@
-+Description: @@SHORTDESC@@
-+ @@FULLDESC@@
+ Architecture: @@architecture
+ Description: @@SHORTDESC
+  @@FULLDESC
 diff --git a/chrome/installer/linux/debian/postinst b/chrome/installer/linux/debian/postinst
-index 43f2b1138d3fa..7cbd189b1584d 100755
+index 43f2b1138d3fa..14d84189b3f90 100755
 --- a/chrome/installer/linux/debian/postinst
 +++ b/chrome/installer/linux/debian/postinst
 @@ -1,6 +1,6 @@
@@ -3742,16 +1393,7 @@ index 43f2b1138d3fa..7cbd189b1584d 100755
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -24,7 +24,7 @@ set -e
- # browser (Firefox), in practice, we treat Epiphany as the lower bound,
- # resulting in the following scheme:
- 
--CHANNEL=@@channel
-+CHANNEL=@@CHANNEL@@
- case $CHANNEL in
-   stable )
-     # Good enough to be the default.
-@@ -39,29 +39,18 @@ case $CHANNEL in
+@@ -39,10 +39,10 @@ case $CHANNEL in
      ;;
    unstable )
      # Unstable, give it the "lowest" priority.
@@ -3764,18 +1406,15 @@ index 43f2b1138d3fa..7cbd189b1584d 100755
      ;;
  esac
  
- update-alternatives --install /usr/bin/x-www-browser x-www-browser \
--  /usr/bin/@@usr_bin_symlink_name $PRIORITY
-+  /usr/bin/@@USR_BIN_SYMLINK_NAME@@ $PRIORITY
+@@ -51,17 +51,6 @@ update-alternatives --install /usr/bin/x-www-browser x-www-browser \
  update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser \
--  /usr/bin/@@usr_bin_symlink_name $PRIORITY
--
+   /usr/bin/@@usr_bin_symlink_name $PRIORITY
+ 
 -update-alternatives --install /usr/bin/@@package_orig @@package_orig \
 -  /usr/bin/@@usr_bin_symlink_name $PRIORITY
 -
 -@@include@@../common/apt.include
-+  /usr/bin/@@USR_BIN_SYMLINK_NAME@@ $PRIORITY
- 
+-
  @@include@@../common/symlinks.include
  
  remove_udev_symlinks
@@ -3821,7 +1460,7 @@ index 3e1cadc8296ca..4399c73412ab0 100755
 -clean_sources_lists
 -uninstall_key
 diff --git a/chrome/installer/linux/debian/prerm b/chrome/installer/linux/debian/prerm
-index 5a0ccc54a2db1..6aa8f4dbb9c1b 100755
+index 5a0ccc54a2db1..2bdc5e3dafff4 100755
 --- a/chrome/installer/linux/debian/prerm
 +++ b/chrome/installer/linux/debian/prerm
 @@ -1,6 +1,6 @@
@@ -3832,281 +1471,58 @@ index 5a0ccc54a2db1..6aa8f4dbb9c1b 100755
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -19,7 +19,7 @@ fi
- @@include@@../common/prerm.include
- 
- # Remove from the alternatives system
--update-alternatives --remove x-www-browser /usr/bin/@@usr_bin_symlink_name
--update-alternatives --remove gnome-www-browser /usr/bin/@@usr_bin_symlink_name
-+update-alternatives --remove x-www-browser /usr/bin/@@USR_BIN_SYMLINK_NAME@@
-+update-alternatives --remove gnome-www-browser /usr/bin/@@USR_BIN_SYMLINK_NAME@@
+@@ -22,4 +22,4 @@ fi
+ update-alternatives --remove x-www-browser /usr/bin/@@usr_bin_symlink_name
+ update-alternatives --remove gnome-www-browser /usr/bin/@@usr_bin_symlink_name
  
 -update-alternatives --remove @@package_orig /usr/bin/@@usr_bin_symlink_name
 +# End
 diff --git a/chrome/installer/linux/rpm/build.py b/chrome/installer/linux/rpm/build.py
-index 43237aaad4772..53f0459d9e510 100755
+index 874f0cccc5d33..0109c4d36f7c0 100755
 --- a/chrome/installer/linux/rpm/build.py
 +++ b/chrome/installer/linux/rpm/build.py
-@@ -1,5 +1,5 @@
- #!/usr/bin/env python3
--# Copyright 2025 The Chromium Authors
-+# Copyright 2026 The Chromium Authors and Alex313031
- # Use of this source code is governed by a BSD-style license that can be
- # found in the LICENSE file.
- 
-@@ -12,51 +12,125 @@ import shutil
- import subprocess
- import sys
- 
--
- sys.path.append(os.path.join(os.path.dirname(__file__), "../common"))
- import installer
- 
- 
--def parse_args() -> argparse.Namespace:
--    parser = installer.parse_common_args()
-+def parse_args():
-+    parser = argparse.ArgumentParser()
-+    parser.add_argument(
-+        "-a", "--arch", required=True, help="rpm package architecture"
-+    )
-+    parser.add_argument(
-+        "-b", "--build-time", required=True, help="build timestamp"
-+    )
-+    parser.add_argument(
-+        "-c", "--channel", required=True, help="package channel"
-+    )
-+    parser.add_argument("-d", "--branding", required=True, help="branding")
-+    parser.add_argument(
-+        "-f", "--official", action="store_true", help="official build"
-+    )
-+    parser.add_argument(
-+        "-n", "--name-suffix", default="", help="package filename suffix"
-+    )
-+    parser.add_argument(
-+        "--simd-variant", default="", help="SIMD variant shown by the browser"
-+    )
-+    parser.add_argument(
-+        "--clearkey-cdm-path", help="relative path to the stripped ClearKey CDM"
-+    )
-+    parser.add_argument(
-+        "-o", "--output-dir", required=True, help="output directory"
-+    )
-+    parser.add_argument("-t", "--target-os", required=True, help="target os")
-+    parser.add_argument(
-+        "--build-with-internal-optimization-guide",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the internal Optimization Guide library",
-+    )
-+    parser.add_argument(
-+        "--bundle-widevine-cdm",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package a bundled Widevine CDM",
-+    )
-+    parser.add_argument(
-+        "--enable-ml-internal",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the internal LiteRT accelerator",
-+    )
-+    parser.add_argument(
-+        "--enable-swiftshader",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package SwiftShader",
-+    )
-+    parser.add_argument(
-+        "--package-libcxx",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the shared libc++ runtime",
-+    )
-+    parser.add_argument(
-+        "--package-vulkan",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the Vulkan loader",
-+    )
-+    parser.add_argument(
-+        "--use-qt5",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the Qt 5 shim",
-+    )
-+    parser.add_argument(
-+        "--use-qt6",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether to package the Qt 6 shim",
-+    )
-+    parser.add_argument(
-+        "--use-static-angle",
-+        choices=["true", "false"],
-+        default="false",
-+        help="whether ANGLE is statically linked",
-+    )
-     return parser.parse_args()
- 
- 
--def gen_spec(
--    config: installer.InstallerConfig, spec_file: pathlib.Path
--) -> None:
-+def gen_spec(context, spec_file):
+@@ -30,11 +30,16 @@ def gen_spec(
      if spec_file.exists():
          spec_file.unlink()
  
 -    config.rpm_package_filename = f"{config.package_orig}-{config.channel}"
-+    context["PACKAGE_FILENAME"] = context["PACKAGE_ORIG"]
++    if config.is_thorium:
++        config.rpm_package_filename = config.package_orig
++        template = "thorium.spec.template"
++    else:
++        config.rpm_package_filename = f"{config.package_orig}-{config.channel}"
++        template = "chrome.spec.template"
  
      script_dir = pathlib.Path(__file__).parent.absolute()
      installer.process_template(
 -        script_dir / "chrome.spec.template",
--        spec_file,
--        config.get_template_context(),
-+        script_dir / "thorium.spec.template", spec_file, context
++        script_dir / template,
+         spec_file,
+         config.get_template_context(),
      )
- 
- 
--def verify_package(
--    config: installer.InstallerConfig, rpm_file: pathlib.Path
--) -> None:
--    depends = config.rpm_depends
--    version_output = subprocess.check_output(["rpm", "--version"])
--    version_match = re.match(r'.*version ([.\d]*)', str(version_output))
-+def verify_package(context, rpm_file):
-+    depends = context["DEPENDS"]
-+    version_output = subprocess.check_output(["rpm", "--version"], text=True)
-+    version_match = re.search(r"(?<!\d)(\d+)(?:\.\d+)+", version_output)
-     additional_deps = [
-         "/bin/sh",
+@@ -64,8 +69,9 @@ def verify_package(
+         "rpmlib(CompressedFileNames) <= 3.0.4-1",
+         "rpmlib(FileDigests) <= 4.6.0-1",
+         "rpmlib(PayloadFilesHavePrefix) <= 4.0-1",
 -        "/usr/sbin/update-alternatives",
      ]
--    if version_match and version_match[1] >= '6.0':
--        additional_deps += ['rpmlib(LargeFiles) <= 4.12.0-1']
-+    if version_match and int(version_match.group(1)) >= 6:
-+        additional_deps.append("rpmlib(LargeFiles) <= 4.12.0-1")
-     else:
--        additional_deps += [
--            "rpmlib(CompressedFileNames) <= 3.0.4-1",
--            "rpmlib(FileDigests) <= 4.6.0-1",
--            "rpmlib(PayloadFilesHavePrefix) <= 4.0-1",
--        ]
--    if config.is_official_build:
-+        additional_deps.extend(
-+            [
-+                "rpmlib(CompressedFileNames) <= 3.0.4-1",
-+                "rpmlib(FileDigests) <= 4.6.0-1",
-+                "rpmlib(PayloadFilesHavePrefix) <= 4.0-1",
-+            ]
-+        )
-+    if context["IS_OFFICIAL_BUILD"] == "1":
++    if not config.is_thorium:
++        additional_deps.append("/usr/sbin/update-alternatives")
+     if config.is_official_build:
          additional_deps.append("rpmlib(PayloadIsXz) <= 5.2-1")
  
-     all_deps = depends.split(",") + additional_deps
-@@ -68,9 +142,10 @@ def verify_package(
-     installer.verify_package_deps(expected_depends, actual_depends)
+@@ -108,21 +114,21 @@ def main() -> None:
+         inst = installer.Installer(config)
  
- 
--def main() -> None:
-+def main():
-     os.umask(0o022)
-     args = parse_args()
-+    is_official_build = args.official
- 
-     log_level = logging.INFO if os.environ.get("VERBOSE") else logging.ERROR
-     logging.basicConfig(level=log_level, format="%(message)s")
-@@ -79,98 +154,139 @@ def main() -> None:
-     output_dir = pathlib.Path(args.output_dir).absolute()
-     channel = args.channel
- 
--    staging_dir = output_dir / f"rpm-staging-{channel}"
--    tmp_file_dir = output_dir / f"rpm-tmp-{channel}"
--    rpm_build_dir = output_dir / f"rpm-build-{channel}"
-+    staging_dir = output_dir / "rpm-staging"
-+    tmp_file_dir = output_dir / "rpm-tmp"
-+    rpmbuild_dir = output_dir / "rpm-build"
-+
-+    if staging_dir.exists():
-+        shutil.rmtree(staging_dir)
-+    if tmp_file_dir.exists():
-+        shutil.rmtree(tmp_file_dir)
-+    if rpmbuild_dir.exists():
-+        shutil.rmtree(rpmbuild_dir)
-+
-+    staging_dir.mkdir(parents=True, exist_ok=True)
-+    tmp_file_dir.mkdir(parents=True, exist_ok=True)
-+    rpmbuild_dir.mkdir(parents=True, exist_ok=True)
-+
-+    spec_file = tmp_file_dir / "chrome.spec"
-+
-+    inst = installer.Installer(
-+        output_dir,
-+        staging_dir,
-+        channel,
-+        args.branding,
-+        args.arch,
-+        args.target_os,
-+        is_official_build,
-+        args.clearkey_cdm_path,
-+        build_with_internal_optimization_guide=(
-+            args.build_with_internal_optimization_guide == "true"
-+        ),
-+        bundle_widevine_cdm=args.bundle_widevine_cdm == "true",
-+        enable_ml_internal=args.enable_ml_internal == "true",
-+        enable_swiftshader=args.enable_swiftshader == "true",
-+        package_libcxx=args.package_libcxx == "true",
-+        package_vulkan=args.package_vulkan == "true",
-+        use_qt5=args.use_qt5 == "true",
-+        use_qt6=args.use_qt6 == "true",
-+        use_static_angle=args.use_static_angle == "true",
-+    )
-+
-+    inst.set_context(
-+        {
-+            "OUTPUTDIR": output_dir,
-+            "STAGEDIR": staging_dir,
-+            "TMPFILEDIR": tmp_file_dir,
-+            "RPMBUILD_DIR": rpmbuild_dir,
-+            "BRANDING": args.branding,
-+            "ARCHITECTURE": args.arch,
-+            "BUILD_TIMESTAMP": args.build_time,
-+            "IS_OFFICIAL_BUILD": "1" if is_official_build else "0",
-+            "SIMD_VARIANT": args.simd_variant,
-+            "SCRIPTDIR": script_dir,
-+            "SPEC": spec_file,
-+        }
-+    )
- 
--    with installer.StagingContext(staging_dir, tmp_file_dir, rpm_build_dir):
--        spec_file = tmp_file_dir / "chrome.spec"
-+    inst.initialize()
-+    os.environ["ARCHITECTURE"] = args.arch
- 
--        config = installer.InstallerConfig.from_args(
--            args, output_dir, package_format=installer.PackageFormat.RPM
--        )
--        config.script_dir = script_dir
--        config.staging_dir = staging_dir
--        config.tmp_file_dir = tmp_file_dir
--        config.rpm_build_dir = rpm_build_dir
--        config.rpm_spec_file = spec_file
--
--        inst = installer.Installer(config)
--
--        inst.prep_staging_common()
+         inst.prep_staging_common()
 -        (staging_dir / "etc/cron.daily").mkdir(parents=True, exist_ok=True)
 -        (staging_dir / "etc/cron.daily").chmod(
 -            installer.StandardPermissions.EXECUTABLE
 -        )
-+    inst.context["SHLIB_PERMS"] = 0o755
+-
+         inst.stage_install_common()
  
--        inst.stage_install_common()
-+    inst.prep_staging_common()
-+    inst.stage_install_common()
- 
--        logging.info(f"Staging RPM install files in '{staging_dir}'...")
+         logging.info(f"Staging RPM install files in '{staging_dir}'...")
 -        cron_file = staging_dir / "etc/cron.daily" / config.info_vars["PACKAGE"]
 -        installer.process_template(
 -            output_dir / "installer/common/rpmrepo.cron",
@@ -4114,140 +1530,54 @@ index 43237aaad4772..53f0459d9e510 100755
 -            config.get_template_context(),
 -        )
 -        cron_file.chmod(installer.StandardPermissions.EXECUTABLE)
--
--        # do_package logic
--        logging.info(f"Packaging {args.arch}...")
--
--        config.rpm_provides = config.package_orig
--
--        rpm_common_deps_file = output_dir / "rpm_common.deps"
--        with rpm_common_deps_file.open("r") as f:
--            depends = f.read().replace("\n", ",")
--        config.rpm_depends = depends
--
--        if config.info_vars["PACKAGE"] != config.usr_bin_symlink_name:
--            symlink = config.usr_bin_symlink_name
--            config.rpm_optional_man_page = f"/usr/share/man/man1/{symlink}.1.gz"
--
--        gen_spec(config, spec_file)
--
--        os.environ["SOURCE_DATE_EPOCH"] = args.build_time
--
--        (rpm_build_dir / "BUILD").mkdir(parents=True, exist_ok=True)
--        (rpm_build_dir / "RPMS").mkdir(parents=True, exist_ok=True)
--
--        if args.official:
++        if not config.is_thorium:
++            (staging_dir / "etc/cron.daily").mkdir(parents=True, exist_ok=True)
++            (staging_dir / "etc/cron.daily").chmod(
++                installer.StandardPermissions.EXECUTABLE
++            )
++            cron_file = staging_dir / "etc/cron.daily" / config.info_vars["PACKAGE"]
++            installer.process_template(
++                output_dir / "installer/common/rpmrepo.cron",
++                cron_file,
++                config.get_template_context(),
++            )
++            cron_file.chmod(installer.StandardPermissions.EXECUTABLE)
+ 
+         # do_package logic
+         logging.info(f"Packaging {args.arch}...")
+@@ -146,7 +152,11 @@ def main() -> None:
+         (rpm_build_dir / "RPMS").mkdir(parents=True, exist_ok=True)
+ 
+         if args.official:
 -            compression_opt = "_binary_payload w9.xzdio"
--        else:
--            compression_opt = "_binary_payload w0.gzdio"
--
--        cmd = [
--            "fakeroot",
--            "rpmbuild",
--            "-bb",
--            f"--target={args.arch}",
--            "--rmspec",
--            f"--define=_topdir {rpm_build_dir}",
--            f"--define={compression_opt}",
--            "--define=__os_install_post %{nil}",
--            "--define=_build_id_links none",
--            "--define=build_mtime_policy clamp_to_source_date_epoch",
--            "--define=clamp_mtime_to_source_date_epoch 1",
--            "--define=use_source_date_epoch_as_buildtime 1",
--            "--define=_buildhost reproducible",
--            str(spec_file),
--        ]
--
--        installer.run_command(cmd)
--
--        pkg_name = (
--            f"{config.rpm_package_filename}-{config.version}-"
--            f"{config.package_release}"
-+    logging.info(f"Staging RPM install files in '{staging_dir}'...")
-+    # do_package logic
-+    logging.info(f"Packaging {args.arch}...")
-+
-+    inst.context["PROVIDES"] = inst.context["PACKAGE_ORIG"]
-+
-+    rpm_common_deps_file = output_dir / "rpm_common.deps"
-+    with rpm_common_deps_file.open("r") as f:
-+        depends = f.read().replace("\n", ",")
-+    inst.context["DEPENDS"] = depends
-+
-+    if inst.context["PACKAGE"] != inst.context["USR_BIN_SYMLINK_NAME"]:
-+        symlink = inst.context['USR_BIN_SYMLINK_NAME']
-+        inst.context["OPTIONAL_MAN_PAGE"] = (
-+            f"/usr/share/man/man1/{symlink}.1.gz"
++            compression_opt = (
++                "_binary_payload w6T0.xzdio"
++                if config.is_thorium
++                else "_binary_payload w9.xzdio"
++            )
+         else:
+             compression_opt = "_binary_payload w0.gzdio"
+ 
+@@ -178,7 +188,12 @@ def main() -> None:
          )
--        rpm_file = f"{pkg_name}.{args.arch}.rpm"
--        src_rpm = rpm_build_dir / f"RPMS/{args.arch}/{rpm_file}"
+         rpm_file = f"{pkg_name}.{args.arch}.rpm"
+         src_rpm = rpm_build_dir / f"RPMS/{args.arch}/{rpm_file}"
 -        dst_rpm = output_dir / rpm_file
-+    else:
-+        inst.context["OPTIONAL_MAN_PAGE"] = ""
-+
-+    gen_spec(inst.context, spec_file)
-+
-+    os.environ["SOURCE_DATE_EPOCH"] = args.build_time
-+
-+    (rpmbuild_dir / "BUILD").mkdir(parents=True, exist_ok=True)
-+    (rpmbuild_dir / "RPMS").mkdir(parents=True, exist_ok=True)
-+
-+    if is_official_build:
-+        compression_opt = "_binary_payload w6T0.xzdio"
-+    else:
-+        compression_opt = "_binary_payload w0.gzdio"
-+
-+    cmd = [
-+        "fakeroot",
-+        "rpmbuild",
-+        "-bb",
-+        f"--target={args.arch}",
-+        "--rmspec",
-+        f"--define=_topdir {rpmbuild_dir}",
-+        f"--define={compression_opt}",
-+        "--define=__os_install_post %{nil}",
-+        "--define=_build_id_links none",
-+        "--define=build_mtime_policy clamp_to_source_date_epoch",
-+        "--define=clamp_mtime_to_source_date_epoch 1",
-+        "--define=use_source_date_epoch_as_buildtime 1",
-+        "--define=_buildhost reproducible",
-+        str(spec_file),
-+    ]
-+
-+    installer.run_command(cmd)
-+
-+    pkg_name = (
-+        f"{inst.context['PACKAGE_FILENAME']}-{inst.context['VERSION']}-"
-+        f"{inst.context['PACKAGE_RELEASE']}"
-+    )
-+    rpm_file = f"{pkg_name}.{args.arch}.rpm"
-+    src_rpm = rpmbuild_dir / f"RPMS/{args.arch}/{rpm_file}"
-+    dst_rpm = output_dir / (
-+        f"{inst.context['PACKAGE_ORIG']}_{inst.context['VERSION']}"
-+        f"{args.name_suffix}.rpm"
-+    )
-+
-+    shutil.move(src_rpm, dst_rpm)
-+    dst_rpm.chmod(0o644)
++        if config.is_thorium:
++            dst_rpm = output_dir / (
++                f"{config.package_orig}_{config.version}{args.name_suffix}.rpm"
++            )
++        else:
++            dst_rpm = output_dir / rpm_file
  
--        shutil.move(src_rpm, dst_rpm)
--        dst_rpm.chmod(installer.StandardPermissions.REGULAR)
-+    verify_package(inst.context, dst_rpm)
- 
--        verify_package(config, dst_rpm)
-+    # cleanup
-+    shutil.rmtree(staging_dir)
-+    shutil.rmtree(tmp_file_dir)
-+    shutil.rmtree(rpmbuild_dir)
- 
- 
- if __name__ == "__main__":
+         shutil.move(src_rpm, dst_rpm)
+         dst_rpm.chmod(installer.StandardPermissions.REGULAR)
 diff --git a/chrome/installer/linux/rpm/thorium.spec.template b/chrome/installer/linux/rpm/thorium.spec.template
 new file mode 100644
-index 0000000000000..46e8d213e86de
+index 0000000000000..eaf5414656a5d
 --- /dev/null
 +++ b/chrome/installer/linux/rpm/thorium.spec.template
-@@ -0,0 +1,162 @@
+@@ -0,0 +1,164 @@
 +#------------------------------------------------------------------------------
 +#   Thorium RPM spec
 +#   chrome.spec
@@ -4256,18 +1586,18 @@ index 0000000000000..46e8d213e86de
 +#------------------------------------------------------------------------------
 +#   Prologue information
 +#------------------------------------------------------------------------------
-+Summary         : @@MENUNAME@@
-+License         : Multiple, see @@PRODUCTURL@@
-+Name            : @@PACKAGE_FILENAME@@
-+Version         : @@VERSION@@
-+Release         : @@PACKAGE_RELEASE@@
++Summary         : @@MENUNAME
++License         : Multiple, see @@PRODUCTURL
++Name            : @@rpm_package_filename
++Version         : @@version
++Release         : @@package_release
 +Group           : Applications/Internet
-+Vendor          : @@COMPANY_FULLNAME@@
-+Url             : @@PRODUCTURL@@
-+Packager        : @@MAINTNAME@@ <@@MAINTMAIL@@>
++Vendor          : @@COMPANY_FULLNAME
++Url             : @@PRODUCTURL
++Packager        : @@MAINTNAME <@@MAINTMAIL>
 +
-+Provides        : @@PROVIDES@@ = %{version}
-+Requires        : @@DEPENDS@@
++Provides        : @@rpm_provides = %{version}
++Requires        : @@rpm_depends
 +Autoreqprov     : No
 +
 +BuildRoot       : %{_tmppath}/%{name}-%{version}-root
@@ -4280,9 +1610,9 @@ index 0000000000000..46e8d213e86de
 +#   Description
 +#------------------------------------------------------------------------------
 +%Description
-+@@SHORTDESC@@
++@@SHORTDESC
 +
-+@@FULLDESC@@
++@@FULLDESC
 +
 +#------------------------------------------------------------------------------
 +#   Build rule - How to make the package
@@ -4295,25 +1625,25 @@ index 0000000000000..46e8d213e86de
 +%install
 +rm -rf "$RPM_BUILD_ROOT"
 +
-+if [ -z "@@STAGEDIR@@" -o ! -d "@@STAGEDIR@@" ] ; then
-+    echo "@@STAGEDIR@@ appears to be incorrectly set - aborting"
++if [ -z "@@staging_dir" -o ! -d "@@staging_dir" ] ; then
++    echo "@@staging_dir appears to be incorrectly set - aborting"
 +    exit 1
 +fi
 +
-+if [ -z "@@INSTALLDIR@@" -o ! -d "@@STAGEDIR@@/@@INSTALLDIR@@" ] ; then
-+    echo "@@INSTALLDIR@@ appears to be incorrectly set - aborting"
++if [ -z "@@INSTALLDIR" -o ! -d "@@staging_dir/@@INSTALLDIR" ] ; then
++    echo "@@INSTALLDIR appears to be incorrectly set - aborting"
 +    exit 1
 +fi
 +
 +install -m 755 -d \
 +  "$RPM_BUILD_ROOT/opt" \
 +  "$RPM_BUILD_ROOT/usr"
-+if [ -d "@@STAGEDIR@@/etc" ]; then
++if [ -d "@@staging_dir/etc" ]; then
 +  install -m 755 -d "$RPM_BUILD_ROOT/etc"
-+  cp -a "@@STAGEDIR@@/etc/" "$RPM_BUILD_ROOT/"
++  cp -a --no-preserve=ownership "@@staging_dir/etc/" "$RPM_BUILD_ROOT/"
 +fi
-+cp -a "@@STAGEDIR@@/opt/" "$RPM_BUILD_ROOT/"
-+cp -a "@@STAGEDIR@@/usr/" "$RPM_BUILD_ROOT/"
++cp -a --no-preserve=ownership "@@staging_dir/opt/" "$RPM_BUILD_ROOT/"
++cp -a --no-preserve=ownership "@@staging_dir/usr/" "$RPM_BUILD_ROOT/"
 +
 +#------------------------------------------------------------------------------
 +#   Rule to clean up a build
@@ -4330,23 +1660,23 @@ index 0000000000000..46e8d213e86de
 +
 +# We cheat and just let RPM figure it out for us; everything we install
 +# should go under this prefix anyways.
-+@@INSTALLDIR@@
++@@INSTALLDIR
 +
 +# Be explicit about the files we scatter throughout the system we don't
 +# accidentally "own" stuff that's not ours (crbug.com/123990).
-+/usr/bin/@@USR_BIN_SYMLINK_NAME@@
++/usr/bin/@@usr_bin_symlink_name
 +# Extra Thorium stuff
 +/usr/bin/pak
 +/usr/bin/thorium-shell
 +/usr/share/applications/thorium-shell.desktop
-+/usr/share/appdata/@@PACKAGE@@.appdata.xml
-+/usr/share/applications/@@PACKAGE@@.desktop
-+/usr/share/applications/@@RDN_DESKTOP@@.desktop
-+/usr/share/gnome-control-center/default-apps/@@PACKAGE@@.xml
++/usr/share/appdata/@@PACKAGE.appdata.xml
++/usr/share/applications/@@PACKAGE.desktop
++/usr/share/applications/@@rdn_desktop.desktop
++/usr/share/gnome-control-center/default-apps/@@PACKAGE.xml
 +%docdir /usr/share/man/man1
 +# These two files will be the same on non-stable channels.
-+/usr/share/man/man1/@@PACKAGE@@.1.gz
-+@@OPTIONAL_MAN_PAGE@@
++/usr/share/man/man1/@@PACKAGE.1.gz
++@@rpm_optional_man_page
 +
 +#------------------------------------------------------------------------------
 +#   Pre install script
@@ -4367,7 +1697,9 @@ index 0000000000000..46e8d213e86de
 +
 +@@include@@../common/postinst.include
 +
-+@@include@@../common/rpm.include
++get_lib_dir() {
++  LIBDIR="%{_lib}"
++}
 +
 +@@include@@../common/symlinks.include
 +
@@ -4376,7 +1708,7 @@ index 0000000000000..46e8d213e86de
 +
 +remove_udev_symlinks
 +
-+ln -sf /opt/chromium.org/thorium/thorium-browser /usr/bin/@@USR_BIN_SYMLINK_NAME@@
++ln -sf /opt/chromium.org/thorium/thorium-browser /usr/bin/@@usr_bin_symlink_name
 +
 +exit 0
 +

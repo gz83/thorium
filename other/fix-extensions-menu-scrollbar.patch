@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/extensions/BUILD.gn b/chrome/browser/ui/views/extensions/BUILD.gn
-index e26e7dc48bf38..64aad3dd1bebb 100644
+index 2b7d71281a319..e447cbd25227d 100644
 --- a/chrome/browser/ui/views/extensions/BUILD.gn
 +++ b/chrome/browser/ui/views/extensions/BUILD.gn
 @@ -108,6 +108,22 @@ source_set("extensions_menu_entry_view") {
@@ -33,7 +33,7 @@ index e26e7dc48bf38..64aad3dd1bebb 100644
      "//chrome/app:generated_resources",
      "//chrome/browser/ui:browser_element_identifiers",
      "//chrome/browser/ui:chrome_pages",
-@@ -683,6 +700,7 @@ source_set("extensions_menu_view") {
+@@ -681,6 +698,7 @@ source_set("extensions_menu_view") {
      ":extension_action_delegate_desktop",
      ":extensions_container_views",
      ":extensions_menu_item_view",
@@ -42,7 +42,7 @@ index e26e7dc48bf38..64aad3dd1bebb 100644
      "//chrome/browser/ui:chrome_pages",
      "//chrome/browser/ui/browser_window",
 diff --git a/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc b/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
-index 7a87e5399382d..4335d28a6dfde 100644
+index feaa2254527c8..344aa0b5c0449 100644
 --- a/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
 +++ b/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
 @@ -25,6 +25,7 @@

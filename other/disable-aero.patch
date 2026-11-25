@@ -21,10 +21,10 @@ index b80fd78c52bab..68372419ad469 100644
 +  return !base::CommandLine::ForCurrentProcess()->HasSwitch("disable-aero");
  }
 diff --git a/ui/views/win/hwnd_message_handler.cc b/ui/views/win/hwnd_message_handler.cc
-index 42fd0087319f0..1c51b40618b15 100644
+index 4a5681b9124e0..aff7446614c69 100644
 --- a/ui/views/win/hwnd_message_handler.cc
 +++ b/ui/views/win/hwnd_message_handler.cc
-@@ -1057,7 +1057,7 @@ void HWNDMessageHandler::FrameTypeChanged() {
+@@ -1132,7 +1132,7 @@ void HWNDMessageHandler::FrameTypeChanged() {
    if (!custom_window_region_.is_valid() && IsFrameSystemDrawn()) {
      dwm_transition_desired_ = true;
    }

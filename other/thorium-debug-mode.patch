@@ -1,8 +1,8 @@
 diff --git a/base/BUILD.gn b/base/BUILD.gn
-index c71d7a643405a..c9862d6443cb8 100644
+index 76fb572811d09..b19171d65d856 100644
 --- a/base/BUILD.gn
 +++ b/base/BUILD.gn
-@@ -1201,6 +1201,7 @@ component("base") {
+@@ -1213,6 +1213,7 @@ component("base") {
      "//build:chromecast_buildflags",
      "//build:robolectric_buildflags",
      "//third_party/abseil-cpp:absl",
@@ -10,7 +10,7 @@ index c71d7a643405a..c9862d6443cb8 100644
    ]
  
    sources += [
-@@ -3078,6 +3079,7 @@ buildflag_header("debugging_buildflags") {
+@@ -3085,6 +3086,7 @@ buildflag_header("debugging_buildflags") {
      "ENABLE_ALLOCATION_TRACE_RECORDER_FULL_REPORTING=$build_allocation_trace_recorder_full_reporting",
      "PRINT_UNSYMBOLIZED_STACK_TRACES=$print_unsymbolized_stack_traces",
      "ENABLE_CHECK_ELISION_WARNING=$enable_check_elision_warning",
@@ -19,10 +19,10 @@ index c71d7a643405a..c9862d6443cb8 100644
  }
  
 diff --git a/base/check.cc b/base/check.cc
-index a91851e30eee2..4baf345deb7c2 100644
+index f935dbad049bd..b07c20c28091a 100644
 --- a/base/check.cc
 +++ b/base/check.cc
-@@ -337,6 +337,7 @@ std::ostream& CheckError::stream() {
+@@ -346,6 +346,7 @@ std::ostream& CheckError::stream() {
  }
  
  CheckError::~CheckError() {
@@ -30,7 +30,7 @@ index a91851e30eee2..4baf345deb7c2 100644
    // TODO(crbug.com/40254046): Consider splitting out CHECK from DCHECK so that
    // the destructor can be marked [[noreturn]] and we don't need to check
    // severity in the destructor.
-@@ -354,6 +355,7 @@ CheckError::~CheckError() {
+@@ -363,6 +364,7 @@ CheckError::~CheckError() {
    if (is_fatal) {
      base::ImmediateCrash();
    }
@@ -72,7 +72,7 @@ index 4b3b7ee07ba65..59888a3abfda6 100644
    if (!GetFileAttributesEx(file_path.value().c_str(), GetFileExInfoStandard,
                             &attr)) {
 diff --git a/base/logging.cc b/base/logging.cc
-index 7beceac45c360..85658d6c09ca8 100644
+index b7221d75c2ef1..0fc67b81b5fe1 100644
 --- a/base/logging.cc
 +++ b/base/logging.cc
 @@ -10,6 +10,7 @@
@@ -99,8 +99,8 @@ index 7beceac45c360..85658d6c09ca8 100644
  }
  
  std::string BuildCrashString(const char* file,
-@@ -556,10 +559,24 @@ int GetMinLogLevel() {
-   return g_min_log_level;
+@@ -560,10 +563,24 @@ uint32_t GetLoggingDestination() {
+   return g_logging_destination;
  }
  
 +bool IsVerbose() {
@@ -124,7 +124,7 @@ index 7beceac45c360..85658d6c09ca8 100644
  
    // Return true here unless we know ~LogMessage won't do anything.
    return g_logging_destination != LOG_NONE || g_log_message_handler ||
-@@ -571,7 +588,7 @@ bool ShouldCreateLogMessage(int severity) {
+@@ -575,7 +592,7 @@ bool ShouldCreateLogMessage(int severity) {
  // set, or only LOG_TO_FILE is set, since that is useful for local development
  // and debugging.
  bool ShouldLogToStderr(int severity) {
@@ -133,7 +133,7 @@ index 7beceac45c360..85658d6c09ca8 100644
      return true;
    }
  
-@@ -682,7 +699,7 @@ void DisplayDebugMessageInDialog(std::string_view str) {
+@@ -686,7 +703,7 @@ void DisplayDebugMessageInDialog(std::string_view str) {
    // You can just look at stderr.
    if (base::win::IsUser32AndGdi32Available()) {
      MessageBoxW(nullptr, base::as_wcstr(base::UTF8ToUTF16(str)), L"Fatal error",
@@ -142,7 +142,7 @@ index 7beceac45c360..85658d6c09ca8 100644
    } else {
      OutputDebugStringW(base::as_wcstr(base::UTF8ToUTF16(str)));
    }
-@@ -703,8 +720,11 @@ void LogMessage::Flush() {
+@@ -707,8 +724,11 @@ void LogMessage::Flush() {
    // Don't let actions from this method affect the system error after returning.
    base::ScopedClearLastError scoped_clear_last_error;
  
@@ -155,7 +155,7 @@ index 7beceac45c360..85658d6c09ca8 100644
    // Include a stack trace on a fatal, unless a debugger is attached.
    if (severity_ == LOGGING_FATAL && !base::debug::BeingDebugged()) {
      base::debug::StackTrace stack_trace;
-@@ -738,6 +758,7 @@ void LogMessage::Flush() {
+@@ -742,6 +762,7 @@ void LogMessage::Flush() {
    std::string str_newline(stream_.str());
    TraceLogMessage(file_, line_, str_newline.substr(message_start_));
  
@@ -163,7 +163,7 @@ index 7beceac45c360..85658d6c09ca8 100644
    // FATAL messages should always run the assert handler and crash, even if a
    // message handler marks them as otherwise handled.
    absl::Cleanup handle_fatal_message = [&] {
-@@ -749,6 +770,7 @@ void LogMessage::Flush() {
+@@ -753,6 +774,7 @@ void LogMessage::Flush() {
    if (severity_ == LOGGING_FATAL) {
      SetLogFatalCrashKey(this);
    }
@@ -172,10 +172,10 @@ index 7beceac45c360..85658d6c09ca8 100644
    // Give any log message handler first dibs on the message.
    if (g_log_message_handler &&
 diff --git a/base/logging.h b/base/logging.h
-index 2d72f112e9b9f..567503f15f329 100644
+index 26bed110a9eb6..70cbfd02378eb 100644
 --- a/base/logging.h
 +++ b/base/logging.h
-@@ -225,6 +225,9 @@ BASE_EXPORT void SetMinLogLevel(int level);
+@@ -231,6 +231,9 @@ BASE_EXPORT void SetMinLogLevel(int level);
  // Gets the current log level.
  BASE_EXPORT int GetMinLogLevel();
  
@@ -186,10 +186,10 @@ index 2d72f112e9b9f..567503f15f329 100644
  BASE_EXPORT bool ShouldCreateLogMessage(int severity);
  
 diff --git a/content/browser/renderer_host/render_process_host_impl.cc b/content/browser/renderer_host/render_process_host_impl.cc
-index 232d1c239df5c..6c740514d17a1 100644
+index ca7a5e6f1aeed..7baee04cc1382 100644
 --- a/content/browser/renderer_host/render_process_host_impl.cc
 +++ b/content/browser/renderer_host/render_process_host_impl.cc
-@@ -4128,7 +4128,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
+@@ -4153,7 +4153,7 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
      }
    }
  

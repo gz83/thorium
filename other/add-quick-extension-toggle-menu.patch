@@ -1,8 +1,8 @@
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index 592a30f498e7f..b8b74a2b32907 100644
+index 4d79396c8d53a..3fe5f0890fb92 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -6480,6 +6480,12 @@ Keep your key file in a safe place. You will need it to create new versions of y
+@@ -6233,6 +6233,12 @@ Keep your key file in a safe place. You will need it to create new versions of y
          <message name="IDS_EXTENSIONS_MENU_TITLE" desc="Title of the Extensions Menu" formatter_data="android_java">
            Extensions
          </message>
@@ -75,10 +75,10 @@ index 5de0ad6e04cc3..eee8ef63e7df9 100644
    virtual void OnReloadPageButtonClicked() = 0;
  
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 96e0548ffebb2..aedb050f8d94f 100644
+index cceb1d5d6daca..b319a94664fef 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -185,6 +185,9 @@ BASE_FEATURE(kLegacySearchIntegrityCheck, base::FEATURE_DISABLED_BY_DEFAULT);
+@@ -229,6 +229,9 @@ BASE_FEATURE(kLegacySearchIntegrityCheck, base::FEATURE_DISABLED_BY_DEFAULT);
  
  BASE_FEATURE(kExtensionsCollapseMainMenu, base::FEATURE_DISABLED_BY_DEFAULT);
  
@@ -89,10 +89,10 @@ index 96e0548ffebb2..aedb050f8d94f 100644
  // default.
  BASE_FEATURE(kExtensionsPinnedByDefault, base::FEATURE_ENABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 4d052afb28058..580e1dc2a81d9 100644
+index 604638bac8470..07da434536a06 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -94,6 +94,8 @@ bool IsSettingsSearch2026Enabled();
+@@ -110,6 +110,8 @@ bool IsHistoryPageRefreshEnabled();
  // the "Discover Chrome Extensions" item will be present.
  BASE_DECLARE_FEATURE(kExtensionsCollapseMainMenu);
  
@@ -408,7 +408,7 @@ index 72d113f610f8d..1fa42c5d23072 100644
                            ExtensionsMenuViewModel::Observer>
        menu_model_observation_{this};
 diff --git a/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc b/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
-index 89674311a47b8..7a87e5399382d 100644
+index d21ef5ab22f57..feaa2254527c8 100644
 --- a/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
 +++ b/chrome/browser/ui/views/extensions/extensions_menu_main_page_view.cc
 @@ -9,6 +9,7 @@

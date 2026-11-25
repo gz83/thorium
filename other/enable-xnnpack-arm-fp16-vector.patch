@@ -1,5 +1,5 @@
 diff --git a/third_party/xnnpack/build_defs.gni b/third_party/xnnpack/build_defs.gni
-index f12e9c7714e31..d3ac4c29feda1 100644
+index 49f3a26160238..5b4e07ecf22c1 100644
 --- a/third_party/xnnpack/build_defs.gni
 +++ b/third_party/xnnpack/build_defs.gni
 @@ -16,7 +16,7 @@ xnn_defines = [

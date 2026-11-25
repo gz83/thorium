@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
-index 88668a0b3e980..436f4cbd1a625 100644
+index 9469400d339f8..562d7504519d5 100644
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn
-@@ -345,6 +345,7 @@ if (!is_android) {
+@@ -348,6 +348,7 @@ if (!is_android) {
        "//chrome/browser/ui/fuzzy_search",
        "//chrome/browser/ui/interaction",
        "//chrome/browser/ui/lens",
@@ -11,10 +11,10 @@ index 88668a0b3e980..436f4cbd1a625 100644
        "//chrome/browser/ui/page_info",
        "//chrome/browser/ui/page_info:about_this_site_icon",
 diff --git a/chrome/browser/ui/browser_actions.cc b/chrome/browser/ui/browser_actions.cc
-index d716fe0590cf2..cbf4a6b5596c2 100644
+index 66af63af26538..6bbce2ad6d25e 100644
 --- a/chrome/browser/ui/browser_actions.cc
 +++ b/chrome/browser/ui/browser_actions.cc
-@@ -131,6 +131,7 @@
+@@ -136,6 +136,7 @@
  #include "chrome/browser/ui/lens/lens_string_utils.h"
  #include "chrome/browser/ui/location_bar/location_bar.h"
  #include "chrome/browser/ui/omnibox/ai_mode_page_action_controller.h"
@@ -22,7 +22,7 @@ index d716fe0590cf2..cbf4a6b5596c2 100644
  #include "chrome/browser/ui/page_action/page_action_controller.h"
  #include "chrome/browser/ui/page_action/page_action_triggers.h"
  #include "chrome/browser/ui/page_info/page_info_dialog.h"
-@@ -4656,6 +4657,13 @@ void BrowserActions::InitializeToolbarAndMiscActions() {
+@@ -4783,6 +4784,13 @@ void BrowserActions::InitializeToolbarAndMiscActions() {
                },
                bwi))
            .SetActionId(kActionSharingHub)
@@ -37,10 +37,10 @@ index d716fe0590cf2..cbf4a6b5596c2 100644
  
    root_action_item_->AddChild(
 diff --git a/chrome/browser/ui/browser_command_controller.cc b/chrome/browser/ui/browser_command_controller.cc
-index e12e43ef640a9..d03ae605e6e0e 100644
+index 9c46985bfe366..406d95c2300f6 100644
 --- a/chrome/browser/ui/browser_command_controller.cc
 +++ b/chrome/browser/ui/browser_command_controller.cc
-@@ -2955,9 +2955,9 @@ void BrowserCommandController::UpdateCommandsForProfile() {
+@@ -3010,9 +3010,9 @@ void BrowserCommandController::UpdateCommandsForProfile() {
  
  void BrowserCommandController::UpdateActionsForSharingHubPolicy() {
  #if !BUILDFLAG(IS_CHROMEOS)
@@ -53,7 +53,7 @@ index e12e43ef640a9..d03ae605e6e0e 100644
    const bool sharing_enabled =
        profile()->GetPrefs()->GetBoolean(prefs::kDesktopSharingHubEnabled);
  
-@@ -2967,6 +2967,7 @@ void BrowserCommandController::UpdateActionsForSharingHubPolicy() {
+@@ -3022,6 +3022,7 @@ void BrowserCommandController::UpdateActionsForSharingHubPolicy() {
            action_item->SetVisible(sharing_enabled);
          }
        };
@@ -115,7 +115,7 @@ index 3f3af819540f8..7d4b7a1842b00 100644
    // DEPRECATED: kSmsRemoteFetcher = 19,
    kTranslate = 20,
 diff --git a/chrome/browser/ui/page_action/page_action_properties_provider.cc b/chrome/browser/ui/page_action/page_action_properties_provider.cc
-index 127fbb81e6110..9f21a7e0a48db 100644
+index ac0829b58074b..b80600724e4a7 100644
 --- a/chrome/browser/ui/page_action/page_action_properties_provider.cc
 +++ b/chrome/browser/ui/page_action/page_action_properties_provider.cc
 @@ -12,6 +12,7 @@
@@ -126,8 +126,8 @@ index 127fbb81e6110..9f21a7e0a48db 100644
  #include "ui/actions/action_id.h"
  
  namespace {
-@@ -317,6 +318,18 @@ constexpr auto kPageActionProperties = base::MakeFixedFlatMap<
-                 page_actions::PageActionPriorityCategory::kContextualCue,
+@@ -312,6 +313,18 @@ constexpr auto kPageActionProperties = base::MakeFixedFlatMap<
+                 kSecurityTrustAndPermissions,
          },
      },
 +    {
@@ -146,7 +146,7 @@ index 127fbb81e6110..9f21a7e0a48db 100644
          kActionShowPaymentsChurnedUsersBubble,
          {
 diff --git a/chrome/browser/ui/sharing_hub/BUILD.gn b/chrome/browser/ui/sharing_hub/BUILD.gn
-index 50849de0ca3a9..2aa901774fde6 100644
+index 9b74cceb757fb..49497a68ba95e 100644
 --- a/chrome/browser/ui/sharing_hub/BUILD.gn
 +++ b/chrome/browser/ui/sharing_hub/BUILD.gn
 @@ -46,6 +46,7 @@ source_set("impl") {
@@ -185,10 +185,10 @@ index dd8784f81c36e..3c81a38629f6d 100644
        anchor, attempt,
        SharingHubBubbleController::CreateOrGetFromWebContents(
 diff --git a/chrome/browser/ui/tabs/BUILD.gn b/chrome/browser/ui/tabs/BUILD.gn
-index bf88dff65dd1a..b828bc6e0978c 100644
+index b92d02b116a91..21244417b5eff 100644
 --- a/chrome/browser/ui/tabs/BUILD.gn
 +++ b/chrome/browser/ui/tabs/BUILD.gn
-@@ -613,6 +613,7 @@ if (!is_android) {
+@@ -608,6 +608,7 @@ if (!is_android) {
        "//chrome/browser/safe_browsing",
        "//chrome/browser/search",
        "//chrome/browser/sessions",
@@ -197,10 +197,10 @@ index bf88dff65dd1a..b828bc6e0978c 100644
        "//chrome/browser/site_protection",
        "//chrome/browser/skills:public",
 diff --git a/chrome/browser/ui/tabs/tab_features.cc b/chrome/browser/ui/tabs/tab_features.cc
-index 5b0269fbf6103..9261d295dd165 100644
+index aaef65951a4b1..c3733a1c82afa 100644
 --- a/chrome/browser/ui/tabs/tab_features.cc
 +++ b/chrome/browser/ui/tabs/tab_features.cc
-@@ -93,6 +93,7 @@
+@@ -95,6 +95,7 @@
  #include "chrome/browser/profiles/profile_key.h"
  #include "chrome/browser/resource_coordinator/tab_helper.h"
  #include "chrome/browser/sessions/session_tab_helper_factory.h"
@@ -208,7 +208,7 @@ index 5b0269fbf6103..9261d295dd165 100644
  #include "chrome/browser/signin/identity_manager_factory.h"
  #include "chrome/browser/site_protection/site_protection_metrics_observer.h"
  #include "chrome/browser/ssl/ask_before_http_dialog_controller.h"
-@@ -517,6 +518,12 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
+@@ -520,6 +521,12 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
                page_actions::PageActionPropertiesProvider(),
                pinned_actions_model);
  
@@ -222,10 +222,10 @@ index 5b0269fbf6103..9261d295dd165 100644
      translate_page_action_controller_ =
          std::make_unique<TranslatePageActionController>(tab);
 diff --git a/chrome/browser/ui/webui/webui_toolbar/utils/toolbar_button_utils.cc b/chrome/browser/ui/webui/webui_toolbar/utils/toolbar_button_utils.cc
-index 57f46e7aa5c2d..dcd09f6cd5768 100644
+index dd2794db55c3d..bdca0214cbf2d 100644
 --- a/chrome/browser/ui/webui/webui_toolbar/utils/toolbar_button_utils.cc
 +++ b/chrome/browser/ui/webui/webui_toolbar/utils/toolbar_button_utils.cc
-@@ -553,6 +553,8 @@ actions::ActionId MojomPageActionIdToActionId(
+@@ -554,6 +554,8 @@ actions::ActionId MojomPageActionIdToActionId(
        return kActionAnchoredContextualCue;
      case MojomPageActionId::kActionAutofillPayment:
        return kActionAutofillPayment;
@@ -234,7 +234,7 @@ index 57f46e7aa5c2d..dcd09f6cd5768 100644
      case MojomPageActionId::kActionShowPaymentsChurnedUsersBubble:
        return kActionShowPaymentsChurnedUsersBubble;
      case MojomPageActionId::kActionFakePageActionForDebug:
-@@ -631,6 +633,8 @@ MojomPageActionId ActionIdToMojomPageActionId(actions::ActionId action_id) {
+@@ -632,6 +634,8 @@ MojomPageActionId ActionIdToMojomPageActionId(actions::ActionId action_id) {
        return MojomPageActionId::kActionAnchoredContextualCue;
      case kActionAutofillPayment:
        return MojomPageActionId::kActionAutofillPayment;
@@ -244,10 +244,10 @@ index 57f46e7aa5c2d..dcd09f6cd5768 100644
        return MojomPageActionId::kActionShowPaymentsChurnedUsersBubble;
      case kActionFakePageActionForDebug:
 diff --git a/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom b/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom
-index e1a68cd2bb1b4..462324e3ec144 100644
+index 655d1913ed914..36bb9780187d3 100644
 --- a/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom
 +++ b/components/browser_apis/ui_controllers/toolbar/toolbar_ui_api_data_model.mojom
-@@ -523,6 +523,7 @@ enum PageActionId {
+@@ -539,6 +539,7 @@ enum PageActionId {
    kActionGlicContextualCueing,
    kActionAnchoredContextualCue,
    kActionAutofillPayment,

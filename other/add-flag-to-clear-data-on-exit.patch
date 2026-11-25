@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/browser_features.cc b/chrome/browser/browser_features.cc
-index a69dbb8784aab..29ea3f2fe16d1 100644
+index 9eb92261f2189..c870282b74e67 100644
 --- a/chrome/browser/browser_features.cc
 +++ b/chrome/browser/browser_features.cc
 @@ -63,6 +63,9 @@ BASE_FEATURE(kCertVerificationNetworkTime, base::FEATURE_DISABLED_BY_DEFAULT);
@@ -13,7 +13,7 @@ index a69dbb8784aab..29ea3f2fe16d1 100644
  // Enables usage of os_crypt_async::SecretPortalKeyProvider.  Once
  // `kSecretPortalKeyProviderUseForEncryption` is enabled, this flag cannot be
 diff --git a/chrome/browser/browser_features.h b/chrome/browser/browser_features.h
-index 62894e09a6812..de32d40589c39 100644
+index 6689a6034bc84..2e5b5fa27f415 100644
 --- a/chrome/browser/browser_features.h
 +++ b/chrome/browser/browser_features.h
 @@ -39,6 +39,7 @@ BASE_DECLARE_FEATURE(kBookmarkTriggerForPrefetch);
@@ -25,7 +25,7 @@ index 62894e09a6812..de32d40589c39 100644
  #if BUILDFLAG(IS_LINUX)
  BASE_DECLARE_FEATURE(kDbusSecretPortal);
 diff --git a/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc b/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc
-index 2594391ee96a8..cddd906307bba 100644
+index 965f23939bda0..e1994a34616e8 100644
 --- a/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc
 +++ b/chrome/browser/browsing_data/chrome_browsing_data_lifetime_manager.cc
 @@ -19,6 +19,7 @@
@@ -58,7 +58,7 @@ index 2594391ee96a8..cddd906307bba 100644
  uint64_t GetOriginTypeMask(const base::ListValue& data_types) {
    uint64_t result = 0;
    for (const auto& data_type : data_types) {
-@@ -332,9 +348,11 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
+@@ -334,9 +350,11 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
    const base::ListValue& data_types = profile_->GetPrefs()->GetList(
        browsing_data::prefs::kClearBrowsingDataOnExitList);
  
@@ -72,7 +72,7 @@ index 2594391ee96a8..cddd906307bba 100644
      profile_->GetPrefs()->SetBoolean(
          browsing_data::prefs::kClearBrowsingDataOnExitDeletionPending, true);
      auto* remover = profile_->GetBrowsingDataRemover();
-@@ -345,8 +363,10 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
+@@ -347,8 +365,10 @@ void ChromeBrowsingDataLifetimeManager::ClearBrowsingDataForOnExitPolicy(
        CHECK(keep_browser_alive, base::NotFatalUntil::M161);
  #endif
      remover->RemoveAndReply(base::Time(), base::Time::Max(),

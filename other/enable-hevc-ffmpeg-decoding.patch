@@ -1,5 +1,5 @@
 diff --git a/media/base/supported_types.cc b/media/base/supported_types.cc
-index efc7246c8cd3e..51734902ee029 100644
+index c68f663fb60d0..23942f3693c05 100644
 --- a/media/base/supported_types.cc
 +++ b/media/base/supported_types.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index efc7246c8cd3e..51734902ee029 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -229,25 +229,19 @@ bool IsAudioCodecProprietary(AudioCodec codec) {
+@@ -230,25 +230,19 @@ bool IsAudioCodecProprietary(AudioCodec codec) {
  #endif  // !BUILDFLAG(USE_PROPRIETARY_CODECS)
  
  bool IsDecoderHevcProfileSupported(const VideoType& type) {
@@ -41,7 +41,7 @@ index efc7246c8cd3e..51734902ee029 100644
  }
  
  bool IsDecoderVp9ProfileSupported(const VideoType& type) {
-@@ -580,7 +574,7 @@ bool IsEncoderOptionalVideoType(const media::VideoType& type) {
+@@ -611,7 +605,7 @@ bool IsEncoderOptionalVideoType(const media::VideoType& type) {
  
  bool IsDecoderBuiltInVideoCodec(VideoCodec codec) {
  #if BUILDFLAG(ENABLE_FFMPEG_VIDEO_DECODERS) && BUILDFLAG(USE_PROPRIETARY_CODECS)
@@ -70,7 +70,7 @@ index e4c443001dba3..21b7cd434219d 100644
    return "";
  #endif
 diff --git a/media/filters/ffmpeg_video_decoder.cc b/media/filters/ffmpeg_video_decoder.cc
-index 3e351538d12f0..d1feb70cab362 100644
+index 07a4be8b49482..da0b48e151371 100644
 --- a/media/filters/ffmpeg_video_decoder.cc
 +++ b/media/filters/ffmpeg_video_decoder.cc
 @@ -1,4 +1,4 @@
@@ -79,7 +79,7 @@ index 3e351538d12f0..d1feb70cab362 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  #include "media/filters/ffmpeg_video_decoder.h"
-@@ -71,19 +71,19 @@ static int GetFFmpegVideoDecoderThreadCount(const VideoDecoderConfig& config) {
+@@ -71,9 +71,13 @@ static int GetFFmpegVideoDecoderThreadCount(const VideoDecoderConfig& config) {
    // Only add more threads for those codecs that we know will benefit.
    switch (config.codec()) {
      case VideoCodec::kUnknown:
@@ -93,7 +93,8 @@ index 3e351538d12f0..d1feb70cab362 100644
 -    case VideoCodec::kHEVC:
      case VideoCodec::kVP9:
      case VideoCodec::kAV1:
-     case VideoCodec::kDolbyVision:
+     case VideoCodec::kAV2:
+@@ -81,10 +85,6 @@ static int GetFFmpegVideoDecoderThreadCount(const VideoDecoderConfig& config) {
      case VideoCodec::kTheora:
      case VideoCodec::kMPEG4:
      case VideoCodec::kVP8:
@@ -104,7 +105,7 @@ index 3e351538d12f0..d1feb70cab362 100644
        // Normalize to three threads for 1080p content, then scale linearly
        // with number of pixels.
        // Examples:
-@@ -117,8 +117,9 @@ static void ReleaseVideoBufferImpl(void* opaque, uint8_t* data) {
+@@ -118,8 +118,9 @@ static void ReleaseVideoBufferImpl(void* opaque, uint8_t* data) {
  
  // static
  bool FFmpegVideoDecoder::IsCodecSupported(VideoCodec codec) {

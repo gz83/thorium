@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/toolbar/app_menu_model.cc b/chrome/browser/ui/toolbar/app_menu_model.cc
-index 49ef721d9e96f..76f02d993c7f1 100644
+index 8a1d52f8b1db1..00ef04786a15a 100644
 --- a/chrome/browser/ui/toolbar/app_menu_model.cc
 +++ b/chrome/browser/ui/toolbar/app_menu_model.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index 49ef721d9e96f..76f02d993c7f1 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -958,9 +958,7 @@ void HelpMenuModel::Build(BrowserWindowInterface* browser) {
+@@ -961,9 +961,7 @@ void HelpMenuModel::Build(BrowserWindowInterface* browser) {
    int help_string_id = IDS_HELP_PAGE;
  #endif
    AddItemWithStringIdAndVectorIcon(this, IDC_ABOUT, IDS_ABOUT,
@@ -19,7 +19,7 @@ index 49ef721d9e96f..76f02d993c7f1 100644
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
    if (whats_new::IsEnabled()) {
      AddItemWithStringIdAndVectorIcon(
-@@ -2327,8 +2325,7 @@ void AppMenuModel::Build() {
+@@ -2339,8 +2337,7 @@ void AppMenuModel::Build() {
  
    AddItemWithStringIdAndVectorIcon(
        this, IDC_CLEAR_BROWSING_DATA, IDS_CLEAR_BROWSING_DATA,
@@ -29,7 +29,7 @@ index 49ef721d9e96f..76f02d993c7f1 100644
    SetElementIdentifierAt(GetIndexOfCommandId(IDC_CLEAR_BROWSING_DATA).value(),
                           kClearBrowsingDataMenuItem);
  
-@@ -2483,12 +2480,11 @@ void AppMenuModel::Build() {
+@@ -2495,12 +2492,11 @@ void AppMenuModel::Build() {
                           kHelpMenuItem);
  #else
  #if BUILDFLAG(IS_CHROMEOS)

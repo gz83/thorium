@@ -1,5 +1,18 @@
+diff --git a/components/policy/core/common/policy_paths.cc b/components/policy/core/common/policy_paths.cc
+index 7c15eeaa4f875..0368d1ff58208 100644
+--- a/components/policy/core/common/policy_paths.cc
++++ b/components/policy/core/common/policy_paths.cc
+@@ -17,6 +17,8 @@ namespace policy {
+ const char kPolicyPath[] = "/etc/opt/chrome/policies";
+ #elif BUILDFLAG(GOOGLE_CHROME_FOR_TESTING_BRANDING)
+ const char kPolicyPath[] = "/etc/opt/chrome_for_testing/policies";
++#elif BUILDFLAG(IS_LINUX)
++const char kPolicyPath[] = "/etc/thorium/policies";
+ #else
+ const char kPolicyPath[] = "/etc/chromium/policies";
+ #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
 diff --git a/components/policy/tools/template_writers/writer_configuration.py b/components/policy/tools/template_writers/writer_configuration.py
-index 4a4dc51a09cca..3eb3deed1a77d 100755
+index 4a4dc51a09cca..e1943a2b1f6c7 100755
 --- a/components/policy/tools/template_writers/writer_configuration.py
 +++ b/components/policy/tools/template_writers/writer_configuration.py
 @@ -10,9 +10,6 @@ def GetConfigurationForBuild(defines):
@@ -12,7 +25,7 @@ index 4a4dc51a09cca..3eb3deed1a77d 100755
    '''
    # The prefix of key names in config determines which writer will use their
    # corresponding values:
-@@ -24,45 +21,7 @@ def GetConfigurationForBuild(defines):
+@@ -24,46 +21,12 @@ def GetConfigurationForBuild(defines):
    # Google:Cat_Google references the external google.admx file.
    # category_path_strings strings in curly braces are looked up from localized
    # 'messages' in policy_templates.json.
@@ -55,11 +68,17 @@ index 4a4dc51a09cca..3eb3deed1a77d 100755
 -  elif (
 -    '_google_chrome' in defines or '_is_chrome_for_testing_branded' in defines
 -  ):
-+  if defines.get('_google_chrome', False) == True or defines.get('_is_chrome_for_testing_branded', False) == True:
-     if '_google_chrome' in defines:
+-    if '_google_chrome' in defines:
++  google_chrome = defines.get('_google_chrome') in (1, '1', 'true')
++  chrome_for_testing = defines.get('_is_chrome_for_testing_branded') in (
++    1, '1', 'true'
++  )
++  if google_chrome or chrome_for_testing:
++    if google_chrome:
        linux_policy_path = '/etc/opt/chrome/policies/'
        win_policy_path = 'Software\\Policies\\Google\\Chrome'
-@@ -117,7 +76,43 @@ def GetConfigurationForBuild(defines):
+     else:
+@@ -117,7 +80,43 @@ def GetConfigurationForBuild(defines):
        'bundle_id': 'com.google.chrome.ios',
      }
    else:

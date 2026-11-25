@@ -1,5 +1,5 @@
 diff --git a/build/install-build-deps.py b/build/install-build-deps.py
-index 8fe0643f47698..5c9216721d737 100755
+index bbebda88d2209..d29995b32b712 100755
 --- a/build/install-build-deps.py
 +++ b/build/install-build-deps.py
 @@ -1,6 +1,6 @@
@@ -10,7 +10,7 @@ index 8fe0643f47698..5c9216721d737 100755
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -242,6 +242,7 @@ def apt_update(options):
+@@ -257,6 +257,7 @@ def apt_update(options):
  # Packages needed for development
  def dev_list():
      packages = [
@@ -18,7 +18,7 @@ index 8fe0643f47698..5c9216721d737 100755
          "autoconf",
          "binutils",
          "bison",
-@@ -257,6 +258,7 @@ def dev_list():
+@@ -272,6 +273,7 @@ def dev_list():
          "flex",
          "git-core",
          "gperf",
@@ -26,7 +26,7 @@ index 8fe0643f47698..5c9216721d737 100755
          "libasound2-dev",
          "libatspi2.0-dev",
          "libbrlapi-dev",
-@@ -298,15 +300,18 @@ def dev_list():
+@@ -313,16 +315,19 @@ def dev_list():
          "lighttpd",
          "locales",
          "openbox",
@@ -39,13 +39,14 @@ index 8fe0643f47698..5c9216721d737 100755
          "ripgrep",
          "rpm",
          "ruby",
+         "squashfs-tools",
          "uuid-dev",
          "wdiff",
 +        "wget",
          "x11-utils",
          "xcompmgr",
          "xz-utils",
-@@ -412,12 +417,14 @@ def lib_list():
+@@ -428,12 +433,14 @@ def lib_list():
          "libpango-1.0-0",
          "libpangocairo-1.0-0",
          "libpci3",
@@ -60,7 +61,7 @@ index 8fe0643f47698..5c9216721d737 100755
          "libx11-6",
          "libx11-xcb1",
          "libxau6",
-@@ -535,6 +542,7 @@ def lib32_list(options):
+@@ -551,6 +558,7 @@ def lib32_list(options):
          "zlib1g:i386",
          # 32-bit libraries needed e.g. to compile V8 snapshot for Android or armhf
          "linux-libc-dev:i386",
@@ -68,7 +69,7 @@ index 8fe0643f47698..5c9216721d737 100755
          "libexpat1:i386",
          "libpci3:i386",
      ]
-@@ -739,7 +747,9 @@ def arm_list(options):
+@@ -755,7 +763,9 @@ def arm_list(options):
          "g++-arm-linux-gnueabihf",
          "gcc-arm-linux-gnueabihf",
          "libc6-dev-armhf-cross",

@@ -1,8 +1,8 @@
 diff --git a/android_webview/BUILD.gn b/android_webview/BUILD.gn
-index 779aae3bc237c..3845e250d6ddd 100644
+index 4b8c81b60fb1f..da080786f04d7 100644
 --- a/android_webview/BUILD.gn
 +++ b/android_webview/BUILD.gn
-@@ -78,9 +78,14 @@ if (_is_default_toolchain) {
+@@ -77,9 +77,14 @@ if (_is_default_toolchain) {
      }
    }
  
@@ -18,7 +18,7 @@ index 779aae3bc237c..3845e250d6ddd 100644
        if (android_64bit_target_cpu) {
          is_64_bit_browser = false
          include_64_bit_webview = true
-@@ -124,7 +129,11 @@ if (_is_default_toolchain) {
+@@ -123,7 +128,11 @@ if (_is_default_toolchain) {
  
    if (android_64bit_target_cpu) {
      system_webview_apk_tmpl("system_webview_64_apk") {
@@ -32,10 +32,10 @@ index 779aae3bc237c..3845e250d6ddd 100644
        include_32_bit_webview = false
        include_64_bit_webview = true
 diff --git a/android_webview/system_webview_apk_tmpl.gni b/android_webview/system_webview_apk_tmpl.gni
-index f40264c620594..cc3e7aa091e2c 100644
+index 7d48724bf828b..f4f4848789a4f 100644
 --- a/android_webview/system_webview_apk_tmpl.gni
 +++ b/android_webview/system_webview_apk_tmpl.gni
-@@ -75,6 +75,7 @@ template("system_webview_apk_or_module_tmpl") {
+@@ -70,6 +70,7 @@ template("system_webview_apk_or_module_tmpl") {
      variables = [
        "force_32_bit=$_force_32_bit",
        "manifest_package=$_manifest_package",
@@ -44,7 +44,7 @@ index f40264c620594..cc3e7aa091e2c 100644
      includes = []
      if (defined(invoker.jinja_input)) {
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
-index e3e9d0318a10d..e673d9d67b377 100644
+index 31655cd275108..7bc6c8dc20bcf 100644
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -53,7 +53,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -2119,9 +2119,14 @@ if (_is_default_toolchain) {
+@@ -2117,9 +2117,14 @@ if (_is_default_toolchain) {
      }
    }
  
@@ -69,7 +69,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
      if (defined(android_app_secondary_abi)) {
        # Ensure 64-bit chrome does not depend on 32-bit things.
        assert_no_deps =
-@@ -2137,7 +2142,7 @@ if (_is_default_toolchain) {
+@@ -2135,7 +2140,7 @@ if (_is_default_toolchain) {
    }
  
    chrome_public_bundle("chrome_public_bundle") {
@@ -78,7 +78,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
      if (enable_manifest_verification) {
        expected_android_manifest_template = "expectations/chrome_public_bundle__SPLIT_NAME.AndroidManifest.expected"
        expected_proguard_config =
-@@ -2151,7 +2156,7 @@ if (_is_default_toolchain) {
+@@ -2149,7 +2154,7 @@ if (_is_default_toolchain) {
  
    create_app_bundle_minimal_apks("chrome_public_minimal_apks") {
      deps = [ ":chrome_public_bundle" ]
@@ -87,7 +87,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
    }
  
    if (android_64bit_target_cpu && defined(android_app_secondary_abi)) {
-@@ -2315,7 +2320,7 @@ if (_is_default_toolchain) {
+@@ -2313,7 +2318,7 @@ if (_is_default_toolchain) {
    # scoped, and do not leave lingering state after execution.
    # TODO(crbug.com/40193330): Set clear rules for what tests can be added here.
    chrome_public_test_apk_tmpl("chrome_public_unit_test_apk") {
@@ -96,7 +96,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
      deps = [
        ":chrome_unit_test_java",
        "//build/config/android/test/resource_overlay:unit_device_javatests",
-@@ -2380,7 +2385,7 @@ if (_is_default_toolchain) {
+@@ -2378,7 +2383,7 @@ if (_is_default_toolchain) {
  
    # TODO(crbug.com/40193330): Rename to chrome_public_integration_test_apk
    chrome_public_test_apk_tmpl("chrome_public_test_apk") {
@@ -105,7 +105,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
      deps = [
        ":chrome_test_apk_template_resources",
        ":chrome_test_java",
-@@ -2559,7 +2564,8 @@ if (_is_default_toolchain) {
+@@ -2556,7 +2561,8 @@ if (_is_default_toolchain) {
      android_test_apk = ":chrome_smoke_test_apk"
      additional_apks = [ "//net/android:net_test_support_apk" ]
      if (!is_java_debug) {
@@ -115,7 +115,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
      }
    }
  
-@@ -2570,7 +2576,8 @@ if (_is_default_toolchain) {
+@@ -2567,7 +2573,8 @@ if (_is_default_toolchain) {
      extra_args = _common_smoke_test_args
      additional_apks = [ "//net/android:net_test_support_apk" ]
      if (!is_java_debug) {
@@ -125,7 +125,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
      }
    }
  
-@@ -2643,14 +2650,14 @@ if (_is_default_toolchain) {
+@@ -2640,14 +2647,14 @@ if (_is_default_toolchain) {
        ssargs_path = "$root_build_dir/apks/Chrome64.ssargs"
        abi_filter = android_app_abi
        no_java = true
@@ -142,7 +142,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
        webview_basename = "SystemWebView64.minimal.apks"
      }
  
-@@ -2719,7 +2726,7 @@ if (_is_default_toolchain) {
+@@ -2709,7 +2716,7 @@ if (_is_default_toolchain) {
        }
        to_resource_sizes_py_64 = {
          apk_name = "apks/Chrome64"
@@ -151,7 +151,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
        }
        supersize_input_file = "apks/$_ssargs_32_filename"
      }
-@@ -2731,7 +2738,7 @@ if (_is_default_toolchain) {
+@@ -2721,7 +2728,7 @@ if (_is_default_toolchain) {
        mapping_files = []
  
        archive_files = [
@@ -161,7 +161,7 @@ index e3e9d0318a10d..e673d9d67b377 100644
        ]
        supersize_input_file = "apks/Chrome64.ssargs"
 diff --git a/chrome/android/chrome_public_apk_tmpl.gni b/chrome/android/chrome_public_apk_tmpl.gni
-index 7817cd680fe2c..043f5d653e3e7 100644
+index 1f3bd38b356c7..e70d80e6ecd4a 100644
 --- a/chrome/android/chrome_public_apk_tmpl.gni
 +++ b/chrome/android/chrome_public_apk_tmpl.gni
 @@ -1,4 +1,4 @@
@@ -170,10 +170,10 @@ index 7817cd680fe2c..043f5d653e3e7 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -26,15 +26,15 @@ declare_args() {
+@@ -24,15 +24,15 @@ declare_args() {
    # Android package name to use when compiling the public chrome targets
-   # (chrome_public_apk, trichrome_chrome_bundle, etc. as well as the
-   # *_bundle variants). This defaults to the Chromium browser package name.
+   # (chrome_public_apk, chrome_public_bundle, etc.). This defaults to the
+   # Chromium browser package name.
 -  chrome_public_manifest_package = "org.chromium.chrome"
 +  chrome_public_manifest_package = "org.chromium.thorium"
    if (use_stable_package_name) {
@@ -187,8 +187,8 @@ index 7817cd680fe2c..043f5d653e3e7 100644
 -chrome_public_test_manifest_package = "org.chromium.chrome.tests"
 +chrome_public_test_manifest_package = "org.chromium.thorium.tests"
  
- default_chrome_public_jinja_variables = [
-   "channel=$android_channel",
+ # Representative locales packaged in test APKs (covering RTL, CJK, Indic,
+ # Cyrillic/@TestLocale("ru-RU"), Swahili, European, and pseudolocales) rather
 diff --git a/chrome/android/java/res/drawable/ic_warning_white_24dp.xml b/chrome/android/java/res/drawable/ic_warning_white_24dp.xml
 index 6e6325a258830..48a67b1c452b6 100644
 --- a/chrome/android/java/res/drawable/ic_warning_white_24dp.xml

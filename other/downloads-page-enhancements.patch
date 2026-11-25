@@ -71,12 +71,12 @@ index 3b41624ed37a0..0bd6fca4ba9ac 100644
  
    override willUpdate(changedProperties: PropertyValues<this>) {
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index f92a70a676a80..2ae8458d81240 100644
+index bf3fdc2ec5f58..093144aa040a7 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -46,6 +46,9 @@ BASE_FEATURE(kImportExportFlags, base::FEATURE_DISABLED_BY_DEFAULT);
- 
- BASE_FEATURE(kInfoBarQueuedCountPill, base::FEATURE_DISABLED_BY_DEFAULT);
+@@ -80,6 +80,9 @@ BASE_FEATURE(kInfoBarQueuedCountPill, base::FEATURE_DISABLED_BY_DEFAULT);
+ // visible viewport via dedicated Find bar buttons or Alt+Enter.
+ BASE_FEATURE(kFindInPageSkipViewport, base::FEATURE_DISABLED_BY_DEFAULT);
  
 +// Shows the full download URL below the source on the downloads page.
 +BASE_FEATURE(kThoriumDownloadsShowFullUrl, base::FEATURE_ENABLED_BY_DEFAULT);
@@ -85,12 +85,12 @@ index f92a70a676a80..2ae8458d81240 100644
  // timer also exits tab fullscreen (unless browser fullscreen is underneath)
  // when it fires while Esc is locked via the Keyboard Lock API. When disabled,
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 2e0b135ddd81a..8bf00f75bcde6 100644
+index cd0146f5c2260..54af8f4b95a10 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -42,6 +42,8 @@ BASE_DECLARE_FEATURE(kImportExportFlags);
- // infobars wait in the prioritization queue.
- BASE_DECLARE_FEATURE(kInfoBarQueuedCountPill);
+@@ -55,6 +55,8 @@ BASE_DECLARE_FEATURE(kInfoBarQueuedCountPill);
+ 
+ BASE_DECLARE_FEATURE(kFindInPageSkipViewport);
  
 +BASE_DECLARE_FEATURE(kThoriumDownloadsShowFullUrl);
 +
@@ -98,7 +98,7 @@ index 2e0b135ddd81a..8bf00f75bcde6 100644
  
  #if BUILDFLAG(IS_LINUX)
 diff --git a/chrome/browser/ui/webui/downloads/downloads_ui.cc b/chrome/browser/ui/webui/downloads/downloads_ui.cc
-index 64384e09b78e7..fa177eb0a325b 100644
+index 3a8177373f660..26ed59702a2f3 100644
 --- a/chrome/browser/ui/webui/downloads/downloads_ui.cc
 +++ b/chrome/browser/ui/webui/downloads/downloads_ui.cc
 @@ -7,6 +7,7 @@

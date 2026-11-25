@@ -1,8 +1,8 @@
 diff --git a/components/omnibox/browser/BUILD.gn b/components/omnibox/browser/BUILD.gn
-index f7aaba4a989da..1946a91076f79 100644
+index e47e1694fda0e..9c54de9eef6b9 100644
 --- a/components/omnibox/browser/BUILD.gn
 +++ b/components/omnibox/browser/BUILD.gn
-@@ -114,6 +114,22 @@ aggregate_vector_icons("omnibox_vector_icons") {
+@@ -119,6 +119,21 @@ aggregate_vector_icons("omnibox_vector_icons") {
      "wb_sunny_filled.icon",
    ]
  
@@ -11,7 +11,6 @@ index f7aaba4a989da..1946a91076f79 100644
 +      "bookmark_chrome_refresh_old_thorium.icon",
 +      "bookmark_old_thorium.icon",
 +      "clear_old_thorium.icon",
-+      "http_old_thorium.icon",
 +      "incognito_cr2023_old_thorium.icon",
 +      "star_active_chrome_refresh_old_thorium.icon",
 +      "star_chrome_refresh_old_thorium.icon",
@@ -26,7 +25,7 @@ index f7aaba4a989da..1946a91076f79 100644
      sources += [
        "ios_share.icon",
 diff --git a/components/vector_icons/BUILD.gn b/components/vector_icons/BUILD.gn
-index 23cdbe1d87b4e..d968b46b317da 100644
+index a560db4187056..ff315aba28a80 100644
 --- a/components/vector_icons/BUILD.gn
 +++ b/components/vector_icons/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -35,7 +34,7 @@ index 23cdbe1d87b4e..d968b46b317da 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -528,6 +528,46 @@ if (current_toolchain == default_toolchain) {
+@@ -529,6 +529,45 @@ if (current_toolchain == default_toolchain) {
        "work_old.icon",
      ]
  
@@ -50,7 +49,6 @@ index 23cdbe1d87b4e..d968b46b317da 100644
 +        "error_outline_old_thorium.icon",
 +        "extension_old_thorium.icon",
 +        "forward_arrow_old_thorium.icon",
-+        "help_old_thorium.icon",
 +        "help_outline_old_thorium.icon",
 +        "info_outline_old_thorium.icon",
 +        "info_refresh_old_thorium.icon",

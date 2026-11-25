@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/omnibox/omnibox_view.cc b/chrome/browser/ui/omnibox/omnibox_view.cc
-index bcacaa8eccd7f..97b920c0cfca4 100644
+index aa6e268071d01..9f52e04da35ed 100644
 --- a/chrome/browser/ui/omnibox/omnibox_view.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_view.cc
 @@ -1,4 +1,4 @@
@@ -8,15 +8,15 @@ index bcacaa8eccd7f..97b920c0cfca4 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -27,7 +27,6 @@
- #include "components/omnibox/browser/location_bar_model.h"
+@@ -29,7 +29,6 @@
  #include "components/omnibox/browser/omnibox_field_trial.h"
  #include "components/omnibox/common/omnibox_feature_configs.h"
+ #include "components/omnibox/common/omnibox_features.h"
 -#include "components/search/search.h"
  #include "components/search_engines/template_url_service.h"
  #include "extensions/buildflags/buildflags.h"
  #include "url/url_constants.h"
-@@ -100,24 +99,9 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
+@@ -102,24 +101,9 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
                                       ->GetTemplateURLService()
                                       ->GetTemplateURLForKeyword(match.keyword)
                                 : nullptr;
@@ -44,7 +44,7 @@ index bcacaa8eccd7f..97b920c0cfca4 100644
        // If the search engine is enterprise search aggregator, return the icon
        // from the bitmap instead of favicon.
        const SkBitmap* bitmap =
-@@ -134,10 +118,10 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
+@@ -136,10 +120,10 @@ ui::ImageModel OmniboxView::GetIcon(int dip_size,
          return ui::ImageModel::FromImage(icon);
        }
      }

@@ -1,8 +1,8 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
-index 5129b02d8548d..590ef51237365 100644
+index 11ea600a4aa3b..b0121bd4617e4 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
-@@ -1042,8 +1042,9 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
+@@ -1055,8 +1055,9 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
      protected void addWindowingFeatures(
              ChromeAndroidTask chromeAndroidTask,
              Profile profile,
@@ -13,7 +13,7 @@ index 5129b02d8548d..590ef51237365 100644
  
          chromeAndroidTask.addFeature(
                  new ChromeAndroidTaskFeatureKey(
-@@ -4800,8 +4801,17 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
+@@ -4829,8 +4830,17 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
          } else if (id == R.id.extensions_menu_menu_id) {
              ExtensionsToolbarCoordinator coordinator =
                      assumeNonNull(getToolbarManager()).getExtensionsToolbarCoordinator();
@@ -34,7 +34,7 @@ index 5129b02d8548d..590ef51237365 100644
          } else if (id == R.id.manage_extensions_menu_id) {
              LoadUrlParams params =
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
-index 712d392cd3443..b038fb6b9be64 100644
+index c18f3119c1962..80772e32b0126 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 @@ -212,6 +212,7 @@ import org.chromium.chrome.browser.tab.TabState;
@@ -55,7 +55,7 @@ index 712d392cd3443..b038fb6b9be64 100644
  import org.chromium.chrome.browser.ui.extensions.windowing.ExtensionWindowControllerBridge;
  import org.chromium.chrome.browser.ui.extensions.windowing.ExtensionWindowControllerBridgeFactory;
  import org.chromium.chrome.browser.ui.messages.snackbar.Snackbar;
-@@ -1192,14 +1196,44 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
+@@ -1188,14 +1192,44 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
                                      desktopWindowStateManager),
                              pendingId);
  
@@ -104,7 +104,7 @@ index 712d392cd3443..b038fb6b9be64 100644
          }
      }
  
-@@ -1215,15 +1249,33 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
+@@ -1211,15 +1245,33 @@ public abstract class ChromeActivity extends AsyncInitializationActivity
      protected void addWindowingFeatures(
              ChromeAndroidTask chromeAndroidTask,
              Profile profile,
@@ -141,24 +141,30 @@ index 712d392cd3443..b038fb6b9be64 100644
  
      @Override
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelJniBridge.java b/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelJniBridge.java
-index 56088fe8a1832..a67c735ef8c0f 100644
+index e2c39340b69f7..d4f2a6f0f8137 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelJniBridge.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelJniBridge.java
-@@ -167,8 +167,7 @@ public abstract class TabModelJniBridge implements TabModelInternal {
+@@ -181,10 +181,11 @@ public abstract class TabModelJniBridge implements TabModelInternal {
  
      @Override
      public void dissociateWithBrowserWindow() {
 -        assert mNativeAndroidBrowserWindow != 0;
 -
-+        if (mNativeTabModelJniBridge == 0 || mNativeAndroidBrowserWindow == 0) return;
-         TabModelJniBridgeJni.get().dissociateWithBrowserWindow(mNativeTabModelJniBridge);
+-        TabModelJniBridgeJni.get()
+-                .dissociateWithBrowserWindow(assertNonNull(mNativeTabModelJniBridge));
++        var nativePtr = mNativeTabModelJniBridge;
++        if (mNativeAndroidBrowserWindow == 0) return;
++        if (nativePtr != null) {
++            TabModelJniBridgeJni.get().dissociateWithBrowserWindow(nativePtr);
++        }
          mNativeAndroidBrowserWindow = 0;
      }
+ 
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelSelectorBase.java b/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelSelectorBase.java
-index 142b83922a617..194df27020466 100644
+index f03625313dfec..da9be2f49c6bf 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelSelectorBase.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabmodel/TabModelSelectorBase.java
-@@ -446,6 +446,20 @@ public abstract class TabModelSelectorBase
+@@ -419,6 +419,20 @@ public abstract class TabModelSelectorBase
          }
      }
  
@@ -180,10 +186,10 @@ index 142b83922a617..194df27020466 100644
      public void didBecomeEmpty() {
          for (IncognitoTabModelObserver observer : mIncognitoObservers) {
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java b/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
-index 91b734011a117..03dba77dd2297 100644
+index 67e362b878aaf..7b341934f2a49 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/toolbar/ToolbarManager.java
-@@ -460,6 +460,8 @@ public class ToolbarManager
+@@ -464,6 +464,8 @@ public class ToolbarManager
      private @MonotonicNonNull BackButtonCoordinator mBackButtonCoordinator;
      private @MonotonicNonNull ForwardButtonCoordinator mForwardButtonCoordinator;
      private @Nullable ExtensionsToolbarCoordinator mExtensionsToolbarCoordinator;
@@ -192,7 +198,7 @@ index 91b734011a117..03dba77dd2297 100644
  
      private @Nullable DownloadStateModel mDownloadStateModel;
      private @Nullable DownloadToolbarButtonController mDownloadToolbarButtonController;
-@@ -2805,47 +2807,68 @@ public class ToolbarManager
+@@ -2800,47 +2802,68 @@ public class ToolbarManager
              ChromeAndroidTask task = mChromeAndroidTaskSupplier.get();
              // ChromeAndroidTask is available only on Desktop Android.
              if (task != null) {
@@ -299,7 +305,7 @@ index 91b734011a117..03dba77dd2297 100644
              }
          }
  
-@@ -3080,6 +3103,7 @@ public class ToolbarManager
+@@ -3075,6 +3098,7 @@ public class ToolbarManager
      public void destroy() {
          if (mIsDestroyed) return;
          mIsDestroyed = true;
@@ -307,7 +313,7 @@ index 91b734011a117..03dba77dd2297 100644
  
          if (mBottomBarEducationDialogCoordinator != null) {
              mBottomBarEducationDialogCoordinator.destroy();
-@@ -4180,9 +4204,28 @@ public class ToolbarManager
+@@ -4181,9 +4205,28 @@ public class ToolbarManager
       *     if extensions are not supported on this build.
       */
      public @Nullable ExtensionsToolbarCoordinator getExtensionsToolbarCoordinator() {
@@ -337,7 +343,7 @@ index 91b734011a117..03dba77dd2297 100644
       * Returns the mAdjustedToolbarThemeColorProvider if non-null, otherwise returns the
       * mToolbarThemeColorProvider.
 diff --git a/chrome/browser/extensions/api/developer_private/developer_private_functions.cc b/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
-index e66e2aa84296c..7fbfd0bc9254b 100644
+index 163b6cc69e7c3..0833afe048d14 100644
 --- a/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
 +++ b/chrome/browser/extensions/api/developer_private/developer_private_functions.cc
 @@ -1817,9 +1817,12 @@ DeveloperPrivateDismissSafetyHubExtensionsMenuNotificationFunction::Run() {
@@ -357,10 +363,10 @@ index e66e2aa84296c..7fbfd0bc9254b 100644
  }
  
 diff --git a/chrome/browser/tabmodel/android/java/src/org/chromium/chrome/browser/tabmodel/IncognitoTabModelImpl.java b/chrome/browser/tabmodel/android/java/src/org/chromium/chrome/browser/tabmodel/IncognitoTabModelImpl.java
-index 34f0ca1d60803..79a85efff8a56 100644
+index 09ac5efbf6eda..b9e2290d1973f 100644
 --- a/chrome/browser/tabmodel/android/java/src/org/chromium/chrome/browser/tabmodel/IncognitoTabModelImpl.java
 +++ b/chrome/browser/tabmodel/android/java/src/org/chromium/chrome/browser/tabmodel/IncognitoTabModelImpl.java
-@@ -151,7 +151,7 @@ class IncognitoTabModelImpl implements IncognitoTabModelInternal {
+@@ -156,7 +156,7 @@ class IncognitoTabModelImpl implements IncognitoTabModelInternal {
          }
  
          for (IncognitoTabModelObserver observer : mIncognitoObservers) {
@@ -369,7 +375,7 @@ index 34f0ca1d60803..79a85efff8a56 100644
          }
  
          mDelegateModel
-@@ -162,6 +162,10 @@ class IncognitoTabModelImpl implements IncognitoTabModelInternal {
+@@ -167,6 +167,10 @@ class IncognitoTabModelImpl implements IncognitoTabModelInternal {
          mCurrentTabSupplier.set(null);
          mTabCountSupplier.set(0);
  
@@ -380,7 +386,7 @@ index 34f0ca1d60803..79a85efff8a56 100644
          mDelegateModel = EmptyTabModel.getInstance(true);
      }
  
-@@ -196,6 +200,10 @@ class IncognitoTabModelImpl implements IncognitoTabModelInternal {
+@@ -201,6 +205,10 @@ class IncognitoTabModelImpl implements IncognitoTabModelInternal {
          assert mNativeAndroidBrowserWindow == 0;
          mNativeAndroidBrowserWindow = nativeAndroidBrowserWindow;
          mDelegateModel.associateWithBrowserWindow(nativeAndroidBrowserWindow);
@@ -1019,7 +1025,7 @@ index 240817ca174a1..65ef010b52611 100644
  
      public interface Observer {
 diff --git a/chrome/browser/ui/android/extensions/java/src/org/chromium/chrome/browser/ui/extensions/ExtensionsToolbarBridge.java b/chrome/browser/ui/android/extensions/java/src/org/chromium/chrome/browser/ui/extensions/ExtensionsToolbarBridge.java
-index bb0080bcd49b8..522cd510f8d89 100644
+index 22ae6198e8969..5deb76bc60a7d 100644
 --- a/chrome/browser/ui/android/extensions/java/src/org/chromium/chrome/browser/ui/extensions/ExtensionsToolbarBridge.java
 +++ b/chrome/browser/ui/android/extensions/java/src/org/chromium/chrome/browser/ui/extensions/ExtensionsToolbarBridge.java
 @@ -5,6 +5,7 @@
@@ -1672,7 +1678,7 @@ index da03f2af9890d..24f53a58a56d9 100644
                  mContext,
                  buttonView,
 diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
-index aecb640c9a47d..3079f2188a8fa 100644
+index f75a3c86b01a5..d82be7ab5ef6d 100644
 --- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
 +++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
 @@ -159,7 +159,7 @@ public class ExtensionsMenuCoordinator
@@ -1687,7 +1693,7 @@ index aecb640c9a47d..3079f2188a8fa 100644
 @@ -215,6 +215,12 @@ public class ExtensionsMenuCoordinator
  
          mExtensionsMenuButton.addPopupListener(
-                 new ListMenuHost.PopupMenuShownListener() {
+                 new PopupMenuShownListener() {
 +                    @Override
 +                    public void onPreparePopupMenuShow(AnchoredPopupWindow popupWindow) {
 +                        // Unpinning the button must not close the menu it anchors.
@@ -1717,10 +1723,10 @@ index aecb640c9a47d..3079f2188a8fa 100644
          mCurrentTabSupplier.removeObserver(mTabSupplierObserver);
          destroyMediator();
 diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java
-index 9d5bfbffad819..61f3bdef2dd1e 100644
+index dec052918d5dd..95da88d55c6a4 100644
 --- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java
 +++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuMediator.java
-@@ -51,7 +51,6 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -55,7 +55,6 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
      private final Runnable mOnReady;
      private final Runnable mOnDismissMenu;
      private final ChromeAndroidTask mTask;
@@ -1728,7 +1734,7 @@ index 9d5bfbffad819..61f3bdef2dd1e 100644
      private final TabCreator mTabCreator;
      private final ExtensionActionListCoordinator mExtensionActionListCoordinator;
  
-@@ -89,9 +88,8 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -93,9 +92,8 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
          mExtensionActionListCoordinator = extensionActionListCoordinator;
          mTabCreator = tabCreator;
          mTask = task;
@@ -1740,7 +1746,7 @@ index 9d5bfbffad819..61f3bdef2dd1e 100644
  
          mMainPageModel = mainPageModel;
          mSitePermissionsPageModel = sitePermissionsPropertyModel;
-@@ -120,7 +118,11 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -124,7 +122,11 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
  
          ExtensionActionContextMenuBridge contextMenuBridge =
                  new ExtensionActionContextMenuBridge(
@@ -1753,7 +1759,7 @@ index 9d5bfbffad819..61f3bdef2dd1e 100644
  
          ExtensionActionContextMenuUtils.showContextMenu(
                  mContext,
-@@ -183,7 +185,10 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -187,7 +189,10 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
      /** Destroys the mediator. */
      @Override
      public void destroy() {
@@ -1765,7 +1771,7 @@ index 9d5bfbffad819..61f3bdef2dd1e 100644
      }
  
      /**
-@@ -291,6 +296,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
+@@ -295,6 +300,9 @@ class ExtensionsMenuMediator implements Destroyable, ExtensionsMenuBridge.Observ
                      break;
                  }
              }
@@ -1891,10 +1897,10 @@ index beed83f19dce0..c8c23c307f844 100644
          ViewUtils.requestLayout(
                  mContainer, "ExtensionsToolbarCoordinatorImpl.updateMenuButtonPinState()");
 diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarPhone.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarPhone.java
-index fd98066d266e8..32eebcb87a710 100644
+index 5c44a566850c6..47a31c3bab49f 100644
 --- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarPhone.java
 +++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/top/ToolbarPhone.java
-@@ -66,6 +66,7 @@ import org.chromium.build.annotations.NullUnmarked;
+@@ -67,6 +67,7 @@ import org.chromium.build.annotations.NullUnmarked;
  import org.chromium.build.annotations.Nullable;
  import org.chromium.chrome.browser.browser_controls.BrowserControlsStateProvider.ControlsPosition;
  import org.chromium.chrome.browser.flags.ChromeFeatureList;
@@ -1902,7 +1908,7 @@ index fd98066d266e8..32eebcb87a710 100644
  import org.chromium.chrome.browser.ntp.NewTabPageUtils;
  import org.chromium.chrome.browser.ntp_customization.NtpCustomizationUtils;
  import org.chromium.chrome.browser.omnibox.LocationBar;
-@@ -88,6 +89,7 @@ import org.chromium.chrome.browser.toolbar.ToolbarTabController;
+@@ -90,6 +91,7 @@ import org.chromium.chrome.browser.toolbar.ToolbarTabController;
  import org.chromium.chrome.browser.toolbar.ToolbarVariationUtils;
  import org.chromium.chrome.browser.toolbar.back_button.BackButtonCoordinator;
  import org.chromium.chrome.browser.toolbar.download_button.DownloadButtonCoordinator;
@@ -1910,7 +1916,7 @@ index fd98066d266e8..32eebcb87a710 100644
  import org.chromium.chrome.browser.toolbar.forward_button.ForwardButtonCoordinator;
  import org.chromium.chrome.browser.toolbar.home_button.HomeButtonCoordinator;
  import org.chromium.chrome.browser.toolbar.menu_button.MenuButtonCoordinator;
-@@ -331,6 +333,8 @@ public class ToolbarPhone extends ToolbarLayout
+@@ -333,6 +335,8 @@ public class ToolbarPhone extends ToolbarLayout
      private boolean mIsInLoadingPhaseFromNtpToWebpage;
      private boolean mTabOrModelChanged;
  
@@ -1919,7 +1925,7 @@ index fd98066d266e8..32eebcb87a710 100644
      // The following are some properties used during animation.  We use explicit property classes
      // to avoid the cost of reflection for each animation setup.
  
-@@ -524,6 +528,17 @@ public class ToolbarPhone extends ToolbarLayout
+@@ -528,6 +532,17 @@ public class ToolbarPhone extends ToolbarLayout
          }
      }
  
@@ -1937,7 +1943,7 @@ index fd98066d266e8..32eebcb87a710 100644
      @Override
      public void destroy() {
          cancelAnimations();
-@@ -2971,6 +2986,7 @@ public class ToolbarPhone extends ToolbarLayout
+@@ -2970,6 +2985,7 @@ public class ToolbarPhone extends ToolbarLayout
          mIsInLoadingPhaseFromNtpToWebpage = false;
          mTabOrModelChanged = true;
          super.onTabOrModelChanged();
@@ -1945,7 +1951,7 @@ index fd98066d266e8..32eebcb87a710 100644
          updateNtpAnimationState();
          updateVisualsForLocationBarState();
          mTabOrModelChanged = false;
-@@ -2989,6 +3005,10 @@ public class ToolbarPhone extends ToolbarLayout
+@@ -2988,6 +3004,10 @@ public class ToolbarPhone extends ToolbarLayout
          mHomeButton.setBackgroundResource(toolbarIconRippleId);
          getMenuButtonCoordinator().updateButtonBackground(toolbarIconRippleId);
          mLocationBar.updateButtonBackground(omniboxIconRippleId);
@@ -1957,10 +1963,10 @@ index fd98066d266e8..32eebcb87a710 100644
  
      private static boolean isVisualStateValidForBrandColorTransition(@VisualState int state) {
 diff --git a/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskImpl.java b/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskImpl.java
-index c8945b70aca57..dd86b774cb021 100644
+index 0881ba8d4ffd9..a19fc608f22b7 100644
 --- a/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskImpl.java
 +++ b/chrome/browser/ui/browser_window/internal/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskImpl.java
-@@ -469,6 +469,9 @@ final class ChromeAndroidTaskImpl
+@@ -476,6 +476,9 @@ final class ChromeAndroidTaskImpl
              mChromeAndroidTaskImpl.mAndroidBrowserWindowObserverNotifier.updateActiveBrowserWindow(
                      mChromeAndroidTaskImpl.getActiveBrowserWindow());
          }
@@ -1970,7 +1976,7 @@ index c8945b70aca57..dd86b774cb021 100644
      }
  
      private @Nullable Integer mId;
-@@ -782,7 +785,7 @@ final class ChromeAndroidTaskImpl
+@@ -789,7 +792,7 @@ final class ChromeAndroidTaskImpl
                          ? null
                          : topActivityScopedObjects.mTabModelSelector;
          if (tabModelSelector != null) {
@@ -1979,7 +1985,7 @@ index c8945b70aca57..dd86b774cb021 100644
          }
  
          return feature;
-@@ -1275,6 +1278,19 @@ final class ChromeAndroidTaskImpl
+@@ -1278,6 +1281,19 @@ final class ChromeAndroidTaskImpl
          for (var feature : mFeatures.values()) {
              feature.onTaskFocusChanged(isTopResumedActivity);
          }
@@ -1999,7 +2005,7 @@ index c8945b70aca57..dd86b774cb021 100644
  
          mAndroidBrowserWindowObserverNotifier.updateActiveBrowserWindow(getActiveBrowserWindow());
      }
-@@ -1927,7 +1943,7 @@ final class ChromeAndroidTaskImpl
+@@ -1961,7 +1977,7 @@ final class ChromeAndroidTaskImpl
  
      private void onTabModelSelected(TabModel tabModel) {
          for (var feature : mFeatures.values()) {
@@ -2009,7 +2015,7 @@ index c8945b70aca57..dd86b774cb021 100644
          mAndroidBrowserWindowObserverNotifier.updateActiveBrowserWindow(getActiveBrowserWindow());
      }
 diff --git a/chrome/browser/ui/browser_window/public/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskFeature.java b/chrome/browser/ui/browser_window/public/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskFeature.java
-index 4f1103f80f174..1a394affe5911 100644
+index ee0de3b9717e1..3d0ad8df3ab4a 100644
 --- a/chrome/browser/ui/browser_window/public/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskFeature.java
 +++ b/chrome/browser/ui/browser_window/public/android/java/src/org/chromium/chrome/browser/ui/browser_window/ChromeAndroidTaskFeature.java
 @@ -139,4 +139,12 @@ public interface ChromeAndroidTaskFeature {
@@ -2026,10 +2032,10 @@ index 4f1103f80f174..1a394affe5911 100644
 +    }
  }
 diff --git a/chrome/browser/ui/extensions/extensions_menu_view_model.cc b/chrome/browser/ui/extensions/extensions_menu_view_model.cc
-index 07f8519e90ab1..b551623f099a7 100644
+index 5b80a13c7b846..29b6decc110ee 100644
 --- a/chrome/browser/ui/extensions/extensions_menu_view_model.cc
 +++ b/chrome/browser/ui/extensions/extensions_menu_view_model.cc
-@@ -592,6 +592,9 @@ void ExtensionsMenuViewModel::UpdateSiteAccess(
+@@ -593,6 +593,9 @@ void ExtensionsMenuViewModel::UpdateSiteAccess(
      const url::Origin& target_origin,
      PermissionsManager::UserSiteAccess site_access) {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2039,7 +2045,7 @@ index 07f8519e90ab1..b551623f099a7 100644
  
    LogSiteAccessUpdate(site_access);
  
-@@ -610,6 +613,9 @@ void ExtensionsMenuViewModel::UpdateSiteAccess(
+@@ -611,6 +614,9 @@ void ExtensionsMenuViewModel::UpdateSiteAccess(
  void ExtensionsMenuViewModel::AllowHostAccessRequest(
      const extensions::ExtensionId& extension_id) {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2049,7 +2055,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    extensions::ExtensionActionRunner* action_runner =
        extensions::ExtensionActionRunner::GetForWebContents(web_contents);
    if (!action_runner) {
-@@ -630,6 +636,9 @@ void ExtensionsMenuViewModel::AllowHostAccessRequest(
+@@ -631,6 +637,9 @@ void ExtensionsMenuViewModel::AllowHostAccessRequest(
  void ExtensionsMenuViewModel::DismissHostAccessRequest(
      const extensions::ExtensionId& extension_id) {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2059,7 +2065,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    auto* permissions_manager = PermissionsManager::Get(browser_->GetProfile());
    CHECK(permissions_manager);
    int tab_id = extensions::ExtensionTabUtil::GetTabId(web_contents);
-@@ -653,6 +662,9 @@ void ExtensionsMenuViewModel::GrantSiteAccess(
+@@ -654,6 +663,9 @@ void ExtensionsMenuViewModel::GrantSiteAccess(
      const extensions::ExtensionId& extension_id,
      const url::Origin& target_origin) {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2069,7 +2075,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    auto* profile = browser_->GetProfile();
    const extensions::Extension* extension = GetExtension(*profile, extension_id);
  
-@@ -716,6 +728,9 @@ void ExtensionsMenuViewModel::RevokeSiteAccess(
+@@ -717,6 +729,9 @@ void ExtensionsMenuViewModel::RevokeSiteAccess(
      const extensions::ExtensionId& extension_id,
      const url::Origin& target_origin) {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2079,7 +2085,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    auto* profile = browser_->GetProfile();
    const extensions::Extension* extension = GetExtension(*profile, extension_id);
  
-@@ -784,6 +799,9 @@ void ExtensionsMenuViewModel::ExecuteAction(
+@@ -785,6 +800,9 @@ void ExtensionsMenuViewModel::ExecuteAction(
  void ExtensionsMenuViewModel::UpdateSiteSetting(
      extensions::PermissionsManager::UserSiteSetting site_setting) {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2089,7 +2095,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    const url::Origin& origin =
        web_contents->GetPrimaryMainFrame()->GetLastCommittedOrigin();
  
-@@ -801,12 +819,18 @@ void ExtensionsMenuViewModel::UpdateSiteSetting(
+@@ -802,12 +820,18 @@ void ExtensionsMenuViewModel::UpdateSiteSetting(
  
  void ExtensionsMenuViewModel::ReloadWebContents() {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2108,7 +2114,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    Profile* profile = browser_->GetProfile();
    ExtensionActionViewModel* action_model = GetActionViewModel(extension_id);
    CHECK(action_model);
-@@ -904,6 +928,9 @@ ExtensionsMenuViewModel::GetExtensionSitePermissionsState(
+@@ -905,6 +929,9 @@ ExtensionsMenuViewModel::GetExtensionSitePermissionsState(
    const extensions::Extension* extension = action_model->GetExtension();
    CHECK(extension);
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2118,7 +2124,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    const GURL& url = web_contents->GetLastCommittedURL();
  
    // Extension's site permissions can only be computed when site access can be
-@@ -982,6 +1009,9 @@ ExtensionsMenuViewModel::GetMenuEntryState(
+@@ -983,6 +1010,9 @@ ExtensionsMenuViewModel::GetMenuEntryState(
  
    MenuEntryState entry_state;
    entry_state.extension_id = extension_id;
@@ -2128,7 +2134,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    entry_state.action_button =
        GetActionButtonState(extension_id, action_icon_size);
    entry_state.context_menu_button = GetContextMenuButtonState(action_model);
-@@ -1014,6 +1044,9 @@ ExtensionsMenuViewModel::GetMenuEntryState(
+@@ -1015,6 +1045,9 @@ ExtensionsMenuViewModel::GetMenuEntryState(
  ExtensionsMenuViewModel::OptionalSection
  ExtensionsMenuViewModel::GetOptionalSection() {
    content::WebContents* web_contents = GetActiveWebContents();
@@ -2138,7 +2144,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    auto reload_required = [web_contents]() {
      return extensions::TabHelper::FromWebContents(web_contents)
          ->IsReloadRequired();
-@@ -1110,6 +1143,9 @@ void ExtensionsMenuViewModel::OnHostAccessRequestAdded(
+@@ -1111,6 +1144,9 @@ void ExtensionsMenuViewModel::OnHostAccessRequestAdded(
      int tab_id) {
    // Ignore requests for other tabs.
    auto* web_contents = GetActiveWebContents();
@@ -2148,7 +2154,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    int current_tab_id = extensions::ExtensionTabUtil::GetTabId(web_contents);
    if (tab_id != current_tab_id) {
      return;
-@@ -1176,6 +1212,9 @@ void ExtensionsMenuViewModel::OnHostAccessRequestRemoved(
+@@ -1177,6 +1213,9 @@ void ExtensionsMenuViewModel::OnHostAccessRequestRemoved(
      int tab_id) {
    // Ignore requests for other tabs.
    auto* web_contents = GetActiveWebContents();
@@ -2158,7 +2164,7 @@ index 07f8519e90ab1..b551623f099a7 100644
    int current_tab_id = extensions::ExtensionTabUtil::GetTabId(web_contents);
    if (tab_id != current_tab_id) {
      return;
-@@ -1202,11 +1241,15 @@ void ExtensionsMenuViewModel::OnHostAccessRequestsCleared(int tab_id) {
+@@ -1203,11 +1242,15 @@ void ExtensionsMenuViewModel::OnHostAccessRequestsCleared(int tab_id) {
  void ExtensionsMenuViewModel::OnHostAccessRequestDismissedByUser(
      const extensions::ExtensionId& extension_id,
      const url::Origin& origin) {
@@ -2176,7 +2182,7 @@ index 07f8519e90ab1..b551623f099a7 100644
      return;
    }
  
-@@ -1488,7 +1531,7 @@ content::WebContents* ExtensionsMenuViewModel::GetActiveWebContents() {
+@@ -1489,7 +1532,7 @@ content::WebContents* ExtensionsMenuViewModel::GetActiveWebContents() {
    if (delegate_) {
      if (content::WebContents* web_contents =
              delegate_->GetActiveWebContents()) {
@@ -2185,7 +2191,7 @@ index 07f8519e90ab1..b551623f099a7 100644
      }
    }
    auto* tab_list = TabListInterface::From(browser_);
-@@ -1496,5 +1539,7 @@ content::WebContents* ExtensionsMenuViewModel::GetActiveWebContents() {
+@@ -1497,5 +1540,7 @@ content::WebContents* ExtensionsMenuViewModel::GetActiveWebContents() {
      return nullptr;
    }
    auto* tab = tab_list->GetActiveTab();
@@ -2217,7 +2223,7 @@ index 8f052e6d5fae6..2380c5c611694 100644
      url::Origin origin;
    };
 diff --git a/components/tabs/impl/tab_collection.cc b/components/tabs/impl/tab_collection.cc
-index 4dcfbebdc04d1..b1526c26fa12e 100644
+index 169d687b6f053..60bcd61c13096 100644
 --- a/components/tabs/impl/tab_collection.cc
 +++ b/components/tabs/impl/tab_collection.cc
 @@ -198,6 +198,17 @@ TabCollection::TabCollection(Type type,

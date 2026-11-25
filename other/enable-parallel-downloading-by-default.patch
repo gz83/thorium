@@ -1,5 +1,5 @@
 diff --git a/components/download/public/common/download_features.cc b/components/download/public/common/download_features.cc
-index c3d158eab25d5..e983bdca9279e 100644
+index 953568d8bf4e7..d2fd42fb24639 100644
 --- a/components/download/public/common/download_features.cc
 +++ b/components/download/public/common/download_features.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index c3d158eab25d5..e983bdca9279e 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -14,7 +14,7 @@ BASE_FEATURE(kParallelDownloading,
+@@ -13,7 +13,7 @@ BASE_FEATURE(kParallelDownloading,
  #if BUILDFLAG(IS_ANDROID)
               base::FEATURE_ENABLED_BY_DEFAULT
  #else

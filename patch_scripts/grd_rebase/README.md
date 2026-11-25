@@ -28,17 +28,18 @@ The files in `config/` are reviewed inputs, not generated setup output:
   messages are covered by automatic branding discovery or
   `message_allowlist.csv`.
 - `message_allowlist.csv`: reviewed message-level exceptions and special
-  replacements. Plain branding replacements are auto-discovered from
-  `file_allowlist.csv` text-sync files; this CSV only keeps special rows.
-  The three current overrides cover desktop Dino instructions, the
-  accessibility label, and the slower-speed toggle.
+  replacements. Automatic branding discovery covers the standard text-sync
+  roles. Files with the `explicit_text_sync` role process only the named
+  messages. The list covers three Dino messages and eight browser references
+  in the Gemini provider change and Skills gallery notices.
 - `feature_patch_message_ownership.csv`: feature-patch and overlay-added
   message ownership; used to prevent feature-patch strings from being handled
   by the overlay replacement workflow. Pass a non-default ownership file to
   `sync_grd_strings.py` with `--feature-message-ownership`.
-- `xtb_additions.tsv`: canonical reviewed translation additions; currently
-  4374 translation rows across 405 XTB files. They form 54 owner/bundle/message
-  groups, each covering all 81 supported translation targets. Chromium bundles
+- `xtb_additions.tsv` contains 4631 reviewed translations across 407 XTB files.
+  55 owner/bundle/ID groups provide all 81 translations. Another 62 groups
+  supply individual locales where an upstream translation is missing or its
+  wording needs correction. Other locales use normal ID migration. Chromium bundles
   may use different locale aliases for the same language, such as `he` or
   `iw` for Hebrew. Rows are grouped by the explicit `owner` column, then by
   bundle, translation ID, and locale. An owner may be a feature patch path or
@@ -52,8 +53,9 @@ The files in `config/` are reviewed inputs, not generated setup output:
   identifies translations recovered from Chromium-owned XTB data without
   binding them to a particular Chromium milestone. The following path and
   message or translation ID retain the concrete audit source. No runtime tool
-  parses this prefix or uses it to select translations. Pass an alternate
-  reviewed inventory to `merge_thorium_xtb.py` with `--inventory`.
+  parses this prefix or uses it to select translations. When using an alternate
+  inventory, pass the same `--inventory` to both sync and merge. The merge owns
+  the exact target XTB path and ID for each inventory row.
 
 `update_config_from_patches.py` may rewrite
 `config/feature_patch_message_ownership.csv` and
@@ -124,7 +126,7 @@ The summary always reports the validated inventory size and then classifies
 each row according to the supplied Chromium worktree, for example:
 
 ```text
-validated 4374 Thorium translations across 405 XTB files: <inserted> inserted, <refreshed> refreshed, <already-present> already present, <changed-files> files changed
+validated 4631 Thorium translations across 407 XTB files: <inserted> inserted, <refreshed> refreshed, <already-present> already present, <changed-files> files changed
 ```
 
 Only the first two counts are inventory invariants. The inserted, refreshed,
@@ -203,17 +205,19 @@ GRIT parser output before enabling them.
   preferences select the appropriate old translation where required. For
   remaining conflicts, the script deterministically keeps the first candidate
   and reports grouped review buckets instead of every locale row.
-- `--xtb-missing-report`: summarized mapped XTB lookups where the old Chromium
-  translation ID was not found. Missing translations are reported but do not
-  block the run.
+- `--xtb-missing-report` checks the final ID in each mapped locale for the
+  planned source changes (including unchanged IDs) and patch-owned declarations
+  marked for upstream reuse or complete additions. It includes the translations
+  that sync will copy and the exact target rows in the reviewed merge inventory.
+  Run the release audit on the patched baseline before applying string sync.
 
 Current dry-runs may report converged XTB conflicts. Review the grouped conflict
 report before accepting the deterministically selected candidates. A reviewed
 locale-specific preference affects only that locale; other locales in the same
 converged-ID group retain their normal selection and remain visible in the
 report when they still conflict. The missing report is expected to contain only
-its header. Any data row means that a new ID did not receive an upstream
-translation and must be resolved in `xtb_additions.tsv` before release.
+its header. Each data row identifies a resource and locales that still need a
+translation before release.
 
 ## Validation
 

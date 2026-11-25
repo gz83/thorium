@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/layout_constants.cc b/chrome/browser/ui/layout_constants.cc
-index 040f019c5086f..2e0445c976fdf 100644
+index 974d4c2a8378d..5d663db749e3a 100644
 --- a/chrome/browser/ui/layout_constants.cc
 +++ b/chrome/browser/ui/layout_constants.cc
 @@ -4,6 +4,7 @@
@@ -29,7 +29,7 @@ index 040f019c5086f..2e0445c976fdf 100644
        return 16;
      case LayoutConstant::kLocationBarChipPadding:
 diff --git a/chrome/browser/ui/views/chrome_layout_provider.cc b/chrome/browser/ui/views/chrome_layout_provider.cc
-index 0d14f7a3ae287..3365d824fdeed 100644
+index 48d85c14c4a94..214cf109e49f0 100644
 --- a/chrome/browser/ui/views/chrome_layout_provider.cc
 +++ b/chrome/browser/ui/views/chrome_layout_provider.cc
 @@ -6,6 +6,7 @@
@@ -40,7 +40,7 @@ index 0d14f7a3ae287..3365d824fdeed 100644
  #include "base/containers/fixed_flat_map.h"
  #include "base/feature_list.h"
  #include "chrome/browser/ui/ui_features.h"
-@@ -362,13 +363,15 @@ int ChromeLayoutProvider::GetCornerRadiusMetric(views::ShapeContextToken token,
+@@ -365,13 +366,15 @@ int ChromeLayoutProvider::GetCornerRadiusMetric(views::ShapeContextToken token,
      return LayoutProvider::GetCornerRadiusMetric(token, size);
    }
  
@@ -58,7 +58,7 @@ index 0d14f7a3ae287..3365d824fdeed 100644
          break;
      }
 diff --git a/chrome/browser/ui/views/location_bar/location_bar_view.cc b/chrome/browser/ui/views/location_bar/location_bar_view.cc
-index 60d0cb72b14d9..065087696821f 100644
+index cf563c8d121cb..42c3ee180f8bd 100644
 --- a/chrome/browser/ui/views/location_bar/location_bar_view.cc
 +++ b/chrome/browser/ui/views/location_bar/location_bar_view.cc
 @@ -11,6 +11,7 @@
@@ -69,7 +69,7 @@ index 60d0cb72b14d9..065087696821f 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback_helpers.h"
-@@ -265,7 +266,11 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
+@@ -279,7 +280,11 @@ LocationBarView::LocationBarView(BrowserWindowInterface* browser,
            }));
        views::FocusRing::Get(this)->SetOutsetFocusRingDisabled(true);
      }
@@ -82,7 +82,7 @@ index 60d0cb72b14d9..065087696821f 100644
  
  #if BUILDFLAG(OS_LEVEL_GEOLOCATION_PERMISSION_SUPPORTED)
      if (features::IsOsLevelGeolocationPermissionSupportEnabled()) {
-@@ -542,6 +547,11 @@ bool LocationBarView::IsInitialized() const {
+@@ -576,6 +581,11 @@ bool LocationBarView::IsInitialized() const {
  }
  
  int LocationBarView::GetBorderRadius() const {
@@ -94,7 +94,7 @@ index 60d0cb72b14d9..065087696821f 100644
    return ComputeBorderRadius(size());
  }
  
-@@ -1453,6 +1463,12 @@ void LocationBarView::RefreshBackground() {
+@@ -1514,6 +1524,12 @@ void LocationBarView::RefreshBackground() {
    }
  
    SkColor border_color = SK_ColorTRANSPARENT;
@@ -108,7 +108,7 @@ index 60d0cb72b14d9..065087696821f 100644
    // The custom focus border is disabled on macOS to avoid conflicting with
    // native omnibox rendering.
 diff --git a/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc b/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
-index 295a5d18fa4b4..d8936a48a6f8e 100644
+index 6d00e9634bec9..230ea34dc2af9 100644
 --- a/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
 +++ b/chrome/browser/ui/views/omnibox/omnibox_suggestion_button_row_view.cc
 @@ -6,6 +6,7 @@

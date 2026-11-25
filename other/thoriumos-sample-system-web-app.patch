@@ -101,10 +101,10 @@ index 145ef702d8d25..241c3227f1ab3 100644
  namespace content {
  class WebUI;
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index c02f7b5cd661c..24f8cbe6bd907 100644
+index 48d60b7d8fe4d..decc702e4fdd6 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -892,12 +892,10 @@ if (is_chromeos) {
+@@ -887,12 +887,10 @@ if (is_chromeos) {
        "//content/public/browser",
      ]
  
@@ -122,10 +122,10 @@ index c02f7b5cd661c..24f8cbe6bd907 100644
  
    source_set("platform_util_ash") {
 diff --git a/chrome/browser/ash/system_web_apps/apps/BUILD.gn b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
-index ed1d3b1a93010..b327ca09cf347 100644
+index f18a5d77fa95b..dfeabb1777030 100644
 --- a/chrome/browser/ash/system_web_apps/apps/BUILD.gn
 +++ b/chrome/browser/ash/system_web_apps/apps/BUILD.gn
-@@ -191,17 +191,15 @@ static_library("apps") {
+@@ -190,17 +190,15 @@ static_library("apps") {
      "//url",
    ]
  
@@ -166,7 +166,7 @@ index c80f8c0a8995c..d30b7ca6de16f 100644
  class SampleSystemAppDelegate : public ash::SystemWebAppDelegate {
   public:
 diff --git a/chrome/browser/ash/system_web_apps/system_web_app_manager.cc b/chrome/browser/ash/system_web_apps/system_web_app_manager.cc
-index 55fa73abfc9c3..76e78a2bbe296 100644
+index 32abbf49c2e1f..97b08b2d0fe95 100644
 --- a/chrome/browser/ash/system_web_apps/system_web_app_manager.cc
 +++ b/chrome/browser/ash/system_web_apps/system_web_app_manager.cc
 @@ -95,9 +95,7 @@
@@ -229,10 +229,10 @@ index e46a49698bc2f..db55c029be329 100644
  
  }  // namespace chrome::internal
 diff --git a/chrome/browser/ui/webui/ash/config/BUILD.gn b/chrome/browser/ui/webui/ash/config/BUILD.gn
-index 764dd74af07a5..61c4fcedede14 100644
+index 0c5e2bd92a5e5..dfbb14827d3aa 100644
 --- a/chrome/browser/ui/webui/ash/config/BUILD.gn
 +++ b/chrome/browser/ui/webui/ash/config/BUILD.gn
-@@ -117,9 +117,7 @@ static_library("config") {
+@@ -116,9 +116,7 @@ static_library("config") {
      "//ui/webui",
    ]
  
@@ -244,10 +244,10 @@ index 764dd74af07a5..61c4fcedede14 100644
  
  source_set("unit_tests") {
 diff --git a/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc b/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc
-index 6d301f31ebe01..d7c5ef6146de8 100644
+index bee21b08f4139..163e8bad36cb2 100644
 --- a/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc
 +++ b/chrome/browser/ui/webui/ash/config/ash_web_ui_config_manager.cc
-@@ -147,10 +147,8 @@
+@@ -145,10 +145,8 @@
  #include "url/gurl.h"
  #include "url/url_constants.h"
  
@@ -258,23 +258,25 @@ index 6d301f31ebe01..d7c5ef6146de8 100644
  
  namespace content {
  class WebUI;
-@@ -552,8 +550,8 @@ void AshWebUIConfigManager::RegisterWebUIConfigs() {
-   AddWebUIConfig(std::make_unique<GrowthInternalsUIConfig>());
+@@ -612,9 +610,9 @@ void AshWebUIConfigManager::RegisterWebUIConfigs() {
    AddWebUIConfig(
-       std::make_unique<FloatingWorkspaceUIConfig>(&local_state_.get()));
+       std::make_unique<FloatingWorkspaceUIConfig>(&local_state_.get()),
+       /*is_stateful=*/true);
 -#if !defined(OFFICIAL_BUILD)
-   AddWebUIConfig(std::make_unique<SampleSystemWebAppUIConfig>());
+   AddWebUIConfig(std::make_unique<SampleSystemWebAppUIConfig>(),
+                  /*is_stateful=*/false);
 +#if !defined(OFFICIAL_BUILD)
-   AddWebUIConfig(std::make_unique<StatusAreaInternalsUIConfig>());
+   AddWebUIConfig(std::make_unique<StatusAreaInternalsUIConfig>(),
+                  /*is_stateful=*/false);
  #endif  // !defined(OFFICIAL_BUILD)
- }
-@@ -590,10 +588,8 @@ void AshWebUIConfigManager::RegisterUntrustedWebUIConfigs() {
-   AddUntrustedWebUIConfig(std::make_unique<MakoUntrustedUIConfig>());
-   AddUntrustedWebUIConfig(std::make_unique<FocusModeUntrustedUIConfig>());
-   AddUntrustedWebUIConfig(std::make_unique<ScannerFeedbackUntrustedUIConfig>());
+@@ -675,11 +673,9 @@ void AshWebUIConfigManager::RegisterUntrustedWebUIConfigs() {
+                           /*is_stateful=*/false);
+   AddUntrustedWebUIConfig(std::make_unique<ScannerFeedbackUntrustedUIConfig>(),
+                           /*is_stateful=*/false);
 -#if !defined(OFFICIAL_BUILD)
    AddUntrustedWebUIConfig(
-       std::make_unique<SampleSystemWebAppUntrustedUIConfig>());
+       std::make_unique<SampleSystemWebAppUntrustedUIConfig>(),
+       /*is_stateful=*/false);
 -#endif  // !defined(OFFICIAL_BUILD)
  }
  

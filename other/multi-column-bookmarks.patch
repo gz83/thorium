@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index e781d7a9088b4..5a13246d11dcc 100644
+index 3c6e7e670d78d..0a826beb5e0b5 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
 @@ -19,6 +19,9 @@
@@ -13,7 +13,7 @@ index e781d7a9088b4..5a13246d11dcc 100644
  BASE_FEATURE(kUseActionsForBrowserCommands, base::FEATURE_ENABLED_BY_DEFAULT);
  
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 69ecae1ef2df4..51ef41c35061f 100644
+index 9348e2c5e6de9..5bbeb15c3dc4e 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
 @@ -19,6 +19,8 @@ namespace features {
@@ -26,10 +26,10 @@ index 69ecae1ef2df4..51ef41c35061f 100644
  bool ShouldUseActionsForBrowserCommands();
  
 diff --git a/chrome/browser/ui/views/bookmarks/bookmark_menu_delegate.cc b/chrome/browser/ui/views/bookmarks/bookmark_menu_delegate.cc
-index f9cd6f6ed0ff7..bbee65b156639 100644
+index cc36829c8c9e8..291f6bd5431cc 100644
 --- a/chrome/browser/ui/views/bookmarks/bookmark_menu_delegate.cc
 +++ b/chrome/browser/ui/views/bookmarks/bookmark_menu_delegate.cc
-@@ -10,6 +10,7 @@
+@@ -11,6 +11,7 @@
  
  #include "base/containers/fixed_flat_set.h"
  #include "base/containers/to_vector.h"
@@ -37,7 +37,7 @@ index f9cd6f6ed0ff7..bbee65b156639 100644
  #include "base/functional/bind.h"
  #include "base/memory/raw_ptr.h"
  #include "base/memory/weak_ptr.h"
-@@ -34,6 +35,7 @@
+@@ -35,6 +36,7 @@
  #include "chrome/browser/ui/side_panel/side_panel_action_callback.h"
  #include "chrome/browser/ui/side_panel/side_panel_enums.h"
  #include "chrome/browser/ui/toolbar/app_menu_model.h"
@@ -45,7 +45,7 @@ index f9cd6f6ed0ff7..bbee65b156639 100644
  #include "chrome/browser/ui/views/bookmarks/bookmark_bar_view.h"
  #include "chrome/browser/ui/views/event_utils.h"
  #include "chrome/grit/generated_resources.h"
-@@ -60,6 +62,7 @@
+@@ -61,6 +63,7 @@
  #include "ui/gfx/image/image_skia_operations.h"
  #include "ui/menus/simple_menu_model.h"
  #include "ui/views/accessibility/view_accessibility.h"
@@ -53,30 +53,29 @@ index f9cd6f6ed0ff7..bbee65b156639 100644
  #include "ui/views/controls/menu/menu_controller.h"
  #include "ui/views/controls/menu/menu_item_view.h"
  #include "ui/views/controls/menu/submenu_view.h"
-@@ -671,8 +674,20 @@ void BookmarkMenuDelegate::BookmarkNodeFaviconChanged(
-     return;  // We're not showing a menu item for the node.
-   }
+@@ -725,8 +728,19 @@ void BookmarkMenuDelegate::OnFaviconUpdateTimerFired(const BookmarkNode* node) {
  
--  menu_pair->second->SetIcon(GetFaviconForNode(
+ void BookmarkMenuDelegate::UpdateMenuItemFavicon(const BookmarkNode* node,
+                                                  MenuItemView* menu) {
+-  menu->SetIcon(GetFaviconForNode(
 -      GetBookmarkMergedSurfaceService()->bookmark_model(), node));
-+  MenuItemView* menu_item = menu_pair->second;
 +  const ui::ImageModel icon = GetFaviconForNode(
 +      GetBookmarkMergedSurfaceService()->bookmark_model(), node);
-+  if (menu_item->icon_view() && !icon.IsEmpty() && !icon.IsVectorIcon() &&
-+      menu_item->GetParentMenuItem() &&
-+      menu_item->GetParentMenuItem()->GetSubmenu()->use_multiple_columns()) {
++  if (menu->icon_view() && !icon.IsEmpty() && !icon.IsVectorIcon() &&
++      menu->GetParentMenuItem() &&
++      menu->GetParentMenuItem()->GetSubmenu()->use_multiple_columns()) {
 +    // Replacing the icon view invalidates the whole column layout for every
 +    // favicon that arrives. Updating the image in place only requests a layout
 +    // when its preferred size changes. Vector icons still need SetIcon() to
 +    // update the menu item's selection-dependent color.
-+    menu_item->icon_view()->SetImage(icon);
++    menu->icon_view()->SetImage(icon);
 +  } else {
-+    menu_item->SetIcon(icon);
++    menu->SetIcon(icon);
 +  }
  }
  
  void BookmarkMenuDelegate::WillRemoveBookmarks(
-@@ -981,6 +996,9 @@ void BookmarkMenuDelegate::BuildNodeMenuItemAt(const BookmarkNode* node,
+@@ -1036,6 +1050,9 @@ void BookmarkMenuDelegate::BuildNodeMenuItemAt(const BookmarkNode* node,
  void BookmarkMenuDelegate::BuildMenu(const BookmarkParentFolder& folder,
                                       size_t start_child_index,
                                       MenuItemView* menu) {
@@ -87,10 +86,10 @@ index f9cd6f6ed0ff7..bbee65b156639 100644
        GetBookmarkMergedSurfaceService();
    CHECK_LE(start_child_index, service->GetChildrenCount(folder),
 diff --git a/ui/views/controls/menu/menu_controller.cc b/ui/views/controls/menu/menu_controller.cc
-index 20ad3d05bb0e8..0d66bdfd50f94 100644
+index 588d406ea4d79..5d5d595909d65 100644
 --- a/ui/views/controls/menu/menu_controller.cc
 +++ b/ui/views/controls/menu/menu_controller.cc
-@@ -292,6 +292,9 @@ gfx::Rect GetChildMenuAnchorBounds(MenuItemView* item) {
+@@ -308,6 +308,9 @@ gfx::Rect GetChildMenuAnchorBounds(MenuItemView* item) {
      bounds = item->GetBoundsInScreen();
      bounds.Inset(item->GetHighlightInsets());
    }
@@ -100,28 +99,28 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
    // TODO(pkasting): Not clear to me why we want to set the height to 1 dip.
    bounds.set_height(1);
    return bounds;
-@@ -1305,8 +1308,18 @@ bool MenuController::OnMouseWheel(SubmenuView* source,
+@@ -1453,8 +1456,18 @@ bool MenuController::OnMouseWheel(SubmenuView* source,
  
-   MenuPart part = GetMenuPart(source, event.location());
- 
--  SetSelection(part.menu ? part.menu.get() : state_.item.get(),
--               SELECTION_OPEN_SUBMENU | SELECTION_UPDATE_IMMEDIATELY);
-+  MenuItemView* item = part.menu ? part.menu.get() : state_.item.get();
-+  int selection_types = SELECTION_OPEN_SUBMENU | SELECTION_UPDATE_IMMEDIATELY;
-+  if (part.submenu && part.submenu->use_multiple_columns()) {
-+    // Wheel scrolling must not open the hovered folder over adjacent columns,
-+    // or build and measure its children on every wheel event. For column gaps,
-+    // keep the menu under the pointer open and close any deeper submenu.
-+    item = part.menu ? part.menu.get() : part.submenu->GetMenuItem();
-+    if (part.menu) {
-+      selection_types = SELECTION_UPDATE_IMMEDIATELY;
+   // Keep a focused menu-hosted Textfield focused while scrolling past items.
+   if (!HasFocusedTextfield()) {
+-    SetSelection(part.menu ? part.menu.get() : state_.item.get(),
+-                 SELECTION_OPEN_SUBMENU | SELECTION_UPDATE_IMMEDIATELY);
++    MenuItemView* item = part.menu ? part.menu.get() : state_.item.get();
++    int selection_types = SELECTION_OPEN_SUBMENU | SELECTION_UPDATE_IMMEDIATELY;
++    if (part.submenu && part.submenu->use_multiple_columns()) {
++      // Wheel scrolling must not open the hovered folder over adjacent columns,
++      // or build and measure its children on every wheel event. For column gaps,
++      // keep the menu under the pointer open and close any deeper submenu.
++      item = part.menu ? part.menu.get() : part.submenu->GetMenuItem();
++      if (part.menu) {
++        selection_types = SELECTION_UPDATE_IMMEDIATELY;
++      }
 +    }
-+  }
-+  SetSelection(item, selection_types);
-   if (destroy_pending_) {
-     return false;
-   }
-@@ -1484,13 +1497,22 @@ int MenuController::OnDragUpdated(SubmenuView* source,
++    SetSelection(item, selection_types);
+     if (destroy_pending_) {
+       return false;
+     }
+@@ -1635,13 +1648,22 @@ int MenuController::OnDragUpdated(SubmenuView* source,
  
    const gfx::Point screen_loc =
        View::ConvertPointToScreen(source, event.location());
@@ -145,7 +144,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
    bool over_empty_menu = false;
    if (!menu_item) {
      // See if we're over an empty menu. `GetMenuItemAt` fails in this case
-@@ -2152,6 +2174,9 @@ bool MenuController::OnKeyPressed(const ui::KeyEvent& event) {
+@@ -2406,6 +2428,9 @@ bool MenuController::OnKeyPressed(const ui::KeyEvent& event) {
        if (IsEditableCombobox()) {
          break;
        }
@@ -155,7 +154,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
        if (base::i18n::IsRTL()) {
          CloseSubmenu();
        } else {
-@@ -2163,6 +2188,9 @@ bool MenuController::OnKeyPressed(const ui::KeyEvent& event) {
+@@ -2417,6 +2442,9 @@ bool MenuController::OnKeyPressed(const ui::KeyEvent& event) {
        if (IsEditableCombobox()) {
          break;
        }
@@ -165,7 +164,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
        if (base::i18n::IsRTL()) {
          OpenSubmenuChangeSelectionIfCan();
        } else {
-@@ -2992,6 +3020,90 @@ void MenuController::StopCancelAllTimer() {
+@@ -3279,6 +3307,90 @@ void MenuController::StopCancelAllTimer() {
    cancel_all_timer_.Stop();
  }
  
@@ -256,7 +255,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
  gfx::Rect MenuController::CalculateMenuBounds(
      MenuItemView* item,
      MenuOpenDirection preferred_open_direction,
-@@ -3013,8 +3125,11 @@ gfx::Rect MenuController::CalculateMenuBounds(
+@@ -3300,8 +3412,11 @@ gfx::Rect MenuController::CalculateMenuBounds(
    SetAnchorParametersForItem(item, anchor_bounds.origin(), anchor);
  
    const auto* const scroll_view_container = submenu->GetScrollViewContainer();
@@ -270,7 +269,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
  
    const gfx::Rect& monitor_bounds = state_.monitor_bounds;
  
-@@ -3024,8 +3139,10 @@ gfx::Rect MenuController::CalculateMenuBounds(
+@@ -3311,8 +3426,10 @@ gfx::Rect MenuController::CalculateMenuBounds(
    }
  
    // Don't let the menu go too wide or too tall.
@@ -283,7 +282,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
    if (!monitor_bounds.IsEmpty()) {
      menu_bounds.set_width(
          std::min(menu_bounds.width(), monitor_bounds.width()));
-@@ -3196,10 +3313,17 @@ gfx::Rect MenuController::CalculateBubbleMenuBounds(
+@@ -3483,10 +3600,17 @@ gfx::Rect MenuController::CalculateBubbleMenuBounds(
    SubmenuView* submenu = item->GetSubmenu();
    CHECK(submenu);
    const auto* const scroll_view_container = submenu->GetScrollViewContainer();
@@ -305,7 +304,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
  
    // For comboboxes, ensure the menu is at least as wide as the anchor.
    const gfx::Insets border_insets =
-@@ -3402,7 +3526,12 @@ gfx::Rect MenuController::CalculateBubbleMenuBounds(
+@@ -3689,7 +3813,12 @@ gfx::Rect MenuController::CalculateBubbleMenuBounds(
          x = x_right;
        } else if (x_left >= x_min) {
          // Enough room on the left, show there.
@@ -319,7 +318,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
          x = x_left;
        } else {
          // No room on either side. Flush the menu to the right edge.
-@@ -3570,17 +3699,18 @@ void MenuController::MoveSelectionToFirstOrLastItem(
+@@ -3867,17 +3996,18 @@ void MenuController::MoveSelectionToFirstOrLastItem(
  MenuItemView* MenuController::FindInitialSelectableMenuItem(
      MenuItemView* parent,
      SelectionIncrementDirectionType direction) {
@@ -341,7 +340,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
        if (child->IsTraversableByKeyboard()) {
          return child;
        }
-@@ -3589,6 +3719,22 @@ MenuItemView* MenuController::FindInitialSelectableMenuItem(
+@@ -3886,6 +4016,22 @@ MenuItemView* MenuController::FindInitialSelectableMenuItem(
    return nullptr;
  }
  
@@ -364,7 +363,7 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
  void MenuController::OpenSubmenuChangeSelectionIfCan() {
    ScopedDeletionGuard guard(AsWeakPtr());
    MenuItemView* item = pending_state_.item;
-@@ -4213,7 +4359,7 @@ void MenuController::SetNextHotTrackedView(
+@@ -4518,7 +4664,7 @@ void MenuController::SetNextHotTrackedView(
        return;
      }
      // Stop on the next keyboard-traversable item.
@@ -374,18 +373,10 @@ index 20ad3d05bb0e8..0d66bdfd50f94 100644
        SetInitialHotTrackedView(child, direction);
        return;
 diff --git a/ui/views/controls/menu/menu_controller.h b/ui/views/controls/menu/menu_controller.h
-index 655814df01abd..5c61f837c5c10 100644
+index 28616e2672819..236a6b800eb75 100644
 --- a/ui/views/controls/menu/menu_controller.h
 +++ b/ui/views/controls/menu/menu_controller.h
-@@ -9,6 +9,7 @@
- 
- #include <list>
- #include <memory>
-+#include <optional>
- #include <set>
- #include <string>
- #include <utility>
-@@ -573,6 +574,13 @@ class VIEWS_EXPORT MenuController final : public gfx::AnimationDelegate,
+@@ -617,6 +617,13 @@ class VIEWS_EXPORT MenuController final : public gfx::AnimationDelegate,
    void StartCancelAllTimer();
    void StopCancelAllTimer();
  
@@ -399,7 +390,7 @@ index 655814df01abd..5c61f837c5c10 100644
    // Calculates the bounds of the menu to show. `resulting_direction` is set to
    // match the direction the menu opened in. Also calculates anchor that system
    // compositor can use to position the menu. Resulting menu bounds, and bounds
-@@ -630,6 +638,8 @@ class VIEWS_EXPORT MenuController final : public gfx::AnimationDelegate,
+@@ -674,6 +681,8 @@ class VIEWS_EXPORT MenuController final : public gfx::AnimationDelegate,
    // the selection is changed such that the menu opens immediately.
    void OpenSubmenuChangeSelectionIfCan();
  
@@ -408,7 +399,7 @@ index 655814df01abd..5c61f837c5c10 100644
    // If possible, closes the submenu.
    void CloseSubmenu();
  
-@@ -847,6 +857,8 @@ class VIEWS_EXPORT MenuController final : public gfx::AnimationDelegate,
+@@ -900,6 +909,8 @@ class VIEWS_EXPORT MenuController final : public gfx::AnimationDelegate,
    // continually processing whether we can drop, we cache the coordinates.
    bool valid_drop_coordinates_ = false;
    gfx::Point drop_pt_;
@@ -418,7 +409,7 @@ index 655814df01abd..5c61f837c5c10 100644
  
    // If true, we're in the middle of invoking ShowAt on a submenu.
 diff --git a/ui/views/controls/menu/menu_scroll_view_container.cc b/ui/views/controls/menu/menu_scroll_view_container.cc
-index 618177724d161..0ce998e0df791 100644
+index 6fa92879b4e2f..c117bb30da566 100644
 --- a/ui/views/controls/menu/menu_scroll_view_container.cc
 +++ b/ui/views/controls/menu/menu_scroll_view_container.cc
 @@ -300,6 +300,10 @@ class MenuScrollViewContainer::MenuScrollView : public View {
@@ -443,7 +434,7 @@ index 618177724d161..0ce998e0df791 100644
  
      if (old_y == min_y && old_y != y) {
        owner_->DidScrollAwayFromTop();
-@@ -673,13 +679,31 @@ void MenuScrollViewContainer::SetScrollBarThumbVisible(bool visible) {
+@@ -684,13 +690,31 @@ void MenuScrollViewContainer::SetScrollBarThumbVisible(bool visible) {
  
  void MenuScrollViewContainer::OnBoundsChanged(
      const gfx::Rect& previous_bounds) {
@@ -483,10 +474,10 @@ index 618177724d161..0ce998e0df791 100644
    const bool any_scroll_button_visible =
        scroll_up_button_->GetVisible() || scroll_down_button_->GetVisible();
 diff --git a/ui/views/controls/menu/menu_scroll_view_container.h b/ui/views/controls/menu/menu_scroll_view_container.h
-index d1513df4894c0..34be1d1a39e25 100644
+index 80865cd23f24b..bad0bf3e28805 100644
 --- a/ui/views/controls/menu/menu_scroll_view_container.h
 +++ b/ui/views/controls/menu/menu_scroll_view_container.h
-@@ -85,6 +85,10 @@ class VIEWS_EXPORT MenuScrollViewContainer : public View,
+@@ -88,6 +88,10 @@ class VIEWS_EXPORT MenuScrollViewContainer : public View,
    void OnBoundsChanged(const gfx::Rect& previous_bounds) override;
  
   private:
@@ -498,7 +489,7 @@ index d1513df4894c0..34be1d1a39e25 100644
  
    void DidScrollToTop();
 diff --git a/ui/views/controls/menu/submenu_view.cc b/ui/views/controls/menu/submenu_view.cc
-index cb3a68f348b4c..111626ff9ed68 100644
+index 153893423a8d4..3b3c887afaff5 100644
 --- a/ui/views/controls/menu/submenu_view.cc
 +++ b/ui/views/controls/menu/submenu_view.cc
 @@ -5,6 +5,8 @@
@@ -965,7 +956,7 @@ index cb3a68f348b4c..111626ff9ed68 100644
 @@ -426,17 +763,59 @@ void SubmenuView::OnDragExited() {
  views::View::DropCallback SubmenuView::GetDropCallback(
      const ui::DropTargetEvent& event) {
-   DCHECK(parent_menu_item_->GetMenuController());
+   CHECK(parent_menu_item_->GetMenuController(), base::NotFatalUntil::M163);
 +  if (use_multiple_columns_) {
 +    // Scrolling or relayout can move the target after the last drag update.
 +    // DropHelper does not send another update before requesting the callback.
@@ -1095,17 +1086,17 @@ index cb3a68f348b4c..111626ff9ed68 100644
    SchedulePaint();
  }
  
-@@ -805,7 +1218,8 @@ gfx::Rect SubmenuView::CalculateDropIndicatorBounds(
-     MenuItemView* item,
+@@ -806,7 +1219,8 @@ gfx::Rect SubmenuView::CalculateDropIndicatorBounds(
      MenuDelegate::DropPosition position) {
-   DCHECK(position != MenuDelegate::DropPosition::kNone);
+   CHECK(position != MenuDelegate::DropPosition::kNone,
+         base::NotFatalUntil::M163);
 -  gfx::Rect item_bounds = item->bounds();
 +  gfx::Rect item_bounds =
 +      use_multiple_columns_ ? item->GetMirroredBounds() : item->bounds();
    switch (position) {
      case MenuDelegate::DropPosition::kBefore:
        item_bounds.Offset(0, -kDropIndicatorHeight / 2);
-@@ -849,7 +1263,7 @@ bool SubmenuView::OnScroll(float dx, float dy) {
+@@ -850,7 +1264,7 @@ bool SubmenuView::OnScroll(float dx, float dy) {
    //   new_vis_bounds = { x = 0, y = 499, w = 100, h = 500 }
    // so pixels y=499 through y=998 of this view are drawn, and pixel y=999 is
    // hidden - oops.

@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/omnibox/omnibox_edit_model.cc b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
-index d33b2f1ded1b1..b44f1064c72e9 100644
+index d77c4a15eeb27..02dc3b54ba3a9 100644
 --- a/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 +++ b/chrome/browser/ui/omnibox/omnibox_edit_model.cc
 @@ -42,6 +42,7 @@
@@ -14,27 +14,27 @@ index d33b2f1ded1b1..b44f1064c72e9 100644
    }
  }
  
-+WindowOpenDisposition MaybeOverrideOmniboxCurrentTabDisposition(
-+    WindowOpenDisposition disposition) {
-+  if (disposition != WindowOpenDisposition::kCurrentTab ||
++ui::mojom::WindowOpenDisposition MaybeOverrideOmniboxCurrentTabDisposition(
++    ui::mojom::WindowOpenDisposition disposition) {
++  if (disposition != ui::mojom::WindowOpenDisposition::kCurrentTab ||
 +      !base::FeatureList::IsEnabled(features::kOpenOmniboxUrlInNewTab)) {
 +    return disposition;
 +  }
 +
 +  const std::string mode = features::kOpenOmniboxUrlInNewTabMode.Get();
 +  if (mode == "background") {
-+    return WindowOpenDisposition::kNewBackgroundTab;
++    return ui::mojom::WindowOpenDisposition::kNewBackgroundTab;
 +  }
 +
 +  // Default to foreground for unknown values as well as the default parameter.
-+  return WindowOpenDisposition::kNewForegroundTab;
++  return ui::mojom::WindowOpenDisposition::kNewForegroundTab;
 +}
 +
  void EmitEnteredKeywordModeHistogram(
      OmniboxEventProto::KeywordModeEntryMethod entry_method,
      const TemplateURL* turl,
-@@ -928,6 +945,8 @@ void OmniboxEditModel::OpenSelection(
-     WindowOpenDisposition disposition,
+@@ -957,6 +974,8 @@ void OmniboxEditModel::OpenSelection(
+     ui::mojom::WindowOpenDisposition disposition,
      bool via_keyboard,
      const searchbox::AutocompleteSnapshot* snapshot) {
 +  disposition = MaybeOverrideOmniboxCurrentTabDisposition(disposition);
@@ -42,8 +42,8 @@ index d33b2f1ded1b1..b44f1064c72e9 100644
    controller_->StopAutocomplete(/*clear_result=*/false);
  
    base::UmaHistogramMicrosecondsTimes("Omnibox.InputToOpenSelection",
-@@ -2459,6 +2478,8 @@ void OmniboxEditModel::StepPopupSelection(
- void OmniboxEditModel::AcceptInput(WindowOpenDisposition disposition,
+@@ -2505,6 +2524,8 @@ void OmniboxEditModel::StepPopupSelection(
+ void OmniboxEditModel::AcceptInput(ui::mojom::WindowOpenDisposition disposition,
                                     base::TimeTicks match_selection_timestamp) {
    TRACE_EVENT("omnibox", "OmniboxEditModel::AcceptInput");
 +  disposition = MaybeOverrideOmniboxCurrentTabDisposition(disposition);
@@ -52,10 +52,10 @@ index d33b2f1ded1b1..b44f1064c72e9 100644
    GURL alternate_nav_url;
    AutocompleteMatch match = CurrentMatchAndAlternateNavUrl(&alternate_nav_url);
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 5a13246d11dcc..0ff1cd0b955c6 100644
+index 0a826beb5e0b5..65f95917359f9 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
-@@ -279,6 +279,16 @@ BASE_FEATURE_PARAM(std::string,
+@@ -323,6 +323,16 @@ BASE_FEATURE_PARAM(std::string,
                     "mode",
                     "foreground");
  
@@ -73,10 +73,10 @@ index 5a13246d11dcc..0ff1cd0b955c6 100644
  // Enables the UI for Process Isolation in chrome://settings/system.
  BASE_FEATURE(kProcessIsolationSettings, base::FEATURE_DISABLED_BY_DEFAULT);
 diff --git a/chrome/browser/ui/ui_features.h b/chrome/browser/ui/ui_features.h
-index 51ef41c35061f..0e1122aad946c 100644
+index 5bbeb15c3dc4e..c404073e3fb4d 100644
 --- a/chrome/browser/ui/ui_features.h
 +++ b/chrome/browser/ui/ui_features.h
-@@ -419,6 +419,9 @@ BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
+@@ -428,6 +428,9 @@ BASE_DECLARE_FEATURE_PARAM(int, kHoverActivateTabDelayMs);
  BASE_DECLARE_FEATURE(kOpenBookmarksInNewTab);
  BASE_DECLARE_FEATURE_PARAM(std::string, kOpenBookmarksInNewTabMode);
  

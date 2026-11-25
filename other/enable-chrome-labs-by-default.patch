@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/toolbar/chrome_labs/chrome_labs_utils.cc b/chrome/browser/ui/toolbar/chrome_labs/chrome_labs_utils.cc
-index f7c81500b2e9f..ea6463178d243 100644
+index 8150aba234b5f..e7a8b2198cf8c 100644
 --- a/chrome/browser/ui/toolbar/chrome_labs/chrome_labs_utils.cc
 +++ b/chrome/browser/ui/toolbar/chrome_labs/chrome_labs_utils.cc
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index f7c81500b2e9f..ea6463178d243 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -27,7 +27,7 @@
+@@ -28,7 +28,7 @@
  #endif
  
  namespace {

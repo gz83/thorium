@@ -112,7 +112,7 @@ overlay-derived, or still need separate provenance review.
 - [`thorium-app-metadata-branding.patch`](../other/thorium-app-metadata-branding.patch)
 - [`thorium-theme-resources.patch`](../other/thorium-theme-resources.patch) — Registers all eight Thorium WebUI images in M154’s theme resource map, retaining Android’s direct resource-ID access to the version-page mascot.
 - [`thorium-app-vector-icons.patch`](../other/thorium-app-vector-icons.patch)
-- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Bundles verified uBlock Origin 1.75.0 for offline installation in new profiles, retaining upstream's update URL.
+- [`preinstall-ublock-origin.patch`](../other/preinstall-ublock-origin.patch) — Bundles verified uBlock Origin 1.77.0 for offline installation in new profiles, retaining upstream's update URL.
 - [`bookmark-default-prefs.patch`](../other/bookmark-default-prefs.patch)
 - [`bookmark-dialog-default-folder.patch`](../other/bookmark-dialog-default-folder.patch)
 - [`increase-bookmark-open-prompt-threshold.patch`](../other/increase-bookmark-open-prompt-threshold.patch)
@@ -162,6 +162,7 @@ overlay-derived, or still need separate provenance review.
 - [`enable-chrome-labs-by-default.patch`](../other/enable-chrome-labs-by-default.patch)
 - [`enable-whats-new-by-default.patch`](../other/enable-whats-new-by-default.patch)
 - [`fix-policy-templates.patch`](../other/fix-policy-templates.patch)
+  Linux Thorium reads system policies from `/etc/thorium/policies/`. Before upgrading from M158, deploy Thorium's mandatory policies in `managed/` and recommended policies in `recommended/` under that directory. If you use enterprise enrollment, deploy Thorium's enrollment settings in `enrollment/`. Device trust also uses that directory for its signing key.
 - [`ftp-support-thorium.patch`](../other/ftp-support-thorium.patch)
 - [`GPC.patch`](../other/GPC.patch)
   Keeps Thorium's default-enabled `enable_gpc` preference and settings UI, using M154's shared GPC predicate for headers and Navigator APIs, including workers. The API remains exposed when disabled and reports the effective signal state.

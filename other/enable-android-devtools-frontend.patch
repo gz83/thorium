@@ -1,5 +1,5 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java b/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java
-index 0a9639c6bc135..d1b983a79b9a3 100644
+index 44274b0b8f1d1..61b130f1734d7 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/ChromeContextMenuPopulator.java
 @@ -85,7 +85,6 @@ import org.chromium.chrome.browser.share.qrcode.QrCodeCoordinator;
@@ -52,10 +52,10 @@ index 91b71ae48ec56..f560765b83bcb 100644
          if ((readAloudController != null && readAloudController.isReadable(currentTab))
                  || shouldShowReaderModeItem(currentTab)
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
-index 5750bbe7d3d17..9b724efb9233d 100644
+index 5e34bd3bfa5f5..a67deeac394c7 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegate.java
-@@ -503,6 +503,11 @@ public class TabbedAppMenuPropertiesDelegate extends AppMenuPropertiesDelegateIm
+@@ -504,6 +504,11 @@ public class TabbedAppMenuPropertiesDelegate extends AppMenuPropertiesDelegateIm
              modelList.add(buildReaderModeItem(currentTab, shouldShowIconBeforeItem));
          }
  
@@ -115,7 +115,7 @@ index 40c7c3a8c0f5f..b938d81f6934a 100644
  
      /** Launches the task manager. */
 diff --git a/content/public/common/content_features.cc b/content/public/common/content_features.cc
-index ccc1fd856d09c..d8a858c5a1c23 100644
+index 9946f996c45e4..1b622c5533d60 100644
 --- a/content/public/common/content_features.cc
 +++ b/content/public/common/content_features.cc
 @@ -37,7 +37,13 @@ BASE_FEATURE(kAperitifHelpers, base::FEATURE_ENABLED_BY_DEFAULT);

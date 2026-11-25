@@ -1,5 +1,5 @@
 diff --git a/components/BUILD.gn b/components/BUILD.gn
-index f88c4c5eb0421..6103b277d0136 100644
+index 65bc2d6d0025a..5ba7068eda529 100644
 --- a/components/BUILD.gn
 +++ b/components/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -8,7 +8,7 @@ index f88c4c5eb0421..6103b277d0136 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -1241,8 +1241,8 @@ if (use_blink) {
+@@ -1244,8 +1244,8 @@ if (use_blink) {
      ]
  
      if (is_mac) {
@@ -20,7 +20,7 @@ index f88c4c5eb0421..6103b277d0136 100644
  
      if (toolkit_views && !is_mac && !is_castos) {
 diff --git a/content/shell/BUILD.gn b/content/shell/BUILD.gn
-index 8b637148169c2..a24ce7856d5ed 100644
+index 1afecb8edd1db..aa0d0889669a3 100644
 --- a/content/shell/BUILD.gn
 +++ b/content/shell/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -40,7 +40,7 @@ index 8b637148169c2..a24ce7856d5ed 100644
    content_shell_major_version = "999"
  }
  
-@@ -619,7 +619,7 @@ repack("pak") {
+@@ -616,7 +616,7 @@ repack("pak") {
  }
  
  if (is_android) {
@@ -49,7 +49,7 @@ index 8b637148169c2..a24ce7856d5ed 100644
      testonly = true
      deps = [ "//content/shell/android:content_shell_apk" ]
    }
-@@ -634,7 +634,7 @@ if (is_android) {
+@@ -631,7 +631,7 @@ if (is_android) {
      ]
    }
  
@@ -58,7 +58,7 @@ index 8b637148169c2..a24ce7856d5ed 100644
      testonly = true
      output_name = content_shell_product_name
      sources = [ "app/shell_main_mac.cc" ]
-@@ -755,7 +755,7 @@ if (is_android) {
+@@ -752,7 +752,7 @@ if (is_android) {
      }
    }
  } else {
@@ -67,7 +67,7 @@ index 8b637148169c2..a24ce7856d5ed 100644
      testonly = true
  
      sources = [ "app/shell_main.cc" ]
-@@ -817,7 +817,7 @@ if (is_android) {
+@@ -814,7 +814,7 @@ if (is_android) {
      fuchsia_component("content_shell_component") {
        testonly = true
        manifest = "fuchsia/content_shell.cml"
@@ -76,7 +76,7 @@ index 8b637148169c2..a24ce7856d5ed 100644
        visibility = [ ":*" ]
      }
  
-@@ -1115,7 +1115,7 @@ if (is_android) {
+@@ -1112,7 +1112,7 @@ if (is_android) {
        "//content/test/data/media/",
      ]
      data_deps = [
@@ -85,7 +85,7 @@ index 8b637148169c2..a24ce7856d5ed 100644
        "//build/android:devil_chromium_py",
        "//build/android:test_runner_py",
        "//testing:test_scripts_shared",
-@@ -1127,7 +1127,7 @@ if (is_android) {
+@@ -1124,7 +1124,7 @@ if (is_android) {
  group("content_shell_crash_test") {
    testonly = true
    data_deps = [
@@ -166,7 +166,7 @@ index 0837469134df6..6cf1319b88bfc 100644
  #ifdef APSTUDIO_INVOKED
  /////////////////////////////////////////////////////////////////////////////
 diff --git a/content/shell/app/shell_main_delegate.cc b/content/shell/app/shell_main_delegate.cc
-index b7c740fa457ea..4f2a799e2bb73 100644
+index b4c91f75d6d16..17592a096b617 100644
 --- a/content/shell/app/shell_main_delegate.cc
 +++ b/content/shell/app/shell_main_delegate.cc
 @@ -1,4 +1,4 @@
@@ -175,7 +175,7 @@ index b7c740fa457ea..4f2a799e2bb73 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -170,7 +170,7 @@ void InitLogging(const base::CommandLine& command_line) {
+@@ -171,7 +171,7 @@ void InitLogging(const base::CommandLine& command_line) {
  #else
        base::PathService::Get(base::DIR_EXE, &log_filename);
  #endif
@@ -206,7 +206,7 @@ index 0c52b54f11aaa..02b15082cd391 100644
    shell_data.window_widget->Init(std::move(params));
  #endif  // BUILDFLAG(IS_CHROMEOS)
 diff --git a/content/test/BUILD.gn b/content/test/BUILD.gn
-index 4393239aceed5..d510d562f0067 100644
+index 045d7fcc88b23..facd953fa56a5 100644
 --- a/content/test/BUILD.gn
 +++ b/content/test/BUILD.gn
 @@ -1,4 +1,4 @@
@@ -215,10 +215,10 @@ index 4393239aceed5..d510d562f0067 100644
  # Use of this source code is governed by a BSD-style license that can be
  # found in the LICENSE file.
  
-@@ -2394,8 +2394,8 @@ test("content_browsertests") {
-       "../renderer/render_view_browsertest_mac.mm",
+@@ -2402,8 +2402,8 @@ test("content_browsertests") {
+       "//components/remote_cocoa/app_shim",
+       "//third_party/ocmock",
      ]
-     deps += [ "//third_party/ocmock" ]
 -    data_deps += [ "//content/shell:content_shell" ]
 -    data += [ "$root_out_dir/Content Shell.app/" ]
 +    data_deps += [ "//content/shell:thorium_shell" ]

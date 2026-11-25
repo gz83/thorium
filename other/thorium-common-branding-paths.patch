@@ -1,8 +1,8 @@
 diff --git a/base/version_info/nix/version_extra_utils.cc b/base/version_info/nix/version_extra_utils.cc
-index e48fbf29760fb..0cb25d08d5f6c 100644
+index bbdbe3a74ca68..e984cac1cd233 100644
 --- a/base/version_info/nix/version_extra_utils.cc
 +++ b/base/version_info/nix/version_extra_utils.cc
-@@ -39,7 +39,7 @@ std::string GetAppName(base::Environment& env) {
+@@ -40,7 +40,7 @@ std::string GetAppName(base::Environment& env) {
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
    static constexpr std::string_view kAppName = "com.google.Chrome";
  #else
@@ -11,7 +11,7 @@ index e48fbf29760fb..0cb25d08d5f6c 100644
  #endif
  
    std::string_view suffix;
-@@ -64,7 +64,7 @@ std::string GetSessionNamePrefix(base::Environment& env) {
+@@ -65,7 +65,7 @@ std::string GetSessionNamePrefix(base::Environment& env) {
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
    static constexpr std::string_view kSessionNamePrefix = "chrome";
  #else
@@ -20,6 +20,15 @@ index e48fbf29760fb..0cb25d08d5f6c 100644
  #endif
  
    std::string_view suffix;
+@@ -116,7 +116,7 @@ std::string GetDesktopName(base::Environment& env) {
+   if (!name.empty()) {
+     return name;
+   }
+-  return "chromium-browser.desktop";
++  return "thorium-browser.desktop";
+ #endif
+ }
+ 
 diff --git a/chrome/browser/extensions/api/messaging/launch_context_win.cc b/chrome/browser/extensions/api/messaging/launch_context_win.cc
 index bde1be53e4cc2..ccf07f56e3d45 100644
 --- a/chrome/browser/extensions/api/messaging/launch_context_win.cc
@@ -33,25 +42,6 @@ index bde1be53e4cc2..ccf07f56e3d45 100644
  
    // Try to read the path using the Chromium-specific registry for Chromium.
    // If that fails, fallback to Chrome-specific registry key below.
-diff --git a/chrome/common/channel_info_posix.cc b/chrome/common/channel_info_posix.cc
-index f6bcb3cc8e8d6..b0bc8c2a0db93 100644
---- a/chrome/common/channel_info_posix.cc
-+++ b/chrome/common/channel_info_posix.cc
-@@ -1,4 +1,4 @@
--// Copyright 2011 The Chromium Authors
-+// Copyright 2026 The Chromium Authors and Alex313031
- // Use of this source code is governed by a BSD-style license that can be
- // found in the LICENSE file.
- 
-@@ -148,7 +148,7 @@ std::string GetDesktopName(base::Environment* env) {
-   if (name.has_value() && !name.value().empty()) {
-     return name.value();
-   }
--  return "chromium-browser.desktop";
-+  return "thorium-browser.desktop";
- #endif
- }
- #endif  // BUILDFLAG(IS_LINUX)
 diff --git a/chrome/common/chrome_constants.cc b/chrome/common/chrome_constants.cc
 index 1a6b899b4bc3a..1b5159d3fec19 100644
 --- a/chrome/common/chrome_constants.cc
@@ -123,10 +113,10 @@ index 1a6b899b4bc3a..1b5159d3fec19 100644
  
  #if BUILDFLAG(IS_MAC)
 diff --git a/chrome/common/chrome_paths.cc b/chrome/common/chrome_paths.cc
-index 4448f86df86f7..c524811340bc0 100644
+index b2e5bf21e15c4..8e401621f6e7e 100644
 --- a/chrome/common/chrome_paths.cc
 +++ b/chrome/common/chrome_paths.cc
-@@ -56,7 +56,7 @@ const base::FilePath::CharType kFilepathSinglePrefExtensions[] =
+@@ -59,7 +59,7 @@ const base::FilePath::CharType kFilepathSinglePrefExtensions[] =
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
      FILE_PATH_LITERAL("/usr/share/google-chrome/extensions");
  #else
@@ -135,7 +125,7 @@ index 4448f86df86f7..c524811340bc0 100644
  #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
  
  #endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
-@@ -440,8 +440,7 @@ bool PathProvider(int key, base::FilePath* result) {
+@@ -443,8 +443,7 @@ bool PathProvider(int key, base::FilePath* result) {
          return false;
        }
  
@@ -145,7 +135,7 @@ index 4448f86df86f7..c524811340bc0 100644
                  .Append(FILE_PATH_LITERAL("External Extensions"));
  #else
        if (!base::PathService::Get(base::DIR_MODULE, &cur)) {
-@@ -466,7 +465,7 @@ bool PathProvider(int key, base::FilePath* result) {
+@@ -469,7 +468,7 @@ bool PathProvider(int key, base::FilePath* result) {
            "/Library/Google/ChromeForTesting/NativeMessagingHosts"));
  #else
        cur = base::FilePath(FILE_PATH_LITERAL(
@@ -154,7 +144,7 @@ index 4448f86df86f7..c524811340bc0 100644
  #endif
  #else  // BUILDFLAG(IS_MAC)
  #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
-@@ -477,7 +476,7 @@ bool PathProvider(int key, base::FilePath* result) {
+@@ -480,7 +479,7 @@ bool PathProvider(int key, base::FilePath* result) {
            "/etc/opt/chrome_for_testing/native-messaging-hosts"));
  #else
        cur = base::FilePath(
@@ -164,7 +154,7 @@ index 4448f86df86f7..c524811340bc0 100644
  #endif  // !BUILDFLAG(IS_MAC)
        break;
 diff --git a/chrome/common/chrome_paths_linux.cc b/chrome/common/chrome_paths_linux.cc
-index 5575c049b222f..998c3f3bb2b05 100644
+index e8dd514534929..13f9ab4811aac 100644
 --- a/chrome/common/chrome_paths_linux.cc
 +++ b/chrome/common/chrome_paths_linux.cc
 @@ -1,4 +1,4 @@
@@ -173,15 +163,15 @@ index 5575c049b222f..998c3f3bb2b05 100644
  // Use of this source code is governed by a BSD-style license that can be
  // found in the LICENSE file.
  
-@@ -95,7 +95,7 @@ bool GetDefaultUserDataDirectory(base::FilePath* result) {
+@@ -96,7 +96,7 @@ bool GetDefaultUserDataDirectory(base::FilePath* result) {
  #elif BUILDFLAG(GOOGLE_CHROME_BRANDING)
    std::string data_dir_basename = "google-chrome";
  #else
 -  std::string data_dir_basename = "chromium";
 +  std::string data_dir_basename = "thorium";
  #endif
+   // LINT.ThenChange(//chrome/installer/linux/snap/build.py:ConfigDirName)
    *result = config_dir.Append(data_dir_basename + GetChannelSuffixForDataDir());
-   return true;
 diff --git a/chrome/common/chrome_paths_mac.mm b/chrome/common/chrome_paths_mac.mm
 index 6829c9cb92c22..b351e495f9e28 100644
 --- a/chrome/common/chrome_paths_mac.mm

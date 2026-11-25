@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
-index 9e6a5d18dce22..f6aa2b339a844 100644
+index 8d0bac3183299..364575e465a22 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_group_header_view.cc
 @@ -4,6 +4,7 @@
@@ -7,10 +7,10 @@ index 9e6a5d18dce22..f6aa2b339a844 100644
  #include "chrome/browser/ui/views/tabs/common/tab_group_header_view.h"
  
 +#include "base/command_line.h"
- #include "base/i18n/rtl.h"
+ #include "base/numerics/safe_conversions.h"
  #include "base/task/single_thread_task_runner.h"
  #include "build/build_config.h"
-@@ -572,7 +573,23 @@ void TabGroupHeaderView::OnDataChanged(
+@@ -642,7 +643,23 @@ void TabGroupHeaderView::OnDataChanged(
  
    UpdateIsCollapsed();
    UpdateAccessibleName();
@@ -36,7 +36,7 @@ index 9e6a5d18dce22..f6aa2b339a844 100644
  
  void TabGroupHeaderView::OnTabCountChanged() {
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.cc b/chrome/browser/ui/views/tabs/common/tab_view.cc
-index 54a598b76e821..94c285a798fb7 100644
+index e49f31bb597ca..63497c7c45ed7 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.cc
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.cc
 @@ -54,6 +54,7 @@
@@ -47,7 +47,7 @@ index 54a598b76e821..94c285a798fb7 100644
  #include "chrome/browser/ui/views/tabs/tab/tab_close_button.h"
  #include "chrome/browser/ui/views/tabs/tab/tab_icon.h"
  #include "chrome/browser/ui/views/tabs/tab/tab_title.h"
-@@ -910,6 +911,16 @@ void TabView::PaintChildren(const views::PaintInfo& info) {
+@@ -957,6 +958,16 @@ void TabView::PaintChildren(const views::PaintInfo& info) {
    View::PaintChildren(info);
  }
  
@@ -65,7 +65,7 @@ index 54a598b76e821..94c285a798fb7 100644
    // Split pinned tabs have a merged background that is rendered in
    // `SplitTabView`.
 diff --git a/chrome/browser/ui/views/tabs/common/tab_view.h b/chrome/browser/ui/views/tabs/common/tab_view.h
-index bf2a9deaf9e8a..a0853509e1311 100644
+index ed9c2f434f47e..282d9ad868dce 100644
 --- a/chrome/browser/ui/views/tabs/common/tab_view.h
 +++ b/chrome/browser/ui/views/tabs/common/tab_view.h
 @@ -7,6 +7,7 @@
@@ -76,7 +76,7 @@ index bf2a9deaf9e8a..a0853509e1311 100644
  #include <vector>
  
  #include "base/callback_list.h"
-@@ -26,6 +27,7 @@
+@@ -27,6 +28,7 @@
  #include "third_party/skia/include/core/SkScalar.h"
  #include "ui/base/metadata/metadata_header_macros.h"
  #include "ui/gfx/canvas.h"
@@ -84,7 +84,7 @@ index bf2a9deaf9e8a..a0853509e1311 100644
  #include "ui/views/context_menu_controller.h"
  #include "ui/views/layout/layout_manager_base.h"
  #include "ui/views/masked_targeter_delegate.h"
-@@ -143,6 +145,7 @@ class TabView : public views::View,
+@@ -146,6 +148,7 @@ class TabView : public views::View,
    void OnMouseExited(const ui::MouseEvent& event) override;
    bool OnMouseDragged(const ui::MouseEvent& event) override;
    void OnGestureEvent(ui::GestureEvent* event) override;
@@ -93,25 +93,25 @@ index bf2a9deaf9e8a..a0853509e1311 100644
    void OnPaint(gfx::Canvas* canvas) override;
    void AddedToWidget() override;
 diff --git a/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc b/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
-index 2358db3c428cb..a4b2019120b23 100644
+index 5b9120080a5d2..5dda53f22d42e 100644
 --- a/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
 +++ b/chrome/browser/ui/views/tabs/hovercard/tab_hover_card_controller.cc
-@@ -300,6 +300,10 @@ bool TabHoverCardController::IsHoverCardShowingForTab(
+@@ -299,6 +299,10 @@ bool TabHoverCardController::IsHoverCardShowingForTab(
  void TabHoverCardController::UpdateHoverCard(
      HoverCardAnchorTarget* anchor_target,
-     TabSlotController::HoverCardUpdateType update_type) {
+     HoverCardUpdateType update_type) {
 +  if (base::CommandLine::ForCurrentProcess()->HasSwitch("tab-hover-cards")) {
 +    return;
 +  }
 +
    if (hide_hover_card_lock_count_ > 0) {
      anchor_target = nullptr;
-     update_type = TabSlotController::HoverCardUpdateType::kAnimating;
+     update_type = HoverCardUpdateType::kAnimating;
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index c991d5542f695..4d6bf42b26715 100644
+index c4e580f50b6b1..3a2d8131405e9 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -1338,6 +1338,16 @@ float Tab::GetZValue() const {
+@@ -1330,6 +1330,16 @@ float Tab::GetZValue() const {
    return sort_value;
  }
  

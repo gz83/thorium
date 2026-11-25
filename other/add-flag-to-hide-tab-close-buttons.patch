@@ -46,10 +46,10 @@ index d2b935e0c80a1..c3acc5634bf33 100644
        return false;
      }
 diff --git a/chrome/browser/ui/views/tabs/tab.cc b/chrome/browser/ui/views/tabs/tab.cc
-index 5e929dd1b693a..c991d5542f695 100644
+index d954eb38b447c..c4e580f50b6b1 100644
 --- a/chrome/browser/ui/views/tabs/tab.cc
 +++ b/chrome/browser/ui/views/tabs/tab.cc
-@@ -1466,12 +1466,16 @@ void Tab::UpdateIconVisibility() {
+@@ -1458,12 +1458,16 @@ void Tab::UpdateIconVisibility() {
  #if BUILDFLAG(IS_CHROMEOS)
    // Hide tab close button for OnTask if locked. Only applicable for non-web
    // browser scenarios.

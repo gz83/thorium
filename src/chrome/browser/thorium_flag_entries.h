@@ -162,16 +162,16 @@
      "Switch to the left/right tab if a scroll wheel event happens over the tabstrip, or the empty space beside the tabstrip.",
      kOsDesktop, MULTI_VALUE_TYPE(kScrollEventChangesTab)},
 
-#if BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
+#if BUILDFLAG(IS_MAC)
     {"middle-click-autoscroll",
      "Middle Click Autoscroll",
      "Enables autoscrolling when the middle mouse button is pressed.",
-     kOsDesktop,
+     kOsMac,
      ENABLE_DISABLE_VALUE_TYPE_AND_VALUE(switches::kEnableBlinkFeatures,
                                          "MiddleClickAutoscroll",
                                          switches::kDisableBlinkFeatures,
                                          "MiddleClickAutoscroll")},
-#endif // BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
+#endif  // BUILDFLAG(IS_MAC)
 
     {"autoplay-policy",
      "Configure AutoPlay Policy",

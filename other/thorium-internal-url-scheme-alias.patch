@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
-index b712a1750e440..c02f7b5cd661c 100644
+index 0517f8b0ca8fc..48d60b7d8fe4d 100644
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -1037,6 +1037,8 @@ source_set("core") {
+@@ -1032,6 +1032,8 @@ source_set("core") {
      "startup_data.cc",
      "thorium_flag_choices.h",
      "thorium_flag_entries.h",
@@ -12,10 +12,10 @@ index b712a1750e440..c02f7b5cd661c 100644
      "unexpire_flags.h",
      "universal_web_contents_observers.cc",
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index 565bd580ba617..b38c8ca940137 100644
+index 66fc9124dd5f7..992dfd0756eef 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -202,6 +202,7 @@
+@@ -206,6 +206,7 @@
  #include "chrome/browser/subresource_filter/subresource_filter_navigation_download_policy.h"
  #include "chrome/browser/tab_group_sync/tab_group_sync_utils.h"
  #include "chrome/browser/task_manager/task_manager_interface.h"
@@ -23,7 +23,7 @@ index 565bd580ba617..b38c8ca940137 100644
  #include "chrome/browser/tracing/chrome_tracing_delegate.h"
  #include "chrome/browser/translate/translate_service.h"
  #include "chrome/browser/ui/blocked_content/blocked_window_params.h"
-@@ -5227,6 +5228,8 @@ ChromeContentBrowserClient::GetForcedColorsForWebContents(
+@@ -5238,6 +5239,8 @@ ChromeContentBrowserClient::GetForcedColorsForWebContents(
  
  void ChromeContentBrowserClient::BrowserURLHandlerCreated(
      BrowserURLHandler* handler) {
@@ -33,10 +33,10 @@ index 565bd580ba617..b38c8ca940137 100644
    // URL handlers below. Also register it before the "parts" handlers, so the
    // NTP policy takes precedence over extensions that override the NTP.
 diff --git a/chrome/browser/extensions/extension_tab_util.cc b/chrome/browser/extensions/extension_tab_util.cc
-index aeb80f6bc0ae2..41270dca6c036 100644
+index 91501be296e23..0fa3ae529c7c0 100644
 --- a/chrome/browser/extensions/extension_tab_util.cc
 +++ b/chrome/browser/extensions/extension_tab_util.cc
-@@ -1102,7 +1102,8 @@ bool ExtensionTabUtil::IsKillURL(const GURL& url) {
+@@ -1103,7 +1103,8 @@ bool ExtensionTabUtil::IsKillURL(const GURL& url) {
      return true;
    }
  
@@ -47,7 +47,7 @@ index aeb80f6bc0ae2..41270dca6c036 100644
    }
  
 diff --git a/chrome/browser/history/history_utils.cc b/chrome/browser/history/history_utils.cc
-index 71be10047aec7..537a5167042c9 100644
+index e52cc4e0cba3b..3f47463fef7bd 100644
 --- a/chrome/browser/history/history_utils.cc
 +++ b/chrome/browser/history/history_utils.cc
 @@ -25,6 +25,7 @@ bool CanAddURLToHistory(const GURL& url) {
@@ -59,7 +59,7 @@ index 71be10047aec7..537a5167042c9 100644
        url.SchemeIs(content::kViewSourceScheme) ||
        url.SchemeIs(chrome::kChromeNativeScheme) ||
 diff --git a/chrome/browser/profiles/profile_io_data.cc b/chrome/browser/profiles/profile_io_data.cc
-index 803c106e13bca..942d9e28b5386 100644
+index bc36eda8edc4d..fdce7329412de 100644
 --- a/chrome/browser/profiles/profile_io_data.cc
 +++ b/chrome/browser/profiles/profile_io_data.cc
 @@ -44,6 +44,7 @@ bool ProfileIOData::IsHandledProtocol(std::string_view scheme) {
@@ -366,7 +366,7 @@ index d1c01e0bada6d..ae426f648dab2 100644
    typedef std::pair<URLHandler, URLHandler> HandlerPair;
    std::vector<HandlerPair> url_handlers_;
 diff --git a/content/browser/renderer_host/navigation_controller_impl.cc b/content/browser/renderer_host/navigation_controller_impl.cc
-index cf5e166fd1c0a..a299673155c6b 100644
+index 6a32810289d3e..a1a0589798e43 100644
 --- a/content/browser/renderer_host/navigation_controller_impl.cc
 +++ b/content/browser/renderer_host/navigation_controller_impl.cc
 @@ -456,9 +456,9 @@ void RewriteUrlForNavigation(const GURL& original_url,

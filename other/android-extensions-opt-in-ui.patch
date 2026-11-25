@@ -1,8 +1,8 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
-index 590ef51237365..10573d3f58f6c 100644
+index b0121bd4617e4..69ddbf6671c87 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/ChromeTabbedActivity.java
-@@ -4497,6 +4497,13 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
+@@ -4523,6 +4523,13 @@ public class ChromeTabbedActivity extends ChromeActivity implements PreAttachInt
              @Nullable MotionEventInfo triggeringMotion) {
          final Tab currentTab = getActivityTab();
          boolean currentTabIsNtp = isTabNtp(currentTab);
@@ -17,7 +17,7 @@ index 590ef51237365..10573d3f58f6c 100644
              if (!mTabModelSelector.isTabStateInitialized()) {
                  RecordUserAction.record("MobileMenuNewTab.BeforeTabRestore");
 diff --git a/chrome/app/extensions_strings.grdp b/chrome/app/extensions_strings.grdp
-index 3581c69193079..1eaff74b1ea35 100644
+index 3edaa5eb52848..2a57a8d67322f 100644
 --- a/chrome/app/extensions_strings.grdp
 +++ b/chrome/app/extensions_strings.grdp
 @@ -1,6 +1,12 @@
@@ -34,10 +34,10 @@ index 3581c69193079..1eaff74b1ea35 100644
      Allow access to file URLs
    </message>
 diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browser/flags/android/chrome_feature_list.cc
-index 9c7596bebed24..8159f5f88212c 100644
+index e7c673a9e1f9e..b62c88813dff7 100644
 --- a/chrome/browser/flags/android/chrome_feature_list.cc
 +++ b/chrome/browser/flags/android/chrome_feature_list.cc
-@@ -197,6 +197,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
+@@ -198,6 +198,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
      &download::features::kShowDownloadScanningState,
      &download::features::kSmartSuggestionForLargeDownloads,
      &enterprise_data_protection::kEnableAndroidEnterpriseScreenshotProtection,
@@ -46,10 +46,10 @@ index 9c7596bebed24..8159f5f88212c 100644
      &feature_engagement::kIPHTabSwitcherButtonFeature,
      &features::kAAPMBlocksWebGPU,
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-index 69c7831d6d7a4..4068b57a76b35 100644
+index dde2e800b33be..0932a4b7cf9e2 100644
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-@@ -588,6 +588,7 @@ public abstract class ChromeFeatureList {
+@@ -638,6 +638,7 @@ public abstract class ChromeFeatureList {
              "EnableDownloadSaveAsContextMenu";
      public static final String ENABLE_DOWNLOAD_SAVE_AS_SYSTEM_FILE_DIALOG =
              "EnableDownloadSaveAsSystemFileDialog";
@@ -264,7 +264,7 @@ index 12032e33269db..cd75100e3b063 100644
  export {COLORS_CSS_SELECTOR} from 'chrome://resources/cr_components/color_change_listener/colors_css_updater.js';
  export {CrCheckboxElement} from 'chrome://resources/cr_elements/cr_checkbox/cr_checkbox.js';
 diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
-index 3079f2188a8fa..c49254de5b56d 100644
+index d82be7ab5ef6d..fde7b9fb7728a 100644
 --- a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
 +++ b/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/browser/toolbar/extensions/ExtensionsMenuCoordinator.java
 @@ -25,8 +25,10 @@ import org.chromium.base.supplier.NullableObservableSupplier;
@@ -308,7 +308,7 @@ index 3079f2188a8fa..c49254de5b56d 100644
              return;
          }
 diff --git a/chrome/browser/ui/webui/extensions/extensions_ui.cc b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-index 0e5ee2897ccda..bb6cc5ac4003a 100644
+index 0e4c10a6a2980..2efcac5a4833a 100644
 --- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
 +++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
 @@ -10,6 +10,7 @@
@@ -319,7 +319,7 @@ index 0e5ee2897ccda..bb6cc5ac4003a 100644
  #include "base/functional/bind.h"
  #include "base/metrics/field_trial_params.h"
  #include "base/strings/string_util.h"
-@@ -437,6 +438,18 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
+@@ -441,6 +442,18 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
    };
    source->AddLocalizedStrings(kLocalizedStrings);
  

@@ -2,6 +2,8 @@
 "chrome/app/app_management_strings.grdp","True","False","overlay_text_sync","Reviewed overlay-owned replacements; auto-discover plain branding replacements, with special cases in message_allowlist.csv."
 "chrome/app/chromium_strings.grd","True","True","overlay_text_sync","Reviewed overlay-owned replacements; auto-discover plain branding replacements, with special cases in message_allowlist.csv."
 "chrome/app/extensions_strings.grdp","False","True","feature_patch_messages","Patch-owned extensions messages; not broad overlay branding."
+"chrome/app/glic_strings.grdp","False","False","explicit_text_sync","Reviewed browser branding in the Gemini provider change notice."
+"chrome/app/skills_strings.grdp","False","False","explicit_text_sync","Reviewed browser branding in the unsupported Skills gallery notice."
 "chrome/app/generated_resources.grd","True","True","mixed_text_and_structural","Process reviewed overlay messages and exclude feature-patch messages."
 "chrome/app/settings_chromium_strings.grdp","True","False","overlay_text_sync","Reviewed overlay-owned replacements; auto-discover plain branding replacements, with special cases in message_allowlist.csv."
 "chrome/app/settings_strings.grdp","True","True","overlay_text_and_feature_patch","Process reviewed overlay messages; keep GPC feature messages owned by other/GPC.patch."

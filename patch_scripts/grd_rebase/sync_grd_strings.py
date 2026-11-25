@@ -12,6 +12,11 @@ import re
 import sys
 from typing import Iterable
 
+if __package__:
+    from .merge_thorium_xtb import group_inventory, load_inventory
+else:
+    from merge_thorium_xtb import group_inventory, load_inventory
+
 CHROMIUM_PROJECT_LINK_MESSAGE_IDS = frozenset(
     {
         "IDS_VERSION_UI_LICENSE",
@@ -107,6 +112,8 @@ PRODUCT_TEXT_REPLACEMENTS_BEFORE_CHROME = (
 )
 PRODUCT_TEXT_REPLACEMENTS_AFTER_CHROME = (
     ("Google Thorium", "Thorium"),
+    ("Google\u00a0Thorium", "Thorium"),
+    ("Google\u202fThorium", "Thorium"),
     ("Google recommends Thorium", "Alex313031 recommends Thorium"),
     ("ThoriumOS Flex", "ThoriumOS"),
     ("made possible by Thorium", "made possible by Chromium"),
@@ -178,9 +185,11 @@ TRANSLATION_FILE_RE = re.compile(
 GRDP_PARENT_GRD_PATHS = {
     "chrome/app/app_management_strings.grdp": "chrome/app/generated_resources.grd",
     "chrome/app/extensions_strings.grdp": "chrome/app/generated_resources.grd",
+    "chrome/app/glic_strings.grdp": "chrome/app/generated_resources.grd",
     "chrome/app/settings_chromium_strings.grdp": "chrome/app/chromium_strings.grd",
     "chrome/app/settings_strings.grdp": "chrome/app/generated_resources.grd",
     "chrome/app/shared_settings_strings.grdp": "chrome/app/generated_resources.grd",
+    "chrome/app/skills_strings.grdp": "chrome/app/generated_resources.grd",
     "components/autofill_payments_strings.grdp": "components/components_strings.grd",
     "components/autofill_strings.grdp": "components/components_strings.grd",
     "components/error_page_strings.grdp": "components/components_strings.grd",
@@ -380,7 +389,7 @@ class XtbTranslationMatch:
 
 @dataclass(frozen=True)
 class XtbTranslationMissing:
-    """One mapped XTB file where a message's old ID was not found."""
+    """An uncovered translation in one mapped locale."""
 
     source_chromium_path: str
     message_id: str
@@ -444,7 +453,7 @@ def _sample_values(values: Iterable[str], limit: int = 8) -> str:
 def xtb_locale_from_path(chromium_path: str) -> str:
     """Best-effort locale extraction from Chromium XTB resource paths."""
     filename = Path(chromium_path).name
-    match = re.search(r"_([A-Za-z-]+)\.xtb$", filename)
+    match = re.search(r"_([A-Za-z]+(?:-[A-Za-z0-9]+)*)\.xtb$", filename)
     return match.group(1) if match else ""
 
 
@@ -526,7 +535,7 @@ def select_thorium_added_file_rows(
 
 
 def build_message_keys(
-    rows: list[dict[str, str]],
+    rows: Iterable[dict[str, str]],
 ) -> set[tuple[str, str]]:
     """Return normalized `(chromium_path, message_id)` ownership keys."""
     return {
@@ -851,6 +860,7 @@ def find_old_translations(
     source_root: Path,
     changes: list[MessageChange],
     mappings: dict[str, GrdXtbMapping],
+    reviewed_targets: frozenset[tuple[str, str]] = frozenset(),
 ) -> tuple[list[MessageTranslationLookup], dict[str, XtbFileCache]]:
     """Find each modified message's old ID in every mapped XTB file."""
     xtb_cache: dict[str, XtbFileCache] = {}
@@ -867,6 +877,9 @@ def find_old_translations(
         matches: list[XtbTranslationMatch] = []
         missing: list[XtbTranslationMissing] = []
         for xtb_file in mapping.xtb_files:
+            if (xtb_file.chromium_path, change.new_translation_id) in reviewed_targets:
+                # The merge owns this exact locale and ID, including on reruns.
+                continue
             if xtb_file.chromium_path not in xtb_cache:
                 xtb_path = source_root / xtb_file.chromium_path
                 if not xtb_path.is_file():
@@ -883,6 +896,8 @@ def find_old_translations(
                 change.old_translation_id
             )
             if old_translation is None:
+                if change.new_translation_id in xtb_cache[xtb_file.chromium_path].by_id:
+                    continue
                 missing.append(
                     XtbTranslationMissing(
                         source_chromium_path=change.chromium_path,
@@ -1186,11 +1201,61 @@ def write_xtb_conflict_summary_report(
             )
 
 
+def find_uncovered_targets(
+    source_root: Path,
+    changes: list[MessageChange],
+    feature_rows: list[dict[str, str]],
+    reviewed_targets: frozenset[tuple[str, str]],
+    insertions: list[XtbTranslationInsertion],
+    xtb_cache: dict[str, XtbFileCache],
+) -> list[XtbTranslationMissing]:
+    """Check actual target IDs, including unchanged IDs and patch-owned messages."""
+    required: dict[str, set[tuple[str, str, str]]] = {}
+    for change in changes:
+        if change.xtb_sync_needed:
+            required.setdefault(change.chromium_path, set()).add(
+                (change.message_id, change.old_translation_id, change.new_translation_id)
+            )
+
+    localized_features = (
+        row for row in feature_rows
+        if row.get("translation_strategy") in {"reuse_existing_upstream_id", "xtb_additions_complete"}
+    )
+    owned = _build_message_allowlist_from_keys(build_message_keys(localized_features))
+    for path, names in owned.items():
+        for match in MESSAGE_RE.finditer((source_root / path).read_text(encoding="utf-8")):
+            name = MESSAGE_NAME_RE.search(match[1]).group(1)
+            if name in names and not TRANSLATEABLE_FALSE_RE.search(match[1]):
+                translation_id = message_block_to_id(match[0])
+                required.setdefault(path, set()).add((name, translation_id, translation_id))
+
+    planned = reviewed_targets.union(
+        (item.chromium_path, item.new_translation_id) for item in insertions
+    )
+    mappings = build_grd_xtb_mapping(source_root, sorted(required))
+    extra_ids: dict[str, set[str]] = {}
+    missing: list[XtbTranslationMissing] = []
+    for path, targets in required.items():
+        for xtb in mappings[path].xtb_files:
+            target = xtb.chromium_path
+            if target in xtb_cache:
+                present = xtb_cache[target].by_id.keys()
+            else:
+                if target not in extra_ids:
+                    text = (source_root / target).read_text(encoding="utf-8")
+                    extra_ids[target] = {m[1] for m in XTB_TRANSLATION_RE.finditer(text)}
+                present = extra_ids[target]
+            for name, old_id, new_id in targets:
+                if new_id not in present and (target, new_id) not in planned:
+                    missing.append(XtbTranslationMissing(path, name, old_id, new_id, xtb.lang, target))
+    return missing
+
+
 def write_xtb_missing_summary_report(
     missing: list[XtbTranslationMissing],
     output_path: Path,
 ) -> None:
-    """Write a compact summary of missing old-ID translation lookups."""
+    """Summarize target IDs still uncovered after sync and reviewed additions."""
     grouped: dict[tuple[str, str, str, str], list[XtbTranslationMissing]] = {}
     for item in missing:
         key = (
@@ -1234,7 +1299,7 @@ def write_xtb_missing_summary_report(
                     str(len(set(locales))),
                     _sample_values(locales),
                     _sample_values(item.xtb_chromium_path for item in items),
-                    "missing_old_id_no_translation_inserted",
+                    "missing_target_translation",
                     risk,
                 ]
             )
@@ -1322,7 +1387,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--xtb-missing-report",
         type=Path,
         default=None,
-        help="Optional TSV path for summarized missing old-ID lookups.",
+        help="Optional TSV report of target IDs missing after both workflow steps.",
+    )
+    parser.add_argument(
+        "--inventory",
+        type=readable_file,
+        default=Path(__file__).resolve().parent / "config/xtb_additions.tsv",
+        help="Reviewed translations that the subsequent XTB merge will supply.",
     )
     parser.add_argument(
         "--feature-message-ownership",
@@ -1382,7 +1453,8 @@ def main() -> int:
         message_allowlist_rows,
         feature_message_rows,
     )
-    if not text_sync_file_rows:
+    explicit_file_rows = [row for row in file_allowlist_rows if row["role"] == "explicit_text_sync"]
+    if not (text_sync_file_rows or explicit_file_rows):
         raise ValueError("file allowlist contains no text-sync roles")
     source_contents = load_allowed_source_files(
         args.source_root,
@@ -1394,6 +1466,7 @@ def main() -> int:
         source_contents,
         feature_message_keys,
     )
+    source_contents.update(load_allowed_source_files(args.source_root, explicit_file_rows))
     message_allowlist = _build_message_allowlist_from_keys(
         auto_branding_message_keys | explicit_message_keys
     )
@@ -1410,12 +1483,18 @@ def main() -> int:
         args.source_root,
         sorted({change.chromium_path for change in xtb_sync_changes}),
     )
+    reviewed_targets = frozenset(
+        (path, addition.translation_id)
+        for path, additions in group_inventory(load_inventory(args.inventory)).items()
+        for addition in additions
+    )
     translation_lookups, xtb_cache = find_old_translations(
         args.source_root,
         xtb_sync_changes,
         xtb_mappings,
+        reviewed_targets,
     )
-    missing_old_translations = [
+    missing_translations = [
         missing
         for lookup in translation_lookups
         for missing in lookup.missing
@@ -1429,8 +1508,12 @@ def main() -> int:
     if args.xtb_conflict_report is not None:
         write_xtb_conflict_summary_report(xtb_conflicts, args.xtb_conflict_report)
     if args.xtb_missing_report is not None:
+        missing_translations = find_uncovered_targets(
+            args.source_root, changes, feature_message_rows, reviewed_targets,
+            translation_insertions, xtb_cache,
+        )
         write_xtb_missing_summary_report(
-            missing_old_translations,
+            missing_translations,
             args.xtb_missing_report,
         )
     if xtb_conflicts:
@@ -1446,14 +1529,14 @@ def main() -> int:
             "additions workflow",
             file=sys.stderr,
         )
-    if missing_old_translations:
+    if missing_translations:
         missing_messages = {
             (item.source_chromium_path, item.message_id)
-            for item in missing_old_translations
+            for item in missing_translations
         }
         print(
-            "info: old translation IDs were missing from "
-            f"{len(missing_old_translations)} mapped XTB lookups across "
+            "info: translations were unavailable for "
+            f"{len(missing_translations)} mapped XTB lookups across "
             f"{len(missing_messages)} messages; continuing without them",
             file=sys.stderr,
         )

@@ -2,6 +2,7 @@ List of Chromium Authors:
 
 # BEGIN individuals section.
 # keep-sorted start block=no case=no
+Aakash <aaka3h@gmail.com>
 Aaron Boushley <boushley@gmail.com>
 Aaron Dewes <aarondewes@gmail.com>
 Aaron Jacobs <samusaaron3@gmail.com>
@@ -318,6 +319,7 @@ Christopher Dale <chrelad@gmail.com>
 Christopher Snowhill <kode54@gmail.com>
 Chunbo Hua <chunbo.hua@intel.com>
 Claudio DeSouza <claudiomdsjr@gmail.com>
+Clay Dugo <claydugo@gmail.com>
 Clay Miller <clay@smockle.com>
 Clemens Fruhwirth <clemens@endorphin.org>
 Clement Scheelfeldt Skau <clementskau@gmail.com>
@@ -462,6 +464,7 @@ Eldar Rello <eldar.rello@gmail.com>
 Ely Ronnen <elyronnen@gmail.com>
 Emil Suleymanov <emil@esnx.xyz>
 Emre Teke <emretekdersin@gmail.com>
+Eren Özen <erenozen@outlook.com>
 Ergun Erdogmus <erdogmusergun@gmail.com>
 Eric Ahn <byungwook.ahn@gmail.com>
 Eric Huang <ele828@gmail.com>
@@ -480,6 +483,7 @@ Ethan Wong <bunnnywong@gmail.com>
 Etienne Laurin <etienne@atnnn.com>
 Eugene Kim <eugene70kim@gmail.com>
 Eugene Sudin <eugene@sudin.pro>
+Eunji Jeon <e0917132@gmail.com>
 Eunseok Oh <fivesilverstone@gmail.com>
 Evan Peterson <evan.peterson.ep@gmail.com>
 Evan Wallace <evan.exe@gmail.com>
@@ -690,6 +694,7 @@ Jaesung Hyun <dev.hyunjaesung@gmail.com>
 Jaewon Choi <jaewon.james.choi@gmail.com>
 Jaewon Jung <jw.jung@navercorp.com>
 Jaewoo Lee <ljw5953@gmail.com>
+Jaewoong Song <sek82468246@gmail.com>
 Jaeyong Bae <jdragon.bae@gmail.com>
 Jagadesh P <jagadeshjai1999@gmail.com>
 Jagdish Chourasia <jagdish.c@samsung.com>
@@ -1167,6 +1172,7 @@ Mihai Tica <mitica@adobe.com>
 Mihalis Haatainen <mihalis.haatainen@bountyy.fi>
 Mike Pennisi <mike@mikepennisi.com>
 Mike Tilburg <mtilburg@adobe.com>
+Mikhail Gavrilov <mikhail.v.gavrilov@gmail.com>
 Mikhail Pozdnyakov <mikhail.pozdnyakov@intel.com>
 Miles Chen <milesatw@gmail.com>
 Milko Leporis <milko.leporis@imgtec.com>
@@ -1297,6 +1303,7 @@ Patrick Riordan <patrickriordan177@gmail.com>
 Patrick Stein <patrickwonders@gmail.com>
 Patrik Ackland <patrikackland@gmail.com>
 Paul Adolph <padolph@netflix.com>
+Paul Bob <paul.ionut.bob@gmail.com>
 Paul Kehrer <paul.l.kehrer@gmail.com>
 Paul Lind <paul.lind@imgtec.com>
 Paul Nettleship <pnettleship@gmail.com>
@@ -1698,6 +1705,7 @@ Tianyi Zhang <me@1stprinciple.org>
 Tibor Dusnoki <tdusnoki@inf.u-szeged.hu>
 Tibor Dusnoki <tibor.dusnoki.91@gmail.com>
 Tien Hock Loh <tienhock.loh@starfivetech.com>
+Tim <tim071885@gmail.com>
 Tim Ansell <mithro@mithis.com>
 Tim Barry <oregongraperoot@gmail.com>
 Tim Eulitz <tim.eulitz@wallpaperengine.io>
@@ -1717,6 +1725,7 @@ Tomas Popela <tomas.popela@gmail.com>
 Tomasz Edward Posłuszny <tom@devpeer.net>
 Tomoaki Kobayashi <tomoaki.kobayashi.t3@alumni.tohoku.ac.jp>
 Tony Shen <legendmastertony@gmail.com>
+TopChrome UI Bug Fixer Bot <bot.gerrit.topchrome@gmail.com>
 Topi Lassila <tolassila@gmail.com>
 Torsten Kurbad <google@tk-webart.de>
 Toshiaki Tanaka <zokutyou2@gmail.com>
@@ -1758,6 +1767,7 @@ Viet-Trung Luu <viettrungluu@gmail.com>
 Vikas Mundra <vikas.mundra@samsung.com>
 Vinay Anantharaman <vinaya@adobe.com>
 Vinoth Chandar <vinoth@uber.com>
+Viorel Cernateanu <vrilutza@gmail.com>
 Vipul Bhasin <vipul.bhasin@gmail.com>
 Visa Putkinen <v.putkinen@partner.samsung.com>
 Vishal Bhatnagar <vishal.b@samsung.com>
@@ -1883,6 +1893,7 @@ Youngsoo Choi <kenshin.choi@samsung.com>
 Youngsun Suh <zard17@gmail.com>
 Yu Luo <luotianyi@luotianyi.me>
 Yuan-Pin Yu <yjames@uber.com>
+Yugyeong Park <bonbonly7@naver.com>
 Yuhong Sha <yuhong.sha@samsung.com>
 YuJiang Zhou <zhouyujiang.zyj@alibaba-inc.com>
 Yuki Osaki <yuki.osaki7@gmail.com>
@@ -1913,6 +1924,7 @@ Zhang Hao <15686357310a@gmail.com>
 Zhang Hao <zhanghao.m@bytedance.com>
 Zhao Qin <qzmiss@gmail.com>
 Zhaoming Jiang <zhaoming.jiang@intel.com>
+Zhaoyang Zhang <scratch.cache@gmail.com>
 Zhaoze Zhou <zhaoze.zhou@partner.samsung.com>
 Zheda Chen <zheda.chen@intel.com>
 Zheng Chuang <zhengchuangscu@gmail.com>

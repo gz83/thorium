@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index b38c8ca940137..ca7c40c17bb3b 100644
+index 992dfd0756eef..4d60e5a8e347c 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -4111,11 +4111,15 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
+@@ -4112,11 +4112,15 @@ GetPreferredColorScheme(const WebPreferences& web_prefs,
      preferred_root_scrollbar_color_scheme = preferred_color_scheme;
    }
  #else  // !BUILDFLAG(IS_ANDROID)
@@ -85,11 +85,11 @@ index 6d7b24b67ff1f..ff0250adf59a5 100644
  }
  
 diff --git a/chrome/browser/themes/theme_service.cc b/chrome/browser/themes/theme_service.cc
-index cc3523cb5cdf4..1fb01d38ec37d 100644
+index 8f563d16be76f..169aa49319030 100644
 --- a/chrome/browser/themes/theme_service.cc
 +++ b/chrome/browser/themes/theme_service.cc
-@@ -714,7 +714,10 @@ ui::ColorProviderKey ThemeService::GetColorProviderKey(
-   DCHECK_EQ(profile->GetOriginalProfile(), profile_);
+@@ -815,7 +815,10 @@ ui::ColorProviderKey ThemeService::GetColorProviderKey(
+   CHECK_EQ(profile->GetOriginalProfile(), profile_, base::NotFatalUntil::M163);
  
    ui::ColorProviderKey key = base_key;
 -  const bool is_incognito = profile->IsIncognitoProfile();
@@ -101,10 +101,10 @@ index cc3523cb5cdf4..1fb01d38ec37d 100644
  
    // color_mode.
 diff --git a/chrome/browser/ui/views/frame/browser_widget.cc b/chrome/browser/ui/views/frame/browser_widget.cc
-index df70a8b38c53c..a3c384510127d 100644
+index 73fdb2336955b..1b36ebec420ca 100644
 --- a/chrome/browser/ui/views/frame/browser_widget.cc
 +++ b/chrome/browser/ui/views/frame/browser_widget.cc
-@@ -594,6 +594,11 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
+@@ -617,6 +617,11 @@ bool BrowserWidget::RegenerateFrameOnThemeChange(
  }
  
  bool BrowserWidget::IsIncognitoBrowser() const {

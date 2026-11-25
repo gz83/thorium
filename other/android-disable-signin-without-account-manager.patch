@@ -1,5 +1,5 @@
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
-index ae3ce667f878d..c5997883fab47 100644
+index a3806c9dfd707..221bea41057d4 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninAndHistorySyncActivity.java
 @@ -354,10 +354,12 @@ public class SigninAndHistorySyncActivity extends FullscreenSigninAndHistorySync
@@ -15,14 +15,14 @@ index ae3ce667f878d..c5997883fab47 100644
 +                                    // SigninUtils to open settings instead.
 +                                    SigninUtils.openSettingsForAllAccounts(this);
 +                                }
+                                 assumeNonNull(mCoordinator);
+                                 mCoordinator.onAddAccountCanceled();
                                  return;
-                             }
-                             SigninMetricsUtils.logAddAccountStateHistogram(State.STARTED);
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-index 004586067586a..e5eca74eca797 100644
+index 6cdf4ee7fffc0..60c275e1a2408 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninBridge.java
-@@ -148,6 +148,9 @@ final class SigninBridge {
+@@ -149,6 +149,9 @@ final class SigninBridge {
              AccountPickerBottomSheetCoordinatorFactory factory,
              String extensionName) {
          ThreadUtils.assertOnUiThread();
@@ -33,10 +33,10 @@ index 004586067586a..e5eca74eca797 100644
          if (windowAndroid == null || !tab.isUserInteractable()) {
              // The page is opened in the background, ignore the header. See
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java
-index 4aecfaa03a00e..79daaf89a89fa 100644
+index 54fcea994ea92..b30de6014b2f7 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/signin/SigninFirstRunFragment.java
-@@ -226,9 +226,11 @@ public class SigninFirstRunFragment extends Fragment
+@@ -264,9 +264,11 @@ public class SigninFirstRunFragment extends Fragment
                                  return;
                              }
  
@@ -48,14 +48,14 @@ index 4aecfaa03a00e..79daaf89a89fa 100644
 +                                // open settings instead.
 +                                SigninUtils.openSettingsForAllAccounts(getActivity());
 +                            }
+                             mFullscreenSigninCoordinator.onAddAccountCanceled();
                          });
      }
- 
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java b/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
-index a7b591e76aa29..23d9c7edcfe9e 100644
+index 1964c1be3b58d..ab8012e4ba7ed 100644
 --- a/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/sync/settings/AccountManagementFragment.java
-@@ -296,7 +296,9 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
+@@ -295,7 +295,9 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
                  accountsCategory.addPreference(createAccountPreference(account));
              }
          }
@@ -66,7 +66,7 @@ index a7b591e76aa29..23d9c7edcfe9e 100644
          notifyPreferencesUpdated();
      }
  
-@@ -368,7 +370,8 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
+@@ -367,7 +369,8 @@ public class AccountManagementFragment extends ChromeBaseSettingsFragment
  
                                  if (intent != null) {
                                      startActivity(intent);
@@ -91,10 +91,10 @@ index 452f0286b83a0..aa8df00a3093f 100644
              return ExternalAuthUtils.getInstance().canUseGooglePlayServices();
          }
 diff --git a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
-index 969daa36ebcaf..27802bd54d548 100644
+index 91d6315a726fe..53748f01e1737 100644
 --- a/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
 +++ b/chrome/browser/ui/android/signin/java/src/org/chromium/chrome/browser/ui/signin/fullscreen_signin/FullscreenSigninMediator.java
-@@ -445,7 +445,8 @@ public class FullscreenSigninMediator
+@@ -442,7 +442,8 @@ class FullscreenSigninMediator
      }
  
      private boolean isSigninSupported(Profile profile) {
@@ -105,10 +105,10 @@ index 969daa36ebcaf..27802bd54d548 100644
                  && !mConfig.shouldDisableSignin;
      }
 diff --git a/components/signin/internal/identity_manager/primary_account_manager.cc b/components/signin/internal/identity_manager/primary_account_manager.cc
-index b7c706aa23ea0..ad33679b01878 100644
+index a8e83d9cf944e..8820c8ac6add6 100644
 --- a/components/signin/internal/identity_manager/primary_account_manager.cc
 +++ b/components/signin/internal/identity_manager/primary_account_manager.cc
-@@ -391,7 +391,11 @@ void PrimaryAccountManager::RegisterProfilePrefs(PrefRegistrySimple* registry) {
+@@ -343,7 +343,11 @@ void PrimaryAccountManager::RegisterProfilePrefs(PrefRegistrySimple* registry) {
        prefs::kGoogleServicesSyncingUsernameMigratedToSignedIn, std::string());
    registry->RegisterIntegerPref(prefs::kGoogleServicesSyncingUserMigrationType,
                                  /*SyncToSigninMigrationType::kUnknown=*/0);

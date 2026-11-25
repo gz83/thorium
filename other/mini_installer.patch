@@ -1,8 +1,8 @@
 diff --git a/chrome/app/chromium_strings.grd b/chrome/app/chromium_strings.grd
-index dea90cda0be32..6fd24a64b589e 100644
+index 1cbf3e728d748..d0bd617818e2c 100644
 --- a/chrome/app/chromium_strings.grd
 +++ b/chrome/app/chromium_strings.grd
-@@ -739,6 +739,21 @@ Chromium is unable to recover your settings.
+@@ -751,6 +751,21 @@ Chromium is unable to recover your settings.
          <message name="IDS_INSTALL_OS_NOT_SUPPORTED" desc="Error displayed if OS is not supported">
            Chromium requires Windows 10 version 1809 or higher.
          </message>
@@ -2062,7 +2062,7 @@ index 858eb502f635d..9e66bedad5566 100644
    }
    DCHECK_NE(ret, static_cast<int>(STILL_ACTIVE));
 diff --git a/chrome/installer/setup/setup_main.cc b/chrome/installer/setup/setup_main.cc
-index 3b9e3170f0b73..d5d2f4a9fd1a0 100644
+index 9249a5b526ca9..a64425e1b2344 100644
 --- a/chrome/installer/setup/setup_main.cc
 +++ b/chrome/installer/setup/setup_main.cc
 @@ -1398,7 +1398,11 @@ InstallStatus InstallProductsHelper(InstallationState& original_state,
@@ -2079,7 +2079,7 @@ index 3b9e3170f0b73..d5d2f4a9fd1a0 100644
        } else if (install_status != INSTALL_FAILED) {
          if (installer_state.target_path().empty()) {
 diff --git a/chrome/installer/setup/setup_util.cc b/chrome/installer/setup/setup_util.cc
-index c1d710de17d40..41024406b4483 100644
+index 13b692a160560..dccce0e1fd55d 100644
 --- a/chrome/installer/setup/setup_util.cc
 +++ b/chrome/installer/setup/setup_util.cc
 @@ -1,4 +1,4 @@
@@ -2105,7 +2105,7 @@ index c1d710de17d40..41024406b4483 100644
  #include "chrome/installer/util/util_constants.h"
  #include "chrome/installer/util/work_item.h"
  #include "chrome/installer/util/work_item_list.h"
-@@ -252,7 +255,43 @@ bool ContainsUnsupportedSwitch(const base::CommandLine& cmd_line) {
+@@ -267,7 +270,43 @@ bool ContainsUnsupportedSwitch(const base::CommandLine& cmd_line) {
  
  bool IsProcessorSupported() {
  #if defined(ARCH_CPU_X86_FAMILY)

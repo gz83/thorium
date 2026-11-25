@@ -1,8 +1,8 @@
 diff --git a/chrome/app/chrome_main_delegate.cc b/chrome/app/chrome_main_delegate.cc
-index c52c98e5c0b79..becb7edf19813 100644
+index 79b98504e922e..abc4637966a4f 100644
 --- a/chrome/app/chrome_main_delegate.cc
 +++ b/chrome/app/chrome_main_delegate.cc
-@@ -843,6 +843,15 @@ void InitLogging(const std::string& process_type) {
+@@ -852,6 +852,15 @@ void InitLogging(const std::string& process_type) {
                   << chrome::kChromeVersion << " (not a warning)";
      LOG(WARNING) << "In Loving Memory of Linda Louise Frick: Grandma, Mother, and Sister.";
    }
@@ -19,7 +19,7 @@ index c52c98e5c0b79..becb7edf19813 100644
  #endif  // !BUILDFLAG(IS_ANDROID)
  
 diff --git a/chrome/browser/ui/views/frame/browser_root_view.cc b/chrome/browser/ui/views/frame/browser_root_view.cc
-index 6bedb648f178b..394d4fe8c64aa 100644
+index af2b797c5936c..bb383ba3507ba 100644
 --- a/chrome/browser/ui/views/frame/browser_root_view.cc
 +++ b/chrome/browser/ui/views/frame/browser_root_view.cc
 @@ -12,6 +12,7 @@

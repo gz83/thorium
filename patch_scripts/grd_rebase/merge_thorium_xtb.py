@@ -43,6 +43,8 @@ PRODUCT_TEXT_REPLACEMENTS_BEFORE_CHROME = (
 )
 PRODUCT_TEXT_REPLACEMENTS_AFTER_CHROME = (
     ("Google Thorium", "Thorium"),
+    ("Google\u00a0Thorium", "Thorium"),
+    ("Google\u202fThorium", "Thorium"),
     ("Google recommends Thorium", "Alex313031 recommends Thorium"),
     ("ThoriumOS Flex", "ThoriumOS"),
     ("made possible by Thorium", "made possible by Chromium"),

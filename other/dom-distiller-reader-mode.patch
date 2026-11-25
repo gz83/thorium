@@ -1,7 +1,7 @@
-diff --git a/components/dom_distiller/core/css/distilledpage_common.css b/components/dom_distiller/core/css/distilledpage_common.css
-index 570369d1febfe..f80502ac392de 100644
---- a/components/dom_distiller/core/css/distilledpage_common.css
-+++ b/components/dom_distiller/core/css/distilledpage_common.css
+diff --git a/components/web_distiller/core/css/distilledpage_common.css b/components/web_distiller/core/css/distilledpage_common.css
+index 38f315dc8b6d1..2f907966d6649 100644
+--- a/components/web_distiller/core/css/distilledpage_common.css
++++ b/components/web_distiller/core/css/distilledpage_common.css
 @@ -1,4 +1,4 @@
 -/* Copyright 2014 The Chromium Authors
 +/* Copyright 2026 The Chromium Authors and Alex313031
@@ -30,10 +30,10 @@ index 570369d1febfe..f80502ac392de 100644
    padding-bottom: 56.25%;
    position: relative;
    width: 100%;
-diff --git a/components/dom_distiller/core/dom_distiller_features.cc b/components/dom_distiller/core/dom_distiller_features.cc
-index 7f7c885ea0c23..4eb4c304d6b6c 100644
---- a/components/dom_distiller/core/dom_distiller_features.cc
-+++ b/components/dom_distiller/core/dom_distiller_features.cc
+diff --git a/components/web_distiller/core/web_distiller_features.cc b/components/web_distiller/core/web_distiller_features.cc
+index f3825bac99eab..0b0eb6721b67e 100644
+--- a/components/web_distiller/core/web_distiller_features.cc
++++ b/components/web_distiller/core/web_distiller_features.cc
 @@ -1,4 +1,4 @@
 -// Copyright 2015 The Chromium Authors
 +// Copyright 2026 The Chromium Authors and Alex313031
@@ -41,14 +41,14 @@ index 7f7c885ea0c23..4eb4c304d6b6c 100644
  // found in the LICENSE file.
  
 @@ -21,13 +21,19 @@
- namespace dom_distiller {
+ namespace web_distiller {
  
- bool IsDomDistillerEnabled() {
+ bool IsWebDistillerEnabled() {
 +  static const bool kReaderModeDesktop =
 +      base::CommandLine::ForCurrentProcess()->HasSwitch("reader-mode");
    return base::CommandLine::ForCurrentProcess()->HasSwitch(
--      switches::kEnableDomDistiller);
-+             switches::kEnableDomDistiller) ||
+-      switches::kEnableWebDistiller);
++             switches::kEnableWebDistiller) ||
 +         kReaderModeDesktop;
  }
  

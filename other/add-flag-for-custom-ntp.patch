@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
-index ca7c40c17bb3b..e5002d5996a0c 100644
+index 4d60e5a8e347c..4b7c33c52936e 100644
 --- a/chrome/browser/chrome_content_browser_client.cc
 +++ b/chrome/browser/chrome_content_browser_client.cc
-@@ -952,11 +952,22 @@ bool HandleNewTabPageLocationOverride(
+@@ -959,11 +959,22 @@ bool HandleNewTabPageLocationOverride(
  
    // Don't change the URL when incognito mode.
    if (profile->IsOffTheRecord()) {

@@ -1,8 +1,8 @@
 diff --git a/chrome/app/chrome_command_ids.h b/chrome/app/chrome_command_ids.h
-index 2ffedc1aad1f2..f1e23858b6520 100644
+index 2196ccd852cbd..6c55ae846aab6 100644
 --- a/chrome/app/chrome_command_ids.h
 +++ b/chrome/app/chrome_command_ids.h
-@@ -562,6 +562,11 @@
+@@ -564,6 +564,11 @@
  #define IDC_ASK_GOOGLE_ABOUT_THIS_PAGE 54035
  
  
@@ -15,31 +15,31 @@ index 2ffedc1aad1f2..f1e23858b6520 100644
  // See http://msdn.microsoft.com/en-us/library/t2zechd4(VS.71).aspx
  
 diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
-index 80eef5ec1e773..592a30f498e7f 100644
+index ebec8417cd166..4d79396c8d53a 100644
 --- a/chrome/app/generated_resources.grd
 +++ b/chrome/app/generated_resources.grd
-@@ -1054,6 +1054,9 @@ are declared in tools/grit/grit_args.gni.
+@@ -1026,6 +1026,9 @@ are declared in tools/grit/grit_args.gni.
            <message name="IDS_CONTENT_CONTEXT_SEARCHWEBFOR" desc="The name of the Search the Web for “string” command in the content area context menu">
              &amp;Search <ph name="SEARCH_ENGINE">$1<ex>Google</ex></ph> for “<ph name="SEARCH_TERMS">$2<ex>flowers</ex></ph>”
            </message>
 +          <message name="IDS_CONTENT_CONTEXT_SEARCH_WITH" desc="Submenu below the default text-search command, listing other configured search engines and active site searches.">
 +            Search with another search engine
 +          </message>
-           <message name="IDS_CONTENT_CONTEXT_SEARCHWEBFORNEWTAB" desc="The name of the Search the Web for “string” in New Tab command in the content area context menu">
-             &amp;Search <ph name="SEARCH_ENGINE">$1<ex>Google</ex></ph> for “<ph name="SEARCH_TERMS">$2<ex>flowers</ex></ph>” in new tab
+           <message name="IDS_CONTENT_CONTEXT_SEARCHLENSFORIMAGE" desc="The name of the Search Lens for Image command in the content area context menu">
+             Search image with <ph name="VISUAL_SEARCH_PROVIDER">$1<ex>Google Lens</ex></ph>
            </message>
-@@ -1416,6 +1419,9 @@ are declared in tools/grit/grit_args.gni.
+@@ -1357,6 +1360,9 @@ are declared in tools/grit/grit_args.gni.
            <message name="IDS_CONTENT_CONTEXT_SEARCHWEBFOR" desc="In Title Case: The name of the Search the Web for “string” command in the content area context menu">
              &amp;Search <ph name="SEARCH_ENGINE">$1<ex>Google</ex></ph> for “<ph name="SEARCH_TERMS">$2<ex>flowers</ex></ph>”
            </message>
 +          <message name="IDS_CONTENT_CONTEXT_SEARCH_WITH" desc="Submenu below the default text-search command, listing other configured search engines and active site searches.">
 +            Search with another search engine
 +          </message>
-           <message name="IDS_CONTENT_CONTEXT_SEARCHWEBFORNEWTAB" desc="In Title Case: The name of the Search the Web for “string” in New Tab command in the content area context menu">
-             &amp;Search <ph name="SEARCH_ENGINE">$1<ex>Google</ex></ph> for “<ph name="SEARCH_TERMS">$2<ex>flowers</ex></ph>” in New Tab
+           <message name="IDS_CONTENT_CONTEXT_SEARCHLENSFORIMAGE" desc="In Title Case: The name of the Search Lens for Image command in the content area context menu">
+             Search Image with <ph name="VISUAL_SEARCH_PROVIDER">$1<ex>Google Lens</ex></ph>
            </message>
 diff --git a/chrome/browser/renderer_context_menu/BUILD.gn b/chrome/browser/renderer_context_menu/BUILD.gn
-index fe5a6b11df6f4..0b5dd023f0d56 100644
+index 691b776eb8a5a..1766fe3f51973 100644
 --- a/chrome/browser/renderer_context_menu/BUILD.gn
 +++ b/chrome/browser/renderer_context_menu/BUILD.gn
 @@ -45,6 +45,7 @@ source_set("renderer_context_menu") {
@@ -51,7 +51,7 @@ index fe5a6b11df6f4..0b5dd023f0d56 100644
        "//content/public/browser",
        "//content/public/common:buildflags",
 diff --git a/chrome/browser/renderer_context_menu/render_view_context_menu.cc b/chrome/browser/renderer_context_menu/render_view_context_menu.cc
-index ed49f43cd864b..89428981403e9 100644
+index 4a97c27cf7d10..82c55f6d2f3e6 100644
 --- a/chrome/browser/renderer_context_menu/render_view_context_menu.cc
 +++ b/chrome/browser/renderer_context_menu/render_view_context_menu.cc
 @@ -8,16 +8,19 @@
@@ -74,7 +74,7 @@ index ed49f43cd864b..89428981403e9 100644
  #include "base/feature_list.h"
  #include "base/functional/bind.h"
  #include "base/functional/callback.h"
-@@ -212,6 +215,7 @@
+@@ -214,6 +217,7 @@
  #include "components/search_engines/search_engines_pref_names.h"
  #include "components/search_engines/template_url.h"
  #include "components/search_engines/template_url_service.h"
@@ -82,7 +82,7 @@ index ed49f43cd864b..89428981403e9 100644
  #include "components/send_tab_to_self/features.h"
  #include "components/send_tab_to_self/metrics_util.h"
  #include "components/services/app_service/public/cpp/app_launch_params.h"
-@@ -264,6 +268,7 @@
+@@ -266,6 +270,7 @@
  #include "services/metrics/public/cpp/ukm_builders.h"
  #include "services/metrics/public/cpp/ukm_recorder.h"
  #include "services/network/public/cpp/constants.h"
@@ -90,24 +90,24 @@ index ed49f43cd864b..89428981403e9 100644
  #include "services/service_manager/public/cpp/interface_provider.h"
  #include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
  #include "third_party/blink/public/common/context_menu_data/context_menu_data.h"
-@@ -687,13 +692,15 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
-        {IDC_CONTENT_CONTEXT_GLIC_SMART_SUGGESTION, 172},
+@@ -708,13 +713,15 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
         {IDC_CONTENT_CONTEXT_INDIGO, 173},
-        {IDC_CONTENT_CONTEXT_OPENLINKSAMETAB, 174},
-+       {IDC_CONTENT_CONTEXT_SEARCH_WITH, 175},
-+       {IDC_CONTENT_CONTEXT_SEARCH_ENGINE_FIRST, 176},
+        {IDC_CONTENT_CONTEXT_BROWSE_MEMORY_BANKS, 174},
+        {IDC_CONTENT_CONTEXT_OPENLINKSAMETAB, 175},
++       {IDC_CONTENT_CONTEXT_SEARCH_WITH, 176},
++       {IDC_CONTENT_CONTEXT_SEARCH_ENGINE_FIRST, 177},
         // To add new items:
         //   - Add one more line above this comment block, using the UMA value
         //     from the line below this comment block.
         //   - Increment the UMA value in that latter line.
         //   - Add the new item to the RenderViewContextMenuItem enum in
         //     tools/metrics/histograms/metadata/ui/enums.xml.
--       {kUmaMaxValueKey, 175}});
-+       {kUmaMaxValueKey, 177}});
+-       {kUmaMaxValueKey, 176}});
++       {kUmaMaxValueKey, 178}});
    // LINT.ThenChange(//tools/metrics/histograms/metadata/ui/enums.xml:RenderViewContextMenuItem)
  
    // LINT.IfChange(ContextMenuOptionDesktop)
-@@ -737,13 +744,14 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
+@@ -758,13 +765,14 @@ int UmaEnumForCommand(int key, UmaEnumIdLookupType type) {
         {IDC_CONTENT_CONTEXT_ASK_GOOGLE_ABOUT_THIS_PAGE, 35},
         {IDC_CONTENT_CONTEXT_INDIGO, 36},
         {IDC_CONTENT_CONTEXT_OPENLINKSAMETAB, 37},
@@ -123,7 +123,7 @@ index ed49f43cd864b..89428981403e9 100644
    // LINT.ThenChange(//tools/metrics/histograms/metadata/ui/enums.xml:ContextMenuOptionDesktop)
  
    switch (type) {
-@@ -763,11 +771,33 @@ int GetUmaValueMax(UmaEnumIdLookupType type) {
+@@ -784,6 +792,24 @@ int GetUmaValueMax(UmaEnumIdLookupType type) {
    return UmaEnumForCommand(kUmaMaxValueKey, type);
  }
  
@@ -147,8 +147,10 @@ index ed49f43cd864b..89428981403e9 100644
 +
  // Collapses large ranges of ids before looking for UMA enum.
  int CollapseCommandsForUMA(int id) {
-   DCHECK(!RenderViewContextMenu::IsContentCustomCommandId(id));
-   DCHECK(!ContextMenuMatcher::IsExtensionsCustomCommandId(id));
+   CHECK(!RenderViewContextMenu::IsContentCustomCommandId(id),
+@@ -791,6 +817,10 @@ int CollapseCommandsForUMA(int id) {
+   CHECK(!ContextMenuMatcher::IsExtensionsCustomCommandId(id),
+         base::NotFatalUntil::M163);
  
 +  if (IsOtherSearchEngineCommand(id)) {
 +    return IDC_CONTENT_CONTEXT_SEARCH_ENGINE_FIRST;
@@ -157,7 +159,7 @@ index ed49f43cd864b..89428981403e9 100644
    if (id >= IDC_CONTENT_CONTEXT_PROTOCOL_HANDLER_FIRST &&
        id <= IDC_CONTENT_CONTEXT_PROTOCOL_HANDLER_LAST) {
      return IDC_CONTENT_CONTEXT_PROTOCOL_HANDLER_FIRST;
-@@ -1167,6 +1197,12 @@ RenderViewContextMenu::~RenderViewContextMenu() = default;
+@@ -1190,6 +1220,12 @@ RenderViewContextMenu::~RenderViewContextMenu() = default;
  
  void RenderViewContextMenu::MenuClosed(ui::SimpleMenuModel* source) {
    if (source == &menu_model_) {
@@ -169,8 +171,8 @@ index ed49f43cd864b..89428981403e9 100644
 +    std::vector<OtherSearchEngine>().swap(other_search_engines_);
      if (glic_item_shown_) {
        RecordGlicWebContentsContextMenuResult(
-           GetGlicWebContentsContextToken(params_), glic_item_executed_);
-@@ -3090,6 +3126,7 @@ void RenderViewContextMenu::AppendSearchProvider() {
+           GetProfile(), GetGlicWebContentsContextToken(params_),
+@@ -3148,6 +3184,7 @@ void RenderViewContextMenu::AppendSearchProvider() {
                      : vector_icons::kSearchChromeRefreshOldIcon,
                  ui::kColorMenuIcon, kTabMenuIconSize));
        }
@@ -178,7 +180,7 @@ index ed49f43cd864b..89428981403e9 100644
      }
    } else {
      if ((selection_navigation_url_ != params_.link_url) &&
-@@ -3103,6 +3140,221 @@ void RenderViewContextMenu::AppendSearchProvider() {
+@@ -3161,6 +3198,221 @@ void RenderViewContextMenu::AppendSearchProvider() {
    }
  }
  
@@ -385,7 +387,7 @@ index ed49f43cd864b..89428981403e9 100644
 +  auto open_params = GetOpenURLParamsWithExtraHeaders(
 +      url, /*referring_url=*/GURL(), /*initiator=*/{},
 +      ui::DispositionFromEventFlags(event_flags,
-+                                    WindowOpenDisposition::kNewForegroundTab),
++                                    ui::mojom::WindowOpenDisposition::kNewForegroundTab),
 +      ui::PAGE_TRANSITION_LINK,
 +      is_post ? base::StrCat({"Content-Type: ", post_content.first, "\r\n"})
 +              : std::string(),
@@ -400,7 +402,7 @@ index ed49f43cd864b..89428981403e9 100644
  void RenderViewContextMenu::AppendSpellingAndSearchSuggestionItems() {
    const bool use_spelling = !IsRunningInForcedAppMode();
    if (use_spelling) {
-@@ -3577,6 +3829,36 @@ bool RenderViewContextMenu::IsCommandIdEnabled(int id) const {
+@@ -3635,6 +3887,36 @@ bool RenderViewContextMenu::IsCommandIdEnabled(int id) const {
    bool isolated_mode_enabled =
        enterprise_isolated_mode::IsolatedModeReplacesIncognito(GetProfile());
  
@@ -437,7 +439,7 @@ index ed49f43cd864b..89428981403e9 100644
    switch (id) {
      case IDC_BACK:
        return embedder_web_contents_->GetController().CanGoBack();
-@@ -3922,6 +4204,14 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
+@@ -3982,6 +4264,14 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
    }
    command_executed_ = true;
  
@@ -452,7 +454,7 @@ index ed49f43cd864b..89428981403e9 100644
    // Process extension menu items.
    if (ContextMenuMatcher::IsExtensionsCustomCommandId(id)) {
      RenderFrameHost* render_frame_host = GetRenderFrameHost();
-@@ -4387,38 +4677,7 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
+@@ -4456,38 +4746,7 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
            /*initiator=*/{}, disposition, ui::PAGE_TRANSITION_LINK,
            /*extra_headers=*/std::string(), /*started_from_context_menu=*/true);
  
@@ -493,7 +495,7 @@ index ed49f43cd864b..89428981403e9 100644
      }
      case IDC_CONTENT_CONTEXT_GOTOURL: {
 diff --git a/chrome/browser/renderer_context_menu/render_view_context_menu.h b/chrome/browser/renderer_context_menu/render_view_context_menu.h
-index 545bcad55239a..2b6327f3130a1 100644
+index c306d7d723e80..26bc14d2dcd26 100644
 --- a/chrome/browser/renderer_context_menu/render_view_context_menu.h
 +++ b/chrome/browser/renderer_context_menu/render_view_context_menu.h
 @@ -27,8 +27,11 @@
@@ -526,7 +528,7 @@ index 545bcad55239a..2b6327f3130a1 100644
   public:
    DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(kExitFullscreenMenuItem);
    DECLARE_CLASS_ELEMENT_IDENTIFIER_VALUE(kComposeMenuItem);
-@@ -373,6 +378,12 @@ class RenderViewContextMenu
+@@ -375,6 +380,12 @@ class RenderViewContextMenu
    bool AppendAccessibilityLabelsItems();
    void AppendDictationItems();
    void AppendSearchProvider();
@@ -539,7 +541,7 @@ index 545bcad55239a..2b6327f3130a1 100644
  #if BUILDFLAG(ENABLE_EXTENSIONS)
    void AppendCurrentExtensionItems();
  #endif
-@@ -500,6 +511,10 @@ class RenderViewContextMenu
+@@ -503,6 +514,10 @@ class RenderViewContextMenu
    // ProtocolHandlerRegistry::Observer:
    void OnProtocolHandlerRegistryChanged() override;
  
@@ -550,7 +552,7 @@ index 545bcad55239a..2b6327f3130a1 100644
    // Whether or not translation on this page can be triggered. This method
    // checks multiple criteria, e.g. whether translation is disabled by a policy
    // or whether the current page can be translated.
-@@ -553,6 +568,27 @@ class RenderViewContextMenu
+@@ -567,6 +582,27 @@ class RenderViewContextMenu
    // a text selection.
    GURL selection_navigation_url_;
  
@@ -579,7 +581,7 @@ index 545bcad55239a..2b6327f3130a1 100644
    GURL current_url_;
    GURL main_frame_url_;
 diff --git a/tools/metrics/histograms/metadata/ui/enums.xml b/tools/metrics/histograms/metadata/ui/enums.xml
-index 8fd509761c46c..5a9c0365c5464 100644
+index 7c0ea06bdf332..612618e4f3825 100644
 --- a/tools/metrics/histograms/metadata/ui/enums.xml
 +++ b/tools/metrics/histograms/metadata/ui/enums.xml
 @@ -83,6 +83,7 @@ chromium-metrics-reviews@google.com.
@@ -590,12 +592,12 @@ index 8fd509761c46c..5a9c0365c5464 100644
  </enum>
  
  <!-- LINT.ThenChange(//chrome/browser/renderer_context_menu/render_view_context_menu.cc:ContextMenuOptionDesktop) -->
-@@ -454,6 +455,8 @@ chromium-metrics-reviews@google.com.
-   <int value="172" label="IDC_CONTENT_CONTEXT_GLIC_SMART_SUGGESTION"/>
+@@ -455,6 +456,8 @@ chromium-metrics-reviews@google.com.
    <int value="173" label="IDC_CONTENT_CONTEXT_INDIGO"/>
-   <int value="174" label="IDC_CONTENT_CONTEXT_OPENLINKSAMETAB"/>
-+  <int value="175" label="IDC_CONTENT_CONTEXT_SEARCH_WITH"/>
-+  <int value="176" label="IDC_CONTENT_CONTEXT_SEARCH_ENGINE_FIRST"/>
+   <int value="174" label="IDC_CONTENT_CONTEXT_BROWSE_MEMORY_BANKS"/>
+   <int value="175" label="IDC_CONTENT_CONTEXT_OPENLINKSAMETAB"/>
++  <int value="176" label="IDC_CONTENT_CONTEXT_SEARCH_WITH"/>
++  <int value="177" label="IDC_CONTENT_CONTEXT_SEARCH_ENGINE_FIRST"/>
  </enum>
  
  <!-- LINT.ThenChange(//chrome/browser/renderer_context_menu/render_view_context_menu.cc:RenderViewContextMenuItem) -->

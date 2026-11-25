@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/webui/BUILD.gn b/chrome/browser/ui/webui/BUILD.gn
-index 867d0cee383f4..2e86cbe538585 100644
+index c56b156d64f18..cf6e996832a39 100644
 --- a/chrome/browser/ui/webui/BUILD.gn
 +++ b/chrome/browser/ui/webui/BUILD.gn
-@@ -38,6 +38,7 @@ source_set("configs") {
+@@ -39,6 +39,7 @@ source_set("configs") {
    sources = [
      "chrome_untrusted_web_ui_configs.cc",
      "chrome_web_ui_configs.cc",
@@ -11,7 +11,7 @@ index 867d0cee383f4..2e86cbe538585 100644
  
    deps = [
 diff --git a/chrome/browser/ui/webui/chrome_web_ui_configs.cc b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
-index 105d9e9726a92..e373abe2961dc 100644
+index 4503ab6e3466f..3b71747598eaa 100644
 --- a/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 +++ b/chrome/browser/ui/webui/chrome_web_ui_configs.cc
 @@ -56,6 +56,7 @@
@@ -33,10 +33,10 @@ index 105d9e9726a92..e373abe2961dc 100644
    map.AddWebUIConfig(std::make_unique<UsbInternalsUIConfig>());
    map.AddWebUIConfig(std::make_unique<user_actions_ui::UserActionsUIConfig>());
 diff --git a/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc b/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
-index 524089c3d41b1..aa9b95a30bcc3 100644
+index 07fcf83b08c4d..a90bd52e3478d 100644
 --- a/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
 +++ b/chrome/browser/ui/webui/chrome_web_ui_controller_factory.cc
-@@ -352,6 +352,9 @@ bool ChromeWebUIControllerFactory::IsWebUIAllowedToMakeNetworkRequests(
+@@ -350,6 +350,9 @@ bool ChromeWebUIControllerFactory::IsWebUIAllowedToMakeNetworkRequests(
        origin.host() == chrome::kChromeUIDownloadsHost ||
        // https://crbug.com/376417346
        origin.host() == chrome::kChromeUIExtensionsHost ||
@@ -292,10 +292,10 @@ index 0000000000000..e183c1f64b82a
 +
 +#endif  // THORIUM_EASTER_EGGS_H_
 diff --git a/chrome/common/webui_url_constants.cc b/chrome/common/webui_url_constants.cc
-index 6c6f8ffdf7818..5f0c42e3deb74 100644
+index 9a196abd0adea..7b49e470486f4 100644
 --- a/chrome/common/webui_url_constants.cc
 +++ b/chrome/common/webui_url_constants.cc
-@@ -122,6 +122,9 @@ base::span<const base::cstring_view> ChromeURLHosts() {
+@@ -85,6 +85,9 @@ base::span<const base::cstring_view> ChromeURLHosts() {
        kChromeUIAboutHost,
        kChromeUIAccessibilityHost,
        kChromeUIActorInternalsHost,
@@ -306,10 +306,10 @@ index 6c6f8ffdf7818..5f0c42e3deb74 100644
        kChromeUIAppServiceInternalsHost,
  #endif
 diff --git a/chrome/common/webui_url_constants.h b/chrome/common/webui_url_constants.h
-index 889032faeef0b..cd00ece588572 100644
+index 0ef7979f77d8c..2167a1253fa08 100644
 --- a/chrome/common/webui_url_constants.h
 +++ b/chrome/common/webui_url_constants.h
-@@ -33,6 +33,12 @@ namespace chrome {
+@@ -31,6 +31,12 @@ namespace chrome {
  // Not all components have corresponding URLs and vice versa. Only add as
  // needed.
  // Please keep in alphabetical order, with OS/feature specific sections below.
@@ -334,10 +334,10 @@ index 5096175e285c1..6d4a41ab2815f 100644
 +    <a href="{{thorium_link}}">here</a>. Chromium source code is available <a href="{{opensource_link}}">here</a>.
  </div>
 diff --git a/tools/licenses/licenses.py b/tools/licenses/licenses.py
-index 2abab0dc55436..cfb08140cae12 100755
+index 52c002fa7c873..d679c637cfe41 100755
 --- a/tools/licenses/licenses.py
 +++ b/tools/licenses/licenses.py
-@@ -1122,6 +1122,8 @@ def GenerateCredits(args, metadatas):
+@@ -1149,6 +1149,8 @@ def GenerateCredits(args, metadatas):
    reciprocal_contents = EvaluateTemplate(
      reciprocal_template,
      {
@@ -347,7 +347,7 @@ index 2abab0dc55436..cfb08140cae12 100755
        'opensource_link': 'https://source.chromium.org/chromium',
      },
 diff --git a/ui/webui/resources/BUILD.gn b/ui/webui/resources/BUILD.gn
-index ebebce61a325e..38715c53f34bd 100644
+index b3b536fe869a2..e7525fa2ae2be 100644
 --- a/ui/webui/resources/BUILD.gn
 +++ b/ui/webui/resources/BUILD.gn
 @@ -39,6 +39,7 @@ generate_grd("build_grd") {
@@ -365,7 +365,7 @@ index ebebce61a325e..38715c53f34bd 100644
 +    "$target_gen_dir/text/resources.grdp",
    ]
  
-   if ((!is_android && !is_ios) || is_desktop_android) {
+   if (!is_android && !is_ios) {
 diff --git a/ui/webui/resources/text/BUILD.gn b/ui/webui/resources/text/BUILD.gn
 new file mode 100644
 index 0000000000000..21045cee4be90

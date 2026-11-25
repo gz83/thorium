@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/extensions/api/developer_private/extension_info_generator.cc b/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
-index d4ef0e322ba66..d9411184eb2d6 100644
+index 71a1a3e558502..09848f887ef01 100644
 --- a/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
 +++ b/chrome/browser/extensions/api/developer_private/extension_info_generator.cc
-@@ -49,7 +49,6 @@
+@@ -48,7 +48,6 @@
  #include "extensions/browser/icon_util.h"
  #include "extensions/browser/image_loader.h"
  #include "extensions/browser/managed_installation_mode.h"
@@ -10,7 +10,7 @@ index d4ef0e322ba66..d9411184eb2d6 100644
  #include "extensions/browser/path_util.h"
  #include "extensions/browser/permissions/site_permissions_helper.h"
  #include "extensions/browser/shared_module_service.h"
-@@ -60,7 +59,6 @@
+@@ -59,7 +58,6 @@
  #include "extensions/common/command.h"
  #include "extensions/common/extension_features.h"
  #include "extensions/common/extension_set.h"
@@ -18,7 +18,7 @@ index d4ef0e322ba66..d9411184eb2d6 100644
  #include "extensions/common/install_warning.h"
  #include "extensions/common/manifest.h"
  #include "extensions/common/manifest_handlers/background_info.h"
-@@ -897,17 +895,6 @@ void ExtensionInfoGenerator::FillExtensionInfo(const Extension& extension,
+@@ -896,17 +894,6 @@ void ExtensionInfoGenerator::FillExtensionInfo(const Extension& extension,
          toolbar_actions_model->IsActionPinned(extension.id());
    }
  
@@ -35,12 +35,12 @@ index d4ef0e322ba66..d9411184eb2d6 100644
 -
    info.can_upload_as_account_extension =
        AccountExtensionTracker::Get(profile)->CanUploadAsAccountExtension(
-           extension)
+           extension);
 diff --git a/chrome/browser/ui/webui/extensions/extensions_ui.cc b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-index 453c88c973eee..0e5ee2897ccda 100644
+index 94c66bc85e205..0e4c10a6a2980 100644
 --- a/chrome/browser/ui/webui/extensions/extensions_ui.cc
 +++ b/chrome/browser/ui/webui/extensions/extensions_ui.cc
-@@ -515,9 +515,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
+@@ -519,9 +519,7 @@ content::WebUIDataSource* CreateAndAddExtensionsSource(Profile* profile,
        "enableUserPermittedSites",
        base::FeatureList::IsEnabled(
            extensions_features::kExtensionsMenuAccessControlWithPermittedSites));
@@ -49,8 +49,8 @@ index 453c88c973eee..0e5ee2897ccda 100644
 -      base::FeatureList::IsEnabled(features::kSafetyHubThreeDotDetails));
 +  source->AddBoolean("safetyHubThreeDotDetails", false);
    source->AddBoolean("enableGlobalScopedShortcuts", IsGlobalShortcutEnabled());
- 
-   // MV2 deprecation.
+   source->AddBoolean(
+       "isolatedModeEnabled",
 diff --git a/extensions/browser/manifest_v2_handler.cc b/extensions/browser/manifest_v2_handler.cc
 index 5841d3dfbc888..e0fb4e06b97bc 100644
 --- a/extensions/browser/manifest_v2_handler.cc
