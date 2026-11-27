@@ -1,0 +1,244 @@
+diff --git a/remoting/base/url_request_context_getter.cc b/remoting/base/url_request_context_getter.cc
+index 5f1339d22a9dd..ab2bcb1856ad1 100644
+--- a/remoting/base/url_request_context_getter.cc
++++ b/remoting/base/url_request_context_getter.cc
+@@ -15,6 +15,11 @@
+ #include "net/url_request/url_request_context_builder.h"
+ #include "remoting/base/vlog_net_log.h"
+ 
++#if BUILDFLAG(IS_WIN)
++#include "base/win/windows_version.h"
++#include "net/log/net_log.h"
++#endif  // BUILDFLAG(IS_WIN)
++
+ namespace remoting {
+ 
+ URLRequestContextGetter::URLRequestContextGetter(
+@@ -30,6 +35,19 @@ net::URLRequestContext* URLRequestContextGetter::GetURLRequestContext() {
+     net::URLRequestContextBuilder builder;
+     builder.DisableHttpCache();
+ 
++#if BUILDFLAG(IS_WIN)
++    if (base::win::GetVersion() <= base::win::Version::WIN7) {
++      // The network stack of Windows 7 and older systems has a bug such that
++      // proxy resolution always fails and blocks each request for ~10-30
++      // seconds. We don't support proxied connection right now, so just disable
++      // it on Windows 7 HTTP requests.
++      auto proxy_resolution_service =
++          net::ConfiguredProxyResolutionService::CreateWithoutProxyResolver(
++              std::move(proxy_config_service_), net::NetLog::Get());
++      builder.set_proxy_resolution_service(std::move(proxy_resolution_service));
++    }
++#endif  // BUILDFLAG(IS_WIN)
++
+     if (proxy_config_service_) {
+       builder.set_proxy_config_service(std::move(proxy_config_service_));
+     }
+diff --git a/remoting/host/desktop_session_win.cc b/remoting/host/desktop_session_win.cc
+index 720e0ae99f74052477fe5f21e694eaca1c215d1f..b775d771a8decddc812ec56e561a72f771521a18 100644
+--- a/remoting/host/desktop_session_win.cc
++++ b/remoting/host/desktop_session_win.cc
+@@ -28,6 +28,7 @@
+ #include "base/win/registry.h"
+ #include "base/win/scoped_bstr.h"
+ #include "base/win/scoped_handle.h"
++#include "base/win/windows_version.h"
+ #include "base/win/trust_util.h"
+ #include "remoting/base/auto_thread_task_runner.h"
+ #include "remoting/host/base/screen_resolution.h"
+@@ -640,12 +641,17 @@
+ 
+   ReportElapsedTime("attached");
+ 
+-  // Get the name of the executable to run. `kDesktopBinaryName` specifies
+-  // uiAccess="true" in its manifest.  Prefer kDesktopBinaryName but fall back
+-  // to kHostBinaryName if there is a problem loading it.
++  // Launch elevated on Win8+ to enable injection of Alt+Tab and Ctrl+Alt+Del.
++  bool launch_elevated = base::win::GetVersion() >= base::win::Version::WIN8;
++
++  // Get the name of the executable to run. |kDesktopBinaryName| specifies
++  // uiAccess="true" in its manifest.  Prefer kDesktopBinaryName for Win8+ but
++  // fall back to kHostBinaryName if there is a problem loading it.
+   base::FilePath desktop_binary;
+-  bool result = GetInstalledBinaryPath(kDesktopBinaryName, &desktop_binary);
+-
++  bool result = false;
++  if (launch_elevated) {
++    result = GetInstalledBinaryPath(kDesktopBinaryName, &desktop_binary);
++  }
+   if (!result || !base::win::IsBinaryTrusted(desktop_binary)) {
+     result = GetInstalledBinaryPath(kHostBinaryName, &desktop_binary);
+   }
+@@ -666,10 +672,9 @@
+                            kCopiedSwitchNames);
+ 
+   // Create a delegate capable of launching a process in a different session.
+-  // Launch elevated to enable injection of Alt+Tab and Ctrl+Alt+Del.
+   std::unique_ptr<WtsSessionProcessDelegate> delegate(
+       new WtsSessionProcessDelegate(
+-          io_task_runner_, std::move(target), /*launch_elevated=*/true,
++          io_task_runner_, std::move(target), launch_elevated,
+           base::WideToUTF8(kDaemonIpcSecurityDescriptor)));
+   if (!delegate->Initialize(session_id)) {
+     TerminateSession(ErrorCode::HOST_CONFIGURATION_ERROR,
+diff --git a/remoting/host/host_attributes.cc b/remoting/host/host_attributes.cc
+index 5eb91c4b18c0d..f49905d5cb142 100644
+--- a/remoting/host/host_attributes.cc
++++ b/remoting/host/host_attributes.cc
+@@ -16,6 +16,7 @@
+ #include "build/build_config.h"
+ 
+ #if BUILDFLAG(IS_WIN)
++#include "base/win/windows_version.h"
+ #include "remoting/host/win/evaluate_3d_display_mode.h"
+ #include "remoting/host/win/evaluate_d3d.h"
+ #endif
+@@ -98,8 +99,20 @@ std::string GetHostAttributes() {
+     }
+   }
+ #if BUILDFLAG(IS_WIN)
+-  GetD3DCapabilities(&result);
+-  result.push_back("Win10+");
++  {
++    GetD3DCapabilities(&result);
++
++    auto version = base::win::GetVersion();
++    if (version >= base::win::Version::WIN8) {
++      result.push_back("Win8+");
++    }
++    if (version >= base::win::Version::WIN8_1) {
++      result.push_back("Win81+");
++    }
++    if (version >= base::win::Version::WIN10) {
++      result.push_back("Win10+");
++    }
++  }
+ #endif
+ 
+   return base::JoinString(result, kSeparator);
+diff --git a/remoting/host/input_injector_win.cc b/remoting/host/input_injector_win.cc
+index fc8e9dab91d5b..eb1652cb12ceb 100644
+--- a/remoting/host/input_injector_win.cc
++++ b/remoting/host/input_injector_win.cc
+@@ -20,6 +20,7 @@
+ #include "base/strings/utf_string_conversions.h"
+ #include "base/task/sequenced_task_runner.h"
+ #include "base/task/single_thread_task_runner.h"
++#include "base/win/windows_version.h"
+ #include "remoting/base/util.h"
+ #include "remoting/host/clipboard.h"
+ #include "remoting/host/touch_injector_win.h"
+@@ -469,7 +470,7 @@ std::unique_ptr<InputInjector> InputInjector::Create(
+ 
+ // static
+ bool InputInjector::SupportsTouchEvents() {
+-  return true;
++  return base::win::GetVersion() >= base::win::Version::WIN8;
+ }
+ 
+ }  // namespace remoting
+diff --git a/remoting/host/remote_open_url/remote_open_url_util.cc b/remoting/host/remote_open_url/remote_open_url_util.cc
+index 0e1628446c3f2..09931445eba16 100644
+--- a/remoting/host/remote_open_url/remote_open_url_util.cc
++++ b/remoting/host/remote_open_url/remote_open_url_util.cc
+@@ -10,6 +10,7 @@
+ #if BUILDFLAG(IS_WIN)
+ #include "base/win/registry.h"
+ #include "base/win/windows_types.h"
++#include "base/win/windows_version.h"
+ #endif
+ 
+ namespace remoting {
+@@ -32,6 +33,12 @@ bool IsRemoteOpenUrlSupported() {
+ #if BUILDFLAG(IS_LINUX)
+   return true;
+ #elif BUILDFLAG(IS_WIN)
++  // The modern default apps settings dialog is only available to Windows 8+.
++  // Given older Windows versions are EOL, we only advertise the feature on
++  // Windows 8+.
++  if (base::win::GetVersion() < base::win::Version::WIN8) {
++    return false;
++  }
+   // The MSI installs the ProgID and capabilities into registry, but not the
+   // entry in RegisteredApplications, which must be applied out of band to
+   // enable the feature.
+diff --git a/remoting/host/win/evaluate_3d_display_mode.cc b/remoting/host/win/evaluate_3d_display_mode.cc
+index 3a735803587ff..a5d02a60e021f 100644
+--- a/remoting/host/win/evaluate_3d_display_mode.cc
++++ b/remoting/host/win/evaluate_3d_display_mode.cc
+@@ -16,6 +16,7 @@
+ #include "base/native_library.h"
+ #include "base/scoped_native_library.h"
+ #include "base/strings/string_util.h"
++#include "base/win/windows_version.h"
+ #include "remoting/host/base/host_exit_codes.h"
+ #include "remoting/host/base/switches.h"
+ #include "remoting/host/evaluate_capability.h"
+@@ -33,6 +34,11 @@ typedef HRESULT(WINAPI* CreateDXGIFactory2Function)(UINT Flags,
+ }  // namespace
+ 
+ int Evaluate3dDisplayMode() {
++  // CreateDXGIFactory2 does not exist prior to Win 8.1 but neither does 3D
++  // display mode.
++  if (base::win::GetVersion() < base::win::Version::WIN8_1)
++    return kSuccessExitCode;
++
+   // We can't directly reference CreateDXGIFactory2 is it does not exist on
+   // earlier Windows builds.  Therefore we need a LoadLibrary / GetProcAddress
+   // dance.
+diff --git a/remoting/host/win/rdp_client.cc b/remoting/host/win/rdp_client.cc
+index f7cc2a99bae20d0dae88a997ff717eff5b70b81d..73eb079bf1f664af69757dfc437350642be271e4 100644
+--- a/remoting/host/win/rdp_client.cc
++++ b/remoting/host/win/rdp_client.cc
+@@ -17,6 +17,7 @@
+ #include "base/numerics/safe_conversions.h"
+ #include "base/task/current_thread.h"
+ #include "base/task/single_thread_task_runner.h"
++#include "base/win/windows_version.h"
+ #include "net/base/ip_address.h"
+ #include "net/base/ip_endpoint.h"
+ #include "remoting/base/typed_buffer.h"
+@@ -44,6 +45,17 @@
+ constexpr int kMaxRdpScreenWidth = 3840;
+ constexpr int kMaxRdpScreenHeight = 2160;
+ 
++webrtc::DesktopSize GetMaxRdpSize(int width, int height) {
++  const bool landscape = width >= height;
++  const int max_width = landscape ? kMaxRdpScreenWidth : kMaxRdpScreenHeight;
++  const int max_height = landscape ? kMaxRdpScreenHeight : kMaxRdpScreenWidth;
++  // Older RDP controls cap the physical axes, including in portrait mode.
++  if (base::win::GetVersion() < base::win::Version::WIN8) {
++    return webrtc::DesktopSize(std::min(max_width, 4096), std::min(max_height, 2048));
++  }
++  return webrtc::DesktopSize(max_width, max_height);
++}
++
+ // Default dots per inch used by RDP is 96 DPI (100% scale, the minimum scale
+ // factor supported by the RDP ActiveX control's UpdateSessionDisplaySettings()
+ // API).
+@@ -56,10 +68,7 @@
+     return webrtc::DesktopSize(kMinRdpScreenWidth, kMinRdpScreenHeight);
+   }
+ 
+-  const webrtc::DesktopSize max_size =
+-      width >= height
+-          ? webrtc::DesktopSize(kMaxRdpScreenWidth, kMaxRdpScreenHeight)
+-          : webrtc::DesktopSize(kMaxRdpScreenHeight, kMaxRdpScreenWidth);
++  const auto max_size = GetMaxRdpSize(width, height);
+   webrtc::DesktopSize bounded_size =
+       ScaleSizeToFit(webrtc::DesktopSize(width, height), max_size);
+ 
+@@ -80,10 +89,9 @@
+ 
+   const int width = resolution.dimensions().width();
+   const int height = resolution.dimensions().height();
+-  const int max_width =
+-      width >= height ? kMaxRdpScreenWidth : kMaxRdpScreenHeight;
+-  const int max_height =
+-      width >= height ? kMaxRdpScreenHeight : kMaxRdpScreenWidth;
++  const auto max_size = GetMaxRdpSize(width, height);
++  const int max_width = max_size.width();
++  const int max_height = max_size.height();
+   if (width > max_width || height > max_height) {
+     // Scale DPI down by the same factor used to fit `dimensions` into the 4K
+     // limit so the effective logical desktop size is preserved, clamped to the

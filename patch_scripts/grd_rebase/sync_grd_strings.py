@@ -5,17 +5,29 @@
 import argparse
 import csv
 from dataclasses import dataclass
-import hashlib
-import html
 from pathlib import Path
 import re
 import sys
 from typing import Iterable
+import xml.etree.ElementTree as ET
 
 if __package__:
-    from .merge_thorium_xtb import group_inventory, load_inventory
+    from .resource_validation import (
+        WINDOWS_MESSAGE_IDS, missing_windows_translations, windows_resource_requirements, xtb_spans,
+    )
+    from .grit_messages import (
+        MARKUP_TAG_RE, MEANING_RE, MESSAGE_NAME_RE, MESSAGE_RE, message_block_to_id,
+    )
+    from .merge_thorium_xtb import load_workflow_inventory
 else:
-    from merge_thorium_xtb import group_inventory, load_inventory
+    from resource_validation import (
+        WINDOWS_MESSAGE_IDS, missing_windows_translations, windows_resource_requirements, xtb_spans,
+    )
+    from grit_messages import (
+        MARKUP_TAG_RE, MEANING_RE, MESSAGE_NAME_RE, MESSAGE_RE, message_block_to_id,
+    )
+    from merge_thorium_xtb import load_workflow_inventory
+
 
 CHROMIUM_PROJECT_LINK_MESSAGE_IDS = frozenset(
     {
@@ -275,71 +287,11 @@ def build_grd_xtb_mapping(
     return mappings
 
 
-# GRD descriptions can contain a literal ">" (for example, "Settings > AI").
-# Match quoted attribute values as units so that such characters do not end the
-# opening tag and become part of the translatable message body.
-MESSAGE_RE = re.compile(
-    r"<message\b((?:[^>\"']+|\"[^\"]*\"|'[^']*')*)>"
-    r"(.*?)</message>",
-    re.DOTALL,
-)
-MESSAGE_NAME_RE = re.compile(r"\bname\s*=\s*\"([^\"]+)\"")
-MEANING_RE = re.compile(r"\bmeaning=\"([^\"]*)\"")
-GRIT_USE_NAME_FOR_ID_RE = re.compile(r'\buse_name_for_id="true"')
-GRIT_PH_BLOCK_RE = re.compile(
-    r"<ph\b(?=[^>]*\bname=\"([^\"]+)\")[^>]*>.*?</ph>",
-    re.DOTALL,
-)
-GRIT_PH_SELF_CLOSING_RE = re.compile(
-    r"<ph\b(?=[^>]*\bname=\"([^\"]+)\")[^>]*/>"
-)
-GRIT_EX_BLOCK_RE = re.compile(r"<ex\b[^>]*>.*?</ex>", re.DOTALL)
-MARKUP_TAG_RE = re.compile(r"<[^>]+>")
 CHROMIUM_LINK_BLOCK_RE = re.compile(
     r'<ph name="BEGIN_LINK_CHROMIUM"\s*/>.*?'
     r'<ph name="END_LINK_CHROMIUM"\s*/>',
     re.DOTALL,
 )
-
-
-def _grit_fingerprint(text: str) -> int:
-    digest = hashlib.md5(
-        text.encode("utf-8"),
-        usedforsecurity=False,
-    )
-    value = int(digest.hexdigest()[:16], 16)
-    if value & 0x8000000000000000:
-        value = -((~value & 0xFFFFFFFFFFFFFFFF) + 1)
-    return value
-
-
-def message_block_to_id(message_block: str) -> str:
-    """Calculate Chromium GRIT's translation ID for one message block."""
-    match = MESSAGE_RE.fullmatch(message_block.strip())
-    if not match:
-        raise ValueError("not a complete GRD/GRDP <message> block")
-    attrs, body = match.groups()
-    name_match = MESSAGE_NAME_RE.search(attrs)
-    if not name_match:
-        raise ValueError("GRD/GRDP <message> block has no name attribute")
-    message_name = name_match.group(1)
-    if GRIT_USE_NAME_FOR_ID_RE.search(attrs):
-        return message_name
-    body = GRIT_PH_BLOCK_RE.sub(lambda item: item.group(1).upper(), body)
-    body = GRIT_PH_SELF_CLOSING_RE.sub(
-        lambda item: item.group(1).upper(),
-        body,
-    )
-    body = GRIT_EX_BLOCK_RE.sub("", body)
-    body = html.unescape(MARKUP_TAG_RE.sub("", body)).strip()
-    if body.startswith("'''") and body.endswith("'''"):
-        body = body[3:-3].strip()
-    value = _grit_fingerprint(body)
-    meaning_match = MEANING_RE.search(attrs)
-    if meaning_match:
-        meaning_value = _grit_fingerprint(html.unescape(meaning_match.group(1)))
-        value = meaning_value + (value << 1) + (1 if value < 0 else 0)
-    return str(value & 0x7FFFFFFFFFFFFFFF)
 
 
 DESC_RE = re.compile(r"\bdesc=\"([^\"]*)\"")
@@ -840,15 +792,14 @@ def _build_xtb_cache(
     """Index translation IDs and exact block spans for one XTB file."""
     by_id: dict[str, tuple[str, str, str]] = {}
     block_spans: dict[str, list[tuple[int, int]]] = {}
-    for match in XTB_TRANSLATION_RE.finditer(xtb_text):
-        translation_id = match.group(1)
-        if translation_id in by_id:
-            raise ValueError(
-                f"duplicate translation ID {translation_id} in {chromium_path}"
-            )
-        block = match.group(0)
+    spans, _ = xtb_spans(xtb_text, chromium_path)
+    for translation_id, (start, end) in spans.items():
+        block = xtb_text[start:end]
+        match = XTB_TRANSLATION_RE.fullmatch(block)
+        if not match:
+            raise ValueError(f"{chromium_path}: invalid XTB entry {translation_id}")
         by_id[translation_id] = (block, match.group(2), match.group(3))
-        block_spans[block] = [(match.start(), match.end())]
+        block_spans[block] = [(start, end)]
     return XtbFileCache(
         text=xtb_text,
         by_id=by_id,
@@ -1208,6 +1159,7 @@ def find_uncovered_targets(
     reviewed_targets: frozenset[tuple[str, str]],
     insertions: list[XtbTranslationInsertion],
     xtb_cache: dict[str, XtbFileCache],
+    windows_grds: dict[str, str] | None = None,
 ) -> list[XtbTranslationMissing]:
     """Check actual target IDs, including unchanged IDs and patch-owned messages."""
     required: dict[str, set[tuple[str, str, str]]] = {}
@@ -1232,9 +1184,18 @@ def find_uncovered_targets(
     planned = reviewed_targets.union(
         (item.chromium_path, item.new_translation_id) for item in insertions
     )
-    mappings = build_grd_xtb_mapping(source_root, sorted(required))
     extra_ids: dict[str, set[str]] = {}
     missing: list[XtbTranslationMissing] = []
+    if windows_grds is not None:
+        roots = {path: ET.fromstring(windows_grds[path])
+                 for path in WINDOWS_MESSAGE_IDS if path in windows_grds}
+        requirements = windows_resource_requirements(source_root, roots)
+        for path, name, ident, lang, target in missing_windows_translations(source_root, requirements, planned):
+            missing.append(XtbTranslationMissing(path, name, ident, ident, lang, target))
+        for path, ids in WINDOWS_MESSAGE_IDS.items():
+            if path in required:
+                required[path] = {row for row in required[path] if row[0] not in ids}
+    mappings = build_grd_xtb_mapping(source_root, sorted(required))
     for path, targets in required.items():
         for xtb in mappings[path].xtb_files:
             target = xtb.chromium_path
@@ -1243,7 +1204,8 @@ def find_uncovered_targets(
             else:
                 if target not in extra_ids:
                     text = (source_root / target).read_text(encoding="utf-8")
-                    extra_ids[target] = {m[1] for m in XTB_TRANSLATION_RE.finditer(text)}
+                    spans, _ = xtb_spans(text, target)
+                    extra_ids[target] = set(spans)
                 present = extra_ids[target]
             for name, old_id, new_id in targets:
                 if new_id not in present and (target, new_id) not in planned:
@@ -1390,6 +1352,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Optional TSV report of target IDs missing after both workflow steps.",
     )
     parser.add_argument(
+        "--windows-legacy",
+        action="store_true",
+        help="Include and check the Windows REWORK translations.",
+    )
+    parser.add_argument(
         "--inventory",
         type=readable_file,
         default=Path(__file__).resolve().parent / "config/xtb_additions.tsv",
@@ -1483,9 +1450,10 @@ def main() -> int:
         args.source_root,
         sorted({change.chromium_path for change in xtb_sync_changes}),
     )
+    inventory = load_workflow_inventory(args.inventory, args.windows_legacy)
     reviewed_targets = frozenset(
         (path, addition.translation_id)
-        for path, additions in group_inventory(load_inventory(args.inventory)).items()
+        for path, additions in inventory.items()
         for addition in additions
     )
     translation_lookups, xtb_cache = find_old_translations(
@@ -1507,11 +1475,13 @@ def main() -> int:
     )
     if args.xtb_conflict_report is not None:
         write_xtb_conflict_summary_report(xtb_conflicts, args.xtb_conflict_report)
-    if args.xtb_missing_report is not None:
+    if args.windows_legacy or args.xtb_missing_report is not None:
         missing_translations = find_uncovered_targets(
             args.source_root, changes, feature_message_rows, reviewed_targets,
             translation_insertions, xtb_cache,
+            updated_contents if args.windows_legacy else None,
         )
+    if args.xtb_missing_report is not None:
         write_xtb_missing_summary_report(
             missing_translations,
             args.xtb_missing_report,
@@ -1534,6 +1504,17 @@ def main() -> int:
             (item.source_chromium_path, item.message_id)
             for item in missing_translations
         }
+        if args.windows_legacy:
+            missing_legacy = sorted(
+                name for path, name in missing_messages
+                if name in WINDOWS_MESSAGE_IDS.get(path, {})
+            )
+            if missing_legacy:
+                print(
+                    f"error: incomplete Windows legacy translations: {', '.join(missing_legacy)}",
+                    file=sys.stderr,
+                )
+                return 1
         print(
             "info: translations were unavailable for "
             f"{len(missing_translations)} mapped XTB lookups across "
@@ -1551,4 +1532,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, SyntaxError, ET.ParseError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        raise SystemExit(1)

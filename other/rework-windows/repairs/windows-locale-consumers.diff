@@ -1,0 +1,1297 @@
+diff --git a/base/BUILD.gn b/base/BUILD.gn
+--- a/base/BUILD.gn
++++ b/base/BUILD.gn
+@@ -1869,6 +1869,7 @@
+ 
+   # Windows.
+   if (is_win) {
++    public_deps += [ ":legacy_windows_locale" ]
+     sources += [
+       "debug/debugger_win.cc",
+       "debug/gdi_debug_util_win.cc",
+@@ -6810,3 +6811,9 @@
+     ]
+   }
+ }
++
++if (is_win) {
++  source_set("legacy_windows_locale") {
++    sources = [ "win/legacy_locale.h" ]
++  }
++}
+diff --git a/base/i18n/win/preferred_languages.cc b/base/i18n/win/preferred_languages.cc
+--- a/base/i18n/win/preferred_languages.cc
++++ b/base/i18n/win/preferred_languages.cc
+@@ -14,6 +14,7 @@
+ #include "base/strings/string_split.h"
+ #include "base/strings/string_util.h"
+ #include "base/strings/utf_string_conversions.h"
++#include "base/win/legacy_locale.h"
+ 
+ namespace base::i18n {
+ namespace {
+@@ -27,24 +28,19 @@
+   if (id == LOCALE_CUSTOM_UI_DEFAULT) {
+     return {};
+   }
+-  const LCID locale = MAKELCID(id, SORT_DEFAULT);
+-  const auto locale_part = [locale](LCTYPE type) {
+-    wchar_t buffer[9] = {};
+-    const int length = ::GetLocaleInfoW(locale, type, buffer, std::size(buffer));
+-    return length > 1 ? std::wstring(buffer, length - 1) : std::wstring();
+-  };
+-  const auto language = locale_part(LOCALE_SISO639LANGNAME);
++  std::wstring name = base::win::GetLegacyUILanguageName(id);
+   std::vector<LanguageTag> tags;
+-  if (!language.empty() && SUBLANGID(id) != SUBLANG_NEUTRAL) {
+-    const auto region = locale_part(LOCALE_SISO3166CTRYNAME);
+-    if (!region.empty()) {
+-      if (auto tag = GetLanguageTagFromString(WideToASCII(language + L"-" + region))) {
++  while (!name.empty()) {
++    if (auto tag = GetLanguageTagFromString(WideToASCII(name))) {
++      if (tags.empty() || tags.back() != *tag) {
+         tags.push_back(*tag);
+       }
+     }
+-  }
+-  if (auto tag = GetLanguageTagFromString(WideToASCII(language))) {
+-    tags.push_back(*tag);
++    const auto separator = name.rfind(L'-');
++    if (separator == std::wstring::npos) {
++      break;
++    }
++    name.resize(separator);
+   }
+   return tags;
+ }
+diff --git a/base/win/legacy_locale.h b/base/win/legacy_locale.h
+new file mode 100644
+--- /dev/null
++++ b/base/win/legacy_locale.h
+@@ -0,0 +1,298 @@
++// Copyright 2026 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef BASE_WIN_LEGACY_LOCALE_H_
++#define BASE_WIN_LEGACY_LOCALE_H_
++
++#include <windows.h>
++
++#include <iterator>
++#include <string>
++#include <string_view>
++
++namespace base::win {
++
++// XP has numeric locale APIs. Keep its lookup independent of ICU and //base so
++// the baseline-ISA mini installer can also obtain a UI language name.
++inline LCID LocaleNameToLCIDCompat(const wchar_t* name, DWORD flags) {
++  static const auto native = reinterpret_cast<decltype(&::LocaleNameToLCID)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "LocaleNameToLCID"));
++  if (native) {
++    return native(name, flags);
++  }
++  if (!name || !*name) {
++    return LOCALE_USER_DEFAULT;
++  }
++  struct Locale {
++    std::wstring_view tag;
++    LCID id;
++  };
++  static constexpr Locale locales[] = {
++      {L"af", 0x0436},
++      {L"ar", 0x0001},
++      {L"ar-ae", 0x3801},
++      {L"ar-bh", 0x3c01},
++      {L"ar-dz", 0x1401},
++      {L"ar-eg", 0x0c01},
++      {L"ar-iq", 0x0801},
++      {L"ar-jo", 0x2c01},
++      {L"ar-kw", 0x3401},
++      {L"ar-lb", 0x3001},
++      {L"ar-ly", 0x1001},
++      {L"ar-ma", 0x1801},
++      {L"ar-om", 0x2001},
++      {L"ar-qa", 0x4001},
++      {L"ar-sa", 0x0401},
++      {L"ar-sy", 0x2801},
++      {L"ar-tn", 0x1c01},
++      {L"ar-ye", 0x2401},
++      {L"as", 0x044d},
++      {L"az", 0x042c},
++      {L"az-cyrl", 0x082c},
++      {L"az-latn", 0x042c},
++      {L"be", 0x0423},
++      {L"bg", 0x0402},
++      {L"bn", 0x0445},
++      {L"bn-bd", 0x0845},
++      {L"bs", 0x141a},
++      {L"bs-cyrl", 0x201a},
++      {L"bs-latn", 0x141a},
++      {L"ca", 0x0403},
++      {L"cs", 0x0405},
++      {L"cy", 0x0452},
++      {L"da", 0x0406},
++      {L"de", 0x0407},
++      {L"de-at", 0x0c07},
++      {L"de-ch", 0x0807},
++      {L"de-li", 0x1407},
++      {L"de-lu", 0x1007},
++      {L"div", 0x0465},
++      {L"dv", 0x0465},
++      {L"el", 0x0408},
++      {L"en", 0x0009},
++      {L"en-029", 0x2409},
++      {L"en-au", 0x0c09},
++      {L"en-bz", 0x2809},
++      {L"en-ca", 0x1009},
++      {L"en-cb", 0x2409},
++      {L"en-gb", 0x0809},
++      {L"en-ie", 0x1809},
++      {L"en-jm", 0x2009},
++      {L"en-nz", 0x1409},
++      {L"en-ph", 0x3409},
++      {L"en-tt", 0x2c09},
++      {L"en-us", 0x0409},
++      {L"en-za", 0x1c09},
++      {L"en-zw", 0x3009},
++      {L"es", 0x040a},
++      {L"es-ar", 0x2c0a},
++      {L"es-bo", 0x400a},
++      {L"es-cl", 0x340a},
++      {L"es-co", 0x240a},
++      {L"es-cr", 0x140a},
++      {L"es-do", 0x1c0a},
++      {L"es-ec", 0x300a},
++      {L"es-es", 0x0c0a},
++      {L"es-es-tradnl", 0x040a},
++      {L"es-gt", 0x100a},
++      {L"es-hn", 0x480a},
++      {L"es-mx", 0x080a},
++      {L"es-ni", 0x4c0a},
++      {L"es-pa", 0x180a},
++      {L"es-pe", 0x280a},
++      {L"es-pr", 0x500a},
++      {L"es-py", 0x3c0a},
++      {L"es-sv", 0x440a},
++      {L"es-us", 0x540a},
++      {L"es-uy", 0x380a},
++      {L"es-ve", 0x200a},
++      {L"et", 0x0425},
++      {L"eu", 0x042d},
++      {L"fa", 0x0429},
++      {L"fi", 0x040b},
++      {L"fil", 0x0464},
++      {L"fo", 0x0438},
++      {L"fr", 0x040c},
++      {L"fr-be", 0x080c},
++      {L"fr-ca", 0x0c0c},
++      {L"fr-ch", 0x100c},
++      {L"fr-lu", 0x140c},
++      {L"fr-mc", 0x180c},
++      {L"ga", 0x083c},
++      {L"gd", 0x0491},
++      {L"gl", 0x0456},
++      {L"gu", 0x0447},
++      {L"he", 0x040d},
++      {L"hi", 0x0439},
++      {L"hr", 0x041a},
++      {L"hsb", 0x042e},
++      {L"hu", 0x040e},
++      {L"hy", 0x042b},
++      {L"id", 0x0421},
++      {L"in", 0x0421},
++      {L"is", 0x040f},
++      {L"it", 0x0410},
++      {L"it-ch", 0x0810},
++      {L"iw", 0x040d},
++      {L"ja", 0x0411},
++      {L"ka", 0x0437},
++      {L"kk", 0x043f},
++      {L"kn", 0x044b},
++      {L"ko", 0x0412},
++      {L"kok", 0x0457},
++      {L"ky", 0x0440},
++      {L"kz", 0x0440},
++      {L"lt", 0x0427},
++      {L"lt-lt", 0x0427},
++      {L"lv", 0x0426},
++      {L"mk", 0x042f},
++      {L"ml", 0x044c},
++      {L"mn", 0x0450},
++      {L"mr", 0x044e},
++      {L"ms", 0x043e},
++      {L"ms-bn", 0x083e},
++      {L"ms-my", 0x043e},
++      {L"mt", 0x043a},
++      {L"nb", 0x0414},
++      {L"nb-no", 0x0414},
++      {L"ne", 0x0461},
++      {L"ne-in", 0x0861},
++      {L"nl", 0x0413},
++      {L"nl-be", 0x0813},
++      {L"nn", 0x0814},
++      {L"nn-no", 0x0814},
++      {L"no", 0x0414},
++      {L"or", 0x0448},
++      {L"pa", 0x0446},
++      {L"pl", 0x0415},
++      {L"pt", 0x0816},
++      {L"pt-br", 0x0416},
++      {L"rm", 0x0417},
++      {L"ro", 0x0418},
++      {L"ro-md", 0x0818},
++      {L"ru", 0x0419},
++      {L"ru-md", 0x0819},
++      {L"sa", 0x044f},
++      {L"sb", 0x042e},
++      {L"sk", 0x041b},
++      {L"sl", 0x0424},
++      {L"sq", 0x041c},
++      {L"sr", 0x0c1a},
++      {L"sr-cyrl", 0x0c1a},
++      {L"sr-cyrl-ba", 0x1c1a},
++      {L"sr-latn", 0x081a},
++      {L"sr-latn-ba", 0x181a},
++      {L"st", 0x0430},
++      {L"sv", 0x041d},
++      {L"sv-fi", 0x081d},
++      {L"sw", 0x0441},
++      {L"sx", 0x0430},
++      {L"syr", 0x045a},
++      {L"ta", 0x0449},
++      {L"te", 0x044a},
++      {L"th", 0x041e},
++      {L"tl", 0x0464},
++      {L"tn", 0x0432},
++      {L"tr", 0x041f},
++      {L"ts", 0x0431},
++      {L"tt", 0x0444},
++      {L"uk", 0x0422},
++      {L"ur", 0x0420},
++      {L"uz", 0x0443},
++      {L"uz-cyrl", 0x0843},
++      {L"uz-latn", 0x0443},
++      {L"vi", 0x042a},
++      {L"x-az-cyrillic", 0x082c},
++      {L"x-az-latin", 0x042c},
++      {L"xh", 0x0434},
++      {L"yi", 0x043d},
++      {L"zh", 0x0004},
++      {L"zh-chs", 0x0804},
++      {L"zh-cht", 0x0404},
++      {L"zh-cn", 0x0804},
++      {L"zh-hans", 0x0804},
++      {L"zh-hans-sg", 0x1004},
++      {L"zh-hant", 0x0404},
++      {L"zh-hant-hk", 0x0c04},
++      {L"zh-hant-mo", 0x1404},
++      {L"zh-hk", 0x0c04},
++      {L"zh-mo", 0x1404},
++      {L"zh-sg", 0x1004},
++      {L"zh-tw", 0x0404},
++      {L"zu", 0x0435},
++  };
++  std::wstring normalized(name);
++  for (wchar_t& c : normalized) {
++    if (c == L'_') {
++      c = L'-';
++    } else if (c >= L'A' && c <= L'Z') {
++      c += L'a' - L'A';
++    }
++  }
++  std::wstring_view tag(normalized);
++  while (!tag.empty()) {
++    for (const auto& locale : locales) {
++      if (locale.tag == tag) {
++        if (!(flags & LOCALE_ALLOW_NEUTRAL_NAMES) &&
++            SUBLANGID(LANGIDFROMLCID(locale.id)) == SUBLANG_NEUTRAL) {
++          // Numeric formatting calls on XP need a specific locale.
++          return locale.id == LANG_CHINESE ? 0x0804
++                                          : MAKELCID(MAKELANGID(locale.id, SUBLANG_DEFAULT),
++                                                     SORT_DEFAULT);
++        }
++        return locale.id;
++      }
++    }
++    const auto separator = tag.rfind(L'-');
++    if (separator == std::wstring_view::npos) {
++      break;
++    }
++    tag = tag.substr(0, separator);
++  }
++  return LOCALE_USER_DEFAULT;
++}
++
++inline std::wstring GetLegacyUILanguageName(LANGID id) {
++  const LCID locale = MAKELCID(id, SORT_DEFAULT);
++  wchar_t name[LOCALE_NAME_MAX_LENGTH] = {};
++  if (::GetLocaleInfoW(locale, LOCALE_SNAME, name, std::size(name)) > 1) {
++    return name;
++  }
++
++  wchar_t language[9] = {};
++  if (::GetLocaleInfoW(locale, LOCALE_SISO639LANGNAME, language,
++                       std::size(language)) <= 1) {
++    return {};
++  }
++  std::wstring tag(language);
++  // ISO language and country alone cannot distinguish these XP UI locales.
++  switch (id) {
++    case 0x141a:  // bs-Latn-BA
++    case 0x042c:  // az-Latn
++    case 0x0443:  // uz-Latn
++    case 0x081a:  // sr-Latn-CS
++    case 0x181a:  // sr-Latn-BA
++      tag += L"-Latn";
++      break;
++    case 0x201a:  // bs-Cyrl-BA
++    case 0x082c:  // az-Cyrl
++    case 0x0843:  // uz-Cyrl
++    case 0x0c1a:  // sr-Cyrl-CS
++    case 0x1c1a:  // sr-Cyrl-BA
++      tag += L"-Cyrl";
++      break;
++  }
++  wchar_t region[9] = {};
++  if (SUBLANGID(id) != SUBLANG_NEUTRAL &&
++      ::GetLocaleInfoW(locale, LOCALE_SISO3166CTRYNAME, region,
++                       std::size(region)) > 1) {
++    tag += L'-';
++    tag += region;
++  }
++  return tag;
++}
++
++}  // namespace base::win
++
++#endif  // BASE_WIN_LEGACY_LOCALE_H_
+diff --git a/chrome/installer/mini_installer/BUILD.gn b/chrome/installer/mini_installer/BUILD.gn
+--- a/chrome/installer/mini_installer/BUILD.gn
++++ b/chrome/installer/mini_installer/BUILD.gn
+@@ -79,6 +79,7 @@
+   deps = [
+     ":mini_installer_product_version",
+     "//base:compiler_specific",
++    "//base:legacy_windows_locale",
+     "//build:branding_buildflags",
+     "//chrome/installer/util:strings",
+   ]
+diff --git a/chrome/installer/mini_installer/mini_installer.cc b/chrome/installer/mini_installer/mini_installer.cc
+--- a/chrome/installer/mini_installer/mini_installer.cc
++++ b/chrome/installer/mini_installer/mini_installer.cc
+@@ -799,6 +799,8 @@
+       return IDS_UNINSTALL_CLOSE_APP_BASE;
+     case 31:  // SAME_VERSION_REPAIR_FAILED
+       return IDS_SAME_VERSION_REPAIR_FAILED_BASE;
++    case 9:  // OS_NOT_SUPPORTED
++      return IDS_INSTALL_OS_NOT_SUPPORTED_BASE;
+     case 10:  // OS_ERROR
+       return IDS_INSTALL_OS_ERROR_BASE;
+     case PATCH_NOT_FOR_INSTALLED_VERSION:
+@@ -825,7 +827,7 @@
+   }
+ }
+ 
+-void ShowInstallResult(InstallerDialogState* state) {
++void SetInstallResultText(InstallerDialogState* state) {
+   const bool success = state->install_result.IsSuccess();
+   state->result_title = GetInstallerLocalizedString(
+       state->module,
+@@ -851,7 +853,11 @@
+       state->result_message.append(error_code);
+     }
+   }
+-
++}
++
++void ShowInstallResult(InstallerDialogState* state) {
++  SetInstallResultText(state);
++  const bool success = state->install_result.IsSuccess();
+   TASKDIALOGCONFIG& page = state->result_page;
+   page.cbSize = sizeof(page);
+   page.hwndParent = state->dialog;
+@@ -979,9 +985,33 @@
+   dialog.pfCallback = TaskDialogCallbackProc;
+   dialog.lpCallbackData = reinterpret_cast<LONG_PTR>(&state);
+ 
++  // Use the same comctl32 instance as InitCommonControlsEx (including SxS).
++  HMODULE controls = nullptr;
++  ::GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
++                           GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
++                       reinterpret_cast<LPCWSTR>(&::InitCommonControlsEx), &controls);
++  const auto task_dialog = reinterpret_cast<decltype(&::TaskDialogIndirect)>(
++      controls ? ::GetProcAddress(controls, "TaskDialogIndirect") : nullptr);
++  if (!task_dialog) {
++    const int answer = ::MessageBoxW(nullptr, state.prompt.c_str(), state.title.c_str(),
++                                     MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION);
++    if (answer != IDYES) {
++      return ProcessExitResult(answer == IDNO ? INSTALL_CANCELLED : GENERIC_ERROR);
++    }
++    state.install_result = WMainImpl(module, configuration, state.should_launch_browser);
++    SetInstallResultText(&state);
++    const bool success = state.install_result.IsSuccess();
++    const int closed = ::MessageBoxW(nullptr, state.result_message.c_str(),
++                                     state.result_title.c_str(),
++                                     MB_OK | (success ? MB_ICONINFORMATION : MB_ICONERROR));
++    if (success && state.should_launch_browser && closed == IDOK) {
++      LaunchInstalledBrowser(configuration);
++    }
++    return state.install_result;
++  }
+   int selected_button = 0;
+   const HRESULT dialog_result =
+-      TaskDialogIndirect(&dialog, &selected_button, nullptr, nullptr);
++      task_dialog(&dialog, &selected_button, nullptr, nullptr);
+   if (state.install_thread) {
+     if (WaitForSingleObject(state.install_thread, INFINITE) != WAIT_OBJECT_0) {
+       // The worker owns references to `state`. Terminate rather than returning
+diff --git a/chrome/installer/mini_installer/mini_installer_localization.cc b/chrome/installer/mini_installer/mini_installer_localization.cc
+--- a/chrome/installer/mini_installer/mini_installer_localization.cc
++++ b/chrome/installer/mini_installer/mini_installer_localization.cc
+@@ -8,6 +8,7 @@
+ #include <string_view>
+ #include <vector>
+ 
++#include "base/win/legacy_locale.h"
+ #include "chrome/installer/mini_installer/mini_installer_version.h"
+ #include "chrome/installer/util/installer_util_strings.h"
+ 
+@@ -116,12 +117,14 @@
+       MUI_LANGUAGE_NAME | MUI_MERGE_SYSTEM_FALLBACK | MUI_MERGE_USER_FALLBACK;
+   ULONG language_count = 0;
+   ULONG buffer_size = 0;
+-  if (GetThreadPreferredUILanguages(kLanguageFlags, &language_count, nullptr,
+-                                    &buffer_size) &&
++  using GetPreferredLanguages = decltype(&::GetThreadPreferredUILanguages);
++  const auto preferred = reinterpret_cast<GetPreferredLanguages>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"),
++                       "GetThreadPreferredUILanguages"));
++  if (preferred && preferred(kLanguageFlags, &language_count, nullptr, &buffer_size) &&
+       buffer_size > 1) {
+     std::vector<wchar_t> buffer(buffer_size);
+-    if (GetThreadPreferredUILanguages(kLanguageFlags, &language_count,
+-                                      buffer.data(), &buffer_size)) {
++    if (preferred(kLanguageFlags, &language_count, buffer.data(), &buffer_size)) {
+       std::wstring_view remaining(buffer.data(), buffer.size());
+       while (!remaining.empty() && remaining.front() != L'\0') {
+         const size_t terminator = remaining.find(L'\0');
+@@ -135,9 +138,9 @@
+   }
+ 
+   if (languages.empty()) {
+-    wchar_t locale_name[LOCALE_NAME_MAX_LENGTH] = {};
+-    if (GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH)) {
+-      languages.emplace_back(locale_name);
++    const auto name = base::win::GetLegacyUILanguageName(::GetUserDefaultUILanguage());
++    if (!name.empty()) {
++      languages.push_back(name);
+     }
+   }
+   return languages;
+diff --git a/content/browser/sandbox_support_win_impl.cc b/content/browser/sandbox_support_win_impl.cc
+--- a/content/browser/sandbox_support_win_impl.cc
++++ b/content/browser/sandbox_support_win_impl.cc
+@@ -10,220 +10,14 @@
+ #include "base/containers/span.h"
+ #include "base/strings/string_util.h"
+ #include "base/strings/string_util_win.h"
++#include "base/win/legacy_locale.h"
+ #include "content/browser/sandbox_support_impl.h"
+ 
+ namespace content {
+ namespace {
+-typedef LCID (WINAPI* LocaleNameToLCIDPtr)(LPCWSTR, DWORD);
+-typedef std::unordered_map<std::wstring, LCID> NameToLCIDMap;
+-
+-static std::wstring removeLastComponent(const std::wstring& name)
+-{
+-    size_t lastSeparator = name.rfind('-');
+-    if (lastSeparator == std::wstring::npos)
+-        return std::wstring();
+-    return name.substr(0, lastSeparator);
+-}
+-
+-static void ensureNameToLCIDMap(NameToLCIDMap& map)
+-{
+-    if (!map.empty())
+-        return;
+-    // http://www.microsoft.com/resources/msdn/goglobal/default.mspx
+-    // We add only locales used in layout tests for now.
+-    map.insert({L"af", 0x0436});
+-    map.insert({L"sq", 0x041C});
+-    map.insert({L"ar", 0x0001});
+-    map.insert({L"ar-sa", 0x0401});
+-    map.insert({L"ar-iq", 0x0801});
+-    map.insert({L"ar-eg", 0x0C01});
+-    map.insert({L"ar-ly", 0x1001});
+-    map.insert({L"ar-dz", 0x1401});
+-    map.insert({L"ar-ma", 0x1801});
+-    map.insert({L"ar-tn", 0x1C01});
+-    map.insert({L"ar-om", 0x2001});
+-    map.insert({L"ar-ye", 0x2401});
+-    map.insert({L"ar-sy", 0x2801});
+-    map.insert({L"ar-jo", 0x2C01});
+-    map.insert({L"ar-lb", 0x3001});
+-    map.insert({L"ar-kw", 0x3401});
+-    map.insert({L"ar-ae", 0x3801});
+-    map.insert({L"ar-bh", 0x3C01});
+-    map.insert({L"ar-qa", 0x4001});
+-    map.insert({L"eu", 0x042D});
+-    map.insert({L"bg", 0x0402});
+-    map.insert({L"be", 0x0423});
+-    map.insert({L"ca", 0x0403});
+-    map.insert({L"zh", 0x0004});
+-    map.insert({L"zh-mo", 0x1404});
+-    map.insert({L"zh-tw", 0x0404});
+-    map.insert({L"zh-cn", 0x0804});
+-    map.insert({L"zh-hk", 0x0C04});
+-    map.insert({L"zh-sg", 0x1004});
+-    map.insert({L"hr", 0x041A});
+-    map.insert({L"cs", 0x0405});
+-    map.insert({L"da", 0x0406});
+-    map.insert({L"nl", 0x0413});
+-    map.insert({L"nl-be", 0x0813});
+-    map.insert({L"en", 0x0009});
+-    map.insert({L"en", 0x2409});
+-    map.insert({L"en-us", 0x0409});
+-    map.insert({L"en-gb", 0x0809});
+-    map.insert({L"en-au", 0x0C09});
+-    map.insert({L"en-ca", 0x1009});
+-    map.insert({L"en-nz", 0x1409});
+-    map.insert({L"en-ie", 0x1809});
+-    map.insert({L"en-za", 0x1C09});
+-    map.insert({L"en-zw", 0x3009});
+-    map.insert({L"en-jm", 0x2009});
+-    map.insert({L"en-bz", 0x2809});
+-    map.insert({L"en-tt", 0x2C09});
+-    map.insert({L"en-ph", 0x3409});
+-    map.insert({L"et", 0x0425});
+-    map.insert({L"fo", 0x0438});
+-    map.insert({L"fa", 0x0429});
+-    map.insert({L"fi", 0x040B});
+-    map.insert({L"fr", 0x040C});
+-    map.insert({L"fr-be", 0x080C});
+-    map.insert({L"fr-ca", 0x0C0C});
+-    map.insert({L"fr-ch", 0x100C});
+-    map.insert({L"fr-lu", 0x140C});
+-    map.insert({L"fr-mc", 0x180C});
+-    map.insert({L"gd", 0x043C});
+-    map.insert({L"de", 0x0407});
+-    map.insert({L"de-ch", 0x0807});
+-    map.insert({L"de-at", 0x0C07});
+-    map.insert({L"de-lu", 0x1007});
+-    map.insert({L"de-li", 0x1407});
+-    map.insert({L"el", 0x0408});
+-    map.insert({L"he", 0x040D});
+-    map.insert({L"hi", 0x0439});
+-    map.insert({L"hu", 0x040E});
+-    map.insert({L"is", 0x040F});
+-    map.insert({L"id", 0x0421});
+-    map.insert({L"it", 0x0410});
+-    map.insert({L"it-ch", 0x0810});
+-    map.insert({L"ja", 0x0411});
+-    map.insert({L"ko", 0x0412});
+-    map.insert({L"lv", 0x0426});
+-    map.insert({L"lt", 0x0427});
+-    map.insert({L"mk", 0x042F});
+-    map.insert({L"ms", 0x043E});
+-    map.insert({L"mt", 0x043A});
+-    map.insert({L"pl", 0x0415});
+-    map.insert({L"pt-br", 0x0416});
+-    map.insert({L"pt", 0x0816});
+-    map.insert({L"rm", 0x0417});
+-    map.insert({L"ro", 0x0418});
+-    map.insert({L"ro-md", 0x0818});
+-    map.insert({L"ru", 0x0419});
+-    map.insert({L"ru-md", 0x0819});
+-    map.insert({L"sr", 0x0C1A});
+-    map.insert({L"sr", 0x081A});
+-    map.insert({L"sk", 0x041B});
+-    map.insert({L"sl", 0x0424});
+-    map.insert({L"sb", 0x042E});
+-    map.insert({L"es", 0x040A});
+-    map.insert({L"es-mx", 0x080A});
+-    map.insert({L"es", 0x0C0A});
+-    map.insert({L"es-gt", 0x100A});
+-    map.insert({L"es-cr", 0x140A});
+-    map.insert({L"es-pa", 0x180A});
+-    map.insert({L"es-do", 0x1C0A});
+-    map.insert({L"es-ve", 0x200A});
+-    map.insert({L"es-co", 0x240A});
+-    map.insert({L"es-pe", 0x280A});
+-    map.insert({L"es-ar", 0x2C0A});
+-    map.insert({L"es-ec", 0x300A});
+-    map.insert({L"es-cl", 0x340A});
+-    map.insert({L"es-uy", 0x380A});
+-    map.insert({L"es-py", 0x3C0A});
+-    map.insert({L"es-bo", 0x400A});
+-    map.insert({L"es-sv", 0x440A});
+-    map.insert({L"es-hn", 0x480A});
+-    map.insert({L"es-ni", 0x4C0A});
+-    map.insert({L"es-pr", 0x500A});
+-    map.insert({L"sx", 0x0430});
+-    map.insert({L"sv", 0x041D});
+-    map.insert({L"sv-fi", 0x081D});
+-    map.insert({L"th", 0x041E});
+-    map.insert({L"ts", 0x0431});
+-    map.insert({L"tn", 0x0432});
+-    map.insert({L"tr", 0x041F});
+-    map.insert({L"uk", 0x0422});
+-    map.insert({L"ur", 0x0420});
+-    map.insert({L"uz", 0x0443});
+-    map.insert({L"uz", 0x0843});
+-    map.insert({L"vi", 0x042A});
+-    map.insert({L"xh", 0x0434});
+-    map.insert({L"yi", 0x043D});
+-    map.insert({L"zu", 0x0435});
+-    map.insert({L"hy", 0x042B});
+-    map.insert({L"ka", 0x0437});
+-    map.insert({L"kk", 0x043F});
+-    map.insert({L"sw", 0x0441});
+-    map.insert({L"tt", 0x0444});
+-    map.insert({L"bn", 0x0445});
+-    map.insert({L"pa", 0x0446});
+-    map.insert({L"gu", 0x0447});
+-    map.insert({L"or", 0x0448});
+-    map.insert({L"ta", 0x0449});
+-    map.insert({L"te", 0x044A});
+-    map.insert({L"kn", 0x044B});
+-    map.insert({L"ml", 0x044C});
+-    map.insert({L"as", 0x044D});
+-    map.insert({L"mr", 0x044E});
+-    map.insert({L"ms", 0x083E});
+-    map.insert({L"ne", 0x0861});
+-    map.insert({L"sa", 0x044F});
+-    map.insert({L"lt", 0x0827});
+-    map.insert({L"kok", 0x0457});
+-    map.insert({L"x-az-cyrillic", 0x082C});
+-    map.insert({L"x-az-latin", 0x042C});
+-    map.insert({L"no", 0x0414});
+-    map.insert({L"nb-no", 0x0414});
+-    map.insert({L"nn-no", 0x0814});
+-    map.insert({L"az", 0x082C});
+-    map.insert({L"az", 0x042C});
+-    map.insert({L"kz", 0x0440});
+-    map.insert({L"mn", 0x0450});
+-    map.insert({L"gl", 0x0456});
+-    map.insert({L"syr", 0x045A});
+-    map.insert({L"div", 0x0465});
+-    map.insert({L"es-us", 0x540A});
+-}
+-
+-// Fallback implementation of LocaleNameToLCID API. This is used for
+-// testing on Windows XP.
+-// FIXME: Remove this, ensureNameToLCIDMap, and removeLastComponent when we drop
+-// Windows XP support.
+-static LCID WINAPI convertLocaleNameToLCID(LPCWSTR name, DWORD)
+-{
+-    if (!name || !name[0])
+-        return LOCALE_USER_DEFAULT;
+-    static NameToLCIDMap map;
+-    ensureNameToLCIDMap(map);
+-    std::wstring localeName = std::wstring(name);
+-    std::replace(localeName.begin(), localeName.end(), L'_', L'-');
+-    std::transform(localeName.begin(), localeName.end(), localeName.begin(),
+-                   [](wchar_t c){ return towlower(c); });
+-    do {
+-        NameToLCIDMap::const_iterator iterator = map.find(localeName);
+-        if (iterator != map.end())
+-            return iterator->second;
+-        localeName = removeLastComponent(localeName);
+-    } while (!localeName.empty());
+-    return LOCALE_USER_DEFAULT;
+-}
+-
+ LCID CallLocaleNameToLCID(std::u16string_view locale) {
+   CHECK(locale.size() < LOCALE_NAME_MAX_LENGTH);
+-    // LocaleNameToLCID() is available since Windows Vista.
+-    LocaleNameToLCIDPtr localeNameToLCID = reinterpret_cast<LocaleNameToLCIDPtr>(::GetProcAddress(::GetModuleHandle(L"kernel32"), "LocaleNameToLCID"));
+-    if (!localeNameToLCID)
+-        localeNameToLCID = convertLocaleNameToLCID;
+-
+-  return localeNameToLCID(base::as_wcstr(locale), 0);
++  return base::win::LocaleNameToLCIDCompat(base::as_wcstr(locale), 0);
+ }
+ 
+ std::u16string GetLocaleInfoString(LCID lcid,
+diff --git a/third_party/blink/renderer/platform/text/locale_win.cc b/third_party/blink/renderer/platform/text/locale_win.cc
+--- a/third_party/blink/renderer/platform/text/locale_win.cc
++++ b/third_party/blink/renderer/platform/text/locale_win.cc
+@@ -40,229 +40,26 @@
+ #include "base/memory/ptr_util.h"
+ #include "base/numerics/safe_conversions.h"
+ #include "base/strings/string_util.h"
++#include "base/win/legacy_locale.h"
+ #include "third_party/blink/public/platform/platform.h"
+ #include "third_party/blink/public/platform/win/web_sandbox_support.h"
+ #include "third_party/blink/renderer/platform/language.h"
+ #include "third_party/blink/renderer/platform/text/date_components.h"
+ #include "third_party/blink/renderer/platform/text/date_time_format.h"
+ #include "third_party/blink/renderer/platform/web_test_support.h"
+-#include "third_party/blink/renderer/platform/wtf/hash_map.h"
+ #include "third_party/blink/renderer/platform/wtf/text/string_buffer.h"
+ #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
+-#include "third_party/blink/renderer/platform/wtf/text/string_hash.h"
+ #include "third_party/blink/renderer/platform/wtf/text/unicode.h"
+ #include "ui/base/ui_base_features.h"
+ 
+ namespace blink {
+ 
+-typedef LCID (WINAPI* LocaleNameToLCIDPtr)(LPCWSTR, DWORD);
+-typedef HashMap<String, LCID> NameToLCIDMap;
+-
+ namespace {
+-static String removeLastComponent(const String& name)
+-{
+-  const auto separator = name.rfind('-');
+-  return separator == String::npos ? String() : name.substr(0, separator);
+-}
+-
+-static void ensureNameToLCIDMap(NameToLCIDMap& map)
+-{
+-    if (!map.empty())
+-        return;
+-    // http://www.microsoft.com/resources/msdn/goglobal/default.mspx
+-    // We add only locales used in layout tests for now.
+-    map.insert("af", 0x0436);
+-    map.insert("sq", 0x041C);
+-    map.insert("ar", 0x0001);
+-    map.insert("ar-sa", 0x0401);
+-    map.insert("ar-iq", 0x0801);
+-    map.insert("ar-eg", 0x0C01);
+-    map.insert("ar-ly", 0x1001);
+-    map.insert("ar-dz", 0x1401);
+-    map.insert("ar-ma", 0x1801);
+-    map.insert("ar-tn", 0x1C01);
+-    map.insert("ar-om", 0x2001);
+-    map.insert("ar-ye", 0x2401);
+-    map.insert("ar-sy", 0x2801);
+-    map.insert("ar-jo", 0x2C01);
+-    map.insert("ar-lb", 0x3001);
+-    map.insert("ar-kw", 0x3401);
+-    map.insert("ar-ae", 0x3801);
+-    map.insert("ar-bh", 0x3C01);
+-    map.insert("ar-qa", 0x4001);
+-    map.insert("eu", 0x042D);
+-    map.insert("bg", 0x0402);
+-    map.insert("be", 0x0423);
+-    map.insert("ca", 0x0403);
+-    map.insert("zh", 0x0004);
+-    map.insert("zh-mo", 0x1404);
+-    map.insert("zh-tw", 0x0404);
+-    map.insert("zh-cn", 0x0804);
+-    map.insert("zh-hk", 0x0C04);
+-    map.insert("zh-sg", 0x1004);
+-    map.insert("hr", 0x041A);
+-    map.insert("cs", 0x0405);
+-    map.insert("da", 0x0406);
+-    map.insert("nl", 0x0413);
+-    map.insert("nl-be", 0x0813);
+-    map.insert("en", 0x0009);
+-    map.insert("en", 0x2409);
+-    map.insert("en-us", 0x0409);
+-    map.insert("en-gb", 0x0809);
+-    map.insert("en-au", 0x0C09);
+-    map.insert("en-ca", 0x1009);
+-    map.insert("en-nz", 0x1409);
+-    map.insert("en-ie", 0x1809);
+-    map.insert("en-za", 0x1C09);
+-    map.insert("en-zw", 0x3009);
+-    map.insert("en-jm", 0x2009);
+-    map.insert("en-bz", 0x2809);
+-    map.insert("en-tt", 0x2C09);
+-    map.insert("en-ph", 0x3409);
+-    map.insert("et", 0x0425);
+-    map.insert("fo", 0x0438);
+-    map.insert("fa", 0x0429);
+-    map.insert("fi", 0x040B);
+-    map.insert("fr", 0x040C);
+-    map.insert("fr-be", 0x080C);
+-    map.insert("fr-ca", 0x0C0C);
+-    map.insert("fr-ch", 0x100C);
+-    map.insert("fr-lu", 0x140C);
+-    map.insert("fr-mc", 0x180C);
+-    map.insert("gd", 0x043C);
+-    map.insert("de", 0x0407);
+-    map.insert("de-ch", 0x0807);
+-    map.insert("de-at", 0x0C07);
+-    map.insert("de-lu", 0x1007);
+-    map.insert("de-li", 0x1407);
+-    map.insert("el", 0x0408);
+-    map.insert("he", 0x040D);
+-    map.insert("hi", 0x0439);
+-    map.insert("hu", 0x040E);
+-    map.insert("is", 0x040F);
+-    map.insert("id", 0x0421);
+-    map.insert("it", 0x0410);
+-    map.insert("it-ch", 0x0810);
+-    map.insert("ja", 0x0411);
+-    map.insert("ko", 0x0412);
+-    map.insert("lv", 0x0426);
+-    map.insert("lt", 0x0427);
+-    map.insert("mk", 0x042F);
+-    map.insert("ms", 0x043E);
+-    map.insert("mt", 0x043A);
+-    map.insert("pl", 0x0415);
+-    map.insert("pt-br", 0x0416);
+-    map.insert("pt", 0x0816);
+-    map.insert("rm", 0x0417);
+-    map.insert("ro", 0x0418);
+-    map.insert("ro-md", 0x0818);
+-    map.insert("ru", 0x0419);
+-    map.insert("ru-md", 0x0819);
+-    map.insert("sr", 0x0C1A);
+-    map.insert("sr", 0x081A);
+-    map.insert("sk", 0x041B);
+-    map.insert("sl", 0x0424);
+-    map.insert("sb", 0x042E);
+-    map.insert("es", 0x040A);
+-    map.insert("es-mx", 0x080A);
+-    map.insert("es", 0x0C0A);
+-    map.insert("es-gt", 0x100A);
+-    map.insert("es-cr", 0x140A);
+-    map.insert("es-pa", 0x180A);
+-    map.insert("es-do", 0x1C0A);
+-    map.insert("es-ve", 0x200A);
+-    map.insert("es-co", 0x240A);
+-    map.insert("es-pe", 0x280A);
+-    map.insert("es-ar", 0x2C0A);
+-    map.insert("es-ec", 0x300A);
+-    map.insert("es-cl", 0x340A);
+-    map.insert("es-uy", 0x380A);
+-    map.insert("es-py", 0x3C0A);
+-    map.insert("es-bo", 0x400A);
+-    map.insert("es-sv", 0x440A);
+-    map.insert("es-hn", 0x480A);
+-    map.insert("es-ni", 0x4C0A);
+-    map.insert("es-pr", 0x500A);
+-    map.insert("sx", 0x0430);
+-    map.insert("sv", 0x041D);
+-    map.insert("sv-fi", 0x081D);
+-    map.insert("th", 0x041E);
+-    map.insert("ts", 0x0431);
+-    map.insert("tn", 0x0432);
+-    map.insert("tr", 0x041F);
+-    map.insert("uk", 0x0422);
+-    map.insert("ur", 0x0420);
+-    map.insert("uz", 0x0443);
+-    map.insert("uz", 0x0843);
+-    map.insert("vi", 0x042A);
+-    map.insert("xh", 0x0434);
+-    map.insert("yi", 0x043D);
+-    map.insert("zu", 0x0435);
+-    map.insert("hy", 0x042B);
+-    map.insert("ka", 0x0437);
+-    map.insert("kk", 0x043F);
+-    map.insert("sw", 0x0441);
+-    map.insert("tt", 0x0444);
+-    map.insert("bn", 0x0445);
+-    map.insert("pa", 0x0446);
+-    map.insert("gu", 0x0447);
+-    map.insert("or", 0x0448);
+-    map.insert("ta", 0x0449);
+-    map.insert("te", 0x044A);
+-    map.insert("kn", 0x044B);
+-    map.insert("ml", 0x044C);
+-    map.insert("as", 0x044D);
+-    map.insert("mr", 0x044E);
+-    map.insert("ms", 0x083E);
+-    map.insert("ne", 0x0861);
+-    map.insert("sa", 0x044F);
+-    map.insert("lt", 0x0827);
+-    map.insert("kok", 0x0457);
+-    map.insert("x-az-cyrillic", 0x082C);
+-    map.insert("x-az-latin", 0x042C);
+-    map.insert("no", 0x0414);
+-    map.insert("nb-no", 0x0414);
+-    map.insert("nn-no", 0x0814);
+-    map.insert("az", 0x082C);
+-    map.insert("az", 0x042C);
+-    map.insert("kz", 0x0440);
+-    map.insert("mn", 0x0450);
+-    map.insert("gl", 0x0456);
+-    map.insert("syr", 0x045A);
+-    map.insert("div", 0x0465);
+-    map.insert("es-us", 0x540A);
+-}
+-
+-// Fallback implementation of LocaleNameToLCID API. This is used for
+-// testing on Windows XP.
+-// FIXME: Remove this, ensureNameToLCIDMap, and removeLastComponent when we drop
+-// Windows XP support.
+-static LCID WINAPI convertLocaleNameToLCID(LPCWSTR name, DWORD)
+-{
+-    if (!name || !name[0])
+-        return LOCALE_USER_DEFAULT;
+-    DEFINE_STATIC_LOCAL(NameToLCIDMap, map, ());
+-    ensureNameToLCIDMap(map);
+-    String localeName = String(base::as_u16cstr(name)).Replace('_', '-');
+-    localeName = localeName.DeprecatedLower();
+-    do {
+-        NameToLCIDMap::const_iterator iterator = map.find(localeName);
+-        if (iterator != map.end())
+-            return iterator->value;
+-        localeName = removeLastComponent(localeName);
+-    } while (!localeName.empty());
+-    return LOCALE_USER_DEFAULT;
+-}
+ 
+ // Functions that may call Csr* functions in kernelbase.dll and need proxying.
+ LCID CallLocaleNameToLCID(base::span<UChar> locale) {
+   CHECK_LT(locale.size(), static_cast<size_t>(LOCALE_NAME_MAX_LENGTH));
+-    // LocaleNameToLCID() is available since Windows Vista.
+-    LocaleNameToLCIDPtr localeNameToLCID = reinterpret_cast<LocaleNameToLCIDPtr>(::GetProcAddress(::GetModuleHandle(L"kernel32"), "LocaleNameToLCID"));
+-    if (!localeNameToLCID)
+-        localeNameToLCID = convertLocaleNameToLCID;
+-
+-  return localeNameToLCID(base::as_writable_wcstr(locale.data()), 0);
++  return base::win::LocaleNameToLCIDCompat(base::as_writable_wcstr(locale.data()), 0);
+ }
+ 
+ String GetLocaleInfoString(LCID lcid, LCTYPE type, bool defaults_for_locale) {
+diff --git a/ui/accessibility/platform/ax_platform_node_win.cc b/ui/accessibility/platform/ax_platform_node_win.cc
+--- a/ui/accessibility/platform/ax_platform_node_win.cc
++++ b/ui/accessibility/platform/ax_platform_node_win.cc
+@@ -35,6 +35,7 @@
+ #include "base/tracing/protos/chrome_track_event.pbzero.h"
+ #include "base/values.h"
+ #include "base/win/enum_variant.h"
++#include "base/win/legacy_locale.h"
+ #include "base/win/scoped_bstr.h"
+ #include "base/win/scoped_safearray.h"
+ #include "base/win/scoped_variant.h"
+@@ -6342,218 +6343,11 @@
+   return S_OK;
+ }
+ 
+-typedef LCID (WINAPI* LocaleNameToLCIDPtr)(LPCWSTR, DWORD);
+-typedef std::unordered_map<std::wstring, LCID> NameToLCIDMap;
+-
+-static std::wstring removeLastComponent(const std::wstring& name)
+-{
+-    size_t lastSeparator = name.rfind('-');
+-    if (lastSeparator == std::wstring::npos)
+-        return std::wstring();
+-    return name.substr(0, lastSeparator);
+-}
+-
+-static void ensureNameToLCIDMap(NameToLCIDMap& map)
+-{
+-    if (!map.empty())
+-        return;
+-    // http://www.microsoft.com/resources/msdn/goglobal/default.mspx
+-    // We add only locales used in layout tests for now.
+-    map.insert({L"af", 0x0436});
+-    map.insert({L"sq", 0x041C});
+-    map.insert({L"ar", 0x0001});
+-    map.insert({L"ar-sa", 0x0401});
+-    map.insert({L"ar-iq", 0x0801});
+-    map.insert({L"ar-eg", 0x0C01});
+-    map.insert({L"ar-ly", 0x1001});
+-    map.insert({L"ar-dz", 0x1401});
+-    map.insert({L"ar-ma", 0x1801});
+-    map.insert({L"ar-tn", 0x1C01});
+-    map.insert({L"ar-om", 0x2001});
+-    map.insert({L"ar-ye", 0x2401});
+-    map.insert({L"ar-sy", 0x2801});
+-    map.insert({L"ar-jo", 0x2C01});
+-    map.insert({L"ar-lb", 0x3001});
+-    map.insert({L"ar-kw", 0x3401});
+-    map.insert({L"ar-ae", 0x3801});
+-    map.insert({L"ar-bh", 0x3C01});
+-    map.insert({L"ar-qa", 0x4001});
+-    map.insert({L"eu", 0x042D});
+-    map.insert({L"bg", 0x0402});
+-    map.insert({L"be", 0x0423});
+-    map.insert({L"ca", 0x0403});
+-    map.insert({L"zh", 0x0004});
+-    map.insert({L"zh-mo", 0x1404});
+-    map.insert({L"zh-tw", 0x0404});
+-    map.insert({L"zh-cn", 0x0804});
+-    map.insert({L"zh-hk", 0x0C04});
+-    map.insert({L"zh-sg", 0x1004});
+-    map.insert({L"hr", 0x041A});
+-    map.insert({L"cs", 0x0405});
+-    map.insert({L"da", 0x0406});
+-    map.insert({L"nl", 0x0413});
+-    map.insert({L"nl-be", 0x0813});
+-    map.insert({L"en", 0x0009});
+-    map.insert({L"en", 0x2409});
+-    map.insert({L"en-us", 0x0409});
+-    map.insert({L"en-gb", 0x0809});
+-    map.insert({L"en-au", 0x0C09});
+-    map.insert({L"en-ca", 0x1009});
+-    map.insert({L"en-nz", 0x1409});
+-    map.insert({L"en-ie", 0x1809});
+-    map.insert({L"en-za", 0x1C09});
+-    map.insert({L"en-zw", 0x3009});
+-    map.insert({L"en-jm", 0x2009});
+-    map.insert({L"en-bz", 0x2809});
+-    map.insert({L"en-tt", 0x2C09});
+-    map.insert({L"en-ph", 0x3409});
+-    map.insert({L"et", 0x0425});
+-    map.insert({L"fo", 0x0438});
+-    map.insert({L"fa", 0x0429});
+-    map.insert({L"fi", 0x040B});
+-    map.insert({L"fr", 0x040C});
+-    map.insert({L"fr-be", 0x080C});
+-    map.insert({L"fr-ca", 0x0C0C});
+-    map.insert({L"fr-ch", 0x100C});
+-    map.insert({L"fr-lu", 0x140C});
+-    map.insert({L"fr-mc", 0x180C});
+-    map.insert({L"gd", 0x043C});
+-    map.insert({L"de", 0x0407});
+-    map.insert({L"de-ch", 0x0807});
+-    map.insert({L"de-at", 0x0C07});
+-    map.insert({L"de-lu", 0x1007});
+-    map.insert({L"de-li", 0x1407});
+-    map.insert({L"el", 0x0408});
+-    map.insert({L"he", 0x040D});
+-    map.insert({L"hi", 0x0439});
+-    map.insert({L"hu", 0x040E});
+-    map.insert({L"is", 0x040F});
+-    map.insert({L"id", 0x0421});
+-    map.insert({L"it", 0x0410});
+-    map.insert({L"it-ch", 0x0810});
+-    map.insert({L"ja", 0x0411});
+-    map.insert({L"ko", 0x0412});
+-    map.insert({L"lv", 0x0426});
+-    map.insert({L"lt", 0x0427});
+-    map.insert({L"mk", 0x042F});
+-    map.insert({L"ms", 0x043E});
+-    map.insert({L"mt", 0x043A});
+-    map.insert({L"pl", 0x0415});
+-    map.insert({L"pt-br", 0x0416});
+-    map.insert({L"pt", 0x0816});
+-    map.insert({L"rm", 0x0417});
+-    map.insert({L"ro", 0x0418});
+-    map.insert({L"ro-md", 0x0818});
+-    map.insert({L"ru", 0x0419});
+-    map.insert({L"ru-md", 0x0819});
+-    map.insert({L"sr", 0x0C1A});
+-    map.insert({L"sr", 0x081A});
+-    map.insert({L"sk", 0x041B});
+-    map.insert({L"sl", 0x0424});
+-    map.insert({L"sb", 0x042E});
+-    map.insert({L"es", 0x040A});
+-    map.insert({L"es-mx", 0x080A});
+-    map.insert({L"es", 0x0C0A});
+-    map.insert({L"es-gt", 0x100A});
+-    map.insert({L"es-cr", 0x140A});
+-    map.insert({L"es-pa", 0x180A});
+-    map.insert({L"es-do", 0x1C0A});
+-    map.insert({L"es-ve", 0x200A});
+-    map.insert({L"es-co", 0x240A});
+-    map.insert({L"es-pe", 0x280A});
+-    map.insert({L"es-ar", 0x2C0A});
+-    map.insert({L"es-ec", 0x300A});
+-    map.insert({L"es-cl", 0x340A});
+-    map.insert({L"es-uy", 0x380A});
+-    map.insert({L"es-py", 0x3C0A});
+-    map.insert({L"es-bo", 0x400A});
+-    map.insert({L"es-sv", 0x440A});
+-    map.insert({L"es-hn", 0x480A});
+-    map.insert({L"es-ni", 0x4C0A});
+-    map.insert({L"es-pr", 0x500A});
+-    map.insert({L"sx", 0x0430});
+-    map.insert({L"sv", 0x041D});
+-    map.insert({L"sv-fi", 0x081D});
+-    map.insert({L"th", 0x041E});
+-    map.insert({L"ts", 0x0431});
+-    map.insert({L"tn", 0x0432});
+-    map.insert({L"tr", 0x041F});
+-    map.insert({L"uk", 0x0422});
+-    map.insert({L"ur", 0x0420});
+-    map.insert({L"uz", 0x0443});
+-    map.insert({L"uz", 0x0843});
+-    map.insert({L"vi", 0x042A});
+-    map.insert({L"xh", 0x0434});
+-    map.insert({L"yi", 0x043D});
+-    map.insert({L"zu", 0x0435});
+-    map.insert({L"hy", 0x042B});
+-    map.insert({L"ka", 0x0437});
+-    map.insert({L"kk", 0x043F});
+-    map.insert({L"sw", 0x0441});
+-    map.insert({L"tt", 0x0444});
+-    map.insert({L"bn", 0x0445});
+-    map.insert({L"pa", 0x0446});
+-    map.insert({L"gu", 0x0447});
+-    map.insert({L"or", 0x0448});
+-    map.insert({L"ta", 0x0449});
+-    map.insert({L"te", 0x044A});
+-    map.insert({L"kn", 0x044B});
+-    map.insert({L"ml", 0x044C});
+-    map.insert({L"as", 0x044D});
+-    map.insert({L"mr", 0x044E});
+-    map.insert({L"ms", 0x083E});
+-    map.insert({L"ne", 0x0861});
+-    map.insert({L"sa", 0x044F});
+-    map.insert({L"lt", 0x0827});
+-    map.insert({L"kok", 0x0457});
+-    map.insert({L"x-az-cyrillic", 0x082C});
+-    map.insert({L"x-az-latin", 0x042C});
+-    map.insert({L"no", 0x0414});
+-    map.insert({L"nb-no", 0x0414});
+-    map.insert({L"nn-no", 0x0814});
+-    map.insert({L"az", 0x082C});
+-    map.insert({L"az", 0x042C});
+-    map.insert({L"kz", 0x0440});
+-    map.insert({L"mn", 0x0450});
+-    map.insert({L"gl", 0x0456});
+-    map.insert({L"syr", 0x045A});
+-    map.insert({L"div", 0x0465});
+-    map.insert({L"es-us", 0x540A});
+-}
+-
+-// Fallback implementation of LocaleNameToLCID API. This is used for
+-// testing on Windows XP.
+-// FIXME: Remove this, ensureNameToLCIDMap, and removeLastComponent when we drop
+-// Windows XP support.
+-static LCID WINAPI convertLocaleNameToLCID(LPCWSTR name, DWORD)
+-{
+-    if (!name || !name[0])
+-        return LOCALE_USER_DEFAULT;
+-    static NameToLCIDMap map;
+-    ensureNameToLCIDMap(map);
+-    std::wstring localeName = std::wstring(name);
+-    std::replace(localeName.begin(), localeName.end(), L'_', L'-');
+-    std::transform(localeName.begin(), localeName.end(), localeName.begin(),
+-                   [](wchar_t c){ return towlower(c); });
+-    do {
+-        NameToLCIDMap::const_iterator iterator = map.find(localeName);
+-        if (iterator != map.end())
+-            return iterator->second;
+-        localeName = removeLastComponent(localeName);
+-    } while (!localeName.empty());
+-    return LOCALE_USER_DEFAULT;
+-}
+-
+ std::optional<LCID> AXPlatformNodeWin::GetCultureAttributeAsLCID() const {
+   const std::u16string language =
+       base::UTF8ToUTF16(GetDelegate()->GetLanguage());
+-    // LocaleNameToLCID() is available since Windows Vista.
+-    LocaleNameToLCIDPtr localeNameToLCID = reinterpret_cast<LocaleNameToLCIDPtr>(::GetProcAddress(::GetModuleHandle(L"kernel32"), "LocaleNameToLCID"));
+-    if (!localeNameToLCID)
+-        localeNameToLCID = convertLocaleNameToLCID;
+-
+   const LCID lcid =
+-      localeNameToLCID(base::as_wcstr(language), LOCALE_ALLOW_NEUTRAL_NAMES);
++      base::win::LocaleNameToLCIDCompat(base::as_wcstr(language), LOCALE_ALLOW_NEUTRAL_NAMES);
+   if (!lcid)
+     return std::nullopt;
+ 
+diff --git a/ui/base/l10n/l10n_util_win.cc b/ui/base/l10n/l10n_util_win.cc
+--- a/ui/base/l10n/l10n_util_win.cc
++++ b/ui/base/l10n/l10n_util_win.cc
+@@ -61,7 +61,7 @@
+   }
+ }
+ 
+-void AdjustUiFont(gfx::win::FontAdjustment& font_adjustment) {
++bool AdjustUiFontForLocale(gfx::win::FontAdjustment& font_adjustment) {
+   // This is rather simple-minded to deal with the UI font size issue for some
+   // Indian locales (ml, bn, hi) for which the default Windows fonts are too
+   // small to be legible.  For those locales, IDS_UI_FONT_FAMILY is set to an
+@@ -87,16 +87,21 @@
+           font_adjustment.font_family_override.swap(ui_font_family);
+         }
+         font_adjustment.font_scale = scaler / 100.0;
++        return true;
+       }
+     }
+   }
++  return false;
++}
++
++void AdjustUiFont(gfx::win::FontAdjustment& font_adjustment) {
++  AdjustUiFontForLocale(font_adjustment);
+   font_adjustment.font_scale *= display::win::GetAccessibilityFontScale();
+ }
+ 
+ void OverrideLocaleWithUILanguageList() {
+   std::vector<base::i18n::LanguageTag> ui_languages =
+       base::i18n::GetThreadPreferredUILanguageList();
+-  CHECK(!ui_languages.empty());
+   override_locale_holder.Get().swap_value(&ui_languages);
+ }
+ 
+diff --git a/ui/base/l10n/l10n_util_win.h b/ui/base/l10n/l10n_util_win.h
+--- a/ui/base/l10n/l10n_util_win.h
++++ b/ui/base/l10n/l10n_util_win.h
+@@ -29,6 +29,10 @@
+ // and https://devblogs.microsoft.com/oldnewthing/20060626-11/?p=30743 as to why
+ // we need these next three functions.
+ 
++// Apply the locale-specific Windows font family and scale, if configured.
++COMPONENT_EXPORT(UI_BASE)
++bool AdjustUiFontForLocale(gfx::win::FontAdjustment& font_adjustment);
++
+ COMPONENT_EXPORT(UI_BASE)
+ void AdjustUiFont(gfx::win::FontAdjustment& font_adjustment);
+ 
+diff --git a/ui/views/corewm/tooltip_win.cc b/ui/views/corewm/tooltip_win.cc
+--- a/ui/views/corewm/tooltip_win.cc
++++ b/ui/views/corewm/tooltip_win.cc
+@@ -9,7 +9,6 @@
+ #include "base/strings/string_util_win.h"
+ #include "base/win/windowsx_shim.h"
+ #include "ui/aura/window.h"
+-#include "ui/base/l10n/l10n_util.h"
+ #include "ui/base/l10n/l10n_util_win.h"
+ #include "ui/display/display.h"
+ #include "ui/display/screen.h"
+@@ -17,7 +16,6 @@
+ #include "ui/gfx/geometry/rect.h"
+ #include "ui/gfx/system_fonts_win.h"
+ #include "ui/views/corewm/cursor_height_provider_win.h"
+-#include "ui/strings/grit/app_locale_settings.h"
+ 
+ namespace views::corewm {
+ 
+@@ -154,43 +152,13 @@
+   return ::CreateFontIndirect(&logfont);
+ }
+ 
+-bool NeedOverrideDefaultUIFont(std::wstring* override_font_family,
+-                               double* font_size_scaler) {
+-  // This is rather simple-minded to deal with the UI font size
+-  // issue for some Indian locales (ml, bn, hi) for which
+-  // the default Windows fonts are too small to be legible.  For those
+-  // locales, IDS_UI_FONT_FAMILY is set to an actual font family to
+-  // use while for other locales, it's set to 'default'.
+-  std::wstring ui_font_family = l10n_util::GetWideString(IDS_UI_FONT_FAMILY);
+-  int scaler100;
+-  if (!base::StringToInt(l10n_util::GetStringUTF16(IDS_UI_FONT_SIZE_SCALER),
+-                         &scaler100))
+-    return false;
+-
+-  // We use the OS default in two cases:
+-  // 1) The resource bundle has 'default' and '100' for font family and
+-  //    font scaler.
+-  // 2) The resource bundle is not available for some reason and
+-  //    ui_font_family is empty.
+-  if ((ui_font_family == L"default" && scaler100 == 100) ||
+-      ui_font_family.empty())
+-    return false;
+-
+-  if (override_font_family && ui_font_family != L"default")
+-    override_font_family->swap(ui_font_family);
+-  if (font_size_scaler)
+-    *font_size_scaler = scaler100 / 100.0;
+-  return true;
+-}
+-
+ void TooltipWin::MaybeOverrideFont() {
+   gfx::win::FontAdjustment font_adjustment;
+   const HFONT old_font = GetWindowFont(tooltip_hwnd_);
+ 
+   // Determine if we need to override the font.
+   if ((!override_font_.get() || override_font_.get() != old_font) &&
+-      NeedOverrideDefaultUIFont(
+-          &font_adjustment.font_family_override, &font_adjustment.font_scale)) {
++      l10n_util::AdjustUiFontForLocale(font_adjustment)) {
+     // Determine if we need to regenerate the font.
+     // There are a number of situations under which Windows can replace the
+     // font in a tooltip, but we don't actually need to regenerate our override

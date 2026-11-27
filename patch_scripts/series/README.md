@@ -1,7 +1,8 @@
 # Thorium Patch Series
 
-`patch_scripts/series/series` is the canonical ordered list for Thorium
-patches. Patch files currently remain under `other/*.patch`.
+`patch_scripts/series/series` is the ordered list of Thorium's regular
+patches. The optional [Windows REWORK series](../../other/rework-windows/README.md)
+has a separate pinned manifest and applies after the selected regular patches.
 
 Patch files intentionally remain in `other/` for now. The series layer records
 ordering, apply roots, and platform conditions. The root-level `setup.py`
@@ -93,8 +94,10 @@ Linux/macOS:
 python3 patch_scripts/series/apply_series.py --source-tree /path/to/chromium/src --condition sse2
 ```
 
-Only one condition is supported per run. Conditions represent mutually
-exclusive build variants such as `sse2` or `raspi`.
+Select at most one build variant, such as `sse2` or `raspi`. The apply/check
+runner also accepts `--condition windows-legacy` alone or together with a
+Windows desktop SIMD variant. It checks both layers in a temporary directory
+and verifies their resulting file hashes before writing any patch output.
 
 ## Apply
 

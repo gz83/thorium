@@ -1,0 +1,44 @@
+diff --git a/sandbox/win/src/broker_services.cc b/sandbox/win/src/broker_services.cc
+index d13bb7ca862a62cb093631c131e001355dd5079c..bce1c93f8c6c510d2f407dce891830b3e59f8068 100644
+--- a/sandbox/win/src/broker_services.cc
++++ b/sandbox/win/src/broker_services.cc
+@@ -577,7 +577,9 @@
+     startup_info->SetAppContainer(container);
+   }
+ 
+-  startup_info->AddJobToAssociate(policy_base->GetJobHandle());
++  if (base::win::GetVersion() >= base::win::Version::WIN10) {
++    startup_info->AddJobToAssociate(policy_base->GetJobHandle());
++  }
+ 
+   if (!startup_info->BuildStartupInformation()) {
+     return base::unexpected(SBOX_ERROR_PROC_THREAD_ATTRIBUTES);
+@@ -649,6 +651,16 @@
+     DWORD& last_error) {
+   if (initial_result != SBOX_ALL_OK) {
+     return initial_result;
++  }
++
++  // Earlier Windows releases cannot associate a job via STARTUPINFOEX.
++  // The initial thread remains suspended until the broker returns success.
++  if (base::win::GetVersion() < base::win::Version::WIN10 &&
++      !::AssignProcessToJobObject(policy_base->GetJobHandle(),
++                                  process_info.process_handle())) {
++    last_error = ::GetLastError();
++    ::TerminateProcess(process_info.process_handle(), 0);
++    return SBOX_ERROR_ASSIGN_PROCESS_TO_JOB_OBJECT;
+   }
+ 
+   ResultCode result = policy_base->InitProcess(process_info.process_handle(),
+diff --git a/sandbox/win/src/job.cc b/sandbox/win/src/job.cc
+index d69d996018fa35a903f85e57a4f294f8809c2b0f..186c43ec503a8ed250c3dd88df0d9dee06fdd333 100644
+--- a/sandbox/win/src/job.cc
++++ b/sandbox/win/src/job.cc
+@@ -10,6 +10,7 @@
+ 
+ #include <utility>
+ 
++#include "base/win/windows_version.h"
+ #include "sandbox/win/src/security_level.h"
+ 
+ namespace sandbox {

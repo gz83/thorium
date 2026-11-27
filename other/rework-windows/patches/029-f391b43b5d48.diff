@@ -1,0 +1,787 @@
+diff --git a/chrome/browser/default_browser/win/settings_window_finder_win.cc b/chrome/browser/default_browser/win/settings_window_finder_win.cc
+index 8e335eb148a7b4ed1ab87198e9af5c51ca094e32..7ede35127b6a291879f4a8eddc5fa7c8244f0b58 100644
+--- a/chrome/browser/default_browser/win/settings_window_finder_win.cc
++++ b/chrome/browser/default_browser/win/settings_window_finder_win.cc
+@@ -16,13 +16,12 @@
+ #include <string_view>
+ #include <utility>
+ 
+-#include "base/containers/span.h"
+ #include "base/files/file_path.h"
+ #include "base/no_destructor.h"
+ #include "base/path_service.h"
+ #include "base/process/process.h"
++#include "base/process/process_handle.h"
+ #include "base/strings/string_util.h"
+-#include "base/strings/string_view_util.h"
+ #include "base/win/scoped_propvariant.h"
+ #include "ui/gfx/win/hwnd_util.h"
+ 
+@@ -54,26 +53,18 @@
+ 
+ base::Process OpenWindowProcess(HWND hwnd) {
+   // Enough for the pid and image path, plus SYNCHRONIZE to poll the exit.
+-  static constexpr DWORD kWindowProcessAccess =
+-      PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE;
++  const DWORD access = base::ProcessImageQueryAccess() | SYNCHRONIZE;
+ 
+   DWORD pid = 0;
+   if (!::GetWindowThreadProcessId(hwnd, &pid) || !pid) {
+     return base::Process();
+   }
+ 
+-  return base::Process::OpenWithAccess(pid, kWindowProcessAccess);
++  return base::Process::OpenWithAccess(pid, access);
+ }
+ 
+ std::wstring GetProcessImagePath(const base::Process& process) {
+-  wchar_t buffer[MAX_PATH];
+-  DWORD size = std::size(buffer);
+-  if (!::QueryFullProcessImageNameW(process.Handle(), 0, buffer, &size)) {
+-    return std::wstring();
+-  }
+-
+-  // On success `size` is the length of the path, excluding the terminator.
+-  return std::wstring(base::as_string_view(base::span(buffer).first(size)));
++  return base::GetProcessExecutablePath(process.Handle()).value();
+ }
+ 
+ // Installs an out-of-context hook for a single `event`, scoped to `pid` when
+diff --git a/base/process/process_handle.h b/base/process/process_handle.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..7472626a13874b057be5fc3f1c819e990d33a5f0
+--- /dev/null
++++ b/base/process/process_handle.h
+@@ -0,0 +1,137 @@
++// Copyright 2013 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef BASE_PROCESS_PROCESS_HANDLE_H_
++#define BASE_PROCESS_PROCESS_HANDLE_H_
++
++#include <stdint.h>
++#include <sys/types.h>
++
++#include <compare>
++#include <iosfwd>
++
++#include "base/base_export.h"
++#include "build/build_config.h"
++
++#if BUILDFLAG(IS_WIN)
++#include "base/win/windows_types.h"
++#endif
++
++#if BUILDFLAG(IS_FUCHSIA)
++#include <zircon/types.h>
++#endif
++
++namespace base {
++
++class FilePath;
++
++// ProcessHandle is a platform specific type which represents the underlying OS
++// handle to a process.
++// ProcessId is a number which identifies the process in the OS.
++#if BUILDFLAG(IS_WIN)
++typedef HANDLE ProcessHandle;
++typedef DWORD ProcessId;
++typedef HANDLE UserTokenHandle;
++const ProcessHandle kNullProcessHandle = NULL;
++const ProcessId kNullProcessId = 0;
++#elif BUILDFLAG(IS_FUCHSIA)
++typedef zx_handle_t ProcessHandle;
++typedef zx_koid_t ProcessId;
++const ProcessHandle kNullProcessHandle = ZX_HANDLE_INVALID;
++const ProcessId kNullProcessId = ZX_KOID_INVALID;
++#elif BUILDFLAG(IS_POSIX)
++// On POSIX, our ProcessHandle will just be the PID.
++typedef pid_t ProcessHandle;
++typedef pid_t ProcessId;
++const ProcessHandle kNullProcessHandle = 0;
++const ProcessId kNullProcessId = 0;
++#endif  // BUILDFLAG(IS_WIN)
++
++// To print ProcessIds portably use CrPRIdPid (based on PRIuS and friends from
++// C99 and format_macros.h) like this:
++// base::StringPrintf("PID is %" CrPRIdPid ".\n", pid);
++#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_FUCHSIA)
++#define CrPRIdPid "ld"
++#else
++#define CrPRIdPid "d"
++#endif
++
++class UniqueProcId {
++ public:
++  explicit UniqueProcId(ProcessId value) : value_(value) {}
++  UniqueProcId(const UniqueProcId& other) = default;
++  UniqueProcId& operator=(const UniqueProcId& other) = default;
++
++  // Returns the process PID. WARNING: On some platforms, the pid may not be
++  // valid within the current process sandbox.
++  ProcessId GetUnsafeValue() const { return value_; }
++
++  friend bool operator==(const UniqueProcId&, const UniqueProcId&) = default;
++  friend auto operator<=>(const UniqueProcId&, const UniqueProcId&) = default;
++
++ private:
++  ProcessId value_;
++};
++
++std::ostream& operator<<(std::ostream& os, const UniqueProcId& obj);
++
++// Returns the id of the current process.
++// Note that on some platforms, this is not guaranteed to be unique across
++// processes (use GetUniqueIdForProcess if uniqueness is required).
++BASE_EXPORT ProcessId GetCurrentProcId();
++
++// Returns a unique ID for the current process. The ID will be unique across all
++// currently running processes within the chrome session, but IDs of terminated
++// processes may be reused.
++BASE_EXPORT UniqueProcId GetUniqueIdForProcess();
++
++#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
++// When a process is started in a different PID namespace from the browser
++// process, this function must be called with the process's PID in the browser's
++// PID namespace in order to initialize its unique ID. Not thread safe.
++// WARNING: To avoid inconsistent results from GetUniqueIdForProcess, this
++// should only be called very early after process startup - ideally as soon
++// after process creation as possible.
++BASE_EXPORT void InitUniqueIdForProcessInPidNamespace(
++    ProcessId pid_outside_of_namespace);
++#endif
++
++// Returns the ProcessHandle of the current process.
++BASE_EXPORT ProcessHandle GetCurrentProcessHandle();
++
++// Returns the process ID for the specified process. This is functionally the
++// same as Windows' GetProcessId(), but works on versions of Windows before Win
++// XP SP1 as well.
++// DEPRECATED. New code should be using Process::Pid() instead.
++// Note that on some platforms, this is not guaranteed to be unique across
++// processes.
++BASE_EXPORT ProcessId GetProcId(ProcessHandle process);
++
++#if !BUILDFLAG(IS_FUCHSIA)
++// Returns the ID for the parent of the given process. Not available on Fuchsia.
++// Returning a negative value indicates an error, such as if the |process| does
++// not exist. Returns 0 when |process| has no parent process.
++BASE_EXPORT ProcessId GetParentProcessId(ProcessHandle process);
++#endif  // !BUILDFLAG(IS_FUCHSIA)
++
++#if BUILDFLAG(IS_WIN)
++// Minimum OpenProcess access for GetProcessExecutablePath on this system.
++BASE_EXPORT DWORD ProcessImageQueryAccess();
++#endif
++
++#if BUILDFLAG(IS_POSIX) || BUILDFLAG(IS_WIN)
++// Returns the path to the executable of the given process.
++BASE_EXPORT FilePath GetProcessExecutablePath(ProcessHandle process);
++#endif
++
++#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
++// Same as above, but reads from `proc_dir` instead of "/proc", which can be
++// used with a fake procfs directory in tests.
++BASE_EXPORT FilePath GetProcessExecutablePath(ProcessHandle process,
++                                              const FilePath& proc_dir);
++#endif
++
++}  // namespace base
++
++#endif  // BASE_PROCESS_PROCESS_HANDLE_H_
+diff --git a/base/process/process_handle_win.cc b/base/process/process_handle_win.cc
+new file mode 100644
+index 0000000000000000000000000000000000000000..49a6cd18cbc27405bbd0b1ac86d67c0b47f4aa8a
+--- /dev/null
++++ b/base/process/process_handle_win.cc
+@@ -0,0 +1,110 @@
++// Copyright 2013 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "base/process/process_handle.h"
++
++#include <windows.h>
++#include <psapi.h>
++#include <winternl.h>
++
++#include <ostream>
++#include <string>
++
++#include "base/check.h"
++#include "base/files/file_util.h"
++
++namespace base {
++
++namespace {
++
++auto GetQueryFullProcessImageName() {
++  using QueryImageName = decltype(&::QueryFullProcessImageNameW);
++  static const auto query = reinterpret_cast<QueryImageName>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"),
++                       "QueryFullProcessImageNameW"));
++  return query;
++}
++
++}  // namespace
++
++DWORD ProcessImageQueryAccess() {
++  return GetQueryFullProcessImageName() ? PROCESS_QUERY_LIMITED_INFORMATION
++                                       : PROCESS_QUERY_INFORMATION;
++}
++
++FilePath GetProcessExecutablePath(ProcessHandle process) {
++  // One extra character beyond the maximum NT path leaves room to detect a
++  // full buffer, including when PSAPI reports a truncated name as a success.
++  for (DWORD capacity : {DWORD{MAX_PATH}, DWORD{32769}}) {
++    std::wstring path(capacity, L'\0');
++    DWORD length = capacity;
++    if (auto query = GetQueryFullProcessImageName()) {
++      if (query(process, 0, path.data(), &length)) {
++        path.resize(length);
++        return FilePath(path);
++      }
++    } else {
++      // XP's PSAPI returns an NT device path, also across process bitness.
++      length = ::GetProcessImageFileNameW(process, path.data(), capacity);
++      if (length > 0 && length < capacity - 1) {
++        path.resize(length);
++        FilePath dos_path;
++        if (DevicePathToDriveLetterPath(FilePath(path), &dos_path))
++          return dos_path;
++        return {};
++      }
++      if (length > 0)
++        continue;
++    }
++    if (::GetLastError() != ERROR_INSUFFICIENT_BUFFER)
++      break;
++  }
++  return {};
++}
++
++ProcessId GetCurrentProcId() {
++  return ::GetCurrentProcessId();
++}
++
++ProcessHandle GetCurrentProcessHandle() {
++  return ::GetCurrentProcess();
++}
++
++ProcessId GetProcId(ProcessHandle process) {
++  if (process == base::kNullProcessHandle) {
++    return 0;
++  }
++  // This returns 0 if we have insufficient rights to query the process handle.
++  // Invalid handles or non-process handles will cause a hard failure.
++  ProcessId result = GetProcessId(process);
++  CHECK(result != 0 || GetLastError() != ERROR_INVALID_HANDLE)
++      << "process handle = " << process;
++  return result;
++}
++
++// Local definition to include InheritedFromUniqueProcessId which contains a
++// unique identifier for the parent process. See documentation at:
++// https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryinformationprocess
++typedef struct _PROCESS_BASIC_INFORMATION {
++  PVOID Reserved1;
++  PPEB PebBaseAddress;
++  PVOID Reserved2[2];
++  ULONG_PTR UniqueProcessId;
++  ULONG_PTR InheritedFromUniqueProcessId;
++} PROCESS_BASIC_INFORMATION;
++
++ProcessId GetParentProcessId(ProcessHandle process) {
++  PROCESS_BASIC_INFORMATION pbi = {};
++  // TODO(zijiehe): To match other platforms, -1 (UINT32_MAX) should be returned
++  // if the parent process id cannot be found.
++  ProcessId pid = 0u;
++  if (NT_SUCCESS(::NtQueryInformationProcess(process, ProcessBasicInformation,
++                                             &pbi, sizeof(pbi), nullptr))) {
++    pid = static_cast<ProcessId>(pbi.InheritedFromUniqueProcessId);
++  }
++
++  return pid;
++}
++
++}  // namespace base
+diff --git a/base/process/process_unittest.cc b/base/process/process_unittest.cc
+new file mode 100644
+index 0000000000000000000000000000000000000000..a4d8c7edd17ac2461cdce1529db1078b6df14649
+--- /dev/null
++++ b/base/process/process_unittest.cc
+@@ -0,0 +1,473 @@
++// Copyright 2014 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "base/process/process.h"
++
++#include <memory>
++#include <string>
++#include <string_view>
++#include <utility>
++
++#include "base/at_exit.h"
++#include "base/debug/invalid_access_win.h"
++#include "base/process/kill.h"
++#include "base/test/multiprocess_test.h"
++#include "base/test/test_timeouts.h"
++#include "base/threading/platform_thread.h"
++#include "base/threading/platform_thread_internal_posix.h"
++#include "base/threading/thread_local.h"
++#include "build/build_config.h"
++#include "testing/gtest/include/gtest/gtest.h"
++#include "testing/multiprocess_func_list.h"
++
++#if BUILDFLAG(IS_CHROMEOS)
++#include <sys/resource.h>
++#include "base/process/internal_linux.h"
++#endif  // BUILDFLAG(IS_CHROMEOS)
++
++#if BUILDFLAG(IS_WIN)
++#include <windows.h>
++
++#include "base/base_paths.h"
++#include "base/files/file_path.h"
++#include "base/path_service.h"
++#include "base/process/process_handle.h"
++#include "base/win/base_win_buildflags.h"
++#include "base/win/windows_version.h"
++#endif
++
++namespace {
++
++#if BUILDFLAG(IS_WIN)
++constexpr int kExpectedStillRunningExitCode = 0x102;
++#else
++constexpr int kExpectedStillRunningExitCode = 0;
++#endif
++
++constexpr int kDummyExitCode = 42;
++
++#if BUILDFLAG(IS_APPLE)
++// Fake port provider that returns the calling process's
++// task port, ignoring its argument.
++class FakePortProvider : public base::PortProvider {
++  mach_port_t TaskForHandle(base::ProcessHandle process_handle) const override {
++    return mach_task_self();
++  }
++};
++#endif
++
++}  // namespace
++
++namespace base {
++
++class ProcessTest : public MultiProcessTest {};
++
++#if BUILDFLAG(IS_WIN)
++TEST_F(ProcessTest, ExecutablePathWithQueryAccess) {
++  Process process = Process::OpenWithAccess(GetCurrentProcId(),
++                                            ProcessImageQueryAccess());
++  ASSERT_TRUE(process.IsValid());
++  FilePath expected;
++  ASSERT_TRUE(PathService::Get(FILE_EXE, &expected));
++  EXPECT_TRUE(FilePath::CompareEqualIgnoreCase(
++      expected.value(), GetProcessExecutablePath(process.Handle()).value()));
++  EXPECT_TRUE(GetProcessExecutablePath(kNullProcessHandle).empty());
++}
++#endif
++
++TEST_F(ProcessTest, Create) {
++  Process process(SpawnChild("SimpleChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++  ASSERT_FALSE(process.is_current());
++  EXPECT_NE(process.Pid(), kNullProcessId);
++  process.Close();
++  ASSERT_FALSE(process.IsValid());
++}
++
++TEST_F(ProcessTest, CreateCurrent) {
++  Process process = Process::Current();
++  ASSERT_TRUE(process.IsValid());
++  ASSERT_TRUE(process.is_current());
++  EXPECT_NE(process.Pid(), kNullProcessId);
++  process.Close();
++  ASSERT_FALSE(process.IsValid());
++}
++
++TEST_F(ProcessTest, Move) {
++  Process process1(SpawnChild("SimpleChildProcess"));
++  EXPECT_TRUE(process1.IsValid());
++
++  Process process2;
++  EXPECT_FALSE(process2.IsValid());
++
++  process2 = std::move(process1);
++  EXPECT_TRUE(process2.IsValid());
++  EXPECT_FALSE(process1.IsValid());  // NOLINT(bugprone-use-after-move)
++  EXPECT_FALSE(process2.is_current());
++
++  Process process3 = Process::Current();
++  process2 = std::move(process3);
++  EXPECT_TRUE(process2.is_current());
++  EXPECT_TRUE(process2.IsValid());
++  EXPECT_FALSE(process3.IsValid());  // NOLINT(bugprone-use-after-move)
++}
++
++TEST_F(ProcessTest, Duplicate) {
++  Process process1(SpawnChild("SimpleChildProcess"));
++  ASSERT_TRUE(process1.IsValid());
++
++  Process process2 = process1.Duplicate();
++  ASSERT_TRUE(process1.IsValid());
++  ASSERT_TRUE(process2.IsValid());
++  EXPECT_EQ(process1.Pid(), process2.Pid());
++  EXPECT_FALSE(process1.is_current());
++  EXPECT_FALSE(process2.is_current());
++
++  process1.Close();
++  ASSERT_TRUE(process2.IsValid());
++}
++
++TEST_F(ProcessTest, DuplicateCurrent) {
++  Process process1 = Process::Current();
++  ASSERT_TRUE(process1.IsValid());
++
++  Process process2 = process1.Duplicate();
++  ASSERT_TRUE(process1.IsValid());
++  ASSERT_TRUE(process2.IsValid());
++  EXPECT_EQ(process1.Pid(), process2.Pid());
++  EXPECT_TRUE(process1.is_current());
++  EXPECT_TRUE(process2.is_current());
++
++  process1.Close();
++  ASSERT_TRUE(process2.IsValid());
++}
++
++MULTIPROCESS_TEST_MAIN(SleepyChildProcess) {
++  PlatformThread::Sleep(TestTimeouts::action_max_timeout());
++  return 0;
++}
++
++// TODO(crbug.com/42050607): Enable these tests on Fuchsia when
++// CreationTime() is implemented.
++TEST_F(ProcessTest, CreationTimeCurrentProcess) {
++  // The current process creation time should be less than or equal to the
++  // current time.
++  EXPECT_FALSE(Process::Current().CreationTime().is_null());
++  EXPECT_LE(Process::Current().CreationTime(), Time::Now());
++}
++
++#if !BUILDFLAG(IS_ANDROID)  // Cannot read other processes' creation time on
++                            // Android.
++TEST_F(ProcessTest, CreationTimeOtherProcess) {
++  // The creation time of a process should be between a time recorded before it
++  // was spawned and a time recorded after it was spawned. However, since the
++  // base::Time and process creation clocks don't match, tolerate some error.
++  constexpr base::TimeDelta kTolerance =
++#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
++      // On Linux, process creation time is relative to boot time which has a
++      // 1-second resolution. Tolerate 1 second for the imprecise boot time and
++      // 100 ms for the imprecise clock.
++      Milliseconds(1100);
++#elif BUILDFLAG(IS_WIN)
++      // On Windows, process creation time is based on the system clock while
++      // Time::Now() is a combination of system clock and
++      // QueryPerformanceCounter(). Tolerate 100 ms for the clock mismatch.
++      Milliseconds(100);
++#elif BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_FUCHSIA)
++      // On Mac and Fuchsia, process creation time should be very precise.
++      Milliseconds(0);
++#else
++#error Unsupported platform
++#endif
++  const Time before_creation = Time::Now();
++  Process process(SpawnChild("SleepyChildProcess"));
++  const Time after_creation = Time::Now();
++  const Time creation = process.CreationTime();
++  EXPECT_LE(before_creation - kTolerance, creation);
++  EXPECT_LE(creation, after_creation + kTolerance);
++  EXPECT_TRUE(process.Terminate(kDummyExitCode, true));
++}
++#endif  // !BUILDFLAG(IS_ANDROID)
++
++TEST_F(ProcessTest, Terminate) {
++  Process process(SpawnChild("SleepyChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++
++  int exit_code = kDummyExitCode;
++  EXPECT_EQ(TERMINATION_STATUS_STILL_RUNNING,
++            GetTerminationStatus(process.Handle(), &exit_code));
++  EXPECT_EQ(kExpectedStillRunningExitCode, exit_code);
++
++  exit_code = kDummyExitCode;
++  int kExpectedExitCode = 250;
++  process.Terminate(kExpectedExitCode, false);
++  process.WaitForExitWithTimeout(TestTimeouts::action_max_timeout(),
++                                 &exit_code);
++
++  EXPECT_NE(TERMINATION_STATUS_STILL_RUNNING,
++            GetTerminationStatus(process.Handle(), &exit_code));
++#if BUILDFLAG(IS_WIN)
++  // Only Windows propagates the |exit_code| set in Terminate().
++  EXPECT_EQ(kExpectedExitCode, exit_code);
++#endif
++}
++
++TEST_F(ProcessTest, TerminateProcessForBadMessage) {
++  Process process(SpawnChild("SleepyChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++  int exit_code = Process::kResultCodeKilledBadMessage;
++  EXPECT_TRUE(process.Terminate(exit_code, /* wait= */ false));
++}
++
++void AtExitHandler(void*) {
++  // At-exit handler should not be called at
++  // Process::TerminateCurrentProcessImmediately.
++  DCHECK(false);
++}
++
++class ThreadLocalObject {
++ public:
++  ~ThreadLocalObject() {
++    // Thread-local storage should not be destructed at
++    // Process::TerminateCurrentProcessImmediately.
++    DCHECK(false);
++  }
++};
++
++MULTIPROCESS_TEST_MAIN(TerminateCurrentProcessImmediatelyWithCode0) {
++  base::ThreadLocalOwnedPointer<ThreadLocalObject> object;
++  object.Set(std::make_unique<ThreadLocalObject>());
++  base::AtExitManager::RegisterCallback(&AtExitHandler, nullptr);
++  Process::TerminateCurrentProcessImmediately(0);
++}
++
++TEST_F(ProcessTest, TerminateCurrentProcessImmediatelyWithZeroExitCode) {
++  Process process(SpawnChild("TerminateCurrentProcessImmediatelyWithCode0"));
++  ASSERT_TRUE(process.IsValid());
++  int exit_code = 42;
++  ASSERT_TRUE(process.WaitForExitWithTimeout(TestTimeouts::action_max_timeout(),
++                                             &exit_code));
++  EXPECT_EQ(0, exit_code);
++}
++
++MULTIPROCESS_TEST_MAIN(TerminateCurrentProcessImmediatelyWithCode250) {
++  Process::TerminateCurrentProcessImmediately(250);
++}
++
++TEST_F(ProcessTest, TerminateCurrentProcessImmediatelyWithNonZeroExitCode) {
++  Process process(SpawnChild("TerminateCurrentProcessImmediatelyWithCode250"));
++  ASSERT_TRUE(process.IsValid());
++  int exit_code = 42;
++  ASSERT_TRUE(process.WaitForExitWithTimeout(TestTimeouts::action_max_timeout(),
++                                             &exit_code));
++  EXPECT_EQ(250, exit_code);
++}
++
++MULTIPROCESS_TEST_MAIN(FastSleepyChildProcess) {
++  PlatformThread::Sleep(TestTimeouts::tiny_timeout() * 10);
++  return 0;
++}
++
++TEST_F(ProcessTest, WaitForExit) {
++  Process process(SpawnChild("FastSleepyChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++
++  int exit_code = kDummyExitCode;
++  EXPECT_TRUE(process.WaitForExit(&exit_code));
++  EXPECT_EQ(0, exit_code);
++}
++
++TEST_F(ProcessTest, WaitForExitWithTimeout) {
++  Process process(SpawnChild("SleepyChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++
++  int exit_code = kDummyExitCode;
++  TimeDelta timeout = TestTimeouts::tiny_timeout();
++  EXPECT_FALSE(process.WaitForExitWithTimeout(timeout, &exit_code));
++  EXPECT_EQ(kDummyExitCode, exit_code);
++
++  process.Terminate(kDummyExitCode, false);
++}
++
++TEST_F(ProcessTest, WaitForExitWithNegativeTimeout) {
++  Process process(SpawnChild("SleepyChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++
++  int exit_code = kDummyExitCode;
++  EXPECT_FALSE(process.WaitForExitWithTimeout(TimeDelta::Min(), &exit_code));
++  EXPECT_EQ(kDummyExitCode, exit_code);
++
++  EXPECT_FALSE(process.WaitForExitWithTimeout(Seconds(-1000), &exit_code));
++  EXPECT_EQ(kDummyExitCode, exit_code);
++
++  process.Terminate(kDummyExitCode, false);
++}
++
++#if BUILDFLAG(IS_WIN)
++TEST_F(ProcessTest, WaitForExitOrEventWithProcessExit) {
++  Process process(SpawnChild("FastSleepyChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++
++  base::win::ScopedHandle stop_watching_handle(
++      CreateEvent(nullptr, TRUE, FALSE, nullptr));
++
++  int exit_code = kDummyExitCode;
++  EXPECT_EQ(process.WaitForExitOrEvent(stop_watching_handle, &exit_code),
++            base::Process::WaitExitStatus::PROCESS_EXITED);
++  EXPECT_EQ(0, exit_code);
++}
++
++TEST_F(ProcessTest, WaitForExitOrEventWithEventSet) {
++  Process process(SpawnChild("SleepyChildProcess"));
++  ASSERT_TRUE(process.IsValid());
++
++  base::win::ScopedHandle stop_watching_handle(
++      CreateEvent(nullptr, TRUE, TRUE, nullptr));
++
++  int exit_code = kDummyExitCode;
++  EXPECT_EQ(process.WaitForExitOrEvent(stop_watching_handle, &exit_code),
++            base::Process::WaitExitStatus::STOP_EVENT_SIGNALED);
++  EXPECT_EQ(kDummyExitCode, exit_code);
++
++  process.Terminate(kDummyExitCode, false);
++}
++#endif  // BUILDFLAG(IS_WIN)
++
++// Ensure that the priority of a process is restored correctly after
++// backgrounding and restoring.
++// Note: a platform may not be willing or able to lower the priority of
++// a process. The calls to SetProcessPriority should be noops then.
++TEST_F(ProcessTest, SetProcessPriority) {
++  if (!Process::CanSetPriority()) {
++    return;
++  }
++  Process process(SpawnChild("SimpleChildProcess"));
++  int old_os_priority = process.GetOSPriority();
++#if BUILDFLAG(IS_APPLE)
++  // On the Mac, backgrounding a process requires a port to that process.
++  // In the browser it's available through the MachBroker class, which is not
++  // part of base. Additionally, there is an indefinite amount of time between
++  // spawning a process and receiving its port. Because this test just checks
++  // the ability to background/foreground a process, we can use the current
++  // process's port instead.
++  FakePortProvider provider;
++  EXPECT_TRUE(process.SetPriority(&provider, Process::Priority::kBestEffort));
++  EXPECT_EQ(process.GetPriority(&provider), Process::Priority::kBestEffort);
++  EXPECT_TRUE(process.SetPriority(&provider, Process::Priority::kUserBlocking));
++  EXPECT_EQ(process.GetPriority(&provider), Process::Priority::kUserBlocking);
++
++#else
++  EXPECT_TRUE(process.SetPriority(base::Process::Priority::kBestEffort));
++  EXPECT_EQ(process.GetPriority(), Process::Priority::kBestEffort);
++  EXPECT_TRUE(process.SetPriority(base::Process::Priority::kUserBlocking));
++  EXPECT_EQ(process.GetPriority(), Process::Priority::kUserBlocking);
++#endif
++
++#if BUILDFLAG(IS_WIN)
++  EXPECT_TRUE(process.SetPriority(base::Process::Priority::kUserVisible));
++  // Eco QoS level read & write are not supported prior to WIN11_22H2,
++  // Priority::kUserVisible has same behavior as Priority::kUserBlocking, and
++  // is translated as Priority::kUserBlocking.
++  if (base::win::OSInfo::GetInstance()->version() >=
++      base::win::Version::WIN11_22H2) {
++    EXPECT_EQ(process.GetPriority(), Process::Priority::kUserVisible);
++  } else {
++    EXPECT_EQ(process.GetPriority(), Process::Priority::kUserBlocking);
++  }
++
++  EXPECT_TRUE(process.SetPriority(base::Process::Priority::kBestEffort));
++  EXPECT_EQ(process.GetPriority(), Process::Priority::kBestEffort);
++  EXPECT_TRUE(process.SetPriority(base::Process::Priority::kUserVisible));
++  if (base::win::OSInfo::GetInstance()->version() >=
++      base::win::Version::WIN11_22H2) {
++    EXPECT_EQ(process.GetPriority(), Process::Priority::kUserVisible);
++  } else {
++    EXPECT_EQ(process.GetPriority(), Process::Priority::kUserBlocking);
++  }
++  EXPECT_TRUE(process.SetPriority(base::Process::Priority::kUserBlocking));
++  EXPECT_EQ(process.GetPriority(), Process::Priority::kUserBlocking);
++#elif !BUILDFLAG(IS_APPLE)
++  // On other platforms, Process::Priority::kUserVisible is translated as
++  // Process::Priority::kUserBlocking.
++  EXPECT_TRUE(process.SetPriority(base::Process::Priority::kUserVisible));
++  EXPECT_EQ(process.GetPriority(), Process::Priority::kUserBlocking);
++#endif
++
++  int new_os_priority = process.GetOSPriority();
++  EXPECT_EQ(old_os_priority, new_os_priority);
++}
++
++// Consumers can use WaitForExitWithTimeout(base::TimeDelta(), nullptr) to check
++// whether the process is still running. This may not be safe because of the
++// potential reusing of the process id. So we won't export Process::IsRunning()
++// on all platforms. But for the controllable scenario in the test cases, the
++// behavior should be guaranteed.
++TEST_F(ProcessTest, CurrentProcessIsRunning) {
++  EXPECT_FALSE(
++      Process::Current().WaitForExitWithTimeout(base::TimeDelta(), nullptr));
++}
++
++#if BUILDFLAG(IS_APPLE)
++// On Mac OSX, we can detect whether a non-child process is running.
++TEST_F(ProcessTest, PredefinedProcessIsRunning) {
++  // Process 1 is the /sbin/launchd, it should be always running.
++  EXPECT_FALSE(
++      Process::Open(1).WaitForExitWithTimeout(base::TimeDelta(), nullptr));
++}
++#endif
++
++// Test is disabled on Windows AMR64 because
++// TerminateWithHeapCorruption() isn't expected to work there.
++// See: https://crbug.com/1054423
++#if BUILDFLAG(IS_WIN)
++#if defined(ARCH_CPU_ARM64)
++#define MAYBE_HeapCorruption DISABLED_HeapCorruption
++#else
++#define MAYBE_HeapCorruption HeapCorruption
++#endif
++TEST_F(ProcessTest, MAYBE_HeapCorruption) {
++  EXPECT_EXIT(base::debug::win::TerminateWithHeapCorruption(),
++              ::testing::ExitedWithCode(STATUS_HEAP_CORRUPTION), "");
++}
++
++#if BUILDFLAG(WIN_ENABLE_CFG_GUARDS)
++#define MAYBE_ControlFlowViolation ControlFlowViolation
++#else
++#define MAYBE_ControlFlowViolation DISABLED_ControlFlowViolation
++#endif
++TEST_F(ProcessTest, MAYBE_ControlFlowViolation) {
++  // CFG causes ntdll!RtlFailFast2 to be called resulting in uncatchable
++  // 0xC0000409 (STATUS_STACK_BUFFER_OVERRUN) exception.
++  EXPECT_EXIT(base::debug::win::TerminateWithControlFlowViolation(),
++              ::testing::ExitedWithCode(STATUS_STACK_BUFFER_OVERRUN), "");
++}
++
++#endif  // BUILDFLAG(IS_WIN)
++
++TEST_F(ProcessTest, ChildProcessIsRunning) {
++  Process process(SpawnChild("SleepyChildProcess"));
++  EXPECT_FALSE(process.WaitForExitWithTimeout(base::TimeDelta(), nullptr));
++  process.Terminate(0, true);
++  EXPECT_TRUE(process.WaitForExitWithTimeout(base::TimeDelta(), nullptr));
++}
++
++#if BUILDFLAG(IS_CHROMEOS)
++
++// Tests that the function GetProcessPriorityCGroup() can parse the contents
++// of the /proc/<pid>/cgroup file successfully.
++TEST_F(ProcessTest, TestGetProcessPriorityCGroup) {
++  const char kNotBackgroundedCGroup[] = "5:cpuacct,cpu,cpuset:/daemons\n";
++  const char kBackgroundedCGroup[] =
++      "2:freezer:/chrome_renderers/to_be_frozen\n"
++      "1:cpu:/chrome_renderers/background\n";
++
++  EXPECT_EQ(GetProcessPriorityCGroup(kNotBackgroundedCGroup),
++            Process::Priority::kUserBlocking);
++  EXPECT_EQ(GetProcessPriorityCGroup(kBackgroundedCGroup),
++            Process::Priority::kBestEffort);
++}
++
++#endif  // BUILDFLAG(IS_CHROMEOS)
++
++}  // namespace base

@@ -1,0 +1,72 @@
+diff --git a/chrome/browser/media/webrtc/desktop_capture_devices_util_win.cc b/chrome/browser/media/webrtc/desktop_capture_devices_util_win.cc
+index 04ddddb80cdf67fb6196c28d64d97c4991d7f6e3..1b5ac95fa6f6ee926d0b3fed7154a5ab090cd8b2 100644
+--- a/chrome/browser/media/webrtc/desktop_capture_devices_util_win.cc
++++ b/chrome/browser/media/webrtc/desktop_capture_devices_util_win.cc
+@@ -99,27 +99,6 @@
+   return main_process_id;
+ }
+ 
+-// Returns the executable's path for the given process handle.
+-base::FilePath GetProcessExecutablePath(HANDLE process_handle) {
+-  std::wstring image_path(MAX_PATH, L'\0');
+-  DWORD path_length = image_path.size();
+-  BOOL success = QueryFullProcessImageNameW(process_handle, 0,
+-                                            image_path.data(), &path_length);
+-  if (!success && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+-    // Process name is potentially greater than MAX_PATH, try larger max size.
+-    // https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+-    image_path.resize(UNICODE_STRING_MAX_CHARS);
+-    path_length = image_path.size();
+-    success = QueryFullProcessImageName(process_handle, 0, image_path.data(),
+-                                        &path_length);
+-    if (!success) {
+-      return base::FilePath();
+-    }
+-  }
+-
+-  return base::FilePath(image_path);
+-}
+-
+ // Finds the root process id of the application's
+ // process tree. The root process of the tree is defined as the oldest ancestor
+ // process that shares the same executable image with the process identified by
+@@ -136,10 +115,10 @@
+   }
+ 
+   base::win::ScopedHandle parent_process_handle(OpenProcess(
+-      PROCESS_QUERY_LIMITED_INFORMATION, /*bInheritHandle=*/FALSE, parent_id));
++      base::ProcessImageQueryAccess(), /*bInheritHandle=*/FALSE, parent_id));
+   while (parent_process_handle.is_valid()) {
+     base::FilePath parent_path =
+-        GetProcessExecutablePath(parent_process_handle.get());
++        base::GetProcessExecutablePath(parent_process_handle.get());
+     if (parent_path.empty()) {
+       return main_process_id_candidate;
+     }
+@@ -153,7 +132,7 @@
+ 
+     main_process_id_candidate = parent_id;
+     parent_id = base::GetParentProcessId(parent_process_handle.get());
+-    parent_process_handle.Set(OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION,
++    parent_process_handle.Set(OpenProcess(base::ProcessImageQueryAccess(),
+                                           /*bInheritHandle=*/FALSE, parent_id));
+   }
+ 
+@@ -173,7 +152,7 @@
+   }
+ 
+   base::win::ScopedHandle process_handle(
+-      OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION,
++      OpenProcess(base::ProcessImageQueryAccess(),
+                   /*bInheritHandle=*/FALSE, process_id));
+   if (!process_handle.is_valid()) {
+     RecordGetAppMainProcessIdResult(
+@@ -185,7 +164,7 @@
+   // ApplicationFrameHost.exe and the actual app window is a child window of the
+   // top-level window. Therefore, in this situation, we need to look down in the
+   // window hierarchy to find the correct process id.
+-  base::FilePath app_path = GetProcessExecutablePath(process_handle.get());
++  base::FilePath app_path = base::GetProcessExecutablePath(process_handle.get());
+   base::ProcessId main_process_id = base::kNullProcessId;
+   // Checks if process is a UWP app.
+   if (IsUWPApp(app_path)) {

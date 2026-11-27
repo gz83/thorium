@@ -54,6 +54,10 @@ py -3.11 setup.py --woa
 
 See `py -3.11 setup.py --help` and the [SIMD release guide](ABOUT_RELEASES.md).
 
+For the M159 Windows x86/x64 compatibility port, add `--windows-legacy` to
+the selected desktop setup command. The [REWORK series guide](../other/rework-windows/README.md)
+covers the pinned donor release, exclusions and static checks.
+
 ## Configure GN
 
 From Chromium `src`:
@@ -83,6 +87,13 @@ For Windows ARM64, replace `x64` with `arm64`; for 32-bit variants use `x86`.
 The default Windows build uses separate browser and installer phases. The
 profile-named mini installer and related symbols are written under
 `out\thorium`.
+
+When an installer target is selected, `build.py` checks the prepared
+translations before starting the first build phase. This also runs with
+`--dry-run`, including explicit `setup.exe` and mini installer targets. For a
+regular or REWORK checkout it verifies installer resource exports and their
+translations. REWORK builds also check nine Windows messages, their
+placeholders and language pack filenames, and XP font resources.
 
 Useful validation and development forms are:
 

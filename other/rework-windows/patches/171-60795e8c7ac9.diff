@@ -1,0 +1,34 @@
+diff --git a/third_party/webrtc/modules/desktop_capture/win/screen_capture_utils.cc b/third_party/webrtc/modules/desktop_capture/win/screen_capture_utils.cc
+index 28509654c483c9280080ae654f75a9a424c45ac5..12777c71ae836abaab95fb1602e554ecf4bc597b 100644
+--- a/third_party/webrtc/modules/desktop_capture/win/screen_capture_utils.cc
++++ b/third_party/webrtc/modules/desktop_capture/win/screen_capture_utils.cc
+@@ -145,13 +145,22 @@
+ }
+ 
+ DesktopVector GetDpiForMonitor(HMONITOR monitor) {
+-  UINT dpi_x, dpi_y;
+-  // MDT_EFFECTIVE_DPI includes the scale factor as well as the system DPI.
+-  HRESULT hr = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
+-  if (SUCCEEDED(hr)) {
+-    return {static_cast<INT>(dpi_x), static_cast<INT>(dpi_y)};
+-  }
+-  RTC_LOG_GLE_EX(LS_WARNING, hr) << "GetDpiForMonitor() failed";
++  static const auto get_monitor_dpi = [] {
++    HMODULE shcore =
++        ::LoadLibraryExW(L"shcore.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
++    return shcore ? reinterpret_cast<decltype(&::GetDpiForMonitor)>(
++                        ::GetProcAddress(shcore, "GetDpiForMonitor"))
++                  : nullptr;
++  }();
++  if (get_monitor_dpi) {
++    UINT dpi_x, dpi_y;
++    // Effective DPI includes the per-monitor scale factor.
++    HRESULT hr = get_monitor_dpi(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
++    if (SUCCEEDED(hr)) {
++      return {static_cast<INT>(dpi_x), static_cast<INT>(dpi_y)};
++    }
++    RTC_LOG_GLE_EX(LS_WARNING, hr) << "GetDpiForMonitor() failed";
++  }
+ 
+   // If we can't get the per-monitor DPI, then return the system DPI.
+   HDC hdc = GetDC(nullptr);

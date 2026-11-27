@@ -1,0 +1,175 @@
+diff --git a/base/process/memory.h b/base/process/memory.h
+index 62c3312598a15..f7fc569abaf3b 100644
+--- a/base/process/memory.h
++++ b/base/process/memory.h
+@@ -25,6 +25,14 @@
+ 
+ namespace base {
+ 
++// Enables low fragmentation heap (LFH) for every heaps of this process. This
++// won't have any effect on heaps created after this function call. It will not
++// modify data allocated in the heaps before calling this function. So it is
++// better to call this function early in initialization and again before
++// entering the main loop.
++// Note: Returns true on Windows 2000 without doing anything.
++BASE_EXPORT bool EnableLowFragmentationHeap();
++
+ // Enables 'terminate on heap corruption' flag. Helps protect against heap
+ // overflow. Has no effect if the OS doesn't provide the necessary facility.
+ BASE_EXPORT void EnableTerminationOnHeapCorruption();
+diff --git a/base/process/memory_win.cc b/base/process/memory_win.cc
+index 06ad566d4e60d4034091ad0d51c21aac767813cb..1ee80d0a98ab65c3bfabe93541e679299373eb28 100644
+--- a/base/process/memory_win.cc
++++ b/base/process/memory_win.cc
+@@ -12,6 +12,8 @@
+ 
+ #include <windows.h>  // Must be in front of other Windows header files.
+ 
++#include <limits>
++#include <vector>
+ #include <new.h>
+ #include <psapi.h>
+ #include <stddef.h>
+@@ -30,7 +32,50 @@
+   TerminateBecauseOutOfMemory(size);
+ }
+ 
++// HeapSetInformation function pointer.
++typedef BOOL (WINAPI* HeapSetFn)(HANDLE, HEAP_INFORMATION_CLASS, PVOID, SIZE_T);
++
+ }  // namespace
++
++bool EnableLowFragmentationHeap() {
++  HMODULE kernel32 = GetModuleHandle(L"kernel32.dll");
++  HeapSetFn heap_set = reinterpret_cast<HeapSetFn>(GetProcAddress(
++      kernel32,
++      "HeapSetInformation"));
++
++  // On Windows 2000, the function is not exported. This is not a reason to
++  // fail.
++  if (!heap_set)
++    return true;
++
++  unsigned number_heaps = GetProcessHeaps(0, NULL);
++  if (!number_heaps)
++    return false;
++
++  // Gives us some extra space in the array in case a thread is creating heaps
++  // at the same time we're querying them.
++  constexpr DWORD kSpareHeaps = 8;
++  if (number_heaps > (std::numeric_limits<DWORD>::max)() - kSpareHeaps)
++    return false;
++  const DWORD capacity = number_heaps + kSpareHeaps;
++  std::vector<HANDLE> heaps(capacity);
++  number_heaps = ::GetProcessHeaps(capacity, heaps.data());
++  // If the required count grew past capacity, the returned entries are undefined.
++  if (!number_heaps || number_heaps > capacity)
++    return false;
++  heaps.resize(number_heaps);
++
++  for (HANDLE heap : heaps) {
++    ULONG lfh_flag = 2;
++    // Don't bother with the result code. It may fails on heaps that have the
++    // HEAP_NO_SERIALIZE flag. This is expected and not a problem at all.
++    heap_set(heap,
++             HeapCompatibilityInformation,
++             &lfh_flag,
++             sizeof(lfh_flag));
++  }
++  return true;
++}
+ 
+ void EnableTerminationOnHeapCorruption() {
+   // Ignore the result code. Supported on XP SP3 and Vista.
+diff --git a/chrome/app/chrome_exe_main_win.cc b/chrome/app/chrome_exe_main_win.cc
+index 4aa72f26771e419ee7d0ac01e717393cf6fc9a0d..d5bf6dfad76a1f3d632e9ea688bef4d8b862d41a 100644
+--- a/chrome/app/chrome_exe_main_win.cc
++++ b/chrome/app/chrome_exe_main_win.cc
+@@ -143,6 +143,17 @@
+   return AttemptToNotifyRunningChrome(chrome) == NotifyChromeResult::kSuccess;
+ }
+ 
++void SwitchToLFHeap() {
++  // Only needed on XP but harmless on other Windows flavors.
++  auto crt_heap = _get_heap_handle();
++  ULONG enable_LFH = 2;
++  if (HeapSetInformation(reinterpret_cast<HANDLE>(crt_heap),
++                         HeapCompatibilityInformation,
++                         &enable_LFH, sizeof(enable_LFH))) {
++    VLOG(1) << "Low fragmentation heap enabled.";
++  }
++}
++
+ // Returns true if the child process |command_line| contains a /prefetch:#
+ // argument where # is in [1, 8] prior to Win11 and [1,16] for it and later.
+ // The intent of the function is to ensure that all child processes have a
+@@ -229,49 +240,27 @@
+   FiberStatus fiber_status = FiberStatus::kSuccess;
+   // GetLastError result if fiber conversion failed.
+   DWORD fiber_error = ERROR_SUCCESS;
+-typedef LPVOID (WINAPI *PFN_MS_EX) (LPVOID , DWORD  );
+-typedef BOOL (*LPFN)();
+-    PFN_MS_EX pfnex;
+-    LPFN lpfn;
+-    HMODULE h = GetModuleHandle (L"kernel32.dll");
+-    bool fiber;
+-    void *ptr;
+-
+-    if ((lpfn = (LPFN) GetProcAddress (h, "IsThreadAFiber")))
+-    fiber = lpfn();
+-    else
+-      {
+-        ptr = ::GetCurrentFiber(); 
+-        fiber = nullptr != ptr && reinterpret_cast< LPVOID >( 0x1E00) != ptr;
+-      }
+-  if (!fiber) {
++  HMODULE kernel = ::GetModuleHandleW(L"kernel32.dll");
++  auto is_thread_a_fiber = reinterpret_cast<decltype(&::IsThreadAFiber)>(
++      ::GetProcAddress(kernel, "IsThreadAFiber"));
++  auto convert_fiber = reinterpret_cast<decltype(&::ConvertThreadToFiberEx)>(
++      ::GetProcAddress(kernel, "ConvertThreadToFiberEx"));
++  // Older releases without the extended fiber APIs use the existing thread
++  // stack, as on the ordinary fiber-creation failure path.
++  if (is_thread_a_fiber && convert_fiber && !is_thread_a_fiber()) {
+     // Make the main thread's stack size 4 MiB so that it has roughly the same
+     // effective size as the 64-bit build's 8 MiB stack.
+     constexpr size_t kStackSize = 4 * 1024 * 1024;  // 4 MiB
+     // Leak the fiber on exit.
+-    LPVOID original_fiber;
+-    /*  Use ConvertThreadToFiberEx if available.  */
+-    if ((pfnex = (PFN_MS_EX) GetProcAddress (h, "ConvertThreadToFiberEx")))
+-    original_fiber =
+-        pfnex(nullptr, FIBER_FLAG_FLOAT_SWITCH);
+-
+-    /*  Fall back to ConvertThreadToFiber which is always available.  */
+-    else
+-      {
+-    original_fiber =
+-        ::ConvertThreadToFiber(nullptr);
+-        if (original_fiber)
+-        *(DWORD*)((char *) original_fiber + sizeof (void *) * 5) |= CONTEXT_FLOATING_POINT;
+-      }
++    LPVOID original_fiber =
++        convert_fiber(nullptr, FIBER_FLAG_FLOAT_SWITCH);
+     if (original_fiber) {
+       FiberState fiber_state = {instance, original_fiber};
+       // Create a fiber with a bigger stack and switch to it. Leak the fiber on
+       // exit.
+       LPVOID big_stack_fiber = ::CreateFiberEx(
+-          0, kStackSize, pfnex ? FIBER_FLAG_FLOAT_SWITCH : 0, FiberBinder, &fiber_state);
++          0, kStackSize, FIBER_FLAG_FLOAT_SWITCH, FiberBinder, &fiber_state);
+       if (big_stack_fiber) {
+-        if (0 == pfnex)
+-        *(DWORD*)((char *) big_stack_fiber + sizeof (void *) * 5) |= CONTEXT_FLOATING_POINT;
+         ::SwitchToFiber(big_stack_fiber);
+         // The fibers must be cleaned up to avoid obscure TLS-related shutdown
+         // crashes.
+@@ -384,6 +373,8 @@
+     return RunFallbackCrashHandler(*command_line);
+   }
+ 
++  SwitchToLFHeap();
++
+   const base::TimeTicks exe_entry_point_ticks = base::TimeTicks::Now();
+ 
+   // Signal Chrome Elf that Chrome has begun to start.

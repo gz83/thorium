@@ -1,0 +1,421 @@
+diff --git a/base/i18n/win/preferred_languages.cc b/base/i18n/win/preferred_languages.cc
+--- a/base/i18n/win/preferred_languages.cc
++++ b/base/i18n/win/preferred_languages.cc
+@@ -28,19 +28,13 @@
+   if (id == LOCALE_CUSTOM_UI_DEFAULT) {
+     return {};
+   }
+-  std::wstring name = base::win::GetLegacyUILanguageName(id);
+   std::vector<LanguageTag> tags;
+-  while (!name.empty()) {
++  for (const auto& name : base::win::GetLegacyUILanguageCandidates(id)) {
+     if (auto tag = GetLanguageTagFromString(WideToASCII(name))) {
+       if (tags.empty() || tags.back() != *tag) {
+         tags.push_back(*tag);
+       }
+     }
+-    const auto separator = name.rfind(L'-');
+-    if (separator == std::wstring::npos) {
+-      break;
+-    }
+-    name.resize(separator);
+   }
+   return tags;
+ }
+diff --git a/base/win/legacy_locale.h b/base/win/legacy_locale.h
+--- a/base/win/legacy_locale.h
++++ b/base/win/legacy_locale.h
+@@ -10,6 +10,7 @@
+ #include <iterator>
+ #include <string>
+ #include <string_view>
++#include <vector>
+ 
+ namespace base::win {
+ 
+@@ -293,6 +294,31 @@
+   return tag;
+ }
+ 
++// XP supplies one UI LANGID instead of a preferred-language list.
++inline std::vector<std::wstring> GetLegacyUILanguageCandidates(LANGID id) {
++  std::vector<std::wstring> candidates;
++  std::wstring name = GetLegacyUILanguageName(id);
++  while (!name.empty()) {
++    // Keep Latin American Spanish ahead of the generic Spanish resource.
++    if (name == L"es" && PRIMARYLANGID(id) == LANG_SPANISH &&
++        SUBLANGID(id) != SUBLANG_NEUTRAL && SUBLANGID(id) != SUBLANG_SPANISH &&
++        SUBLANGID(id) != SUBLANG_SPANISH_MODERN &&
++        (candidates.empty() || candidates.back() != L"es-419")) {
++      candidates.emplace_back(L"es-419");
++    }
++    candidates.push_back(name);
++    const auto separator = name.rfind(L'-');
++    if (separator == std::wstring::npos) {
++      if (name == L"nn") {
++        candidates.emplace_back(L"no");
++      }
++      break;
++    }
++    name.resize(separator);
++  }
++  return candidates;
++}
++
+ }  // namespace base::win
+ 
+ #endif  // BASE_WIN_LEGACY_LOCALE_H_
+diff --git a/chrome/installer/mini_installer/mini_installer_localization.cc b/chrome/installer/mini_installer/mini_installer_localization.cc
+--- a/chrome/installer/mini_installer/mini_installer_localization.cc
++++ b/chrome/installer/mini_installer/mini_installer_localization.cc
+@@ -138,10 +138,7 @@
+   }
+ 
+   if (languages.empty()) {
+-    const auto name = base::win::GetLegacyUILanguageName(::GetUserDefaultUILanguage());
+-    if (!name.empty()) {
+-      languages.push_back(name);
+-    }
++    return base::win::GetLegacyUILanguageCandidates(::GetUserDefaultUILanguage());
+   }
+   return languages;
+ }
+diff --git a/content/browser/speech/tts_win.cc b/content/browser/speech/tts_win.cc
+--- a/content/browser/speech/tts_win.cc
++++ b/content/browser/speech/tts_win.cc
+@@ -11,6 +11,8 @@
+ #include <wrl/implements.h>
+ 
+ #include <algorithm>
++
++#include <string_view>
+ 
+ #include "base/functional/bind.h"
+ #include "base/memory/raw_ptr.h"
+@@ -26,6 +28,7 @@
+ #include "base/thread_annotations.h"
+ #include "base/threading/sequence_bound.h"
+ #include "base/values.h"
++#include "base/win/legacy_locale.h"
+ #include "base/win/scoped_co_mem.h"
+ #include "content/browser/speech/tts_platform_impl.h"
+ #include "content/browser/speech/tts_win_utils.h"
+@@ -450,36 +453,6 @@
+                                 std::string()));
+ }
+ 
+-static BOOL LookupLocaleStringFromLCID(LCID lcid, LPWSTR pszISOCode, DWORD cchISOCode)
+-{
+-    WCHAR   szCountry[MAX_PATH];
+-    BOOL    fRet = FALSE;
+-
+-    if (GetLocaleInfoW(lcid, LOCALE_SISO639LANGNAME,
+-                      pszISOCode, cchISOCode) == FALSE)
+-    {
+-        goto done;
+-    }
+-
+-    szCountry[0] = L'-';
+-
+-    if (GetLocaleInfoW(lcid, LOCALE_SISO3166CTRYNAME,
+-                      szCountry + 1, sizeof(szCountry)/sizeof(szCountry[0]) - 1) == FALSE)
+-    {
+-        goto done;
+-    }
+-    else
+-    {
+-        wcscat(pszISOCode, szCountry);
+-    }
+-
+-    fRet = TRUE;
+-
+-done:
+-    return fRet;
+-}
+-
+-
+ void TtsPlatformImplBackgroundWorker::GetVoices(
+     std::vector<VoiceData>* out_voices) {
+   if (!speech_synthesizer_.Get())
+@@ -510,21 +483,16 @@
+       continue;
+ 
+     base::win::ScopedCoMem<WCHAR> language;
+-    if (S_OK == attributes->GetStringValue(kLanguageValue, &language)) {
+-      int lcid_value;
+-      base::HexStringToInt(base::WideToUTF8(language.get()), &lcid_value);
+-      LCID lcid = MAKELCID(lcid_value, SORT_DEFAULT);
+-      WCHAR locale_name[LOCALE_NAME_MAX_LENGTH] = {};
+-int (WINAPI * pfnLCIDToLocaleName)(LCID, LPWSTR, int, DWORD);
+-        HMODULE hmod = GetModuleHandleW(L"kernel32");
+-        *(FARPROC*)&pfnLCIDToLocaleName =
+-            GetProcAddress(hmod, "LCIDToLocaleName");
+-        if (pfnLCIDToLocaleName != NULL) {
+-          pfnLCIDToLocaleName(lcid, locale_name, LOCALE_NAME_MAX_LENGTH, 0);
+-        } else {
+-          LookupLocaleStringFromLCID(lcid, locale_name, LOCALE_NAME_MAX_LENGTH);
+-        }
+-      voice.lang = base::WideToUTF8(locale_name);
++    if (S_OK == attributes->GetStringValue(kLanguageValue, &language) && language.get()) {
++      // SAPI lists hexadecimal LANGIDs with the primary language first.
++      std::wstring_view ids(language.get());
++      unsigned int id;
++      if (base::HexStringToUInt(base::WideToUTF8(ids.substr(0, ids.find(L';'))),
++                                &id) &&
++          id > 0 && id <= 0xffff) {
++        voice.lang = base::WideToUTF8(
++            base::win::GetLegacyUILanguageName(static_cast<LANGID>(id)));
++      }
+     }
+ 
+     voice.native = true;
+diff --git a/sandbox/win/src/handle_closer_agent.cc b/sandbox/win/src/handle_closer_agent.cc
+--- a/sandbox/win/src/handle_closer_agent.cc
++++ b/sandbox/win/src/handle_closer_agent.cc
+@@ -45,26 +45,18 @@
+   return TRUE;
+ }
+ 
+-static BOOL CALLBACK EnumLocalesProc(LPTSTR lpLocaleString) {
++static BOOL CALLBACK EnumLocalesProc(LPWSTR lpLocaleString) {
+   return TRUE;
+ }
+ 
+ // Additional warmup done just when CSRSS is being disconnected.
+ bool CsrssDisconnectWarmup() {
+-      typedef BOOL (WINAPI *PfnEnumSystemLocalesEx)
+-          (LOCALE_ENUMPROCEX, DWORD, LPARAM, LPVOID);
+-
+-      HMODULE handle_kern32 = GetModuleHandleW(L"Kernel32.dll");
+-      PfnEnumSystemLocalesEx enum_sys_locales_ex =
+-          reinterpret_cast<PfnEnumSystemLocalesEx>
+-              (GetProcAddress(handle_kern32, "EnumSystemLocalesEx"));
+-
+-      enum_sys_locales_ex(EnumLocalesProcEx, LOCALE_WINDOWS, 0, 0);
+-    if (enum_sys_locales_ex) {
+-      return enum_sys_locales_ex(EnumLocalesProcEx, LOCALE_WINDOWS, 0, 0);
+-    } else {
+-      return EnumSystemLocalesW(EnumLocalesProc, LCID_INSTALLED);
+-    }
++  static const auto enumerate = reinterpret_cast<decltype(&::EnumSystemLocalesEx)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "EnumSystemLocalesEx"));
++  if (enumerate) {
++    return enumerate(EnumLocalesProcEx, LOCALE_WINDOWS, 0, nullptr);
++  }
++  return ::EnumSystemLocalesW(EnumLocalesProc, LCID_INSTALLED);
+ }
+ 
+ // Cleans up this process if CSRSS will be disconnected, as this disconnection
+diff --git a/third_party/icu/source/common/putil.cpp b/third_party/icu/source/common/putil.cpp
+--- a/third_party/icu/source/common/putil.cpp
++++ b/third_party/icu/source/common/putil.cpp
+@@ -98,34 +98,6 @@
+ #   include <windows.h>
+ #   include "unicode/uloc.h"
+ #   include "wintz.h"
+-static BOOL LookupLocaleStringFromLCID(LCID lcid, LPWSTR pszISOCode, DWORD cchISOCode)
+-{
+-    WCHAR   szCountry[MAX_PATH];
+-    BOOL    fRet = FALSE;
+-
+-    if (GetLocaleInfoW(lcid, LOCALE_SISO639LANGNAME,
+-                      pszISOCode, cchISOCode) == FALSE)
+-    {
+-        goto done;
+-    }
+-
+-    szCountry[0] = L'-';
+-    fRet = TRUE;
+-
+-    if (GetLocaleInfoW(lcid, LOCALE_SISO3166CTRYNAME,
+-                      szCountry + 1, sizeof(szCountry)/sizeof(szCountry[0]) - 1) == FALSE)
+-    {
+-        goto done;
+-    }
+-    else
+-    {
+-        wcscat(pszISOCode, szCountry);
+-    }
+-
+-done:
+-    return fRet;
+-}
+-
+ 
+ #elif U_PLATFORM == U_PF_OS400
+ #   include <float.h>
+@@ -1833,65 +1805,38 @@
+     }
+ 
+     // No cached value, need to determine the current value
+-    static WCHAR windowsLocale[LOCALE_NAME_MAX_LENGTH] = {};
+-// GetUserDefaultLocaleName is not available on WIN XP.  So we'll
+-// load it on-the-fly.
+-const wchar_t kKernel32DllName[] = L"kernel32.dll";
+-typedef decltype(GetUserDefaultLocaleName)* GetUserDefaultLocaleNameFunction;
+-
+-    static GetUserDefaultLocaleNameFunction GetUserDefaultLocaleName_func =
+-        NULL;
+-    if (!GetUserDefaultLocaleName_func) {
+-      HMODULE kernel32_dll = ::GetModuleHandle(kKernel32DllName);
+-      GetUserDefaultLocaleName_func =
+-          reinterpret_cast<GetUserDefaultLocaleNameFunction>(
+-              GetProcAddress(kernel32_dll, "GetUserDefaultLocaleName"));
+-    }
+-    int length;
+-    if (GetUserDefaultLocaleName_func != NULL) {
+-      length = GetUserDefaultLocaleName_func(windowsLocale, UPRV_LENGTHOF(windowsLocale));
++    char modifiedWindowsLocale[ULOC_FULLNAME_CAPACITY] = {};
++    static const auto getLocaleName = reinterpret_cast<decltype(&GetUserDefaultLocaleName)>(
++            GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetUserDefaultLocaleName"));
++    WCHAR name[LOCALE_NAME_MAX_LENGTH];
++    const int length = getLocaleName ? getLocaleName(name, UPRV_LENGTHOF(name)) : 0;
++    if (length > 1) {
++        static_assert(ULOC_FULLNAME_CAPACITY >= LOCALE_NAME_MAX_LENGTH);
++        for (int i = 0; i < length - 1; ++i) {
++            modifiedWindowsLocale[i] = name[i] == L'_' ? '-' : static_cast<char>(name[i]);
++        }
+     } else {
+-      LANGID langid = 0;
+-      LCID lcid = 0;
+-
+-      langid = GetUserDefaultLCID();
+-      lcid = MAKELCID(langid, SORT_DEFAULT);
+-      // don't check for error return because the previous code didn't
+-      LookupLocaleStringFromLCID(lcid, windowsLocale, UPRV_LENGTHOF(windowsLocale));
+-      length = lstrlenW(windowsLocale);
+-    }
+-
+-    // Now we should have a Windows locale name that needs converted to the POSIX style.
+-    if (length > 0) // If length is 0, then the GetLocaleInfoEx failed.
+-    {
+-        // First we need to go from UTF-16 to char (and also convert from _ to - while we're at it.)
+-        char modifiedWindowsLocale[LOCALE_NAME_MAX_LENGTH] = {};
+-
+-        int32_t i;
+-        for (i = 0; i < UPRV_LENGTHOF(modifiedWindowsLocale); i++)
+-        {
+-            if (windowsLocale[i] == '_')
+-            {
+-                modifiedWindowsLocale[i] = '-';
++        // The formatting locale can differ from the UI language. ICU's LCID
++        // table also distinguishes scripts and sort variants sharing an ISO code.
++        const LCID lcid = GetUserDefaultLCID();
++        UErrorCode mappingStatus = U_ZERO_ERROR;
++        const int32_t mapped = uloc_getLocaleForLCID(lcid, modifiedWindowsLocale,
++                UPRV_LENGTHOF(modifiedWindowsLocale), &mappingStatus);
++        if (U_FAILURE(mappingStatus) || mapped <= 0 || mapped >= UPRV_LENGTHOF(modifiedWindowsLocale)) {
++            modifiedWindowsLocale[0] = 0;
++        }
++        if (!strchr(modifiedWindowsLocale, '_') && !strchr(modifiedWindowsLocale, '@')) {
++            char language[16], region[16];
++            if (GetLocaleInfoA(lcid, LOCALE_SISO639LANGNAME, language, UPRV_LENGTHOF(language)) > 1) {
++                if (GetLocaleInfoA(lcid, LOCALE_SISO3166CTRYNAME, region, UPRV_LENGTHOF(region)) > 1) {
++                    snprintf(modifiedWindowsLocale, sizeof(modifiedWindowsLocale), "%s_%s", language, region);
++                } else if (!modifiedWindowsLocale[0]) {
++                    snprintf(modifiedWindowsLocale, sizeof(modifiedWindowsLocale), "%s", language);
++                }
+             }
+-            else
+-            {
+-                modifiedWindowsLocale[i] = static_cast<char>(windowsLocale[i]);
+-            }
+-
+-            if (modifiedWindowsLocale[i] == '\0')
+-            {
+-                break;
+-            }
+-        }
+-
+-        if (i >= UPRV_LENGTHOF(modifiedWindowsLocale))
+-        {
+-            // Ran out of room, can't really happen, maybe we'll be lucky about a matching
+-            // locale when tags are dropped
+-            modifiedWindowsLocale[UPRV_LENGTHOF(modifiedWindowsLocale) - 1] = '\0';
+-        }
+-
++        }
++    }
++    if (modifiedWindowsLocale[0]) {
+         // Now normalize the resulting name
+         correctedPOSIXLocale = static_cast<char *>(uprv_malloc(POSIX_LOCALE_CAPACITY + 1));
+         /* TODO: Should we just exit on memory allocation failure? */
+diff --git a/third_party/icu/source/i18n/windtfmt.cpp b/third_party/icu/source/i18n/windtfmt.cpp
+--- a/third_party/icu/source/i18n/windtfmt.cpp
++++ b/third_party/icu/source/i18n/windtfmt.cpp
+@@ -233,56 +233,35 @@
+     fCalendar->setTimeZone(zone);
+ }
+ 
++static void appendWindowsFormat(decltype(&GetTimeFormatW) format, LCID locale, DWORD flags,
++                                const SYSTEMTIME *st, UnicodeString &appendTo)
++{
++    MaybeStackArray<wchar_t, STACK_BUFFER_SIZE> buffer;
++    int length = format(locale, flags, st, nullptr, buffer.getAlias(), buffer.getCapacity());
++    if (length == 0 && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
++        const int required = format(locale, flags, st, nullptr, nullptr, 0);
++        if (required <= 0 || !buffer.resize(required, 0)) {
++            return;
++        }
++        length = format(locale, flags, st, nullptr, buffer.getAlias(), required);
++    }
++    if (length > 0) {
++        appendTo.append(reinterpret_cast<const char16_t *>(buffer.getAlias()), length - 1);
++    }
++}
++
+ static const DWORD dfFlags[] = {DATE_LONGDATE, DATE_LONGDATE, DATE_SHORTDATE, DATE_SHORTDATE};
+ 
+ void Win32DateFormat::formatDate(const SYSTEMTIME *st, UnicodeString &appendTo) const
+ {
+-    int result;
+-    wchar_t stackBuffer[STACK_BUFFER_SIZE];
+-    wchar_t *buffer = stackBuffer;
+-
+-    result = GetDateFormatW(fLCID, dfFlags[fDateStyle - kDateOffset], st, nullptr, buffer, STACK_BUFFER_SIZE);
+-
+-    if (result == 0) {
+-        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+-            int newLength = GetDateFormatW(fLCID, dfFlags[fDateStyle - kDateOffset], st, nullptr, nullptr, 0);
+-
+-            buffer = NEW_ARRAY(wchar_t, newLength);
+-            GetDateFormatW(fLCID, dfFlags[fDateStyle - kDateOffset], st, nullptr, buffer, newLength);
+-        }
+-    }
+-
+-    appendTo.append((const char16_t *)buffer, (int32_t) wcslen(buffer));
+-
+-    if (buffer != stackBuffer) {
+-        DELETE_ARRAY(buffer);
+-    }
++    appendWindowsFormat(GetDateFormatW, fLCID, dfFlags[fDateStyle - kDateOffset], st, appendTo);
+ }
+ 
+ static const DWORD tfFlags[] = {0, 0, 0, TIME_NOSECONDS};
+ 
+ void Win32DateFormat::formatTime(const SYSTEMTIME *st, UnicodeString &appendTo) const
+ {
+-    int result;
+-    wchar_t stackBuffer[STACK_BUFFER_SIZE];
+-    wchar_t *buffer = stackBuffer;
+-
+-    result = GetTimeFormatW(fLCID, tfFlags[fTimeStyle], st, nullptr, buffer, STACK_BUFFER_SIZE);
+-
+-    if (result == 0) {
+-        if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+-            int newLength = GetTimeFormatW(fLCID, tfFlags[fTimeStyle], st, nullptr, nullptr, 0);
+-
+-            buffer = NEW_ARRAY(wchar_t, newLength);
+-            GetDateFormatW(fLCID, tfFlags[fTimeStyle], st, nullptr, buffer, newLength);
+-        }
+-    }
+-
+-    appendTo.append((const char16_t *)buffer, (int32_t) wcslen(buffer));
+-
+-    if (buffer != stackBuffer) {
+-        DELETE_ARRAY(buffer);
+-    }
++    appendWindowsFormat(GetTimeFormatW, fLCID, tfFlags[fTimeStyle], st, appendTo);
+ }
+ 
+ UnicodeString Win32DateFormat::setTimeZoneInfo(TIME_ZONE_INFORMATION *tzi, const TimeZone &zone) const

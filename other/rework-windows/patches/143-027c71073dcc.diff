@@ -1,0 +1,27 @@
+diff --git a/skia/BUILD.gn b/skia/BUILD.gn
+index 9be421668dbacbb0826014dde4a426f3ddec3e8a..65dffc19cbb7c48ba72f5600c60c8b426afa86d2 100644
+--- a/skia/BUILD.gn
++++ b/skia/BUILD.gn
+@@ -472,7 +472,6 @@
+   }
+ 
+   if (is_win) {
+-    # See SK_TYPEFACE_FACTORY_DIRECTWRITE
+     sources += skia_ports_windows_fonts_sources
+     sources += skia_ports_windows_sources
+ 
+diff --git a/ui/gfx/win/direct_write.cc b/ui/gfx/win/direct_write.cc
+index 51f16939fb8cc9da8766e99e040bc22b7674e027..30e24461c9fad7ace0fe19fee69b2ecb0046523d 100644
+--- a/ui/gfx/win/direct_write.cc
++++ b/ui/gfx/win/direct_write.cc
+@@ -76,7 +76,9 @@
+ 
+   sk_sp<SkFontMgr> direct_write_font_mgr =
+       SkFontMgr_New_DirectWrite(factory.Get());
+-  CHECK(!!direct_write_font_mgr);
++  if (!direct_write_font_mgr) {
++    direct_write_font_mgr = SkFontMgr_New_GDI();
++  }
+ 
+   // UI text goes through GDI so font hookers such as MacType apply to it.
+   // DirectWrite stays the default font manager for everything else, such as

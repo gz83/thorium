@@ -1,0 +1,48 @@
+diff --git a/content/common/features.cc b/content/common/features.cc
+index 463a6dd83a939d555450afa6e67ad15dc751fd2a..e97dfe869ed03c4e3a115ace7ba35e7f4c88f393 100644
+--- a/content/common/features.cc
++++ b/content/common/features.cc
+@@ -9,6 +9,11 @@
+ #include "base/metrics/field_trial_params.h"
+ #include "base/time/time.h"
+ #include "third_party/blink/public/common/features.h"
++
++#if BUILDFLAG(IS_WIN)
++#include "base/command_line.h"
++#include "sandbox/policy/switches.h"
++#endif
+ 
+ namespace features {
+ 
+@@ -365,12 +370,31 @@
+   return false;
+ #endif
+ }
++
++bool CanBindFontDataService() {
++#if BUILDFLAG(IS_WIN)
++  // The hybrid GDI manager and CSS local-font matching can request individual
++  // fonts even when the DirectWrite proxy is the default renderer manager.
++  if (base::FeatureList::IsEnabled(kFontDataServiceForCSSLocalFonts) ||
++      base::CommandLine::ForCurrentProcess()->HasSwitch(
++          sandbox::policy::switches::kDisableDirectWrite)) {
++    return true;
++  }
++#endif
++  return IsFontDataServiceEnabled();
++}
+ #endif
+ 
+ // Enables fixes for matching src: local() for web fonts correctly against full
+ // font name or postscript name. Rolling out behind a flag, as enabling this
+ // enables a font indexer on Android which we need to test in the field first.
++// TODO(https://crbug.com/996027): Re-enable this on Windows once Windows 7
++// DWRiteFontLookupTableBuilder stability is fixed.
++#if !BUILDFLAG(IS_WIN)
+ BASE_FEATURE(kFontSrcLocalMatching, base::FEATURE_ENABLED_BY_DEFAULT);
++#else
++BASE_FEATURE(kFontSrcLocalMatching, base::FEATURE_DISABLED_BY_DEFAULT);
++#endif
+ 
+ // Whether to use the Frame Routing Cache to avoid synchronous IPCs from the
+ // renderer side for iframe creation.

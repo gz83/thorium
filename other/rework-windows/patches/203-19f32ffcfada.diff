@@ -1,0 +1,165 @@
+diff --git a/chrome/browser/shell_integration.cc b/chrome/browser/shell_integration.cc
+index fdc0e1b2c4fa69d7616735dfc94d684cff582e1f..199c59ff73351468777f4f3d83651803c54468aa 100644
+--- a/chrome/browser/shell_integration.cc
++++ b/chrome/browser/shell_integration.cc
+@@ -320,11 +320,17 @@
+       case SET_DEFAULT_INTERACTIVE:
+ #if BUILDFLAG(IS_WIN)
+         if (interactive_permitted_) {
+-          win::SetAsDefaultBrowserUsingSystemSettings(
+-              std::move(on_finished_callback));
+-          // Early return because the function above takes care of calling
+-          // `on_finished_callback`.
+-          return;
++        switch (ShellUtil::GetInteractiveSetDefaultMode()) {
++          case ShellUtil::INTENT_PICKER:
++            win::SetAsDefaultBrowserUsingIntentPicker();
++            break;
++          case ShellUtil::SYSTEM_SETTINGS:
++            win::SetAsDefaultBrowserUsingSystemSettings(
++                std::move(on_finished_callback));
++            // Early return because the function above takes care of calling
++            // |on_finished_callback|.
++            return;
++        }
+         }
+ #endif  // BUILDFLAG(IS_WIN)
+         break;
+@@ -443,11 +449,17 @@
+     case SET_DEFAULT_INTERACTIVE:
+ #if BUILDFLAG(IS_WIN)
+       if (interactive_permitted_) {
+-        win::SetAsDefaultClientForSchemeUsingSystemSettings(
+-            scheme_, std::move(on_finished_callback));
+-        // Early return because the function above takes care of calling
+-        // `on_finished_callback`.
+-        return;
++        switch (ShellUtil::GetInteractiveSetDefaultMode()) {
++          case ShellUtil::INTENT_PICKER:
++            win::SetAsDefaultClientForSchemeUsingIntentPicker(scheme_);
++            break;
++          case ShellUtil::SYSTEM_SETTINGS:
++            win::SetAsDefaultClientForSchemeUsingSystemSettings(
++                scheme_, std::move(on_finished_callback));
++            // Early return because the function above takes care of calling
++            // |on_finished_callback|.
++            return;
++        }
+       }
+ #endif  // BUILDFLAG(IS_WIN)
+       break;
+diff --git a/chrome/browser/shell_integration_win.cc b/chrome/browser/shell_integration_win.cc
+index 329e53208fd8c..254459af53f2e 100644
+--- a/chrome/browser/shell_integration_win.cc
++++ b/chrome/browser/shell_integration_win.cc
+@@ -959,6 +959,25 @@ DefaultWebClientState IsDefaultClientForScheme(const std::string& scheme) {
+                    "migration_interval",
+                    base::Days(30));
+ 
++bool SetAsDefaultBrowserUsingIntentPicker() {
++  base::ScopedBlockingCall scoped_blocking_call(FROM_HERE,
++                                                base::BlockingType::MAY_BLOCK);
++
++  base::FilePath chrome_exe;
++  if (!base::PathService::Get(base::FILE_EXE, &chrome_exe)) {
++    NOTREACHED() << "Error getting app exe path";
++    return false;
++  }
++
++  if (!ShellUtil::ShowMakeChromeDefaultSystemUI(chrome_exe)) {
++    LOG(ERROR) << "Failed to launch the set-default-browser Windows UI.";
++    return false;
++  }
++
++  VLOG(1) << "Set-default-browser Windows UI completed.";
++  return true;
++}
++
+ void SetAsDefaultBrowserUsingSystemSettings(
+     base::OnceClosure on_finished_callback) {
+   base::FilePath chrome_exe;
+@@ -829,6 +848,27 @@ void SetAsDefaultBrowserUsingSystemSettings(
+   ShellUtil::ShowMakeChromeDefaultSystemUI(chrome_exe);
+ }
+ 
++bool SetAsDefaultClientForSchemeUsingIntentPicker(const std::string& scheme) {
++  base::ScopedBlockingCall scoped_blocking_call(FROM_HERE,
++                                                base::BlockingType::MAY_BLOCK);
++
++  base::FilePath chrome_exe;
++  if (!base::PathService::Get(base::FILE_EXE, &chrome_exe)) {
++    NOTREACHED() << "Error getting app exe path";
++    return false;
++  }
++
++  std::wstring wscheme(base::UTF8ToWide(scheme));
++  if (!ShellUtil::ShowMakeChromeDefaultProtocolClientSystemUI(chrome_exe,
++                                                              wscheme)) {
++    LOG(ERROR) << "Failed to launch the set-default-client Windows UI.";
++    return false;
++  }
++
++  VLOG(1) << "Set-default-client Windows UI completed.";
++  return true;
++}
++
+ void SetAsDefaultClientForSchemeUsingSystemSettings(
+     const std::string& scheme,
+     base::OnceClosure on_finished_callback) {
+diff --git a/chrome/browser/shell_integration_win.h b/chrome/browser/shell_integration_win.h
+index 4ab7f43c908b8..8e455c779bf61 100644
+--- a/chrome/browser/shell_integration_win.h
++++ b/chrome/browser/shell_integration_win.h
+@@ -31,12 +31,28 @@ namespace shell_integration::win {
+ BASE_DECLARE_FEATURE_PARAM(base::TimeDelta,
+                            kTaskbarShortcutMigrationInterval);
+ 
++// Initiates an OS shell flow which (if followed by the user) should set
++// Chrome as the default browser. Returns false if the flow cannot be
++// initialized, if it is not supported (introduced for Windows 8) or if the
++// user cancels the operation. This is a blocking call and requires a FILE
++// thread. If Chrome is already default browser, no interactive dialog will be
++// shown and this method returns true.
++bool SetAsDefaultBrowserUsingIntentPicker();
++
+ // Initiates the interaction with the system settings for the default browser.
+ // The function takes care of making sure |on_finished_callback| will get called
+ // exactly once when the interaction is finished.
+ void SetAsDefaultBrowserUsingSystemSettings(
+     base::OnceClosure on_finished_callback);
+ 
++// Initiates an OS shell flow which (if followed by the user) should set
++// Chrome as the default handler for |scheme|. Returns false if the flow
++// cannot be initialized, if it is not supported (introduced for Windows 8)
++// or if the user cancels the operation. This is a blocking call and requires
++// a FILE thread. If Chrome is already default for |scheme|, no interactive
++// dialog will be shown and this method returns true.
++bool SetAsDefaultClientForSchemeUsingIntentPicker(const std::string& scheme);
++
+ // Initiates the interaction with the system settings for the default handler of
+ // |scheme|. The function takes care of making sure |on_finished_callback|
+ // will get called exactly once when the interaction is finished.
+diff --git a/chrome/installer/util/shell_util.h b/chrome/installer/util/shell_util.h
+index 46fb4516fa7be..91532504dc6b5 100644
+--- a/chrome/installer/util/shell_util.h
++++ b/chrome/installer/util/shell_util.h
+@@ -495,6 +495,19 @@ class ShellUtil {
+   // Windows prior to Windows 8.
+   static bool CanMakeChromeDefaultUnattended();
+ 
++  enum InteractiveSetDefaultMode {
++    // The intent picker is opened with the different choices available to the
++    // user.
++    INTENT_PICKER,
++    // The Windows default apps settings page is opened with the current default
++    // app focused.
++    SYSTEM_SETTINGS,
++  };
++
++  // Returns the interactive mode that should be used to set the default browser
++  // or default protocol client on Windows 8+.
++  static InteractiveSetDefaultMode GetInteractiveSetDefaultMode();
++
+   // Returns the DefaultState of Chrome for HTTP and HTTPS and updates the
+   // default browser beacons as appropriate.
+   static DefaultState GetChromeDefaultState();

@@ -1,0 +1,24 @@
+diff --git a/base/trace_event/process_memory_dump.cc b/base/trace_event/process_memory_dump.cc
+index 659dda87a8579bab65c53907df6210f19bcddafa..a759d3c38264c5d792b54df5d3855d376073f79e 100644
+--- a/base/trace_event/process_memory_dump.cc
++++ b/base/trace_event/process_memory_dump.cc
+@@ -117,6 +117,10 @@
+       std::min(mapped_size_aligned, kMaxChunkSize), page_size);
+ 
+ #if BUILDFLAG(IS_WIN)
++    typedef BOOL(WINAPI * QUERYWORKINGSETEX)(HANDLE, PVOID, DWORD);
++    QUERYWORKINGSETEX fnQueryWorkingSetEx = QUERYWORKINGSETEX(GetProcAddress(GetModuleHandleW(L"psapi.dll"), "QueryWorkingSetEx"));
++    if(!fnQueryWorkingSetEx)
++        return std::nullopt;
+   auto vec = base::HeapArray<PSAPI_WORKING_SET_EX_INFORMATION>::WithSize(
+       max_page_count);
+ #elif BUILDFLAG(IS_APPLE)
+@@ -155,7 +159,7 @@
+     }
+ 
+     auto span = vec.first(page_count);
+-    failure = !::QueryWorkingSetEx(::GetCurrentProcess(), span.data(),
++    failure = !fnQueryWorkingSetEx(::GetCurrentProcess(), span.data(),
+                                    static_cast<DWORD>(span.size_bytes()));
+ 
+     for (size_t i = 0; i < page_count; i++) {

@@ -1,0 +1,36 @@
+diff --git a/components/device_signals/core/common/win/platform_utils_win.cc b/components/device_signals/core/common/win/platform_utils_win.cc
+index af649851076c53f831083f51cbec1e760c6f7c41..dedab181b39ec153aec11765c6694625346be560 100644
+--- a/components/device_signals/core/common/win/platform_utils_win.cc
++++ b/components/device_signals/core/common/win/platform_utils_win.cc
+@@ -28,6 +28,7 @@
+ #include "base/logging.h"
+ #include "base/path_service.h"
+ #include "base/process/process.h"
++#include "base/process/process_handle.h"
+ #include "base/strings/string_number_conversions.h"
+ #include "base/strings/string_util.h"
+ #include "base/strings/stringprintf.h"
+@@ -222,19 +223,16 @@
+ 
+ std::optional<base::FilePath> GetProcessExePath(base::ProcessId pid) {
+   base::Process process(
+-      ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid));
++      ::OpenProcess(base::ProcessImageQueryAccess(), FALSE, pid));
+   if (!process.IsValid()) {
+     return std::nullopt;
+   }
+ 
+-  DWORD path_len = MAX_PATH;
+-  wchar_t path_string[MAX_PATH];
+-  if (!::QueryFullProcessImageName(process.Handle(), 0, path_string,
+-                                   &path_len)) {
++  auto path = base::GetProcessExecutablePath(process.Handle());
++  if (path.empty()) {
+     return std::nullopt;
+   }
+-
+-  return base::FilePath(path_string);
++  return path;
+ }
+ 
+ std::optional<CrowdStrikeSignals> GetCrowdStrikeSignals() {

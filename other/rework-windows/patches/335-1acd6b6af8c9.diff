@@ -1,0 +1,682 @@
+diff --git a/base/win/win_util.cc b/base/win/win_util.cc
+index 54885cef34c3dac7cc4758e993f7f625871a7812..fa4c72367f5d36e0a6dd09bcf4dcace230baa646 100644
+--- a/base/win/win_util.cc
++++ b/base/win/win_util.cc
+@@ -142,37 +142,6 @@
+   return ::PowerDeterminePlatformRoleEx(POWER_PLATFORM_ROLE_V2);
+ }
+ 
+-// Method used for Windows 8.1 and later.
+-// Since we support versions earlier than 8.1, we must dynamically load this
+-// function from user32.dll, so it won't fail to load in runtime. For earlier
+-// Windows versions GetProcAddress will return null and report failure so that
+-// callers can fall back on the deprecated SetProcessDPIAware.
+-bool SetProcessDpiAwarenessWrapper(PROCESS_DPI_AWARENESS value) {
+-  if (!IsUser32AndGdi32Available())
+-    return false;
+-
+-  static const auto set_process_dpi_awareness_func =
+-      reinterpret_cast<decltype(&::SetProcessDpiAwareness)>(
+-          GetUser32FunctionPointer("SetProcessDpiAwarenessInternal"));
+-  if (set_process_dpi_awareness_func) {
+-    HRESULT hr = set_process_dpi_awareness_func(value);
+-    if (SUCCEEDED(hr))
+-      return true;
+-    DLOG_IF(ERROR, hr == E_ACCESSDENIED)
+-        << "Access denied error from SetProcessDpiAwarenessInternal. "
+-           "Function called twice, or manifest was used.";
+-    NOTREACHED()
+-        << "SetProcessDpiAwarenessInternal failed with unexpected error: "
+-        << hr;
+-    return false;
+-  }
+-
+-  DCHECK_LT(GetVersion(), Version::WIN8_1) << "SetProcessDpiAwarenessInternal "
+-                                              "should be available on all "
+-                                              "platforms >= Windows 8.1";
+-  return false;
+-}
+-
+ // Enable V2 per-monitor high-DPI support for the process. This will cause
+ // Windows to scale dialogs, comctl32 controls, context menus, and non-client
+ // area owned by this process on a per-monitor basis. If per-monitor V2 is not
+@@ -846,40 +815,13 @@
+ bool SetClsidForPropertyStore(IPropertyStore* property_store,
+                               const PROPERTYKEY& property_key,
+                               const CLSID& property_clsid_value) {
++  ScopedNativeLibrary propsys(LoadSystemLibrary(L"propsys.dll"));
++  const auto init_from_clsid =
++      reinterpret_cast<decltype(&::InitPropVariantFromCLSID)>(
++          propsys.GetFunctionPointer("InitPropVariantFromCLSID"));
+   ScopedPropVariant property_value;
+-typedef int (__cdecl *MYPROC)(LPCWSTR);
+-
+-    HINSTANCE hinstLib;
+-    MYPROC ProcAdd;
+-    BOOL fRunTimeLinkSuccess = FALSE;
+-
+-    // Get a handle to the DLL module.
+-
+-    hinstLib = LoadLibraryW(L"Propsys.dll");
+-
+-    // If the handle is valid, try to get the function address.
+-
+-    if (hinstLib != NULL)
+-    {
+-        ProcAdd = (MYPROC) GetProcAddress(hinstLib, "InitPropVariantFromCLSID");
+-
+-        // If the function address is valid, call the function.
+-
+-        if (NULL != ProcAdd)
+-        {
+-            fRunTimeLinkSuccess = TRUE;
+-        }
+-        // Free the DLL module.
+-
+-        FreeLibrary(hinstLib);
+-    }
+-
+-    // If unable to call the DLL function, use an alternative.
+-    if (! fRunTimeLinkSuccess)
+-        return false;
+-
+-  if (FAILED(InitPropVariantFromCLSID(property_clsid_value,
+-                                      property_value.Receive()))) {
++  if (!init_from_clsid ||
++      FAILED(init_from_clsid(property_clsid_value, property_value.Receive()))) {
+     return false;
+   }
+ 
+@@ -1126,26 +1068,19 @@
+     }
+ 
+     // USER32 and GDI32 cannot be used if win32k syscalls are disabled.
+-
+-    // Can't disable win32k prior to windows 8.
+-    if (GetVersion() < Version::WIN8)
+-      return true;
+-
+-    using GetProcessMitigationPolicyType =
+-        decltype(GetProcessMitigationPolicy)*;
+-    GetProcessMitigationPolicyType get_process_mitigation_policy_func =
+-        reinterpret_cast<GetProcessMitigationPolicyType>(GetProcAddress(
+-            GetModuleHandle(L"kernel32.dll"), "GetProcessMitigationPolicy"));
+-
+-    if (!get_process_mitigation_policy_func)
+-      return true;
+-
+-    PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY policy = {};
+-    if (get_process_mitigation_policy_func(::GetCurrentProcess(),
+-                                           ProcessSystemCallDisablePolicy,
+-                                           &policy, sizeof(policy)) &&
+-        policy.DisallowWin32kSystemCalls != 0) {
+-      return false;
++    // Win32k lockdown and its policy query are available starting in Windows 8.
++    if (GetVersion() >= Version::WIN8) {
++      const auto get_policy =
++          reinterpret_cast<decltype(&::GetProcessMitigationPolicy)>(
++              ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"),
++                               "GetProcessMitigationPolicy"));
++      PROCESS_MITIGATION_SYSTEM_CALL_DISABLE_POLICY policy = {};
++      if (!get_policy ||
++          (get_policy(::GetCurrentProcess(), ProcessSystemCallDisablePolicy,
++                      &policy, sizeof(policy)) &&
++           policy.DisallowWin32kSystemCalls)) {
++        return false;
++      }
+     }
+ 
+     if (*g_pin_user32_and_gdi32_trial_state !=
+@@ -1222,32 +1157,11 @@
+                                      TABLET_DISABLE_FLICKFALLBACKKEYS));
+ }
+ 
+-bool IsProcessPerMonitorDpiAware() {
+-  enum class PerMonitorDpiAware {
+-    UNKNOWN = 0,
+-    PER_MONITOR_DPI_UNAWARE,
+-    PER_MONITOR_DPI_AWARE,
+-  };
+-  static PerMonitorDpiAware per_monitor_dpi_aware = PerMonitorDpiAware::UNKNOWN;
+-  if (per_monitor_dpi_aware == PerMonitorDpiAware::UNKNOWN) {
+-    per_monitor_dpi_aware = PerMonitorDpiAware::PER_MONITOR_DPI_UNAWARE;
+-    HMODULE shcore_dll = ::LoadLibrary(L"shcore.dll");
+-    if (shcore_dll) {
+-      auto get_process_dpi_awareness_func =
+-          reinterpret_cast<decltype(::GetProcessDpiAwareness)*>(
+-              ::GetProcAddress(shcore_dll, "GetProcessDpiAwareness"));
+-      if (get_process_dpi_awareness_func) {
+-        PROCESS_DPI_AWARENESS awareness;
+-        if (SUCCEEDED(get_process_dpi_awareness_func(nullptr, &awareness)) &&
+-            awareness == PROCESS_PER_MONITOR_DPI_AWARE)
+-          per_monitor_dpi_aware = PerMonitorDpiAware::PER_MONITOR_DPI_AWARE;
+-      }
+-    }
+-  }
+-  return per_monitor_dpi_aware == PerMonitorDpiAware::PER_MONITOR_DPI_AWARE;
+-}
+-
+ void EnableHighDPISupport() {
++  // Pre-Windows 7 GDI text uses unscaled metrics.
++  if (GetVersion() < Version::WIN7) {
++    return;
++  }
+   if (!IsUser32AndGdi32Available()) {
+     return;
+   }
+@@ -1257,18 +1171,27 @@
+     return;
+   }
+ 
+-  // Fall back to per-monitor DPI for older versions of Win10 instead of
+-  // Win8.1 since Win8.1 does not have EnableChildWindowDpiMessage,
+-  // necessary for correct non-client area scaling across monitors.
+-  PROCESS_DPI_AWARENESS process_dpi_awareness =
+-      GetVersion() >= Version::WIN10 ? PROCESS_PER_MONITOR_DPI_AWARE
+-                                     : PROCESS_SYSTEM_DPI_AWARE;
+-  bool result = SetProcessDpiAwarenessWrapper(process_dpi_awareness);
+-  if (!result) {
+-    // For windows versions where SetProcessDpiAwareness is not available or
+-    // failed, try its predecessor.
+-    BOOL is_dpi_aware = ::SetProcessDPIAware();
+-    DCHECK(is_dpi_aware) << "SetProcessDPIAware failed.";
++  static const auto set_per_monitor_dpi = [] {
++    HMODULE shcore =
++        ::LoadLibraryExW(L"shcore.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
++    return shcore ? reinterpret_cast<decltype(&::SetProcessDpiAwareness)>(
++                        ::GetProcAddress(shcore, "SetProcessDpiAwareness"))
++                  : nullptr;
++  }();
++  if (set_per_monitor_dpi) {
++    const HRESULT hr = set_per_monitor_dpi(PROCESS_PER_MONITOR_DPI_AWARE);
++    if (SUCCEEDED(hr) || hr == E_ACCESSDENIED) {
++      // A manifest or an earlier call can already have set the process mode.
++      return;
++    }
++  }
++
++  // Windows Vista through 8 only support system-wide DPI awareness.
++  static const auto set_system_dpi =
++      reinterpret_cast<decltype(&::SetProcessDPIAware)>(
++          GetUser32FunctionPointer("SetProcessDPIAware"));
++  if (set_system_dpi) {
++    set_system_dpi();
+   }
+ }
+ 
+@@ -1324,14 +1247,10 @@
+ }
+ 
+ bool GetPointerDevice(HANDLE device, POINTER_DEVICE_INFO& result) {
+-  static const auto get_pointer_devices =
+-      reinterpret_cast<decltype(&::GetPointerDevices)>(
+-          base::win::GetUser32FunctionPointer("GetPointerDevices"));
+-  if (!get_pointer_devices) {
+-    return false;
+-  }
+-
+-  return ::GetPointerDevice(device, &result);
++  static const auto get_pointer_device =
++      reinterpret_cast<decltype(&::GetPointerDevice)>(
++          GetUser32FunctionPointer("GetPointerDevice"));
++  return get_pointer_device && get_pointer_device(device, &result);
+ }
+ 
+ std::optional<std::vector<POINTER_DEVICE_INFO>> GetPointerDevices() {
+@@ -1345,7 +1264,7 @@
+   }
+ 
+   std::vector<POINTER_DEVICE_INFO> pointer_devices(device_count);
+-  if (!::GetPointerDevices(&device_count, pointer_devices.data())) {
++  if (!get_pointer_devices(&device_count, pointer_devices.data())) {
+     return std::nullopt;
+   }
+   return pointer_devices;
+@@ -1353,10 +1272,10 @@
+ 
+ bool RegisterPointerDeviceNotifications(HWND hwnd,
+                                         bool notify_proximity_changes) {
+-  if (!base::win::GetUser32FunctionPointer("RegisterPointerDeviceNotifications")) {
+-    return true;
+-  }
+-  return ::RegisterPointerDeviceNotifications(hwnd, notify_proximity_changes);
++  static const auto register_notifications =
++      reinterpret_cast<decltype(&::RegisterPointerDeviceNotifications)>(
++          GetUser32FunctionPointer("RegisterPointerDeviceNotifications"));
++  return register_notifications && register_notifications(hwnd, notify_proximity_changes);
+ }
+ 
+ bool IsRunningUnderDesktopName(std::wstring_view desktop_name) {
+diff --git a/content/browser/renderer_host/render_process_host_impl.cc b/content/browser/renderer_host/render_process_host_impl.cc
+index 25820fb6e9847f832b85e8b0f3d0859d22e1e5c6..076ac09a005b26ea1d0880d988c3666948f67e6d 100644
+--- a/content/browser/renderer_host/render_process_host_impl.cc
++++ b/content/browser/renderer_host/render_process_host_impl.cc
+@@ -4107,6 +4107,7 @@
+ #endif
+ #if BUILDFLAG(IS_WIN)
+       switches::kDisableHighResTimer,
++    switches::kEnableWin7WebRtcHWH264Decoding,
+       switches::kTextContrast,
+       switches::kTextGamma,
+       switches::kTrySupportedChannelLayouts,
+diff --git a/sandbox/policy/switches.cc b/sandbox/policy/switches.cc
+index 9849d9f32901e11e44c5a25d0f42d19d53ab46f1..650bf5cec7eab17eb2de3301c71004816d9199aa 100644
+--- a/sandbox/policy/switches.cc
++++ b/sandbox/policy/switches.cc
+@@ -5,6 +5,7 @@
+ #include "sandbox/policy/switches.h"
+ 
+ #include "build/build_config.h"
++#include "base/win/windows_version.h"
+ 
+ namespace sandbox::policy::switches {
+ 
+diff --git a/content/renderer/renderer_main_platform_delegate_win.cc b/content/renderer/renderer_main_platform_delegate_win.cc
+index 995e24262144d64775cb7b6f332f8ccffc082da0..4b8ba00362fd6824445853310c6f1d20f405fc94 100644
+--- a/content/renderer/renderer_main_platform_delegate_win.cc
++++ b/content/renderer/renderer_main_platform_delegate_win.cc
+@@ -11,6 +11,7 @@
+ 
+ #include "base/command_line.h"
+ #include "base/metrics/histogram_functions.h"
++#include "base/native_library.h"
+ #include "base/win/win_util.h"
+ #include "base/win/windows_version.h"
+ #include "content/child/dwrite_font_proxy/dwrite_font_proxy_init_impl_win.h"
+@@ -56,25 +57,22 @@
+     // cached and there's no more need to access the registry. If the sandbox
+     // is disabled, we don't have to make this dummy call.
+     std::unique_ptr<icu::TimeZone> zone(icu::TimeZone::createDefault());
+-
+-    // Skia's GDI typefaces use usp10.dll, and memory fonts call CoCreateGuid
+-    // from ole32.dll to generate private family names. Both DLLs are
+-    // delay-loaded and must be loaded before the token is lowered.
+-    if (command_line.HasSwitch(
+-            sandbox::policy::switches::kDisableDirectWrite)) {
+-      ::LoadLibraryW(L"usp10.dll");
+-      ::LoadLibraryW(L"ole32.dll");
+-    }
+   }
+ 
+-  // Do not initialize DWriteFactory if the feature flag is enabled
+-  // since this will conflict with the experimental font manager.
+-  // Fallback to only DWrite if running in single process mode, since there can
+-  // only be a single font manager and the browser process always has a DWrite
+-  // one.
++  // The experimental manager reads DirectWrite typefaces without a font proxy.
+   if (!base::FeatureList::IsEnabled(features::kFontDataServiceAllWebContents) ||
+       command_line.HasSwitch(switches::kSingleProcess)) {
+     InitializeDWriteFontProxy();
++  } else {
++    CheckDWriteForFontDataService();
++  }
++
++  // GDI typefaces need Uniscribe and OLE before the renderer lowers its token.
++  if (!no_sandbox &&
++      (RendererNeedsNativeGdi() ||
++       command_line.HasSwitch(sandbox::policy::switches::kDisableDirectWrite))) {
++    base::PinSystemLibrary(L"usp10.dll");
++    base::PinSystemLibrary(L"ole32.dll");
+   }
+ }
+ 
+diff --git a/third_party/blink/renderer/platform/fonts/font_cache.cc b/third_party/blink/renderer/platform/fonts/font_cache.cc
+index fe8604523e8c4eb6e6631f122ba59be8e19c98bc..db0c83117fb0161d83a35de19ffb1c3145f852e9 100644
+--- a/third_party/blink/renderer/platform/fonts/font_cache.cc
++++ b/third_party/blink/renderer/platform/fonts/font_cache.cc
+@@ -95,6 +95,7 @@
+ bool FontCache::antialiased_text_enabled_ = false;
+ bool FontCache::lcd_text_enabled_ = false;
+ bool FontCache::gdi_font_rendering_ = false;
++bool FontCache::use_skia_font_fallback_ = false;
+ #endif  // BUILDFLAG(IS_WIN)
+ 
+ #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_ANDROID)
+diff --git a/third_party/blink/renderer/platform/fonts/font_cache.h b/third_party/blink/renderer/platform/fonts/font_cache.h
+index a2e994daf479c4e4eb8338a7144cfe9c6653b45a..e84bb4562cb733088f272b68c2f081357dbccae4 100644
+--- a/third_party/blink/renderer/platform/fonts/font_cache.h
++++ b/third_party/blink/renderer/platform/fonts/font_cache.h
+@@ -191,6 +191,7 @@
+   static void SetGdiFontRendering(bool enabled) {
+     gdi_font_rendering_ = enabled;
+   }
++  static void AddSideloadedFontForTesting(sk_sp<SkTypeface>);
+   // Functions to cache and retrieve the system font metrics.
+   static void SetMenuFontMetrics(const AtomicString& family_name,
+                                  int32_t font_height);
+@@ -337,6 +338,8 @@
+   static bool antialiased_text_enabled_;
+   static bool lcd_text_enabled_;
+   static bool gdi_font_rendering_;
++  static HashMap<String, sk_sp<SkTypeface>, DeprecatedCaseFoldingHashTraits<String>>*
++      sideloaded_fonts_;
+   // The system font metrics cache.
+   static AtomicString* menu_font_family_name_;
+   static int32_t menu_font_height_;
+diff --git a/third_party/blink/renderer/platform/fonts/skia/font_cache_skia.cc b/third_party/blink/renderer/platform/fonts/skia/font_cache_skia.cc
+index d60a0ac3f2a6a08eab7dccaee0b89c06c65c08a3..f38b97a6b176cfabbcfab7332a9223b044e24b5a 100644
+--- a/third_party/blink/renderer/platform/fonts/skia/font_cache_skia.cc
++++ b/third_party/blink/renderer/platform/fonts/skia/font_cache_skia.cc
+@@ -372,7 +372,7 @@
+   FontPlatformData* font_platform_data = MakeGarbageCollected<FontPlatformData>(
+       typeface, name, font_size, synthetic_bold, synthetic_italic,
+       font_description.TextRendering(), font_description.ResolveFontFeatures(),
+-      font_description.Orientation());
++          font_description.Orientation());
+ 
+   font_platform_data->SetAvoidEmbeddedBitmaps(
+       ShouldAvoidEmbeddedBitmapsForTypeface(*typeface));
+diff --git a/third_party/blink/renderer/platform/fonts/win/font_fallback_win.cc b/third_party/blink/renderer/platform/fonts/win/font_fallback_win.cc
+index 62875320cb3495a995fc520a63cb41979ebaa90a..517505e93aae98ec5384239715b6ddd40b71f8a4 100644
+--- a/third_party/blink/renderer/platform/fonts/win/font_fallback_win.cc
++++ b/third_party/blink/renderer/platform/fonts/win/font_fallback_win.cc
+@@ -660,13 +660,16 @@
+       base_family_name_approximation, bcp47_language_tag, character,
+       &fallback_family_and_style);
+ 
++  if (!mojo_result || !fallback_family_and_style) {
++    return false;
++  }
+   SECURITY_DCHECK(fallback_family);
+   SECURITY_DCHECK(fallback_style);
+   *fallback_family = fallback_family_and_style->fallback_family_name;
+   *fallback_style = SkFontStyle(
+       fallback_family_and_style->weight, fallback_family_and_style->width,
+       static_cast<SkFontStyle::Slant>(fallback_family_and_style->slant));
+-  return mojo_result;
++  return true;
+ }
+ 
+ }  // namespace blink
+diff --git a/third_party/blink/public/web/win/web_font_rendering.h b/third_party/blink/public/web/win/web_font_rendering.h
+index 1cae27c09d37e2cdac05e17a3288af03737af433..e60b7b5ec5b9b280a7497675e77c53a35d990296 100644
+--- a/third_party/blink/public/web/win/web_font_rendering.h
++++ b/third_party/blink/public/web/win/web_font_rendering.h
+@@ -35,6 +35,7 @@
+   static void SetLCDTextEnabled(bool);
+   // The default font manager draws through GDI (--disable-direct-write).
+   static void SetGdiFontRendering(bool);
++  static void SetUseSkiaFontFallback(bool);
+ };
+ 
+ }  // namespace blink
+diff --git a/ui/gfx/win/direct_write.cc b/ui/gfx/win/direct_write.cc
+index 3be1e835fc838c3bb59d5a5f7ef436c223ba07d5..d946c77a8e4bf661bce6d3f976994fba144a55ab 100644
+--- a/ui/gfx/win/direct_write.cc
++++ b/ui/gfx/win/direct_write.cc
+@@ -12,6 +12,7 @@
+ #include "base/command_line.h"
+ #include "base/debug/alias.h"
+ #include "base/metrics/histogram_functions.h"
++#include "base/native_library.h"
+ #include "base/notreached.h"
+ #include "base/strings/utf_string_conversions.h"
+ #include "base/trace_event/trace_event.h"
+@@ -29,14 +30,30 @@
+ 
+ // Pointer to the global IDWriteFactory interface.
+ IDWriteFactory* g_direct_write_factory = nullptr;
+-
+-// GDI font manager for UI text, set with --disable-direct-write. Leaked at
+-// shutdown.
++bool g_dwrite_initialized = false;
++
++// GDI font manager used for UI rendering. Leaked at shutdown.
+ SkFontMgr* g_gdi_ui_font_mgr = nullptr;
+ 
+ // Used in tests to allow a known font to masquerade as a locally installed
+ // font. Usually this is the Ahem.ttf font. Leaked at shutdown.
+ std::vector<base::FilePath>* g_sideloaded_fonts = nullptr;
++
++using CreateFactoryProc = decltype(&::DWriteCreateFactory);
++
++CreateFactoryProc GetCreateFactoryProc() {
++  static const auto proc = []() -> CreateFactoryProc {
++    const auto version = base::win::OSInfo::GetInstance()->version_number();
++    if (version.major == 6 && version.minor == 1 && version.build < 7600) {
++      return nullptr;
++    }
++    HMODULE module = base::PinSystemLibrary(L"dwrite.dll");
++    return module ? reinterpret_cast<CreateFactoryProc>(
++                        ::GetProcAddress(module, "DWriteCreateFactory"))
++                  : nullptr;
++  }();
++  return proc;
++}
+ 
+ void SetDirectWriteFactory(IDWriteFactory* factory) {
+   DCHECK(!g_direct_write_factory);
+@@ -52,39 +69,35 @@
+   return g_sideloaded_fonts;
+ }
+ 
+-void CreateDWriteFactory(IDWriteFactory** factory) {
+-  using DWriteCreateFactoryProc = decltype(DWriteCreateFactory)*;
+-  HMODULE dwrite_dll = LoadLibraryW(L"dwrite.dll");
+-  if (!dwrite_dll)
++bool HasDirectWriteFactoryExport() {
++  return GetCreateFactoryProc() != nullptr;
++}
++
++void CreateDWriteFactory(IDWriteFactory** factory, DWRITE_FACTORY_TYPE type) {
++  *factory = nullptr;
++  auto create = GetCreateFactoryProc();
++  Microsoft::WRL::ComPtr<IUnknown> result;
++  if (create && SUCCEEDED(create(type, __uuidof(IDWriteFactory), &result)) &&
++      result) {
++    result.CopyTo(factory);
++  }
++}
++
++void InitializeDirectWrite() {
++  if (g_dwrite_initialized)
+     return;
+-
+-  DWriteCreateFactoryProc dwrite_create_factory_proc =
+-      reinterpret_cast<DWriteCreateFactoryProc>(
+-          GetProcAddress(dwrite_dll, "DWriteCreateFactory"));
+-  // Not finding the DWriteCreateFactory function indicates a corrupt dll.
+-  if (!dwrite_create_factory_proc)
+-    return;
+-
+-  // Failure to create the DirectWrite factory indicates a corrupt dll.
+-  Microsoft::WRL::ComPtr<IUnknown> factory_unknown;
+-  if (FAILED(dwrite_create_factory_proc(DWRITE_FACTORY_TYPE_SHARED,
+-                                        __uuidof(IDWriteFactory),
+-                                        &factory_unknown))) {
+-    return;
+-  }
+-  factory_unknown.CopyTo(factory);
+-}
+-
+-void InitializeDirectWrite() {
+-  static bool tried_dwrite_initialize = false;
+-  DCHECK(!tried_dwrite_initialize);
+-  tried_dwrite_initialize = true;
++  g_dwrite_initialized = true;
+ 
+   TRACE_EVENT0("fonts", "gfx::InitializeDirectWrite");
+ 
+   Microsoft::WRL::ComPtr<IDWriteFactory> factory;
+   CreateDWriteFactory(&factory);
+-  CHECK(!!factory);
++  if (!factory) {
++    auto gdi = SkFontMgr_New_GDI();
++    g_gdi_ui_font_mgr = sk_ref_sp(gdi.get()).release();
++    skia::OverrideDefaultSkFontMgr(std::move(gdi));
++    return;
++  }
+   SetDirectWriteFactory(factory.Get());
+ 
+   // The skia call to create a new DirectWrite font manager instance can fail
+@@ -113,18 +126,13 @@
+     iteration = -1;
+   base::UmaHistogramSparse("DirectWrite.Fonts.Gfx.InitializeLoopCount",
+                            iteration);
+-  // TODO(crbug.com/956064): Move to a CHECK when the cause of the crash is
+-  // fixed and remove the if statement that fallback to GDI font manager.
+-  DCHECK(!!direct_write_font_mgr);
+-  if (!direct_write_font_mgr)
++  if (!direct_write_font_mgr) {
+     direct_write_font_mgr = SkFontMgr_New_GDI();
+-
+-  // UI text goes through GDI so font hookers such as MacType apply to it.
+-  // DirectWrite stays the default font manager for everything else, such as
+-  // serving font data to renderers and printing.
+-  if (base::CommandLine::InitializedForCurrentProcess() &&
+-      base::CommandLine::ForCurrentProcess()->HasSwitch(
+-          switches::kDisableDirectWrite)) {
++    g_gdi_ui_font_mgr = sk_ref_sp(direct_write_font_mgr.get()).release();
++  } else if (base::CommandLine::InitializedForCurrentProcess() &&
++             base::CommandLine::ForCurrentProcess()->HasSwitch(
++                 switches::kDisableDirectWrite)) {
++    // Thorium's UI preference keeps DirectWrite available to font-data clients.
+     g_gdi_ui_font_mgr = CreateGdiFontManager(direct_write_font_mgr).release();
+   }
+ 
+@@ -138,7 +146,7 @@
+   // Some unittests may access this accessor without any previous call to
+   // |InitializeDirectWrite|. A call to |InitializeDirectWrite| after this
+   // function being called is still invalid.
+-  if (!g_direct_write_factory)
++  if (!g_dwrite_initialized)
+     InitializeDirectWrite();
+   return g_direct_write_factory;
+ }
+@@ -187,7 +195,7 @@
+   CreateDWriteFactory(&factory);
+ 
+   Microsoft::WRL::ComPtr<IDWriteFontCollection> font_collection;
+-  if (FAILED(factory->GetSystemFontCollection(&font_collection))) {
++  if (!factory || FAILED(factory->GetSystemFontCollection(&font_collection))) {
+     return std::nullopt;
+   }
+ 
+diff --git a/ui/gfx/win/direct_write.h b/ui/gfx/win/direct_write.h
+index beba71d5b376f3d47284dc199b8a4b5101ec4bfd..253ad7197813c6f94d51b57b9d4a842b6f9335f5 100644
+--- a/ui/gfx/win/direct_write.h
++++ b/ui/gfx/win/direct_write.h
+@@ -25,14 +25,19 @@
+ 
+ COMPONENT_EXPORT(GFX) void InitializeDirectWrite();
+ 
+-// Creates a DirectWrite factory.
+-COMPONENT_EXPORT(GFX) void CreateDWriteFactory(IDWriteFactory** factory);
++// Checks for a usable factory entry point without creating a factory.
++COMPONENT_EXPORT(GFX) bool HasDirectWriteFactoryExport();
++
++// Leaves the out parameter null when DirectWrite is unavailable.
++COMPONENT_EXPORT(GFX)
++void CreateDWriteFactory(IDWriteFactory** factory,
++                         DWRITE_FACTORY_TYPE type = DWRITE_FACTORY_TYPE_SHARED);
+ 
+ // Returns the global DirectWrite factory.
+ COMPONENT_EXPORT(GFX) IDWriteFactory* GetDirectWriteFactory();
+ 
+ // Returns the GDI font manager for UI text, or null unless
+-// --disable-direct-write was passed to InitializeDirectWrite()'s process.
++// the GDI backend is active.
+ COMPONENT_EXPORT(GFX) sk_sp<SkFontMgr> GetGdiUIFontMgr();
+ 
+ // Retrieves the localized string for a given locale. If locale is empty,
+diff --git a/content/child/dwrite_font_proxy/dwrite_font_proxy_init_impl_win.h b/content/child/dwrite_font_proxy/dwrite_font_proxy_init_impl_win.h
+index ffa5c922ccd5de7ab08bdb337dea360ae8fe22f2..7488e3b1b887403053369577d0566a106deba770 100644
+--- a/content/child/dwrite_font_proxy/dwrite_font_proxy_init_impl_win.h
++++ b/content/child/dwrite_font_proxy/dwrite_font_proxy_init_impl_win.h
+@@ -13,6 +13,11 @@
+ 
+ namespace content {
+ 
++// Renderer main thread only. The font-data service and the proxy each require
++// a functioning DirectWrite factory.
++CONTENT_EXPORT bool RendererNeedsNativeGdi();
++CONTENT_EXPORT void CheckDWriteForFontDataService();
++
+ // Configures the dwrite font proxy to use the specified sender. This can be
+ // useful in tests which use a fake render thread which is unable to process
+ // font IPC messages. This should only be called when running as a test.
+diff --git a/content/child/dwrite_font_proxy/dwrite_font_proxy_win.cc b/content/child/dwrite_font_proxy/dwrite_font_proxy_win.cc
+index 77223a5e41fb9f015c347a998debf6fd4e9d4849..f773a8ac67cb09183336b9fe9d3d6f31ce26a9d6 100644
+--- a/content/child/dwrite_font_proxy/dwrite_font_proxy_win.cc
++++ b/content/child/dwrite_font_proxy/dwrite_font_proxy_win.cc
+@@ -430,10 +430,14 @@
+   // not setup yet when |this| is instantiated. See |InitializePrewarmer|.
+ 
+   HRESULT hr = factory->RegisterFontCollectionLoader(this);
+-  DCHECK(SUCCEEDED(hr));
+-  hr = factory_->RegisterFontFileLoader(this);
+-  DCHECK(SUCCEEDED(hr));
+-  return S_OK;
++  if (FAILED(hr)) {
++    return hr;
++  }
++  hr = factory->RegisterFontFileLoader(this);
++  if (FAILED(hr)) {
++    factory->UnregisterFontCollectionLoader(this);
++  }
++  return hr;
+ }
+ 
+ void DWriteFontCollectionProxy::Unregister() {
+diff --git a/content/child/font_integration_init.cc b/content/child/font_integration_init.cc
+index dd245009f73f07724a2c641ca468978beb675859..e4ba2206e467988c1da838c509d88b879c488f75 100644
+--- a/content/child/font_integration_init.cc
++++ b/content/child/font_integration_init.cc
+@@ -7,7 +7,7 @@
+ #include "base/command_line.h"
+ #include "build/build_config.h"
+ #if BUILDFLAG(IS_WIN)
+-#include "content/public/child/dwrite_font_proxy_init_win.h"
++#include "content/child/dwrite_font_proxy/dwrite_font_proxy_init_impl_win.h"
+ #endif
+ #include "content/child/font_data/font_data_manager.h"
+ #include "content/common/features.h"
+@@ -28,6 +28,11 @@
+     content::InitializeDWriteFontProxy();
+     return;
+   }
++  CheckDWriteForFontDataService();
++  if (RendererNeedsNativeGdi()) {
++    // Skia already defaults to GDI without a DirectWrite manager override.
++    return;
++  }
+ #endif
+ 
+   // On all platforms that support font data service, don't create it in single
+diff --git a/content/renderer/gdi_font_manager_win.cc b/content/renderer/gdi_font_manager_win.cc
+index 400cd29f0206bcf1ac2334d1e201dd64bc019e86..c8672608d989541fca5571362204050814c53832 100644
+--- a/content/renderer/gdi_font_manager_win.cc
++++ b/content/renderer/gdi_font_manager_win.cc
+@@ -70,8 +70,12 @@
+ 
+ }  // namespace
+ 
+-void InstallGdiFontManager() {
++void InstallGdiFontManager(bool native_gdi) {
+   SkTypeface_SetEnsureLOGFONTAccessibleProc(EnsureLogFontAccessible);
++  if (native_gdi) {
++    skia::OverrideDefaultSkFontMgr(SkFontMgr_New_GDI());
++    return;
++  }
+   // The DirectWrite-based FontDataManager handles fallback and color fonts,
+   // and picks the installed fonts pages ask for, as in other browsers (the
+   // system's GDI font settings are for its own UI, not for web pages).
+diff --git a/content/renderer/gdi_font_manager_win.h b/content/renderer/gdi_font_manager_win.h
+index bba710a04cf82e37b2df4bee3cdfbdd7cf43ad29..9b1ea245950f599781865c89560ce461a882f70a 100644
+--- a/content/renderer/gdi_font_manager_win.h
++++ b/content/renderer/gdi_font_manager_win.h
+@@ -7,11 +7,9 @@
+ 
+ namespace content {
+ 
+-// Makes GDI the renderer's default font manager, so web content text is drawn
+-// through GDI and picked up by GDI hooks such as MacType. Used with
+-// --disable-direct-write. Must run before anything uses the default
+-// SkFontMgr.
+-void InstallGdiFontManager();
++// Installs native GDI when DirectWrite is unavailable, or Thorium's hybrid
++// manager when the user requests GDI. Call before the first default font lookup.
++void InstallGdiFontManager(bool native_gdi);
+ 
+ }  // namespace content
+ 

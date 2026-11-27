@@ -9,12 +9,22 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 import re
+import sys
+import xml.etree.ElementTree as ET
+
+if __package__:
+    from .resource_validation import (
+        check_inventory, check_legacy_profile, language_key, xtb_spans,
+    )
+else:
+    from resource_validation import (
+        check_inventory, check_legacy_profile, language_key, xtb_spans,
+    )
 
 TRANSLATION_RE = re.compile(
     r'<translation\b(?=[^>]*\bid="([^"]+)")[^>]*>.*?</translation>',
     re.DOTALL,
 )
-TRANSLATION_BUNDLE_END = "</translationbundle>"
 MARKUP_TAG_RE = re.compile(r"<[^>]+>")
 CHROMIUM_LINK_BLOCK_RE = re.compile(
     r'<ph name="BEGIN_LINK_CHROMIUM"\s*/>.*?'
@@ -160,6 +170,8 @@ def normalize_xtb_translation_block(block: str, translation_id: str) -> str:
 class XtbAddition:
     translation_id: str
     block: str
+    bundle: str = ""
+    locale: str = ""
 
 
 @dataclass(frozen=True)
@@ -230,15 +242,33 @@ def group_inventory(
                 f"for {target_path}"
             )
         seen_keys.add(key)
+        locale = language_key(row.get("locale", ""))
+        bundle = row.get("bundle", "")
+        if grouped[target_path]:
+            first = grouped[target_path][0]
+            if (first.locale, first.bundle) != (locale, bundle):
+                raise ValueError(f"inconsistent bundle or locale in inventory for {target_path}")
         grouped[target_path].append(
             XtbAddition(
                 translation_id=translation_id,
                 block=block,
+                locale=locale,
+                bundle=bundle,
             )
         )
     if not grouped:
         raise ValueError("inventory contains no XTB translations")
     return dict(grouped)
+
+
+def load_workflow_inventory(
+    inventory: Path, windows_legacy: bool,
+) -> dict[str, list[XtbAddition]]:
+    rows = load_inventory(inventory)
+    if windows_legacy:
+        config = Path(__file__).resolve().parent / "config"
+        rows.extend(load_inventory(config / "windows_legacy_xtb_additions.tsv"))
+    return group_inventory(rows)
 
 
 def merge_additions_into_text(
@@ -247,39 +277,33 @@ def merge_additions_into_text(
     target_path: str,
 ) -> tuple[str, int, int, int]:
     """Insert missing additions and refresh reviewed existing additions."""
-    existing: dict[str, str] = {}
-    for match in TRANSLATION_RE.finditer(target_text):
-        translation_id = match.group(1)
-        if translation_id in existing:
-            raise ValueError(
-                f"duplicate translation ID {translation_id} in {target_path}"
-            )
-        existing[translation_id] = match.group(0)
+    existing, closing_index = xtb_spans(
+        target_text, target_path, additions[0].locale if additions else "",
+        {item.translation_id for item in additions},
+    )
+    edits = []
 
     pending: list[XtbAddition] = []
     skipped_count = 0
     replaced_count = 0
     for addition in additions:
-        existing_block = existing.get(addition.translation_id)
-        if existing_block is None:
+        span = existing.get(addition.translation_id)
+        if span is None:
             pending.append(addition)
             continue
-        if existing_block != addition.block:
-            target_text = target_text.replace(existing_block, addition.block, 1)
+        start, end = span
+        if target_text[start:end] != addition.block:
+            edits.append((start, end, addition.block))
             replaced_count += 1
             continue
         skipped_count += 1
 
     if pending:
-        closing_index = target_text.rfind(TRANSLATION_BUNDLE_END)
-        if closing_index < 0:
-            raise ValueError(f"missing {TRANSLATION_BUNDLE_END} in {target_path}")
-
-        prefix = target_text[:closing_index]
-        suffix = target_text[closing_index:]
-        separator = "" if not prefix or prefix.endswith("\n") else "\n"
+        separator = "" if target_text[:closing_index].endswith("\n") else "\n"
         addition_text = "\n".join(addition.block for addition in pending)
-        target_text = f"{prefix}{separator}{addition_text}\n{suffix}"
+        edits.append((closing_index, closing_index, f"{separator}{addition_text}\n"))
+    for start, end, replacement in sorted(edits, reverse=True):
+        target_text = target_text[:start] + replacement + target_text[end:]
 
     return (
         target_text,
@@ -351,9 +375,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Normalized TSV inventory; defaults to the reviewed inventory.",
     )
     parser.add_argument(
+        "--windows-legacy",
+        action="store_true",
+        help="Include the Windows REWORK translations and require their GRD messages during --check.",
+    )
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--dry-run",
         action="store_true",
         help="Validate and report additions without writing target files.",
+    )
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="Check merged XTB files for the detected profile. Fail on missing or differing entries.",
     )
     return parser
 
@@ -363,7 +398,14 @@ def main() -> int:
     inventory = args.inventory or (
         Path(__file__).resolve().parent / "config/xtb_additions.tsv"
     )
-    inventory_groups = group_inventory(load_inventory(inventory))
+    legacy_grd = (
+        check_legacy_profile(args.chromium_root, args.windows_legacy)
+        if args.check else None
+    )
+    windows_legacy = args.windows_legacy or legacy_grd is not None
+    inventory_groups = load_workflow_inventory(inventory, windows_legacy)
+    if args.check:
+        return check_inventory(args.chromium_root, inventory_groups, legacy_grd)
     additions_by_target = [
         (target_path, additions)
         for target_path, additions in sorted(inventory_groups.items())
@@ -390,4 +432,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, SyntaxError, ET.ParseError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        raise SystemExit(1)

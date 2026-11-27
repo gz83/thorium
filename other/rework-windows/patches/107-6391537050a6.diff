@@ -1,0 +1,58 @@
+diff --git a/third_party/skia/src/utils/win/SkDWrite.cpp b/third_party/skia/src/utils/win/SkDWrite.cpp
+index 5637bf4b36380786634445d5a7efc7a94ebd5d13..e3faee9b306964b3d0cb34106aff058f06c23aa9 100644
+--- a/third_party/skia/src/utils/win/SkDWrite.cpp
++++ b/third_party/skia/src/utils/win/SkDWrite.cpp
+@@ -13,6 +13,7 @@
+ #include "src/utils/win/SkHRESULT.h"
+ 
+ #include <dwrite.h>
++#include <string>
+ 
+ #if defined(__clang__)
+     #pragma clang diagnostic push
+@@ -27,18 +28,28 @@
+     }
+ }
+ 
++static HMODULE load_system_dwrite(const wchar_t* name) {
++    wchar_t directory[MAX_PATH];
++    UINT length = GetSystemDirectoryW(directory, MAX_PATH);
++    if (!length || length >= MAX_PATH) {
++        return nullptr;
++    }
++    std::wstring path(directory, length);
++    path += L"\\";
++    path += name;
++    return LoadLibraryW(path.c_str());
++}
++
+ static void create_dwrite_factory(IDWriteFactory** factory) {
+     using DWriteCreateFactoryProc = decltype(DWriteCreateFactory)*;
+     DWriteCreateFactoryProc dWriteCreateFactoryProc;
+ 
+-    dWriteCreateFactoryProc = reinterpret_cast<DWriteCreateFactoryProc>(GetProcAddress(
+-            LoadLibraryExW(L"DWriteCore.dll", NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS),
+-            "DWriteCoreCreateFactory"));
++    dWriteCreateFactoryProc = reinterpret_cast<DWriteCreateFactoryProc>(
++        GetProcAddress(load_system_dwrite(L"DWriteCore.dll"), "DWriteCoreCreateFactory"));
+ 
+     if (!dWriteCreateFactoryProc) {
+-        dWriteCreateFactoryProc = reinterpret_cast<DWriteCreateFactoryProc>(GetProcAddress(
+-                LoadLibraryExW(L"dwrite.dll", NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS),
+-                "DWriteCreateFactory"));
++        dWriteCreateFactoryProc = reinterpret_cast<DWriteCreateFactoryProc>(
++            GetProcAddress(load_system_dwrite(L"dwrite.dll"), "DWriteCreateFactory"));
+     }
+ 
+     if (!dWriteCreateFactoryProc) {
+@@ -128,8 +139,8 @@
+ 
+ HRESULT SkGetGetUserDefaultLocaleNameProc(SkGetUserDefaultLocaleNameProc* proc) {
+     *proc = reinterpret_cast<SkGetUserDefaultLocaleNameProc>(
+-            GetProcAddress(LoadLibraryExW(L"Kernel32.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32),
+-                           "GetUserDefaultLocaleName"));
++        GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetUserDefaultLocaleName")
++    );
+     if (!*proc) {
+         HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
+         if (!IS_ERROR(hr)) {

@@ -1,0 +1,59 @@
+diff --git a/chrome/app/chromium_strings.grd b/chrome/app/chromium_strings.grd
+index 5d0c8ad9d57cdb4777c86903094d7b5d790e1631..1ed465f3ef23206954b86e83e1629aeccf63f2ea 100644
+--- a/chrome/app/chromium_strings.grd
++++ b/chrome/app/chromium_strings.grd
+@@ -760,7 +760,7 @@
+           Can not install the same Chromium version that is currently running. Please close Chromium and try again.
+         </message>
+         <message name="IDS_INSTALL_OS_NOT_SUPPORTED" desc="Error displayed if OS is not supported">
+-          Chromium requires Windows 7 or higher.
++          This version of Windows cannot run Chromium.
+         </message>
+         <message name="IDS_INSTALL_CPU_NOT_SUPPORTED" desc="Error displayed when the processor lacks features required by this build.">
+           This processor is not supported by this version of <ph name="PRODUCT_NAME">$1<ex>Thorium</ex></ph>.
+diff --git a/chrome/app/google_chrome_strings.grd b/chrome/app/google_chrome_strings.grd
+index 0ff0b480cf5e8230e8a691e993161bb0b02106ed..757196cbd70e4cb7d3fb6b6c5efc5e81152fe451 100644
+--- a/chrome/app/google_chrome_strings.grd
++++ b/chrome/app/google_chrome_strings.grd
+@@ -740,7 +740,7 @@
+           Can not install the same Google Chrome version that is currently running. Please close Google Chrome and try again.
+         </message>
+         <message name="IDS_INSTALL_OS_NOT_SUPPORTED" desc="Error displayed if OS is not supported">
+-          Google Chrome requires Windows 7 or higher.
++          This version of Windows cannot run Google Chrome.
+         </message>
+         <message name="IDS_INSTALL_OS_ERROR" desc="Error displayed when any Windows API call fails and we do not have more specific information.">
+           An operating system error occurred during installation. Please download Google Chrome again.
+diff --git a/chrome/installer/setup/setup_main.cc b/chrome/installer/setup/setup_main.cc
+index 085fe65..7a4022c 100644
+--- a/chrome/installer/setup/setup_main.cc
++++ b/chrome/installer/setup/setup_main.cc
+@@ -1733,10 +1733,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance,
+     persistent_histogram_storage.Disable();
+   }
+ 
+-  // Check to make sure current system is Win7 or later. If not, log
++  // Check to make sure current system is WinXP or later. If not, log
+   // error message and get out.
+   if (!InstallUtil::IsOSSupported()) {
+-    LOG(ERROR) << "Chrome only supports Windows 7 or later.";
++    LOG(ERROR) << "Chrome only supports Windows XP or later.";
+     installer_state.WriteInstallerResult(installer::OS_NOT_SUPPORTED,
+                                          IDS_INSTALL_OS_NOT_SUPPORTED_BASE,
+                                          nullptr);
+diff --git a/chrome/installer/util/install_util.cc b/chrome/installer/util/install_util.cc
+index 54c90db4425e5f51abfa125cdee906dd9c6fbba1..fed02f165b90e9b7314b1347f41222ae9a06a43c 100644
+--- a/chrome/installer/util/install_util.cc
++++ b/chrome/installer/util/install_util.cc
+@@ -246,10 +246,9 @@
+ }
+ 
+ bool InstallUtil::IsOSSupported() {
+-  // We do not support anything prior to Windows 7.
+   VLOG(1) << base::SysInfo::OperatingSystemName() << ' '
+           << base::SysInfo::OperatingSystemVersion();
+-  return base::win::GetVersion() >= base::win::Version::WIN7;
++  return base::win::GetVersion() >= base::win::Version::XP;
+ }
+ 
+ void InstallUtil::AddInstallerResultItems(bool system_install,

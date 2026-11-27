@@ -1,0 +1,100 @@
+diff --git a/mojo/core/embedder/embedder.cc b/mojo/core/embedder/embedder.cc
+index 6da99ad8bf6f6ba97269508fd61d999e94513833..5f7a0908a60571ce4fdf85af84accc518542965a 100644
+--- a/mojo/core/embedder/embedder.cc
++++ b/mojo/core/embedder/embedder.cc
+@@ -42,12 +42,17 @@
+ #endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) ||
+         // BUILDFLAG(IS_ANDROID)
+ 
+-namespace mojo::core {
++#if BUILDFLAG(IS_WIN)
++#include "base/win/windows_version.h"
++#endif
++
++namespace mojo {
++namespace core {
+ 
+ namespace {
+ 
+ #if BUILDFLAG(MOJO_SUPPORT_LEGACY_CORE)
+-std::atomic<bool> g_mojo_ipcz_enabled{false};
++std::atomic<bool> g_mojo_ipcz_enabled{true};
+ 
+ bool g_mojo_ipcz_force_disabled = false;
+ 
+@@ -91,7 +96,7 @@
+ 
+ #if BUILDFLAG(MOJO_SUPPORT_LEGACY_CORE)
+   if (base::FeatureList::IsEnabled(kMojoIpcz)) {
+-    EnableMojoIpcz();
++    EnableMojoIpczIfSupported();
+   } else {
+     g_mojo_ipcz_enabled.store(false, std::memory_order_release);
+   }
+@@ -100,9 +105,20 @@
+   g_enable_memv2 = base::FeatureList::IsEnabled(kMojoIpczMemV2);
+ }
+ 
+-void EnableMojoIpcz() {
+-#if BUILDFLAG(MOJO_SUPPORT_LEGACY_CORE)
+-  g_mojo_ipcz_enabled.store(true, std::memory_order_release);
++void EnableMojoIpczIfSupported() {
++#if BUILDFLAG(MOJO_SUPPORT_LEGACY_CORE)
++#if BUILDFLAG(IS_WIN)
++  // TODO(https://crbug.com/1299283): Sandboxed processes on Windows versions
++  // older than 8.1 require some extra (not yet implemented) setup for ipcz to
++  // work properly. This is omitted for early experimentation.
++  const bool kIsIpczSupported =
++      base::win::GetVersion() >= base::win::Version::WIN8_1;
++#else
++  const bool kIsIpczSupported = true;
++#endif
++  if (kIsIpczSupported) {
++    g_mojo_ipcz_enabled.store(true, std::memory_order_release);
++  }
+ #endif
+ }
+ 
+@@ -170,6 +186,12 @@
+ #if !BUILDFLAG(MOJO_SUPPORT_LEGACY_CORE)
+   return true;
+ #else
++#if BUILDFLAG(IS_WIN)
++  // This also covers early callers and the MOJO_IPCZ environment override.
++  if (base::win::GetVersion() < base::win::Version::WIN8_1) {
++    return false;
++  }
++#endif
+   // Because Mojo and FeatureList are both brought up early in many binaries, it
+   // can be tricky to ensure there aren't races that would lead to two different
+   // Mojo implementations being selected at different points throughout the
+@@ -216,4 +238,5 @@
+   return ipcz_driver::ObjectBase::ReleaseAsHandle(std::move(transport));
+ }
+ 
+-}  // namespace mojo::core
++}  // namespace core
++}  // namespace mojo
+diff --git a/mojo/core/embedder/embedder.h b/mojo/core/embedder/embedder.h
+index 2d31ced82a815..88645eff1b4e5 100644
+--- a/mojo/core/embedder/embedder.h
++++ b/mojo/core/embedder/embedder.h
+@@ -50,13 +51,14 @@ scoped_refptr<base::SingleThreadTaskRunner> GetIOTaskRunner();
+ // base::Features inside of Mojo.
+ COMPONENT_EXPORT(MOJO_CORE_EMBEDDER) void InitFeatures();
+ 
+-// Enables MojoIpcz. Called before Init() is called. Only call this if the
+-// current program doesn't have base::FeatureList integration, since otherwise
+-// InitFeatures() will do the work.
++// Enables MojoIpcz if it is supported on the current platform. Called before
++// Init() is called. Only call this if the current program doesn't have
++// base::FeatureList integration, since otherwise InitFeatures() will do the
++// work.
+ //
+ // TODO(crbug.com/40058840): Remove once MojoIpcz becomes the default
+ // implementation.
+-COMPONENT_EXPORT(MOJO_CORE_EMBEDDER) void EnableMojoIpcz();
++COMPONENT_EXPORT(MOJO_CORE_EMBEDDER) void EnableMojoIpczIfSupported();
+ 
+ // Indicates whether the ipcz-based Mojo implementation is enabled. This can be
+ // done by enabling the MojoIpcz feature.

@@ -1,0 +1,17 @@
+diff --git a/components/sqlite_vfs/file_system_id.cc b/components/sqlite_vfs/file_system_id.cc
+index 7a26f8156e0faee9fcbd6c4307fd5a5422958cc6..f04e6fc41ad1f4fe195bf27eee0d6c7829080cf3 100644
+--- a/components/sqlite_vfs/file_system_id.cc
++++ b/components/sqlite_vfs/file_system_id.cc
+@@ -31,7 +31,11 @@
+     // Try to get the full 128-bit identifier for the file. Note that not all
+     // versions of Windows and all filesystems support this.
+     FILE_ID_INFO id_info = {};
+-    if (::GetFileInformationByHandleEx(file.GetPlatformFile(), FileIdInfo,
++    static const auto get_info =
++        reinterpret_cast<decltype(&::GetFileInformationByHandleEx)>(
++            ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"),
++                             "GetFileInformationByHandleEx"));
++    if (get_info && get_info(file.GetPlatformFile(), FileIdInfo,
+                                        &id_info, sizeof(id_info)) &&
+         !std::ranges::all_of(id_info.FileId.Identifier,
+                              [](uint8_t b) { return b == 0; })) {

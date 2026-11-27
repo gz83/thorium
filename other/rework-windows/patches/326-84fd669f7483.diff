@@ -1,0 +1,226 @@
+diff --git a/chrome/chrome_elf/nt_registry/nt_registry.cc b/chrome/chrome_elf/nt_registry/nt_registry.cc
+index 29e4b899e9ff81441bc9bd8d883fbb1d0d37b689..b35b5c469e1e309125d9ed5cd1d02aa7f5106f1a 100644
+--- a/chrome/chrome_elf/nt_registry/nt_registry.cc
++++ b/chrome/chrome_elf/nt_registry/nt_registry.cc
+@@ -9,8 +9,12 @@
+ #include <stdint.h>
+ #include <stdlib.h>
+ 
++#include <algorithm>
+ #include <memory>
++#include <span>
+ #include <string>
++#include <string_view>
++#include <utility>
+ 
+ #include "base/compiler_specific.h"
+ #include "chrome/chrome_elf/nt_registry/nt_registry_functions.h"
+@@ -23,7 +27,7 @@
+ bool g_wow64_proc = false;
+ wchar_t g_kRegPathHKLM[] = L"\\Registry\\Machine\\";
+ wchar_t g_kRegPathHKCU[nt::g_kRegMaxPathLen + 1] = L"";
+-wchar_t g_current_user_sid_string[nt::g_kRegMaxPathLen + 1] = L"";
++wchar_t g_current_user_sid[nt::g_kRegMaxPathLen + 1] = {};
+ 
+ // Max number of tries for system API calls when STATUS_BUFFER_OVERFLOW or
+ // STATUS_BUFFER_TOO_SMALL can be returned.
+@@ -81,15 +85,21 @@
+     return false;
+   }
+ 
+-  // Finish setting up global HKCU path.
+-  UNSAFE_TODO(::wcsncat(g_kRegPathHKCU, current_user_reg_path.Buffer,
+-                        nt::g_kRegMaxPathLen));
+-  UNSAFE_TODO(::wcsncat(g_kRegPathHKCU, L"\\",
+-                        (nt::g_kRegMaxPathLen - ::wcslen(g_kRegPathHKCU))));
+-  // Keep the sid string as well.
+-  wchar_t* ptr = ::wcsrchr(current_user_reg_path.Buffer, L'\\');
+-  ptr++;
+-  ::wcsncpy(g_current_user_sid_string, ptr, nt::g_kRegMaxPathLen);
++  // RtlFormatCurrentUserKeyPath returns a counted string.
++  const std::wstring_view path(current_user_reg_path.Buffer,
++                               current_user_reg_path.Length / sizeof(wchar_t));
++  const auto separator = path.rfind(L'\\');
++  if (path.empty() || path.size() >= nt::g_kRegMaxPathLen ||
++      separator == path.npos || separator + 1 == path.size()) {
++    ::RtlFreeUnicodeString(&current_user_reg_path);
++    return false;
++  }
++  path.copy(g_kRegPathHKCU, path.size());
++  std::span{g_kRegPathHKCU}[path.size()] = L'\\';
++  std::span{g_kRegPathHKCU}[path.size() + 1] = L'\0';
++  const auto sid = path.substr(separator + 1);
++  sid.copy(g_current_user_sid, sid.size());
++  std::span{g_current_user_sid}[sid.size()] = L'\0';
+   ::RtlFreeUnicodeString(&current_user_reg_path);
+ 
+   // Figure out if this is a system or user install.
+@@ -669,6 +679,10 @@
+   return true;
+ }
+ 
++extern "C" NTSTATUS WINAPI NtOpenKey(OUT PHANDLE KeyHandle,
++                                            IN ACCESS_MASK DesiredAccess,
++                                            IN POBJECT_ATTRIBUTES
++                                                ObjectAttributes);
+ bool OpenRegKey(ROOT_KEY root,
+                 const wchar_t* key_path,
+                 ACCESS_MASK access,
+@@ -704,7 +718,7 @@
+   InitializeObjectAttributes(&obj, &key_path_uni, OBJ_CASE_INSENSITIVE, NULL,
+                              NULL);
+ 
+-  status = ::NtOpenKeyEx(out_handle, access, &obj, 0);
++  status = NtOpenKey(out_handle, access, &obj);
+   // See if caller wants the NTSTATUS.
+   if (error_code)
+     *error_code = status;
+@@ -1063,97 +1077,72 @@
+ }
+ 
+ //------------------------------------------------------------------------------
+-// Enumeration Support
++// Utils
+ //------------------------------------------------------------------------------
+ 
+ bool QueryRegEnumerationInfo(HANDLE key, ULONG* out_subkey_count) {
+   if (!g_initialized && !InitNativeRegApi())
+     return false;
+ 
+-  // Use a loop here, to be a little more tolerant of concurrent registry
+-  // changes.
+-  NTSTATUS ntstatus = STATUS_UNSUCCESSFUL;
+-  int tries = 0;
+-  // Start with sizeof the structure.  It's very common for the variable sized
+-  // "Class" element to be of length 0.
+-  KEY_FULL_INFORMATION* key_info = nullptr;
+-  DWORD size_needed = sizeof(*key_info);
+-  std::vector<BYTE> buffer(size_needed);
+-  do {
+-    buffer.resize(size_needed);
+-    key_info = reinterpret_cast<KEY_FULL_INFORMATION*>(buffer.data());
+-
+-    ntstatus = ::NtQueryKey(key, KeyFullInformation, key_info, size_needed,
+-                            &size_needed);
+-  } while ((ntstatus == STATUS_BUFFER_OVERFLOW ||
+-            ntstatus == STATUS_BUFFER_TOO_SMALL) &&
+-           ++tries < kMaxTries);
+-
+-  if (!NT_SUCCESS(ntstatus))
+-    return false;
+-
+-  // Move desired information to out variables.
+-  *out_subkey_count = key_info->SubKeys;
+-
+-  return true;
+-}
+-
+-bool QueryRegSubkey(HANDLE key,
+-                    ULONG subkey_index,
++  // KeyFullInformation may include a variable-length class name.
++  ULONG needed = sizeof(KEY_FULL_INFORMATION);
++  std::vector<KEY_FULL_INFORMATION> buffer;
++  for (int tries = 0; tries < kMaxTries; ++tries) {
++    buffer.resize(needed / sizeof(KEY_FULL_INFORMATION) +
++                  (needed % sizeof(KEY_FULL_INFORMATION) != 0));
++    NTSTATUS status = ::NtQueryKey(key, KeyFullInformation, buffer.data(),
++                                   needed, &needed);
++    if (NT_SUCCESS(status)) {
++      if (needed < offsetof(KEY_FULL_INFORMATION, MaxNameLen))
++        return false;
++      *out_subkey_count = buffer.front().SubKeys;
++      return true;
++    }
++    if (status != STATUS_BUFFER_OVERFLOW && status != STATUS_BUFFER_TOO_SMALL)
++      break;
++  }
++  return false;
++}
++
++bool QueryRegSubkey(HANDLE key, ULONG subkey_index,
+                     std::wstring* out_subkey_name) {
+   if (!g_initialized && !InitNativeRegApi())
+     return false;
+ 
+-  // Use a loop here, to be a little more tolerant of concurrent registry
+-  // changes.
+-  NTSTATUS ntstatus = STATUS_UNSUCCESSFUL;
+-  int tries = 0;
+-  // Start with sizeof the structure, plus 12 characters.  It's very common for
+-  // key names to be < 12 characters (without being inefficient as an initial
+-  // allocation).
+-  KEY_BASIC_INFORMATION* subkey_info = nullptr;
+-  DWORD size_needed = sizeof(*subkey_info) + (12 * sizeof(wchar_t));
+-  std::vector<BYTE> buffer(size_needed);
+-  do {
+-    buffer.resize(size_needed);
+-    subkey_info = reinterpret_cast<KEY_BASIC_INFORMATION*>(buffer.data());
+-
+-    ntstatus = ::NtEnumerateKey(key, subkey_index, KeyBasicInformation,
+-                                subkey_info, size_needed, &size_needed);
+-  } while ((ntstatus == STATUS_BUFFER_OVERFLOW ||
+-            ntstatus == STATUS_BUFFER_TOO_SMALL) &&
+-           ++tries < kMaxTries);
+-
+-  if (!NT_SUCCESS(ntstatus))
+-    return false;
+-
+-  // Move desired information to out variables.
+-  // NOTE: NameLength is size of Name array in bytes.  Name array is also
+-  //       NOT null terminated!
+-  BYTE* name = reinterpret_cast<BYTE*>(subkey_info->Name);
+-  std::vector<BYTE> content(name, name + subkey_info->NameLength);
+-  EnsureTerminatedSZ(&content, false);
+-  out_subkey_name->assign(reinterpret_cast<wchar_t*>(content.data()));
+-
+-  return true;
+-}
+-
+-//------------------------------------------------------------------------------
+-// Utils
+-//------------------------------------------------------------------------------
++  ULONG needed = sizeof(KEY_BASIC_INFORMATION) + 12 * sizeof(wchar_t);
++  std::vector<KEY_BASIC_INFORMATION> buffer;
++  for (int tries = 0; tries < kMaxTries; ++tries) {
++    buffer.resize(needed / sizeof(KEY_BASIC_INFORMATION) +
++                  (needed % sizeof(KEY_BASIC_INFORMATION) != 0));
++    NTSTATUS status = ::NtEnumerateKey(key, subkey_index, KeyBasicInformation,
++                                      buffer.data(), needed, &needed);
++    if (NT_SUCCESS(status)) {
++      // The kernel returns a byte count and does not append a terminator.
++      constexpr size_t offset = offsetof(KEY_BASIC_INFORMATION, Name);
++      const auto bytes = std::as_bytes(std::span(buffer));
++      if (needed < offset || needed > bytes.size())
++        return false;
++      const ULONG length = buffer.front().NameLength;
++      if (length % sizeof(wchar_t) != 0 || length > needed - offset)
++        return false;
++      std::wstring name(length / sizeof(wchar_t), L'\0');
++      std::ranges::copy(bytes.subspan(offset, length),
++                        std::as_writable_bytes(std::span(name)).begin());
++      *out_subkey_name = std::move(name);
++      return true;
++    }
++    if (status != STATUS_BUFFER_OVERFLOW && status != STATUS_BUFFER_TOO_SMALL)
++      break;
++  }
++  return false;
++}
+ 
+ const wchar_t* GetCurrentUserSidString() {
+-  if (!g_initialized && !InitNativeRegApi())
+-    return nullptr;
+-
+-  return g_current_user_sid_string;
++  return (g_initialized || InitNativeRegApi()) ? g_current_user_sid : nullptr;
+ }
+ 
+ bool IsCurrentProcWow64() {
+-  if (!g_initialized && !InitNativeRegApi())
+-    return false;
+-
+-  return g_wow64_proc;
++  return (g_initialized || InitNativeRegApi()) && g_wow64_proc;
+ }
+ 
+ bool SetTestingOverride(ROOT_KEY root, const std::wstring& new_path) {

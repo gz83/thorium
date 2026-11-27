@@ -1,0 +1,124 @@
+diff --git a/chrome/browser/chrome_browser_main_win.cc b/chrome/browser/chrome_browser_main_win.cc
+--- a/chrome/browser/chrome_browser_main_win.cc
++++ b/chrome/browser/chrome_browser_main_win.cc
+@@ -8,11 +8,13 @@
+ // windows.h must be included before shellapi.h
+ #include <windows.h>
+ 
++#include <cpl.h>
+ #include <shellapi.h>
+ #include <stddef.h>
+ #include <stdint.h>
+ 
+ #include <algorithm>
++#include <iterator>
+ #include <optional>
+ #include <string_view>
+ #include <utility>
+@@ -52,6 +54,7 @@
+ #include "base/version.h"
+ #include "base/win/delayload_helpers.h"
+ #include "base/win/pe_image.h"
++#include "base/win/shlwapi.h"
+ #include "base/win/windows_version.h"
+ #include "base/win/wrapped_window_proc.h"
+ #include "build/branding_buildflags.h"
+@@ -148,6 +151,60 @@
+     const wchar_t* command_line,
+     DWORD flags);
+ 
++// The XP Control Panel obtains this item's localized title from its applet.
++std::u16string GetXpUninstallAppletName() {
++  base::ScopedNativeLibrary module(base::LoadSystemLibrary(L"appwiz.cpl"));
++  const auto applet =
++      reinterpret_cast<APPLET_PROC>(module.GetFunctionPointer("CPlApplet"));
++  if (!applet || !applet(nullptr, CPL_INIT, 0, 0)) {
++    return {};
++  }
++
++  std::u16string name;
++  if (applet(nullptr, CPL_GETCOUNT, 0, 0) > 0) {
++    CPLINFO info = {};
++    applet(nullptr, CPL_INQUIRE, 0, reinterpret_cast<LPARAM>(&info));
++    if (info.idName > 0) {
++      wchar_t* resource = nullptr;
++      const int length = ::LoadStringW(module.get(), info.idName,
++                                       reinterpret_cast<LPWSTR>(&resource), 0);
++      if (length > 0) {
++        name = base::WideToUTF16(std::wstring_view(resource, length));
++      }
++    } else if (info.idName == CPL_DYNAMIC_RES) {
++      NEWCPLINFOW details = {};
++      details.dwSize = sizeof(details);
++      applet(nullptr, CPL_NEWINQUIRE, 0, reinterpret_cast<LPARAM>(&details));
++      if (details.dwSize == sizeof(details) && details.szName[0]) {
++        name = base::WideToUTF16(std::wstring_view(details.szName));
++        info.lData = details.lData;
++      }
++      if (details.hIcon) {
++        ::DestroyIcon(details.hIcon);
++      }
++    }
++    applet(nullptr, CPL_STOP, 0, info.lData);
++  }
++  applet(nullptr, CPL_EXIT, 0, 0);
++  return name;
++}
++
++std::u16string GetUninstallAppletName(base::win::Version version) {
++  std::u16string name;
++  if (version < base::win::Version::VISTA) {
++    name = GetXpUninstallAppletName();
++  } else {
++    // Shell display resource for Microsoft.ProgramsAndFeatures.
++    wchar_t title[MAX_PATH] = {};
++    if (SUCCEEDED(::SHLoadIndirectString(
++            L"@%SystemRoot%\\system32\\appwiz.cpl,-159", title,
++            std::size(title), nullptr))) {
++      name = base::WideToUTF16(std::wstring_view(title));
++    }
++  }
++  return name.empty() ? u"appwiz.cpl" : name;
++}
++
+ void InitializeWindowProcExceptions() {
+   base::win::WinProcExceptionFilter exception_filter =
+       base::win::SetWinProcExceptionFilter(&CrashForException_ExportThunk);
+@@ -918,18 +975,12 @@
+ int ChromeBrowserMainPartsWin::HandleIconsCommands(
+     const base::CommandLine& parsed_command_line) {
+   if (parsed_command_line.HasSwitch(switches::kHideIcons)) {
+-   std::u16string cp_applet;
+-    base::win::Version version = base::win::GetVersion();
+-    if (version >= base::win::Version::VISTA) {
+-      cp_applet.assign(u"Programs and Features");  // Windows Vista and later.
+-    } else if (version >= base::win::Version::XP) {
+-      cp_applet.assign(u"Add/Remove Programs");  // Windows XP.
+-    } else {
+-      return CHROME_RESULT_CODE_UNSUPPORTED_PARAM;  // Not supported
+-    }
+-
+-    const std::u16string msg =
+-        l10n_util::GetStringFUTF16(IDS_HIDE_ICONS_NOT_SUPPORTED, cp_applet);
++    const auto version = base::win::GetVersion();
++    if (version < base::win::Version::XP) {
++      return CHROME_RESULT_CODE_UNSUPPORTED_PARAM;
++    }
++    const std::u16string msg = l10n_util::GetStringFUTF16(
++        IDS_HIDE_ICONS_NOT_SUPPORTED, GetUninstallAppletName(version));
+     const std::u16string caption = l10n_util::GetStringUTF16(IDS_PRODUCT_NAME);
+     const UINT flags = MB_OKCANCEL | MB_ICONWARNING | MB_TOPMOST;
+     if (IDOK == ui::MessageBox(NULL, base::AsWString(msg),
+diff --git a/third_party/blink/renderer/platform/text/locale_win.cc b/third_party/blink/renderer/platform/text/locale_win.cc
+--- a/third_party/blink/renderer/platform/text/locale_win.cc
++++ b/third_party/blink/renderer/platform/text/locale_win.cc
+@@ -61,7 +61,8 @@
+ namespace {
+ static String removeLastComponent(const String& name)
+ {
+-  return name.substr(0, name.rfind('-'));
++  const auto separator = name.rfind('-');
++  return separator == String::npos ? String() : name.substr(0, separator);
+ }
+ 
+ static void ensureNameToLCIDMap(NameToLCIDMap& map)

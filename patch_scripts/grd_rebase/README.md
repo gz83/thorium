@@ -9,8 +9,8 @@ The runtime surface is intentionally small:
 - `sync_grd_strings.py` updates reviewed Chromium GRD/GRDP messages, computes
   old and new GRIT translation IDs, and copies compatible upstream XTB
   translations to the new Thorium IDs.
-- `merge_thorium_xtb.py` merges reviewed Thorium-owned translation additions
-  from `config/xtb_additions.tsv` into Chromium XTB bundles.
+- `merge_thorium_xtb.py` merges the selected translation inventories into
+  Chromium XTB bundles and verifies the merged files with `--check`.
 - `update_config_from_patches.py` refreshes low-risk config rows that can be
   derived from the current patch series.
 
@@ -56,6 +56,11 @@ The files in `config/` are reviewed inputs, not generated setup output:
   parses this prefix or uses it to select translations. When using an alternate
   inventory, pass the same `--inventory` to both sync and merge. The merge owns
   the exact target XTB path and ID for each inventory row.
+- `windows_legacy_xtb_additions.tsv` adds four REWORK messages to the 81
+  `chromium_strings` locale bundles when `--windows-legacy` is enabled.
+  The shortcut label uses Chromium 159 translations. The uninstall prompt
+  uses Chromium 109 translations. The pre-XP warning and the unsupported
+  Windows installer message have Thorium translations.
 
 `update_config_from_patches.py` may rewrite
 `config/feature_patch_message_ownership.csv` and
@@ -70,6 +75,20 @@ Run the scripts after Chromium and non-string feature patches are in place:
 
 1. Run `sync_grd_strings.py`.
 2. Run `merge_thorium_xtb.py`.
+3. Run `merge_thorium_xtb.py --check` on the same tree and inventory.
+
+For a Windows legacy checkout, pass `--windows-legacy` to the sync and merge
+commands, including dry runs. The read-only check detects the prepared profile
+from the Windows locale header, GRD messages or installer string list. Passing the flag also requires
+the legacy messages to be present. `setup.py` runs all three steps for the
+selected profile.
+
+The check verifies XTB languages against their GRD registrations. For both
+profiles it checks the Windows installer's resource references, Chromium-brand
+exports and translations in every registered installer locale. For Windows
+legacy it also checks the final GRIT IDs and placeholders of nine messages,
+the corresponding Windows language pack filenames, and XP font defaults and
+overrides.
 
 This order keeps overlay-derived old/new ID syncing separate from reviewed
 Thorium-owned additions.
@@ -180,9 +199,9 @@ All apply operations are designed to be idempotent.
 
 ## GRIT ID Notes
 
-`sync_grd_strings.py` contains a lightweight GRIT message ID replica for
-auto-discovered branding messages and reviewed special messages. It matches
-Chromium's `GenerateMessageId()` fingerprint and meaning-combination behavior:
+Sync and release validation use `grit_messages.py` to calculate translation IDs
+for the reviewed messages. It implements Chromium's `GenerateMessageId()`
+fingerprint and meaning handling.
 
 - MD5 first 64 bits interpreted as signed.
 - Optional `meaning` fingerprint combined with the message fingerprint.
@@ -209,7 +228,10 @@ GRIT parser output before enabling them.
   planned source changes (including unchanged IDs) and patch-owned declarations
   marked for upstream reuse or complete additions. It includes the translations
   that sync will copy and the exact target rows in the reviewed merge inventory.
-  Run the release audit on the patched baseline before applying string sync.
+  Generate this report on the patched baseline before applying string sync.
+  In Windows legacy mode, sync checks all nine messages on every run.
+  If a translation is missing from a mapped locale after accounting for the
+  planned merge, sync reports the message and exits before writing resources.
 
 Current dry-runs may report converged XTB conflicts. Review the grouped conflict
 report before accepting the deterministically selected candidates. A reviewed
@@ -221,10 +243,26 @@ translation before release.
 
 ## Validation
 
+After setup, verify the reviewed translations on disk with the same profile
+used to prepare the checkout. For example, for Windows legacy:
+
+```shell
+python3 patch_scripts/grd_rebase/merge_thorium_xtb.py /path/to/chromium/src --windows-legacy --check
+```
+
+`--check` is read-only and exits nonzero when an inventory entry is missing
+or differs from the merged text. It identifies each affected XTB file. For a
+legacy checkout it also verifies all nine messages in the Windows locales of
+`chromium_strings`, `generated_resources`, `ui_strings` and `ax_strings`.
+Windows installer builds through `build.py` run this check
+before starting Ninja, including with `--dry-run`.
+The earlier `--xtb-missing-report` also accounts for planned insertions.
+
 Basic syntax checks:
 
 ```shell
 python3 -m py_compile \
+  patch_scripts/grd_rebase/grit_messages.py \
   patch_scripts/grd_rebase/update_config_from_patches.py \
   patch_scripts/grd_rebase/sync_grd_strings.py \
   patch_scripts/grd_rebase/merge_thorium_xtb.py

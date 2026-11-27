@@ -1,0 +1,631 @@
+diff --git a/base/win/legacy_locale.h b/base/win/legacy_locale.h
+--- a/base/win/legacy_locale.h
++++ b/base/win/legacy_locale.h
+@@ -6,6 +6,7 @@
+ #define BASE_WIN_LEGACY_LOCALE_H_
+ 
+ #include <windows.h>
++#include <versionhelpers.h>
+ 
+ #include <iterator>
+ #include <string>
+@@ -20,10 +21,22 @@
+   static const auto native = reinterpret_cast<decltype(&::LocaleNameToLCID)>(
+       ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "LocaleNameToLCID"));
+   if (native) {
++    // Vista exports LocaleNameToLCID, but reserves its flags argument.
++    if (flags == LOCALE_ALLOW_NEUTRAL_NAMES) {
++      static const bool supports_neutral_names = ::IsWindows7OrGreater();
++      if (!supports_neutral_names)
++        flags = 0;
++    }
+     return native(name, flags);
+   }
+-  if (!name || !*name) {
+-    return LOCALE_USER_DEFAULT;
++  if (!name) {
++    return ::GetUserDefaultLCID();
++  }
++  if (!*name) {
++    return LOCALE_INVARIANT;
++  }
++  if (std::wstring_view(name) == LOCALE_NAME_SYSTEM_DEFAULT) {
++    return ::GetSystemDefaultLCID();
+   }
+   struct Locale {
+     std::wstring_view tag;
+@@ -251,7 +264,8 @@
+     }
+     tag = tag.substr(0, separator);
+   }
+-  return LOCALE_USER_DEFAULT;
++  ::SetLastError(ERROR_INVALID_PARAMETER);
++  return 0;
+ }
+ 
+ inline std::wstring GetLegacyUILanguageName(LANGID id) {
+diff --git a/chrome/browser/resources/settings/BUILD.gn b/chrome/browser/resources/settings/BUILD.gn
+--- a/chrome/browser/resources/settings/BUILD.gn
++++ b/chrome/browser/resources/settings/BUILD.gn
+@@ -574,7 +574,7 @@
+     ]
+   }
+ 
+-  if (is_linux) {
++  if (is_linux || is_win) {
+     ts_files += [
+       "a11y_page/captions_page.html.ts",
+       "a11y_page/captions_page.ts",
+diff --git a/chrome/browser/resources/settings/a11y_page/a11y_page.html.ts b/chrome/browser/resources/settings/a11y_page/a11y_page.html.ts
+--- a/chrome/browser/resources/settings/a11y_page/a11y_page.html.ts
++++ b/chrome/browser/resources/settings/a11y_page/a11y_page.html.ts
+@@ -3,6 +3,10 @@
+ // found in the LICENSE file.
+ 
+ import {html} from '//resources/lit/v3_0/lit.rollup.js';
++
++// <if expr="is_linux or is_macosx or is_win">
++import {routes} from '../route.js';
++// </if>
+ 
+ import type {SettingsA11yPageElement} from './a11y_page.js';
+ import {ToastAlertLevel} from './a11y_page.js';
+@@ -19,22 +23,26 @@
+ </if>
+ 
+ <if expr="is_macosx or is_win">
+-    ${this.enableLiveCaption_ ? html`
++    ${!routes.CAPTIONS && this.enableLiveCaption_ ? html`
+       <settings-live-caption></settings-live-caption>
+     ` : ''}
+-    <cr-link-row id="captions" class="hr"
+-        label="$i18n{captionsPreferencesTitle}"
+-        sub-label="$i18n{captionsPreferencesSubtitle}"
+-        @click="${this.onCaptionsClick_}"
+-        button-aria-description="$i18n{opensInNewTab}" external>
+-    </cr-link-row>
++    ${!routes.CAPTIONS ? html`
++      <cr-link-row id="captions" class="hr"
++          label="$i18n{captionsPreferencesTitle}"
++          sub-label="$i18n{captionsPreferencesSubtitle}"
++          @click="${this.onCaptionsClick_}"
++          button-aria-description="$i18n{opensInNewTab}" external>
++      </cr-link-row>
++    ` : ''}
+ </if>
+ 
+-<if expr="is_linux">
+-    <cr-link-row id="captions" class="hr" label="$i18n{captionsTitle}"
+-        @click="${this.onCaptionsClick_}"
+-        role-description="$i18n{subpageArrowRoleDescription}">
+-    </cr-link-row>
++<if expr="is_linux or is_win">
++    ${routes.CAPTIONS ? html`
++      <cr-link-row id="captions" class="hr" label="$i18n{captionsTitle}"
++          @click="${this.onCaptionsClick_}"
++          role-description="$i18n{subpageArrowRoleDescription}">
++      </cr-link-row>
++    ` : ''}
+ </if>
+ 
+ <if expr="not is_chromeos">
+diff --git a/chrome/browser/resources/settings/a11y_page/a11y_page.ts b/chrome/browser/resources/settings/a11y_page/a11y_page.ts
+--- a/chrome/browser/resources/settings/a11y_page/a11y_page.ts
++++ b/chrome/browser/resources/settings/a11y_page/a11y_page.ts
+@@ -253,11 +253,14 @@
+   }
+ 
+   protected onCaptionsClick_() {
++    // <if expr="is_linux or is_win">
++    if (routes.CAPTIONS) {
++      Router.getInstance().navigateTo(routes.CAPTIONS);
++      return;
++    }
++    // </if>
+     // <if expr="is_win or is_macosx">
+     CaptionsBrowserProxyImpl.getInstance().openSystemCaptionsDialog();
+-    // </if>
+-    // <if expr="is_linux">
+-    Router.getInstance().navigateTo(routes.CAPTIONS);
+     // </if>
+   }
+   // </if>
+@@ -311,7 +314,7 @@
+   }
+   // </if>
+ 
+-  // <if expr="is_linux">
++  // <if expr="is_linux or is_win">
+   // SettingsViewMixin implementation.
+   override getFocusConfig() {
+     const map = new Map();
+diff --git a/chrome/browser/resources/settings/a11y_page/a11y_page_index.html.ts b/chrome/browser/resources/settings/a11y_page/a11y_page_index.html.ts
+--- a/chrome/browser/resources/settings/a11y_page/a11y_page_index.html.ts
++++ b/chrome/browser/resources/settings/a11y_page/a11y_page_index.html.ts
+@@ -14,10 +14,12 @@
+       route-path="${this.routes_.ACCESSIBILITY.path}">
+   </settings-a11y-page>
+ 
+-<if expr="is_linux">
+-  <settings-captions-page slot="view" id="captions" data-parent-view-id="parent"
+-      route-path="${this.routes_.CAPTIONS.path}">
+-  </settings-captions-page>
++<if expr="is_linux or is_win">
++  ${this.routes_.CAPTIONS ? html`
++    <settings-captions-page slot="view" id="captions" data-parent-view-id="parent"
++        route-path="${this.routes_.CAPTIONS.path}">
++    </settings-captions-page>
++  ` : ''}
+ </if>
+ </cr-view-manager>
+ <!--_html_template_end_-->`;
+diff --git a/chrome/browser/resources/settings/a11y_page/a11y_page_index.ts b/chrome/browser/resources/settings/a11y_page/a11y_page_index.ts
+--- a/chrome/browser/resources/settings/a11y_page/a11y_page_index.ts
++++ b/chrome/browser/resources/settings/a11y_page/a11y_page_index.ts
+@@ -4,7 +4,7 @@
+ 
+ import 'chrome://resources/cr_elements/cr_view_manager/cr_view_manager.js';
+ import './a11y_page.js';
+-// <if expr="is_linux">
++// <if expr="is_linux or is_win">
+ import './captions_page.js';
+ 
+ // </if>
+@@ -64,7 +64,7 @@
+           this.$.viewManager.switchView(
+               'parent', 'no-animation', 'no-animation');
+           break;
+-        // <if expr="is_linux">
++        // <if expr="is_linux or is_win">
+         case routes.CAPTIONS:
+           this.$.viewManager.switchView(
+               'captions', 'no-animation', 'no-animation');
+diff --git a/components/system_cpu/cpu_probe_win.cc b/components/system_cpu/cpu_probe_win.cc
+--- a/components/system_cpu/cpu_probe_win.cc
++++ b/components/system_cpu/cpu_probe_win.cc
+@@ -4,6 +4,7 @@
+ 
+ #include "components/system_cpu/cpu_probe_win.h"
+ 
++#include <cstdint>
+ #include <optional>
+ #include <utility>
+ 
+@@ -11,6 +12,7 @@
+ #include "base/logging.h"
+ #include "base/memory/ptr_util.h"
+ #include "base/memory/scoped_refptr.h"
++#include "base/native_library.h"
+ #include "base/sequence_checker.h"
+ #include "base/task/sequenced_task_runner.h"
+ #include "base/task/task_traits.h"
+@@ -28,6 +30,10 @@
+ 
+ constexpr wchar_t kProcessorCounter[] =
+     L"\\Processor(_Total)\\% Processor Time";
++
++uint64_t Ticks(FILETIME time) {
++  return (static_cast<uint64_t>(time.dwHighDateTime) << 32) | time.dwLowDateTime;
++}
+ 
+ }  // namespace
+ 
+@@ -47,7 +53,14 @@
+   std::optional<CpuSample> Update();
+ 
+  private:
++  std::optional<CpuSample> UpdateFromSystemTimes();
+   SEQUENCE_CHECKER(sequence_checker_);
++
++  struct SystemTimes {
++    uint64_t idle;
++    uint64_t total;
++  };
++  std::optional<SystemTimes> previous_times_ GUARDED_BY_CONTEXT(sequence_checker_);
+ 
+   // Used to derive CPU utilization.
+   base::win::ScopedPdhQuery cpu_query_ GUARDED_BY_CONTEXT(sequence_checker_);
+@@ -75,27 +88,16 @@
+ std::optional<CpuSample> CpuProbeWin::BlockingTaskRunnerHelper::Update() {
+   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+ 
++  static const auto add_english_counter = [] {
++    HMODULE pdh = base::PinSystemLibrary(L"pdh.dll");
++    return reinterpret_cast<decltype(&::PdhAddEnglishCounterW)>(
++        pdh ? ::GetProcAddress(pdh, "PdhAddEnglishCounterW") : nullptr);
++  }();
++  if (!add_english_counter) {
++    // XP's PdhAddCounterW requires translated object and counter names.
++    return UpdateFromSystemTimes();
++  }
+   PDH_STATUS pdh_status;
+-
+-typedef PDH_STATUS ( __stdcall * PdhAddEnglishCounterW_type) (
+-  __in  PDH_HQUERY hQuery,
+-  __in  LPCWSTR szFullCounterPath,
+-  __in  DWORD_PTR dwUserData,
+-  __out PDH_HCOUNTER * phCounter
+-  );
+-  PdhAddEnglishCounterW_type m_pfnPdhAddEnglishCounterW = NULL;
+-  HMODULE m_hinstancePDH_DLL =
+-    //If the function fails, the return value is NULL.
+-    ::LoadLibraryW( L"pdh.dll" //LPCSTR / char *
+-      );
+-  if( m_hinstancePDH_DLL )
+-  {
+-    m_pfnPdhAddEnglishCounterW = (PdhAddEnglishCounterW_type)
+-      ::GetProcAddress(m_hinstancePDH_DLL, "PdhAddEnglishCounterW" );
+-    if( m_pfnPdhAddEnglishCounterW == NULL )
+-      m_pfnPdhAddEnglishCounterW = (PdhAddEnglishCounterW_type)
+-      ::GetProcAddress(m_hinstancePDH_DLL, "PdhAddCounterW" );
+-  }
+   if (!cpu_query_.is_valid()) {
+     cpu_query_ = base::win::ScopedPdhQuery::Create();
+     if (!cpu_query_.is_valid()) {
+@@ -111,8 +113,8 @@
+     const auto* query_info = is_running_in_vm
+                                  ? kHypervisorLogicalProcessorCounter
+                                  : kProcessorCounter;
+-    pdh_status = m_pfnPdhAddEnglishCounterW(cpu_query_.get(), query_info, NULL,
+-                                      &cpu_percent_utilization_);
++    pdh_status = add_english_counter(cpu_query_.get(), query_info, 0,
++                                     &cpu_percent_utilization_);
+ 
+     // When Chrome is running under a different hypervisor, we can add the
+     // Hyper-V performance counter successfully but it isn't available to
+@@ -121,8 +123,8 @@
+       pdh_status = PdhCollectQueryData(cpu_query_.get());
+       if (pdh_status != ERROR_SUCCESS) {
+         query_info = kProcessorCounter;
+-        pdh_status = m_pfnPdhAddEnglishCounterW(cpu_query_.get(), query_info, NULL,
+-                                          &cpu_percent_utilization_);
++        pdh_status = add_english_counter(cpu_query_.get(), query_info, 0,
++                                         &cpu_percent_utilization_);
+       }
+     }
+ 
+@@ -156,6 +158,29 @@
+   }
+ 
+   return CpuSample{counter_value.doubleValue / 100.0};
++}
++
++std::optional<CpuSample>
++CpuProbeWin::BlockingTaskRunnerHelper::UpdateFromSystemTimes() {
++  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
++  static const auto get_times = reinterpret_cast<decltype(&::GetSystemTimes)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "GetSystemTimes"));
++  FILETIME idle, kernel, user;
++  if (!get_times || !get_times(&idle, &kernel, &user)) {
++    return std::nullopt;
++  }
++  // Windows includes idle time in the kernel total.
++  SystemTimes now{Ticks(idle), Ticks(kernel) + Ticks(user)};
++  auto previous = std::exchange(previous_times_, now);
++  if (!previous || now.total <= previous->total || now.idle < previous->idle) {
++    return std::nullopt;
++  }
++  const uint64_t elapsed = now.total - previous->total;
++  const uint64_t idle_ticks = now.idle - previous->idle;
++  if (idle_ticks > elapsed) {
++    return std::nullopt;
++  }
++  return CpuSample{static_cast<double>(elapsed - idle_ticks) / elapsed};
+ }
+ 
+ // static
+diff --git a/ui/shell_dialogs/execute_select_file_win.cc b/ui/shell_dialogs/execute_select_file_win.cc
+--- a/ui/shell_dialogs/execute_select_file_win.cc
++++ b/ui/shell_dialogs/execute_select_file_win.cc
+@@ -42,7 +42,7 @@
+ #include <Windows.h>
+ #include <Commdlg.h>
+ 
+-#include <tuple>
++#include <string_view>
+ #include <vector>
+ 
+ namespace base {
+@@ -59,7 +59,7 @@
+   // Initializes the OPENFILENAME, which may be accessed using Get(). All fields
+   // will be NULL except for |lStructSize|, |lpstrFile|, and |nMaxFile|. The
+   // file buffer will initially contain a null-terminated empty string.
+-  OpenFileName(HWND parent_window, DWORD flags);
++  OpenFileName(HWND parent_window, const std::u16string& title, DWORD flags);
+ 
+   OpenFileName(const OpenFileName&) = delete;
+   OpenFileName& operator=(const OpenFileName&) = delete;
+@@ -94,21 +94,10 @@
+   // Returns the OPENFILENAME structure.
+   const OPENFILENAME* GetOPENFILENAME() const { return &openfilename_; }
+ 
+-  // Stores directory and filenames in the buffer pointed to by
+-  // |openfilename->lpstrFile| and sized |openfilename->nMaxFile|.
+-  static void SetResult(const base::FilePath& directory,
+-                        const std::vector<base::FilePath>& filenames,
+-                        OPENFILENAME* openfilename);
+-
+-  // Returns a vector of label/pattern pairs built from
+-  // |openfilename->lpstrFilter|.
+-  static std::vector<std::tuple<std::wstring, std::wstring>> GetFilters(
+-      const OPENFILENAME* openfilename);
+-
+  private:
+-  OPENFILENAME openfilename_;
++  OPENFILENAME openfilename_{};
+   std::wstring initial_directory_buffer_;
+-  wchar_t filename_buffer_[UNICODE_STRING_MAX_CHARS];
++  wchar_t filename_buffer_[UNICODE_STRING_MAX_CHARS]{};
+   std::wstring filter_buffer_;
+ };
+ 
+@@ -180,9 +169,10 @@
+ 
+ }  // namespace
+ 
+-OpenFileName::OpenFileName(HWND parent_window, DWORD flags) {
+-  ::ZeroMemory(&openfilename_, sizeof(openfilename_));
++OpenFileName::OpenFileName(HWND parent_window, const std::u16string& title,
++                           DWORD flags) {
+   openfilename_.lStructSize = sizeof(openfilename_);
++  openfilename_.lpstrTitle = title.empty() ? nullptr : base::as_wcstr(title);
+ 
+   // According to http://support.microsoft.com/?scid=kb;en-us;222003&x=8&y=12,
+   // The lpstrFile Buffer MUST be NULL Terminated.
+@@ -260,20 +250,25 @@
+ void OpenFileName::GetResult(base::FilePath* directory,
+                              std::vector<base::FilePath>* filenames) {
+   DCHECK(filenames->empty());
+-  const wchar_t* selection = openfilename_.lpstrFile;
+-  // The return value of |openfilename_.lpstrFile| is dependent on the
+-  // value of the Multi-Select flag within |openfilename_|. If the flag is
+-  // not set the return value will be a single null-terminated wide string.
+-  // If it is set it will be more than one null-terminated wide string, itself
+-  // terminated by an empty null-terminated wide string.
+-  if (openfilename_.Flags & OFN_ALLOWMULTISELECT) {
+-    while (*selection) {  // Empty string indicates end of list.
+-      filenames->push_back(base::FilePath(selection));
+-      // Skip over filename and null-terminator.
+-      selection += filenames->back().value().length() + 1;
+-    }
+-  } else {
+-    filenames->push_back(base::FilePath(selection));
++  std::wstring_view selection(filename_buffer_, std::size(filename_buffer_));
++  const size_t first_end = selection.find(L'\0');
++  if (first_end == std::wstring_view::npos || first_end == 0)
++    return;
++  filenames->emplace_back(selection.substr(0, first_end));
++  // With Explorer-style multiselect, nFileOffset points past the directory's
++  // terminator for multiple files, or into the full path for a single file.
++  if ((openfilename_.Flags & OFN_ALLOWMULTISELECT) &&
++      openfilename_.nFileOffset == first_end + 1) {
++    selection.remove_prefix(first_end + 1);
++    while (!selection.empty() && selection.front()) {
++      const size_t end = selection.find(L'\0');
++      if (end == std::wstring_view::npos) {
++        filenames->clear();
++        return;
++      }
++      filenames->emplace_back(selection.substr(0, end));
++      selection.remove_prefix(end + 1);
++    }
+   }
+   if (filenames->size() == 1) {
+     // When there is one file, it contains the path and filename.
+@@ -285,59 +280,6 @@
+     *directory = (*filenames)[0];
+     filenames->erase(filenames->begin());
+   }
+-}
+-
+-// static
+-void OpenFileName::SetResult(const base::FilePath& directory,
+-                             const std::vector<base::FilePath>& filenames,
+-                             OPENFILENAME* openfilename) {
+-  std::wstring filename_value;
+-  if (filenames.size() == 1) {
+-    filename_value = directory.Append(filenames[0]).value();
+-  } else {
+-    filename_value = directory.value();
+-    filename_value.push_back(0);
+-    for (std::vector<base::FilePath>::const_iterator it = filenames.begin();
+-         it != filenames.end();
+-         ++it) {
+-      filename_value.append(it->value());
+-      filename_value.push_back(0);
+-    }
+-  }
+-  if (filename_value.size() + 1 < openfilename->nMaxFile) {
+-    // Because the result has embedded nulls, we must memcpy.
+-    memcpy(openfilename->lpstrFile,
+-           filename_value.c_str(),
+-           (filename_value.size() + 1) * sizeof(filename_value[0]));
+-  } else if (openfilename->nMaxFile) {
+-    openfilename->lpstrFile[0] = 0;
+-  }
+-}
+-
+-// static
+-std::vector<std::tuple<std::wstring, std::wstring>>
+-OpenFileName::GetFilters(const OPENFILENAME* openfilename) {
+-  std::vector<std::tuple<std::wstring, std::wstring>> filters;
+-
+-  const wchar_t* display_string = openfilename->lpstrFilter;
+-  if (!display_string)
+-    return filters;
+-
+-  while (*display_string) {
+-    const wchar_t* display_string_end = display_string;
+-    while (*display_string_end)
+-      ++display_string_end;
+-    const wchar_t* pattern = display_string_end + 1;
+-    const wchar_t* pattern_end = pattern;
+-    while (*pattern_end)
+-      ++pattern_end;
+-    filters.push_back(
+-        std::make_tuple(std::wstring(display_string, display_string_end),
+-                  std::wstring(pattern, pattern_end)));
+-    display_string = pattern_end + 1;
+-  }
+-
+-  return filters;
+ }
+ 
+ }  // namespace win
+@@ -784,6 +726,7 @@
+ // and extension of the user selected file name. |def_ext| is the default
+ // extension to give to the file if the user did not enter an extension.
+ bool SaveFileAsWithFilter(HWND owner,
++                          const std::u16string& title,
+                           const base::FilePath& default_path,
+                           const std::vector<FileFilterSpec>& filter,
+                           const std::wstring& def_ext,
+@@ -794,7 +737,7 @@
+   // specify a filter when saving.
+   DCHECK(!filter.empty());
+ 
+-  ui::win::OpenFileName save_as(owner, OFN_OVERWRITEPROMPT | OFN_EXPLORER |
++  ui::win::OpenFileName save_as(owner, title, OFN_OVERWRITEPROMPT | OFN_EXPLORER |
+                                            OFN_ENABLESIZING | OFN_NOCHANGEDIR |
+                                            OFN_PATHMUSTEXIST);
+ 
+@@ -830,12 +773,10 @@
+   // Figure out what filter got selected. The filter index is 1-based.
+   std::wstring filter_selected;
+   if (*index > 0) {
+-    std::vector<std::tuple<std::wstring, std::wstring>> filters =
+-        ui::win::OpenFileName::GetFilters(save_as.GetOPENFILENAME());
+-    if (*index > filters.size())
++    if (*index > filter.size())
+       NOTREACHED() << "Invalid filter index.";
+     else
+-      filter_selected = std::get<1>(filters[*index - 1]);
++      filter_selected = base::as_wcstr(filter[*index - 1].extension_spec);
+   }
+ 
+   // Get the extension that was suggested to the user (when the Save As dialog
+@@ -961,7 +902,7 @@
+                        base::FilePath* path) {
+   // We use OFN_NOCHANGEDIR so that the user can rename or delete the
+   // directory without having to close Chrome first.
+-  ui::win::OpenFileName ofn(owner, OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR);
++  ui::win::OpenFileName ofn(owner, title, OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR);
+   if (!default_path.empty()) {
+     if (IsDirectory(default_path))
+       ofn.SetInitialSelection(default_path, base::FilePath());
+@@ -986,7 +927,7 @@
+                             std::vector<base::FilePath>* paths) {
+   // We use OFN_NOCHANGEDIR so that the user can rename or delete the directory
+   // without having to close Chrome first.
+-  ui::win::OpenFileName ofn(owner, OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST |
++  ui::win::OpenFileName ofn(owner, title, OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST |
+                                        OFN_EXPLORER | OFN_HIDEREADONLY |
+                                        OFN_ALLOWMULTISELECT | OFN_NOCHANGEDIR);
+   if (!default_path.empty()) {
+@@ -1030,64 +971,60 @@
+     case SelectFileDialog::SELECT_FOLDER:
+     case SelectFileDialog::SELECT_UPLOAD_FOLDER:
+     case SelectFileDialog::SELECT_EXISTING_FOLDER: {
+-  Microsoft::WRL::ComPtr<IFileOpenDialog> file_open_dialog;
+-  if (FAILED(::CoCreateInstance(CLSID_FileOpenDialog, nullptr,
+-                                CLSCTX_INPROC_SERVER,
+-                                IID_PPV_ARGS(&file_open_dialog)))) {
+-      base::FilePath path;
+-      if (RunSelectFolderDialog(owner, type, title, default_path, &path))
+-        paths.push_back(std::move(path));
+-  }
+-    else
+-      ExecuteSelectFolder(owner, type, title, default_path, &paths);
+-    }
++      Microsoft::WRL::ComPtr<IFileOpenDialog> file_open_dialog;
++      if (FAILED(::CoCreateInstance(CLSID_FileOpenDialog, nullptr,
++                                    CLSCTX_INPROC_SERVER,
++                                    IID_PPV_ARGS(&file_open_dialog)))) {
++        base::FilePath path;
++        if (RunSelectFolderDialog(owner, type, title, default_path, &path))
++          paths.push_back(std::move(path));
++      } else {
++        ExecuteSelectFolder(owner, type, title, default_path, &paths);
++      }
+       break;
++    }
+     case SelectFileDialog::SELECT_SAVEAS_FILE: {
+       base::FilePath path;
+-  Microsoft::WRL::ComPtr<IFileSaveDialog> file_save_dialog;
+-  if (FAILED(::CoCreateInstance(CLSID_FileSaveDialog, nullptr,
+-                                CLSCTX_INPROC_SERVER,
+-                                IID_PPV_ARGS(&file_save_dialog)))) {
+-  DWORD filter_index = file_type_index;
+-      if (SaveFileAsWithFilter(owner, default_path, filter, default_extension,
+-                               &filter_index, &path))
+-        paths.push_back(std::move(path));
+-     break;
+-  }
+-    else
+-      if (ExecuteSaveFile(owner, title, default_path, filter, default_extension,
+-                          &file_type_index, &path)) {
++      Microsoft::WRL::ComPtr<IFileSaveDialog> file_save_dialog;
++      if (FAILED(::CoCreateInstance(CLSID_FileSaveDialog, nullptr,
++                                    CLSCTX_INPROC_SERVER,
++                                    IID_PPV_ARGS(&file_save_dialog)))) {
++        DWORD filter_index = file_type_index;
++        if (SaveFileAsWithFilter(owner, title, default_path, filter,
++                                 default_extension, &filter_index, &path))
++          paths.push_back(std::move(path));
++      } else if (ExecuteSaveFile(owner, title, default_path, filter,
++                                 default_extension, &file_type_index, &path)) {
+         paths.push_back(std::move(path));
+       }
+       break;
+     }
+     case SelectFileDialog::SELECT_OPEN_FILE: {
+-  Microsoft::WRL::ComPtr<IFileOpenDialog> file_open_dialog;
+-  if (FAILED(::CoCreateInstance(CLSID_FileOpenDialog, nullptr,
+-                                CLSCTX_INPROC_SERVER,
+-                                IID_PPV_ARGS(&file_open_dialog)))) {
+-      base::FilePath path;
+-      if (RunOpenFileDialog(owner, title, default_path, filter, &path))
+-        paths.push_back(std::move(path));
+-     break;
+-  }
+-    else
+-      ExecuteSelectSingleFile(owner, title, default_path, filter,
+-                              &file_type_index, &paths);
++      Microsoft::WRL::ComPtr<IFileOpenDialog> file_open_dialog;
++      if (FAILED(::CoCreateInstance(CLSID_FileOpenDialog, nullptr,
++                                    CLSCTX_INPROC_SERVER,
++                                    IID_PPV_ARGS(&file_open_dialog)))) {
++        base::FilePath path;
++        if (RunOpenFileDialog(owner, title, default_path, filter, &path))
++          paths.push_back(std::move(path));
++      } else {
++        ExecuteSelectSingleFile(owner, title, default_path, filter,
++                                &file_type_index, &paths);
++      }
+       break;
+     }
+     case SelectFileDialog::SELECT_OPEN_MULTI_FILE: {
+-  Microsoft::WRL::ComPtr<IFileOpenDialog> file_open_dialog;
+-  if (FAILED(::CoCreateInstance(CLSID_FileOpenDialog, nullptr,
+-                                CLSCTX_INPROC_SERVER,
+-                                IID_PPV_ARGS(&file_open_dialog)))) {
+-      RunOpenMultiFileDialog(owner, title, default_path, filter, &paths);
+-  }
+-    else
+-      ExecuteSelectMultipleFile(owner, title, default_path, filter,
+-                                &file_type_index, &paths);
+-    }
++      Microsoft::WRL::ComPtr<IFileOpenDialog> file_open_dialog;
++      if (FAILED(::CoCreateInstance(CLSID_FileOpenDialog, nullptr,
++                                    CLSCTX_INPROC_SERVER,
++                                    IID_PPV_ARGS(&file_open_dialog)))) {
++        RunOpenMultiFileDialog(owner, title, default_path, filter, &paths);
++      } else {
++        ExecuteSelectMultipleFile(owner, title, default_path, filter,
++                                  &file_type_index, &paths);
++      }
+       break;
++    }
+     case SelectFileDialog::SELECT_NONE:
+       NOTREACHED();
+   }

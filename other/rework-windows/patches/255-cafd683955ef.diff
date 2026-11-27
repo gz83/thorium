@@ -1,0 +1,15 @@
+diff --git a/sandbox/policy/win/sandbox_win.cc b/sandbox/policy/win/sandbox_win.cc
+index 72032e1cc792a66c7cda5fa1699aba52d72cbb9e..462236e400fd654fddac4fcc0738e0dcea186e49 100644
+--- a/sandbox/policy/win/sandbox_win.cc
++++ b/sandbox/policy/win/sandbox_win.cc
+@@ -769,6 +769,10 @@
+ // static
+ ResultCode SandboxWin::AddWin32kLockdownPolicy(TargetConfig* config) {
+   DCHECK(!config->IsConfigured());
++  // The kernel first provided Win32k system-call lockdown in Windows 8.
++  // Other sandbox policies still apply on earlier releases.
++  if (base::win::GetVersion() < base::win::Version::WIN8)
++    return SBOX_ALL_OK;
+   MitigationFlags flags = config->GetProcessMitigations();
+   // Check not enabling twice. Should not happen.
+   DCHECK_EQ(0U, flags & MITIGATION_WIN32K_DISABLE);

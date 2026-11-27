@@ -1,0 +1,80 @@
+diff --git a/mojo/core/channel_win.cc b/mojo/core/channel_win.cc
+index cab73f59a8db87c9c7746a7e68f10edf60582552..99a7f9d689a4cd4f7317dc0520fc68f263059097 100644
+--- a/mojo/core/channel_win.cc
++++ b/mojo/core/channel_win.cc
+@@ -38,6 +38,13 @@
+ 
+ namespace {
+ 
++auto GetCancelIoEx() {
++  static const auto cancel_io_ex = reinterpret_cast<decltype(&::CancelIoEx)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "CancelIoEx"));
++  return cancel_io_ex;
++}
++
++
+ constexpr int kMaxOpenChannelSample = 101;
+ 
+ struct OpenChannelMetrics {
+@@ -114,6 +121,17 @@
+   }
+ 
+   void Write(MessagePtr message) override {
++    if (!GetCancelIoEx()) {
++      // CancelIo on XP can only cancel operations issued by the same thread.
++      io_task_runner_->PostTask(
++          FROM_HERE, base::BindOnce(&ChannelWin::WriteMessage, this,
++                                    std::move(message)));
++      return;
++    }
++    WriteMessage(std::move(message));
++  }
++
++  void WriteMessage(MessagePtr message) {
+     RecordSentMessageMetricsSubsampled(message->data_num_bytes());
+ 
+     base::TimeTicks creation_time;
+@@ -268,7 +286,11 @@
+     // cancels I/O issued by the calling thread; use CancelIoEx() with a null
+     // OVERLAPPED to cancel all pending I/O on the handle regardless of which
+     // thread issued it.
+-    CancelIoEx(handle_.get(), nullptr);
++    if (auto cancel_io_ex = GetCancelIoEx()) {
++      cancel_io_ex(handle_.get(), nullptr);
++    } else {
++      ::CancelIo(handle_.get());
++    }
+     if (leak_handle_) {
+       std::ignore = handle_.release();
+     } else {
+diff --git a/mojo/public/cpp/platform/platform_channel_server_win.cc b/mojo/public/cpp/platform/platform_channel_server_win.cc
+index d8a4fb632defba4827eef08220399a14c23200eb..d5d4fb05706c2b1c292d1ecdc52e85d43b710c70 100644
+--- a/mojo/public/cpp/platform/platform_channel_server_win.cc
++++ b/mojo/public/cpp/platform/platform_channel_server_win.cc
+@@ -25,6 +25,13 @@
+ 
+ namespace {
+ 
++auto GetCancelIoEx() {
++  static const auto cancel_io_ex = reinterpret_cast<decltype(&::CancelIoEx)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "CancelIoEx"));
++  return cancel_io_ex;
++}
++
++
+ class ListenerImpl : public PlatformChannelServer::Listener,
+                      public base::win::ObjectWatcher::Delegate {
+  public:
+@@ -34,7 +41,11 @@
+ 
+   ~ListenerImpl() override {
+     if (server_.is_valid()) {
+-      ::CancelIoEx(server_.get(), &connect_overlapped_);
++      if (auto cancel_io_ex = GetCancelIoEx()) {
++        cancel_io_ex(server_.get(), &connect_overlapped_);
++      } else {
++        ::CancelIo(server_.get());
++      }
+       // CancelIoEx is asynchronous; block the destruction on the kernel writing
+       // status into connect_overlapped_ to avoid a use-after-free.
+       DWORD bytes = 0;

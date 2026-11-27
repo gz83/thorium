@@ -1,0 +1,125 @@
+diff --git a/ui/views/win/hwnd_message_handler.cc b/ui/views/win/hwnd_message_handler.cc
+index b53b61bfd5271ec001b3dffd60d638dbc56eedec..2362ccd5c2862785fc5c694d92e25af0b58b735e 100644
+--- a/ui/views/win/hwnd_message_handler.cc
++++ b/ui/views/win/hwnd_message_handler.cc
+@@ -205,10 +205,13 @@
+                                                WPARAM w_param,
+                                                LPARAM l_param) {
+   if (n_code == HC_ACTION && w_param == VK_ESCAPE) {
+-    int value = TRUE;
+-    ::DwmSetWindowAttribute(instance_->host_->hwnd(),
+-                            DWMWA_TRANSITIONS_FORCEDISABLED, &value,
++    if (base::win::GetVersion() >= base::win::Version::VISTA) {
++      int value = TRUE;
++      ::DwmSetWindowAttribute(instance_->host_->hwnd(),
++                            DWMWA_TRANSITIONS_FORCEDISABLED,
++                            &value,
+                             sizeof(value));
++    }
+     if (instance_->hide_on_escape_) {
+       instance_->host_->Hide();
+     }
+@@ -585,7 +588,8 @@
+   RestoreEnabledIfNecessary();
+ 
+   // Re-enable flicks which removes the window property.
+-  base::win::EnableFlicks(hwnd());
++  if (base::win::GetVersion() >= base::win::Version::WIN7)
++    base::win::EnableFlicks(hwnd());
+ 
+   if (!waiting_for_close_now_) {
+     // And we delay the close so that if we are called from an ATL callback,
+@@ -1127,9 +1131,11 @@
+ }
+ 
+ void HWNDMessageHandler::SetVisibilityChangedAnimationsEnabled(bool enabled) {
+-  int dwm_value = enabled ? FALSE : TRUE;
+-  ::DwmSetWindowAttribute(hwnd(), DWMWA_TRANSITIONS_FORCEDISABLED, &dwm_value,
+-                          sizeof(dwm_value));
++  if (base::win::GetVersion() >= base::win::Version::VISTA) {
++    int dwm_value = enabled ? FALSE : TRUE;
++    ::DwmSetWindowAttribute(
++        hwnd(), DWMWA_TRANSITIONS_FORCEDISABLED, &dwm_value, sizeof(dwm_value));
++  }
+ }
+ 
+ bool HWNDMessageHandler::SetTitle(const std::u16string& title) {
+@@ -1158,12 +1164,20 @@
+ }
+ 
+ void HWNDMessageHandler::FrameTypeChanged() {
+-  needs_dwm_frame_clear_ = true;
+-  if (!custom_window_region_.is_valid() && IsFrameSystemDrawn()) {
+-    dwm_transition_desired_ = true;
+-  }
+-  if ((!dwm_transition_desired_ || !IsFullscreen()) && IsFrameSystemDrawn()) {
+-    PerformDwmTransition();
++  if (base::win::GetVersion() < base::win::Version::VISTA) {
++    // Don't redraw the window here, because we invalidate the window later.
++    ResetWindowRegion(true, false);
++    // The non-client view needs to update too.
++    delegate_->HandleFrameChanged();
++    InvalidateRect(hwnd(), NULL, FALSE);
++  } else {
++    needs_dwm_frame_clear_ = true;
++    if (!custom_window_region_.is_valid() && IsFrameSystemDrawn()) {
++      dwm_transition_desired_ = true;
++    }
++    if ((!dwm_transition_desired_ || !IsFullscreen()) && IsFrameSystemDrawn()) {
++      PerformDwmTransition();
++    }
+   }
+ }
+ 
+@@ -1688,7 +1702,9 @@
+   }
+ 
+   // Disable pen flicks (http://crbug.com/506977)
+-  base::win::DisableFlicks(hwnd());
++  if (base::win::GetVersion() >= base::win::Version::WIN7) {
++    base::win::DisableFlicks(hwnd());
++  }
+ }
+ 
+ int HWNDMessageHandler::GetAppbarAutohideEdges(HMONITOR monitor) {
+@@ -2126,10 +2142,12 @@
+ 
+ LRESULT HWNDMessageHandler::OnCreate(CREATESTRUCT* create_struct) {
+   if (is_translucent_) {
+-    // This is part of the magic to emulate layered windows with Aura
+-    // see the explanation elsewere when we set is_translucent_.
+-    MARGINS margins = {-1, -1, -1, -1};
+-    DwmExtendFrameIntoClientArea(hwnd(), &margins);
++    if (base::win::GetVersion() >= base::win::Version::VISTA) {
++      // This is part of the magic to emulate layered windows with Aura
++      // see the explanation elsewere when we set is_translucent_.
++      MARGINS margins = {-1,-1,-1,-1};
++      DwmExtendFrameIntoClientArea(hwnd(), &margins);
++    }
+ 
+     ::SetProp(hwnd(), ui::kWindowTranslucent, reinterpret_cast<HANDLE>(1));
+   }
+@@ -2159,7 +2177,8 @@
+   // Get access to a modifiable copy of the system menu.
+   ::GetSystemMenu(hwnd(), false);
+ 
+-  if (!pointer_events_for_touch_)
++  if (!pointer_events_for_touch_ &&
++      base::win::GetVersion() >= base::win::Version::WIN7)
+     RegisterTouchWindow(hwnd(), TWF_WANTPALM);
+ 
+   // We need to allow the delegate to size its contents since the window may not
+@@ -2741,8 +2760,11 @@
+   // Calling DefWindowProc is only necessary if there's a system frame being
+   // drawn. Otherwise it can draw an incorrect title bar and cause visual
+   // corruption.
+-  if (!delegate_->HasFrame() ||
+-      delegate_->GetFrameMode() == FrameMode::CUSTOM_DRAWN) {
++  // Avoid DefWindowProc non-client rendering over our custom frame on newer
++  // Windows versions only (breaks taskbar activation indication on XP/Vista).
++  if ((!delegate_->HasFrame() ||
++      delegate_->GetFrameMode() == FrameMode::CUSTOM_DRAWN) &&
++      base::win::GetVersion() > base::win::Version::VISTA) {
+     SetMsgHandled(TRUE);
+     return TRUE;
+   }

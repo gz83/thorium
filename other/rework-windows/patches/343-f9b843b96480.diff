@@ -1,0 +1,163 @@
+diff --git a/sandbox/win/BUILD.gn b/sandbox/win/BUILD.gn
+index 619ea1abe1dbb5daf51db99ba2a326b67a19aa42..f5a24d2ebce81b756d8908e7edec1e488e4929b4 100644
+--- a/sandbox/win/BUILD.gn
++++ b/sandbox/win/BUILD.gn
+@@ -177,7 +177,6 @@
+ 
+   libs = [
+     "ntdll.lib",
+-    "userenv.lib",
+   ]
+ }
+ 
+diff --git a/sandbox/win/src/startup_information_helper.cc b/sandbox/win/src/startup_information_helper.cc
+index fce8b014a0661cd79535bb75515682f56f05843b..33ad6327d9f22c4db5b775e9720c4014d2e64bf1 100644
+--- a/sandbox/win/src/startup_information_helper.cc
++++ b/sandbox/win/src/startup_information_helper.cc
+@@ -73,6 +73,8 @@
+ }
+ 
+ void StartupInformationHelper::SetAppContainer(AppContainer* container) {
++  // Only supported for Windows 8+.
++  DCHECK(base::win::GetVersion() >= base::win::Version::WIN8);
+   // LowPrivilegeAppContainer only supported for Windows 10+
+   DCHECK(!container->GetEnableLowPrivilegeAppContainer() ||
+          base::win::GetVersion() >= base::win::Version::WIN10_RS1);
+diff --git a/sandbox/win/src/handle_inheritance_test.cc b/sandbox/win/src/handle_inheritance_test.cc
+index 36653fd386165cae5fe17e37e0a6256b70fd3e7a..67e3fd2b406cb6b893923b9cbbcdd728609c0798 100644
+--- a/sandbox/win/src/handle_inheritance_test.cc
++++ b/sandbox/win/src/handle_inheritance_test.cc
+@@ -7,6 +7,7 @@
+ #include "base/files/file_util.h"
+ #include "base/files/scoped_temp_dir.h"
+ #include "base/win/scoped_handle.h"
++#include "base/win/windows_version.h"
+ #include "sandbox/win/tests/common/controller.h"
+ #include "testing/gtest/include/gtest/gtest.h"
+ 
+diff --git a/sandbox/win/src/policy_broker.cc b/sandbox/win/src/policy_broker.cc
+index 8ddeeac4517699f8f982e0d0cb1d2516b080d145..8789bbf259425b79c3772085001258a3e7bdf064 100644
+--- a/sandbox/win/src/policy_broker.cc
++++ b/sandbox/win/src/policy_broker.cc
+@@ -10,6 +10,7 @@
+ 
+ #include "base/check.h"
+ #include "base/win/pe_image.h"
++#include "base/win/windows_version.h"
+ #include "sandbox/win/src/interception.h"
+ #include "sandbox/win/src/interceptors.h"
+ #include "sandbox/win/src/internal_types.h"
+diff --git a/sandbox/win/src/restricted_token_utils.cc b/sandbox/win/src/restricted_token_utils.cc
+index c9875de53ed14f544c4e6c94bc1cfe63c7fbdf15..45499ccccaabefccc0f5e0da85e97490c53ed9fa 100644
+--- a/sandbox/win/src/restricted_token_utils.cc
++++ b/sandbox/win/src/restricted_token_utils.cc
+@@ -13,6 +13,7 @@
+ #include "base/notreached.h"
+ #include "base/win/access_token.h"
+ #include "base/win/security_descriptor.h"
++#include "base/win/windows_version.h"
+ #include "sandbox/win/src/acl.h"
+ #include "sandbox/win/src/restricted_token.h"
+ #include "sandbox/win/src/sandbox_nt_util.h"
+diff --git a/sandbox/win/src/target_services.cc b/sandbox/win/src/target_services.cc
+index 8dc1eee4c5b08e6a4b4bfce47d0f25abc45928c6..83558a58d85b6f3f7e0f86d9c75b384e1f5a4eca 100644
+--- a/sandbox/win/src/target_services.cc
++++ b/sandbox/win/src/target_services.cc
+@@ -17,6 +17,7 @@
+ #include "base/containers/span.h"
+ #include "base/logging.h"
+ #include "base/win/access_token.h"
++#include "base/win/windows_version.h"
+ #include "sandbox/win/src/acl.h"
+ #include "sandbox/win/src/crosscall_client.h"
+ #include "sandbox/win/src/handle_closer_agent.h"
+@@ -66,11 +67,6 @@
+   }
+   return true;
+ }
+-
+-// GetUserDefaultLocaleName is not available on WIN XP.  So we'll
+-// load it on-the-fly.
+-const wchar_t kKernel32DllName[] = L"kernel32.dll";
+-typedef decltype(GetUserDefaultLocaleName)* GetUserDefaultLocaleNameFunction;
+ 
+ // Warm up language subsystems before the sandbox is turned on.
+ // Tested on Win8.1 x64:
+@@ -84,23 +80,13 @@
+   // warmup all of these functions, but let's not assume that.
+   ::GetUserDefaultLangID();
+   ::GetUserDefaultLCID();
+-  static GetUserDefaultLocaleNameFunction GetUserDefaultLocaleName_func =
+-      nullptr;
+-  if (!GetUserDefaultLocaleName_func) {
+-    HMODULE kernel32_dll = ::GetModuleHandle(kKernel32DllName);
+-    if (!kernel32_dll) {
+-      return false;
+-    }
+-    GetUserDefaultLocaleName_func =
+-        reinterpret_cast<GetUserDefaultLocaleNameFunction>(
+-            GetProcAddress(kernel32_dll, "GetUserDefaultLocaleName"));
+-    if (!GetUserDefaultLocaleName_func) {
+-      return false;
+-    }
+-  }
+   wchar_t localeName[LOCALE_NAME_MAX_LENGTH] = {};
+-  return (0 != GetUserDefaultLocaleName_func(
+-                   localeName, LOCALE_NAME_MAX_LENGTH * sizeof(wchar_t)));
++  static const auto get_locale_name =
++      reinterpret_cast<decltype(&::GetUserDefaultLocaleName)>(
++          ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"),
++                           "GetUserDefaultLocaleName"));
++  // Legacy systems have only the numeric locale APIs warmed above.
++  return !get_locale_name || get_locale_name(localeName, LOCALE_NAME_MAX_LENGTH);
+ }
+ 
+ bool SetProcessIntegrityLevel(IntegrityLevel integrity_level) {
+diff --git a/sandbox/win/src/win_utils.cc b/sandbox/win/src/win_utils.cc
+index aee6336524e75f0c97bc47a10bf63e1c28e42a3d..5bc1ce1c6243d9bb033e355083c2201ca0bada51 100644
+--- a/sandbox/win/src/win_utils.cc
++++ b/sandbox/win/src/win_utils.cc
+@@ -22,6 +22,7 @@
+ #include "base/containers/span.h"
+ #include "base/numerics/safe_math.h"
+ #include "base/strings/string_util.h"
++#include "base/win/pe_image.h"
+ #include "base/win/scoped_handle.h"
+ #include "base/win/win_util.h"
+ #include "sandbox/win/src/internal_types.h"
+@@ -219,3 +220,22 @@
+ }
+ 
+ }  // namespace sandbox
++
++void ResolveNTFunctionPtr(const char* name, void* ptr) {
++  static volatile HMODULE ntdll = nullptr;
++
++  if (!ntdll) {
++    HMODULE ntdll_local = ::GetModuleHandle(sandbox::kNtdllName);
++    // Use PEImage to sanity-check that we have a valid ntdll handle.
++    base::win::PEImage ntdll_peimage(ntdll_local);
++    CHECK_NT(ntdll_peimage.VerifyMagic());
++    // Race-safe way to set static ntdll.
++    ::InterlockedCompareExchangePointer(
++        reinterpret_cast<PVOID volatile*>(&ntdll), ntdll_local, nullptr);
++  }
++
++  CHECK_NT(ntdll);
++  FARPROC* function_ptr = reinterpret_cast<FARPROC*>(ptr);
++  *function_ptr = ::GetProcAddress(ntdll, name);
++  CHECK_NT(*function_ptr);
++}
+diff --git a/sandbox/win/src/win_utils.h b/sandbox/win/src/win_utils.h
+index 92939ac5e609694f6dbaf00f4f25f22866834f19..2112a449eec4c2e82719f3d913d272b07532a0bc 100644
+--- a/sandbox/win/src/win_utils.h
++++ b/sandbox/win/src/win_utils.h
+@@ -92,4 +92,8 @@
+ 
+ }  // namespace sandbox
+ 
++// Resolves a function name in NTDLL to a function pointer. The second parameter
++// is a pointer to the function pointer.
++void ResolveNTFunctionPtr(const char* name, void* ptr);
++
+ #endif  // SANDBOX_WIN_SRC_WIN_UTILS_H_

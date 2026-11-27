@@ -1,0 +1,155 @@
+diff --git a/base/files/file_util_win.cc b/base/files/file_util_win.cc
+index 8e6d03a7045ba58c4d39f3b045d9c0e90ca63ad7..1906aab47fc5b4372f375a3b8b924f547c01e947 100644
+--- a/base/files/file_util_win.cc
++++ b/base/files/file_util_win.cc
+@@ -59,6 +59,8 @@
+ #include "base/win/security_util.h"
+ #include "base/win/sid.h"
+ #include "base/win/windows_types.h"
++#include "base/scoped_native_library.h"
++#include "base/win/pe_image.h"
+ #include "base/win/windows_version.h"
+ 
+ #ifdef __cplusplus
+@@ -1088,18 +1090,16 @@
+ // intentionally limited to FILE_NAME_NORMALIZED | VOLUME_NAME_DOS, the only
+ // combination used by NormalizeFilePath. This is not a public API replacement.
+ DWORD GetFinalPathNameByHandleWA(HANDLE file,
+-                                 wchar_t* file_path,
+-                                 DWORD file_path_size,
++                                 span<wchar_t> file_path,
+                                  DWORD flags) {
+   static const auto get_final_path =
+       reinterpret_cast<decltype(&::GetFinalPathNameByHandleW)>(::GetProcAddress(
+           ::GetModuleHandleW(L"kernel32.dll"), "GetFinalPathNameByHandleW"));
+   if (get_final_path) {
+-    return get_final_path(file, file_path, file_path_size, flags);
+-  }
+-
+-  if (flags != (FILE_NAME_NORMALIZED | VOLUME_NAME_DOS) ||
+-      (!file_path && file_path_size != 0)) {
++    return get_final_path(file, file_path.data(), checked_cast<DWORD>(file_path.size()), flags);
++  }
++
++  if (flags != (FILE_NAME_NORMALIZED | VOLUME_NAME_DOS)) {
+     ::SetLastError(ERROR_INVALID_PARAMETER);
+     return 0;
+   }
+@@ -1149,21 +1149,22 @@
+     storage.resize((required_size + sizeof(uintptr_t) - 1) / sizeof(uintptr_t));
+   }
+ 
+-  const auto* name =
+-      reinterpret_cast<const ObjectNameInformation*>(storage.data());
++  ObjectNameInformation name{};
++  byte_span_from_ref(allow_nonunique_obj, name).copy_from(
++      as_byte_span(storage).first<sizeof(name)>());
+   const uintptr_t begin = reinterpret_cast<uintptr_t>(storage.data());
+   const uintptr_t end = begin + storage.size() * sizeof(uintptr_t);
+-  const uintptr_t text = reinterpret_cast<uintptr_t>(name->buffer);
+-  if (name->length == 0 || name->length > name->maximum_length ||
+-      name->length % sizeof(wchar_t) != 0 || text % alignof(wchar_t) != 0 ||
++  const uintptr_t text = reinterpret_cast<uintptr_t>(name.buffer);
++  if (name.length == 0 || name.length > name.maximum_length ||
++      name.length % sizeof(wchar_t) != 0 || text % alignof(wchar_t) != 0 ||
+       text < begin + sizeof(ObjectNameInformation) || text > end ||
+-      name->length > end - text) {
++      name.length > end - text) {
+     ::SetLastError(ERROR_INVALID_DATA);
+     return 0;
+   }
+ 
+-  const std::wstring_view queried_name(name->buffer,
+-                                       name->length / sizeof(wchar_t));
++  const std::wstring_view queried_name(name.buffer,
++                                       name.length / sizeof(wchar_t));
+   // FilePath truncates at NUL, so validate the original counted name first.
+   if (queried_name.find(L'\0') != std::wstring_view::npos) {
+     ::SetLastError(ERROR_INVALID_DATA);
+@@ -1329,11 +1330,11 @@
+   // retains responsibility for stripping the prefix and enforcing MAX_PATH.
+   const std::wstring result = extended_path(normalized_path) + stream_suffix;
+   const DWORD length = checked_cast<DWORD>(result.size());
+-  if (file_path_size <= length) {
++  if (file_path.size() <= length) {
+     ::SetLastError(ERROR_INSUFFICIENT_BUFFER);
+     return length + 1;
+   }
+-  std::copy(result.begin(), result.end(), file_path);
++  file_path.first(length).copy_from(span(result));
+   file_path[length] = L'\0';
+   return length;
+ }
+@@ -1357,7 +1358,7 @@
+   // including the trailing '\0'. Thus, failure is indicated by returning 0 or
+   // >= kMaxPathLength.
+   DWORD used_wchars = GetFinalPathNameByHandleWA(
+-      file.GetPlatformFile(), prefixed_file_path_buffer, kMaxPathLength,
++      file.GetPlatformFile(), prefixed_file_path_buffer,
+       FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+   if (used_wchars >= kMaxPathLength || used_wchars == 0) {
+     return false;
+@@ -1821,6 +1822,42 @@
+ 
+ namespace {
+ 
++// Some sections in a mapped PE can be inaccessible even in a valid image.
++bool TouchImagePages(span<const volatile uint8_t> bytes, size_t stride) {
++  __try {
++    while (!bytes.empty()) {
++      static_cast<void>(bytes.front());
++      if (bytes.size() <= stride) {
++        static_cast<void>(bytes.back());
++        break;
++      }
++      bytes = bytes.subspan(stride);
++    }
++    return true;
++  } __except (EXCEPTION_EXECUTE_HANDLER) {
++    return false;
++  }
++}
++
++bool PreReadLegacyImage(const FilePath& path, int64_t max_bytes) {
++  ScopedNativeLibrary module(::LoadLibraryExW(path.value().c_str(), nullptr,
++                                              DONT_RESOLVE_DLL_REFERENCES));
++  if (!module.is_valid())
++    return false;
++  win::PEImage image(module.get());
++  if (!image.VerifyMagic())
++    return false;
++  const size_t size = checked_cast<size_t>(std::min<int64_t>(
++      image.GetNTHeaders()->OptionalHeader.SizeOfImage, max_bytes));
++  SYSTEM_INFO info = {};
++  ::GetSystemInfo(&info);
++  // SAFETY: the loader mapped SizeOfImage bytes and the module owns this
++  // mapping throughout the read. TouchImagePages handles inaccessible pages.
++  return TouchImagePages(UNSAFE_BUFFERS(span(
++      reinterpret_cast<const volatile uint8_t*>(module.get()), size)),
++      info.dwPageSize ? info.dwPageSize : 4096u);
++}
++
+ // ::PrefetchVirtualMemory() is only available on Windows 8 and above. Chrome
+ // supports Windows 7, so we need to check for the function's presence
+ // dynamically.
+@@ -1848,13 +1885,17 @@
+   static PrefetchVirtualMemoryPtr prefetch_virtual_memory =
+       GetPrefetchVirtualMemoryPtr();
+ 
+-  if (prefetch_virtual_memory == nullptr)
+-    return internal::PreReadFileSlow(file_path, max_bytes);
+-
+   if (max_bytes == 0) {
+     // PrefetchVirtualMemory() fails when asked to read zero bytes.
+     // base::MemoryMappedFile::Initialize() fails on an empty file.
+     return true;
++  }
++
++  if (!prefetch_virtual_memory) {
++    if (is_executable && file_path.IsAbsolute() &&
++        win::GetVersion() <= win::Version::XP && PreReadLegacyImage(file_path, max_bytes))
++      return true;
++    return internal::PreReadFileSlow(file_path, max_bytes);
+   }
+ 
+   // PrefetchVirtualMemory() fails if the file is opened with write access.

@@ -1,0 +1,126 @@
+diff --git a/components/metrics/system_session_analyzer/system_session_analyzer_win.cc b/components/metrics/system_session_analyzer/system_session_analyzer_win.cc
+index e1a23724bec2762dbb3e880111d324ec65ed2e92..33a434302ab20fd86dbe766767ca6ee624fe3b84 100644
+--- a/components/metrics/system_session_analyzer/system_session_analyzer_win.cc
++++ b/components/metrics/system_session_analyzer/system_session_analyzer_win.cc
+@@ -5,12 +5,45 @@
+ #include "components/metrics/system_session_analyzer/system_session_analyzer_win.h"
+ 
+ #include "base/logging.h"
++#include "base/native_library.h"
+ #include "base/threading/scoped_thread_priority.h"
+ #include "base/time/time.h"
+ 
+ namespace metrics {
+ 
+ namespace {
++
++// Some downlevel systems do not have the Windows Event Log API. Resolve the
++// complete set before acquiring handles so every acquired handle can be closed.
++struct EventLogApi {
++  decltype(&::EvtQuery) query;
++  decltype(&::EvtNext) next;
++  decltype(&::EvtRender) render;
++  decltype(&::EvtCreateRenderContext) create_render_context;
++  decltype(&::EvtClose) close;
++};
++
++const EventLogApi& GetEventLogApi() {
++  static const EventLogApi api = [] {
++    EventLogApi result = {};
++    HMODULE module = base::PinSystemLibrary(L"wevtapi.dll");
++    if (module) {
++      result.query = reinterpret_cast<decltype(result.query)>(
++          ::GetProcAddress(module, "EvtQuery"));
++      result.next = reinterpret_cast<decltype(result.next)>(
++          ::GetProcAddress(module, "EvtNext"));
++      result.render = reinterpret_cast<decltype(result.render)>(
++          ::GetProcAddress(module, "EvtRender"));
++      result.create_render_context =
++          reinterpret_cast<decltype(result.create_render_context)>(
++              ::GetProcAddress(module, "EvtCreateRenderContext"));
++      result.close = reinterpret_cast<decltype(result.close)>(
++          ::GetProcAddress(module, "EvtClose"));
++    }
++    return result;
++  }();
++  return api;
++}
+ 
+ // The name of the log channel to query.
+ const wchar_t kChannelName[] = L"System";
+@@ -53,6 +86,12 @@
+ 
+ }  // namespace
+ 
++void SystemSessionAnalyzer::EvtHandleCloser::operator()(EVT_HANDLE handle) const {
++  if (handle) {
++    GetEventLogApi().close(handle);
++  }
++}
++
+ SystemSessionAnalyzer::SystemSessionAnalyzer(uint32_t max_session_cnt)
+     : max_session_cnt_(max_session_cnt), sessions_queried_(0) {}
+ 
+@@ -85,7 +124,7 @@
+   DWORD buffer_size = kAttributeCnt * sizeof(EVT_VARIANT);
+   DWORD buffer_used = 0U;
+   DWORD retrieved_attribute_cnt = 0U;
+-  if (!::EvtRender(context, event, EvtRenderEventValues, buffer_size,
++  if (!GetEventLogApi().render(context, event, EvtRenderEventValues, buffer_size,
+                    buffer.data(), &buffer_used, &retrieved_attribute_cnt)) {
+     DPLOG(ERROR) << "Failed to render the event.";
+     SetExtendedFailureStatus(ExtendedStatus::RENDER_EVENT_FAILURE);
+@@ -167,7 +206,7 @@
+   DWORD desired_event_cnt = requested_events;
+   std::vector<EVT_HANDLE> events_raw(desired_event_cnt, nullptr);
+   DWORD event_cnt = 0U;
+-  BOOL success = ::EvtNext(query_handle_.get(), desired_event_cnt,
++  BOOL success = GetEventLogApi().next(query_handle_.get(), desired_event_cnt,
+                            events_raw.data(), kTimeoutMs, 0, &event_cnt);
+ 
+   // Ensure handles get closed. The MSDN sample seems to imply handles may need
+@@ -212,11 +251,18 @@
+   // a background-priority thread.
+   SCOPED_MAY_LOAD_LIBRARY_AT_BACKGROUND_PRIORITY();
+ 
++  const auto& api = GetEventLogApi();
++  if (!api.query || !api.next || !api.render || !api.create_render_context ||
++      !api.close) {
++    SetExtendedFailureStatus(ExtendedStatus::EVTQUERY_FAILED);
++    return false;
++  }
++
+   // Create the event query.
+   // Note: requesting events from newest to oldest.
+   if (!query_handle_.get()) {
+     query_handle_.reset(
+-        ::EvtQuery(nullptr, kChannelName, kSessionEventsQuery,
++        api.query(nullptr, kChannelName, kSessionEventsQuery,
+                    EvtQueryChannelPath | EvtQueryReverseDirection));
+     if (!query_handle_.get()) {
+       DPLOG(ERROR) << "Event query failed.";
+@@ -309,7 +355,7 @@
+ 
+   EVT_HANDLE context = nullptr;
+   context =
+-      ::EvtCreateRenderContext(kValueCnt, value_paths, EvtRenderContextValues);
++      GetEventLogApi().create_render_context(kValueCnt, value_paths, EvtRenderContextValues);
+   if (!context)
+     DPLOG(ERROR) << "Failed to create render context.";
+ 
+diff --git a/components/metrics/system_session_analyzer/system_session_analyzer_win.h b/components/metrics/system_session_analyzer/system_session_analyzer_win.h
+index c35fd93db8a8ae0032651072895661d59780b5bf..814bfda56c9982753e3bee8103853006b57d0dc9 100644
+--- a/components/metrics/system_session_analyzer/system_session_analyzer_win.h
++++ b/components/metrics/system_session_analyzer/system_session_analyzer_win.h
+@@ -90,10 +90,7 @@
+  private:
+   struct EvtHandleCloser {
+     using pointer = EVT_HANDLE;
+-    void operator()(EVT_HANDLE handle) const {
+-      if (handle)
+-        ::EvtClose(handle);
+-    }
++    void operator()(EVT_HANDLE handle) const;
+   };
+   using EvtHandle = std::unique_ptr<EVT_HANDLE, EvtHandleCloser>;
+ 

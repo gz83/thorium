@@ -1,0 +1,37 @@
+diff --git a/mojo/core/ipcz_driver/invitation.cc b/mojo/core/ipcz_driver/invitation.cc
+index 4370e0b80e18de05bfa4a5ed1b9da67f5eb80956..733ee18b5805149f4d8f67935733105835aaa383 100644
+--- a/mojo/core/ipcz_driver/invitation.cc
++++ b/mojo/core/ipcz_driver/invitation.cc
+@@ -137,11 +137,15 @@
+   base::ProcessId server_pid = 0;
+   base::ProcessId current_pid = base::GetCurrentProcId();
+ 
+-  if (!GetNamedPipeClientProcessId(handle, &client_pid)) {
++  static const auto get_client_pid = reinterpret_cast<decltype(&::GetNamedPipeClientProcessId)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "GetNamedPipeClientProcessId"));
++  static const auto get_server_pid = reinterpret_cast<decltype(&::GetNamedPipeServerProcessId)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "GetNamedPipeServerProcessId"));
++  if (!get_client_pid || !get_client_pid(handle, &client_pid)) {
+     PLOG(ERROR) << "GetNamedPipeClientProcessId failed";
+     return base::Process();
+   }
+-  if (!GetNamedPipeServerProcessId(handle, &server_pid)) {
++  if (!get_server_pid || !get_server_pid(handle, &server_pid)) {
+     PLOG(ERROR) << "GetNamedPipeServerProcessId failed";
+     return base::Process();
+   }
+diff --git a/mojo/public/cpp/platform/named_platform_channel_win.cc b/mojo/public/cpp/platform/named_platform_channel_win.cc
+index 0b3763ba90b67479ca5a33eedbeacc340fca4b35..351f74bbe21194dbba10ae1cfd97b37d7f31f150 100644
+--- a/mojo/public/cpp/platform/named_platform_channel_win.cc
++++ b/mojo/public/cpp/platform/named_platform_channel_win.cc
+@@ -46,7 +46,9 @@
+     HANDLE pipe_handle,
+     NamedPlatformChannel::PipeNameType pipe_name_type) {
+   DWORD pid = 0;
+-  if (!GetNamedPipeServerProcessId(pipe_handle, &pid)) {
++  static const auto get_server_pid = reinterpret_cast<decltype(&::GetNamedPipeServerProcessId)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "GetNamedPipeServerProcessId"));
++  if (!get_server_pid || !get_server_pid(pipe_handle, &pid)) {
+     return ServerPrivilegeStatus::kRetryableError;
+   }
+ 

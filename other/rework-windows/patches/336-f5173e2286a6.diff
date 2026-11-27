@@ -1,0 +1,163 @@
+diff --git a/base/time/time_win.cc b/base/time/time_win.cc
+index 7acb320151703dd14935d06261e185bffbed3908..1cb00f89495a31fb1e63a1000b5e46d439df4737 100644
+--- a/base/time/time_win.cc
++++ b/base/time/time_win.cc
+@@ -80,16 +80,22 @@
+   return bit_cast<FILETIME, int64_t>(us * 10);
+ }
+ 
++decltype(&::QueryInterruptTimePrecise) FindInterruptClock(const char* name) {
++  HMODULE kernel_base = ::GetModuleHandleW(L"kernelbase.dll");
++  return kernel_base ? reinterpret_cast<decltype(&::QueryInterruptTimePrecise)>(
++                           ::GetProcAddress(kernel_base, name))
++                     : nullptr;
++}
++
+ int64_t CurrentWallclockMicroseconds() {
++  static const auto get_time = [] {
++    const auto precise = reinterpret_cast<decltype(&::GetSystemTimeAsFileTime)>(
++        ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"),
++                         "GetSystemTimePreciseAsFileTime"));
++    return precise ? precise : &::GetSystemTimeAsFileTime;
++  }();
+   FILETIME ft;
+-typedef void(WINAPI* GetSystemTimeAsFileTimePtr)(LPFILETIME);
+-
+-  GetSystemTimeAsFileTimePtr fp;
+-    fp = (GetSystemTimeAsFileTimePtr)(void*)GetProcAddress(
+-        GetModuleHandleW(L"kernel32.dll"), "GetSystemTimePreciseAsFileTime");
+-    if (fp == nullptr)
+-      fp = GetSystemTimeAsFileTime;
+-  fp(&ft);
++  get_time(&ft);
+   return FileTimeToMicroseconds(ft);
+ }
+ 
+@@ -161,6 +167,16 @@
+   if (g_last_interval_requested_ms) {
+     timeBeginPeriod(g_last_interval_requested_ms);
+   }
++}
++
++// Returns a pointer to the QueryThreadCycleTime() function from Windows.
++// Can't statically link to it because it is not available on XP.
++using QueryThreadCycleTimePtr = decltype(::QueryThreadCycleTime)*;
++QueryThreadCycleTimePtr GetQueryThreadCycleTimeFunction() {
++  static const QueryThreadCycleTimePtr query_thread_cycle_time_fn =
++      reinterpret_cast<QueryThreadCycleTimePtr>(::GetProcAddress(
++          ::GetModuleHandle(L"kernel32.dll"), "QueryThreadCycleTime"));
++  return query_thread_cycle_time_fn;
+ }
+ 
+ // Returns the current value of the performance counter.
+@@ -756,55 +772,23 @@
+ 
+ namespace subtle {
+ LiveTicks LiveTicksNowIgnoringOverride() {
+-  // Ensure that the assignment to |g_qpc_ticks_per_second|, made in
+-  // InitializeNowFunctionPointer(), has happened by this point.
+-  LARGE_INTEGER perf_counter_now = {};
+-  // According to the MSDN documentation for QueryPerformanceCounter(), this
+-  // will never fail on systems that run XP or later.
+-  // https://msdn.microsoft.com/library/windows/desktop/ms644904.aspx
+-  ::QueryPerformanceCounter(&perf_counter_now);
+-  std::atomic_thread_fence(std::memory_order_acquire);
+-
+-  DCHECK_GT(g_qpc_ticks_per_second, 0);
+-
+-  // If the QPC Value is below the overflow threshold, we proceed with
+-  // simple multiply and divide.
+-  if (perf_counter_now.QuadPart < Time::kQPCOverflowThreshold) {
+-    return LiveTicks() + Microseconds(perf_counter_now.QuadPart * Time::kMicrosecondsPerSecond /
+-                        g_qpc_ticks_per_second);
+-  }
+-  // Otherwise, calculate microseconds in a round about manner to avoid
+-  // overflow and precision issues.
+-  int64_t whole_seconds = perf_counter_now.QuadPart / g_qpc_ticks_per_second;
+-  int64_t leftover_ticks = perf_counter_now.QuadPart - (whole_seconds * g_qpc_ticks_per_second);
+-  return LiveTicks() + Microseconds((whole_seconds * Time::kMicrosecondsPerSecond) +
+-                      ((leftover_ticks * Time::kMicrosecondsPerSecond) /
+-                       g_qpc_ticks_per_second));
++  static const auto precise = FindInterruptClock("QueryUnbiasedInterruptTimePrecise");
++  ULONGLONG ticks;
++  if (precise) {
++    precise(&ticks);
++    return LiveTicks() + Microseconds(ticks / 10);
++  }
++  static const auto unbiased = reinterpret_cast<decltype(&::QueryUnbiasedInterruptTime)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "QueryUnbiasedInterruptTime"));
++  if (unbiased && unbiased(&ticks)) {
++    return LiveTicks() + Microseconds(ticks / 10);
++  }
++  // XP and Vista lack the unbiased interrupt clock. Use an initialized monotonic clock.
++  return LiveTicks() + TimeTicksNowIgnoringOverride().since_origin();
+ }
+ }  // namespace subtle
+ 
+ // RealTicks ------------------------------------------------------------------
+-
+-typedef struct _KUSER_SHARED_DATA {
+-
+-    volatile ULONG TickCountLow;
+-    ULONG TickCountMultiplier;
+-
+-    volatile ULONG ITimeLow;
+-    volatile ULONG ITime1High;
+-    volatile ULONG ITime2High;
+-} KUSER_SHARED_DATA;
+-
+-#define MM_SHARED_USER_DATA_VA      0x7FFE0000
+-#define SharedUserData ((KUSER_SHARED_DATA * const) MM_SHARED_USER_DATA_VA)
+-
+-#define KiQueryInterruptTime(CurrentTime) \
+-    while (TRUE) {                                                                      \
+-        (CurrentTime)->HighPart = SharedUserData->ITime1High;              \
+-        (CurrentTime)->LowPart = SharedUserData->ITimeLow;                 \
+-        if ((CurrentTime)->HighPart == SharedUserData->ITime2High) break;  \
+-        YieldProcessor();                                                                \
+-    }
+ 
+ namespace subtle {
+ // On Windows, `QueryInterruptTimePrecise()` and
+@@ -817,11 +801,18 @@
+ // https://learn.microsoft.com/en-us/windows/win32/api/realtimeapiset/nf-realtimeapiset-queryinterrupttimeprecise
+ // https://learn.microsoft.com/en-us/windows/win32/api/realtimeapiset/nf-realtimeapiset-queryunbiasedinterrupttimeprecise
+ time_internal::RealTicks RealTicksNowIgnoringOverride() {
+-  ULONGLONG interrupt_time;
+-  KiQueryInterruptTime((PULARGE_INTEGER)&interrupt_time);
+-  // QueryInterruptTimePrecise gets the interrupt time in system time units of
+-  // 100 nanoseconds.
+-  return time_internal::RealTicks() + Nanoseconds(interrupt_time * 100);
++  static const auto precise = FindInterruptClock("QueryInterruptTimePrecise");
++  if (precise) {
++    ULONGLONG ticks;
++    precise(&ticks);
++    return time_internal::RealTicks() + Microseconds(ticks / 10);
++  }
++  static const auto tick_count = reinterpret_cast<decltype(&::GetTickCount64)>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), "GetTickCount64"));
++  if (tick_count) {
++    return time_internal::RealTicks() + Milliseconds(tick_count());
++  }
++  return time_internal::RealTicks() + RolloverProtectedNow().since_origin();
+ }
+ }  // namespace subtle
+ 
+@@ -854,7 +845,7 @@
+ #else
+   // Get the number of TSC ticks used by the current thread.
+   ULONG64 thread_cycle_time = 0;
+-  ::QueryThreadCycleTime(thread_handle.platform_handle(), &thread_cycle_time);
++  GetQueryThreadCycleTimeFunction()(::GetCurrentThread(), &thread_cycle_time);
+ 
+   // Get the frequency of the TSC.
+   const double tsc_ticks_per_second = time_internal::TSCTicksPerSecond();
+@@ -878,7 +869,7 @@
+   // not care about the time stamp counter.
+   return true;
+ #else
+-  return time_internal::HasConstantRateTSC();
++  return GetQueryThreadCycleTimeFunction() && time_internal::HasConstantRateTSC();
+ #endif
+ }
+ 

@@ -1,0 +1,2 @@
+patches/*.diff -text !eol
+*.tsv text eol=lf

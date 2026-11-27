@@ -1,0 +1,84 @@
+diff --git a/base/i18n/win/preferred_languages.cc b/base/i18n/win/preferred_languages.cc
+index aebf9de4a0c16a0062834256b6bcd1109d8bcfb9..34dc2d61355f0590c586105d40f89dd297344846 100644
+--- a/base/i18n/win/preferred_languages.cc
++++ b/base/i18n/win/preferred_languages.cc
+@@ -22,9 +22,44 @@
+ 
+ constexpr std::wstring_view kNullTerminator{L"\0", 1};
+ 
++std::vector<LanguageTag> GetDefaultUILanguageList() {
++  const LANGID id = ::GetUserDefaultUILanguage();
++  if (id == LOCALE_CUSTOM_UI_DEFAULT) {
++    return {};
++  }
++  const LCID locale = MAKELCID(id, SORT_DEFAULT);
++  const auto locale_part = [locale](LCTYPE type) {
++    wchar_t buffer[9] = {};
++    const int length = ::GetLocaleInfoW(locale, type, buffer, std::size(buffer));
++    return length > 1 ? std::wstring(buffer, length - 1) : std::wstring();
++  };
++  const auto language = locale_part(LOCALE_SISO639LANGNAME);
++  std::vector<LanguageTag> tags;
++  if (!language.empty() && SUBLANGID(id) != SUBLANG_NEUTRAL) {
++    const auto region = locale_part(LOCALE_SISO3166CTRYNAME);
++    if (!region.empty()) {
++      if (auto tag = GetLanguageTagFromString(WideToASCII(language + L"-" + region))) {
++        tags.push_back(*tag);
++      }
++    }
++  }
++  if (auto tag = GetLanguageTagFromString(WideToASCII(language))) {
++    tags.push_back(*tag);
++  }
++  return tags;
++}
++
++GetPreferredUILanguages_Fn ResolveLanguageFunction(const char* name) {
++  return reinterpret_cast<GetPreferredUILanguages_Fn>(
++      ::GetProcAddress(::GetModuleHandleW(L"kernel32.dll"), name));
++}
++
+ std::vector<LanguageTag> GetPreferredUILanguageList(
+     GetPreferredUILanguages_Fn function,
+     ULONG flags) {
++  if (!function) {
++    return GetDefaultUILanguageList();
++  }
+   DCHECK_EQ((flags & (MUI_LANGUAGE_ID | MUI_LANGUAGE_NAME)), 0U);
+   const ULONG call_flags = flags | MUI_LANGUAGE_NAME;
+   ULONG language_count = 0;
+@@ -32,7 +67,7 @@
+   if (!function(call_flags, &language_count, nullptr, &buffer_length) ||
+       !buffer_length) {
+     DPCHECK(!buffer_length) << "Failed getting size of preferred UI languages.";
+-    return {};
++    return GetDefaultUILanguageList();
+   }
+ 
+   std::wstring buffer(buffer_length, '\0');
+@@ -40,7 +75,7 @@
+                 &buffer_length) ||
+       !language_count) {
+     DPCHECK(!language_count) << "Failed getting preferred UI languages.";
+-    return {};
++    return GetDefaultUILanguageList();
+   }
+ 
+   // The buffer has been populated with a series of strings separated by
+@@ -68,12 +103,14 @@
+ }  // namespace
+ 
+ std::vector<LanguageTag> GetUserPreferredUILanguageList() {
+-  return GetPreferredUILanguageList(::GetUserPreferredUILanguages, 0);
++  static const auto function = ResolveLanguageFunction("GetUserPreferredUILanguages");
++  return GetPreferredUILanguageList(function, 0);
+ }
+ 
+ std::vector<LanguageTag> GetThreadPreferredUILanguageList() {
++  static const auto function = ResolveLanguageFunction("GetThreadPreferredUILanguages");
+   return GetPreferredUILanguageList(
+-      ::GetThreadPreferredUILanguages,
++      function,
+       MUI_MERGE_SYSTEM_FALLBACK | MUI_MERGE_USER_FALLBACK);
+ }
+ 

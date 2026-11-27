@@ -1,0 +1,221 @@
+diff --git a/chrome/installer/setup/uninstall.cc b/chrome/installer/setup/uninstall.cc
+index ff9ebbbb58414..62ee7762f0aa8 100644
+--- a/chrome/installer/setup/uninstall.cc
++++ b/chrome/installer/setup/uninstall.cc
+@@ -9,6 +9,7 @@
+ #include <shlobj.h>
+ #include <stddef.h>
+ #include <stdint.h>
++#include <psapi.h>
+ 
+ #include <initializer_list>
+ #include <memory>
+@@ -159,8 +161,8 @@ class ProcessPathPrefixFilter : public base::ProcessFilter {
+ 
+     DWORD path_len = MAX_PATH;
+     wchar_t path_string[MAX_PATH];
+-    if (::QueryFullProcessImageName(process.Handle(), 0, path_string,
+-                                    &path_len)) {
++    if (::GetModuleFileNameExW(process.Handle(), 0, path_string,
++                                    path_len)) {
+       base::FilePath file_path(path_string);
+       return base::StartsWith(file_path.value(), process_path_prefix_,
+                               base::CompareCase::INSENSITIVE_ASCII);
+diff --git a/chrome/installer/setup/BUILD.gn b/chrome/installer/setup/BUILD.gn
+index 5d86e36c76d4b9ae2c0aabbb21abb4084447035d..a340a1f85b8b8bebe6a0acbb1825a0ea315c8103 100644
+--- a/chrome/installer/setup/BUILD.gn
++++ b/chrome/installer/setup/BUILD.gn
+@@ -120,8 +120,6 @@
+       "//chrome/installer/util:with_rc_strings",
+     ]
+ 
+-    libs = [ "rstrtmgr.lib" ]
+-
+     deps = [
+       "//base",
+       "//build:branding_buildflags",
+diff --git a/chrome/installer/setup/installed_browser_shutdown.cc b/chrome/installer/setup/installed_browser_shutdown.cc
+index d68e2cec64b98762694e3a6bf3919cc1f50056c7..5792848c3ca60a8f60b49968f5e591ce131a709e 100644
+--- a/chrome/installer/setup/installed_browser_shutdown.cc
++++ b/chrome/installer/setup/installed_browser_shutdown.cc
+@@ -14,17 +14,71 @@
+ #include <utility>
+ #include <vector>
+ 
++#include "base/files/file.h"
+ #include "base/files/file_path.h"
+-#include "base/functional/bind.h"
+-#include "base/functional/callback_helpers.h"
+ #include "base/logging.h"
++#include "base/native_library.h"
+ #include "base/process/process.h"
++#include "base/process/process_handle.h"
+ #include "base/process/process_iterator.h"
++#include "base/scoped_native_library.h"
+ #include "base/time/time.h"
+ #include "chrome/installer/util/util_constants.h"
+ 
+ namespace installer {
+ namespace {
++
++struct RestartManager {
++  base::ScopedNativeLibrary library{base::LoadSystemLibrary(L"rstrtmgr.dll")};
++  decltype(&::RmStartSession) start = reinterpret_cast<decltype(start)>(
++      library.GetFunctionPointer("RmStartSession"));
++  decltype(&::RmRegisterResources) register_resources =
++      reinterpret_cast<decltype(register_resources)>(
++          library.GetFunctionPointer("RmRegisterResources"));
++  decltype(&::RmShutdown) shutdown = reinterpret_cast<decltype(shutdown)>(
++      library.GetFunctionPointer("RmShutdown"));
++  decltype(&::RmEndSession) end = reinterpret_cast<decltype(end)>(
++      library.GetFunctionPointer("RmEndSession"));
++
++  bool available() const {
++    return start && register_resources && shutdown && end;
++  }
++};
++
++std::optional<bool> MatchesInstalledImage(const base::FilePath& target,
++                                          const base::FilePath& image) {
++  if (image.empty()) {
++    return std::nullopt;
++  }
++  if (base::FilePath::CompareEqualIgnoreCase(target.value(), image.value())) {
++    return true;
++  }
++  if (base::ProcessImageQueryAccess() == PROCESS_QUERY_LIMITED_INFORMATION) {
++    return false;
++  }
++
++  // XP's device-path conversion can choose a different drive alias. Compare
++  // file identities before dismissing a running browser with a different path.
++  constexpr auto flags =
++      base::File::FLAG_OPEN | base::File::FLAG_WIN_SHARE_DELETE;
++  base::File target_file(target, flags);
++  if (!target_file.IsValid()) {
++    if (target_file.error_details() == base::File::FILE_ERROR_NOT_FOUND) {
++      return false;
++    }
++    return std::nullopt;
++  }
++  base::File image_file(image, flags);
++  BY_HANDLE_FILE_INFORMATION target_info, image_info;
++  if (!image_file.IsValid() ||
++      !::GetFileInformationByHandle(target_file.GetPlatformFile(), &target_info) ||
++      !::GetFileInformationByHandle(image_file.GetPlatformFile(), &image_info)) {
++    return std::nullopt;
++  }
++  return target_info.dwVolumeSerialNumber == image_info.dwVolumeSerialNumber &&
++         target_info.nFileIndexHigh == image_info.nFileIndexHigh &&
++         target_info.nFileIndexLow == image_info.nFileIndexLow;
++}
+ 
+ struct InstalledProcess {
+   base::Process process;
+@@ -46,7 +100,7 @@
+     // Keep this handle for waiting and capture the creation time for any later
+     // termination attempt, so a reused PID cannot target a different process.
+     base::Process process(
+-        ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, FALSE,
++        ::OpenProcess(base::ProcessImageQueryAccess() | SYNCHRONIZE, FALSE,
+                       entry->th32ProcessID));
+     if (!process.IsValid()) {
+       if (::GetLastError() == ERROR_INVALID_PARAMETER) {
+@@ -58,20 +112,17 @@
+     if (::WaitForSingleObject(process.Handle(), 0) == WAIT_OBJECT_0) {
+       continue;
+     }
+-    std::wstring path(32768, L'\0');
+-    DWORD path_length = static_cast<DWORD>(path.size());
+-    if (!::QueryFullProcessImageNameW(process.Handle(), 0, path.data(),
+-                                      &path_length)) {
+-      const DWORD error = ::GetLastError();
++    const auto matches = MatchesInstalledImage(
++        executable_path, base::GetProcessExecutablePath(process.Handle()));
++    if (!matches.has_value()) {
+       if (::WaitForSingleObject(process.Handle(), 0) == WAIT_OBJECT_0) {
+         continue;
+       }
+-      LOG(ERROR) << "Cannot query browser process path: " << error;
++      LOG(ERROR) << "Cannot determine browser process path for "
++                 << entry->th32ProcessID;
+       return std::nullopt;
+     }
+-    path.resize(path_length);
+-    if (!base::FilePath::CompareEqualIgnoreCase(executable_path.value(),
+-                                                path)) {
++    if (!*matches) {
+       continue;
+     }
+     RM_UNIQUE_PROCESS identity = {};
+@@ -91,7 +142,8 @@
+   return processes;
+ }
+ 
+-void RequestUpdateShutdown(const std::vector<InstalledProcess>& processes) {
++void RequestUpdateShutdown(const RestartManager& rm,
++                           const std::vector<InstalledProcess>& processes) {
+   std::vector<RM_UNIQUE_PROCESS> applications;
+   for (const auto& process : processes) {
+     if (HasExited(process)) {
+@@ -117,14 +169,12 @@
+ 
+   DWORD session = 0;
+   wchar_t session_key[CCH_RM_SESSION_KEY + 1] = {};
+-  DWORD error = ::RmStartSession(&session, 0, session_key);
++  DWORD error = rm.start(&session, 0, session_key);
+   if (error != ERROR_SUCCESS) {
+     LOG(WARNING) << "Cannot start Restart Manager session: " << error;
+     return;
+   }
+-  base::ScopedClosureRunner end_session(
+-      base::BindOnce([](DWORD handle) { ::RmEndSession(handle); }, session));
+-  error = ::RmRegisterResources(session, 0, nullptr,
++  error = rm.register_resources(session, 0, nullptr,
+                                 static_cast<UINT>(applications.size()),
+                                 applications.data(), 0, nullptr);
+   if (error == ERROR_SUCCESS) {
+@@ -132,8 +182,9 @@
+     // Chromium's browser and background tray call SessionEnding(), saving
+     // the exit type and committing preferences before the process exits.
+     // Force is deliberately deferred until all shutdown passes have finished.
+-    error = ::RmShutdown(session, 0, nullptr);
+-  }
++    error = rm.shutdown(session, 0, nullptr);
++  }
++  rm.end(session);
+   if (error != ERROR_SUCCESS) {
+     LOG(WARNING) << "Restart Manager update shutdown incomplete: " << error;
+   }
+@@ -154,8 +205,8 @@
+     return;
+   }
+   base::Process terminable(
+-      ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_TERMINATE,
+-                    FALSE, process.identity.dwProcessId));
++      ::OpenProcess(base::ProcessImageQueryAccess() | PROCESS_TERMINATE, FALSE,
++                    process.identity.dwProcessId));
+   if (!terminable.IsValid()) {
+     PLOG(WARNING) << "Cannot open browser process for forced shutdown";
+     return;
+@@ -177,6 +228,7 @@
+ }  // namespace
+ 
+ bool CloseInstalledBrowser(const base::FilePath& target_path) {
++  const RestartManager rm;
+   // Re-enumerate after each pass: shutting down a parent can expose a second
+   // browser root or leave child processes behind. Bound retries so an external
+   // program continually relaunching the browser cannot hang setup forever.
+@@ -188,7 +240,11 @@
+     if (processes->empty()) {
+       return true;
+     }
+-    RequestUpdateShutdown(*processes);
++    if (!rm.available()) {
++      LOG(WARNING) << "Close the installed browser before retrying setup";
++      return false;
++    }
++    RequestUpdateShutdown(rm, *processes);
+     WaitForExit(*processes, base::Seconds(5));
+   }
+ 

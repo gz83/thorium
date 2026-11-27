@@ -1,0 +1,16 @@
+diff --git a/chrome/BUILD.gn b/chrome/BUILD.gn
+index 0753724487493..002e416fc9b3c 100644
+--- a/chrome/BUILD.gn
++++ b/chrome/BUILD.gn
+@@ -448,6 +448,11 @@ if (is_win) {
+     if (use_aura) {
+       deps += [ "//ui/compositor" ]
+     }
++
++    if (current_cpu == "x86") {
++      # Don"t set an x64 base address (to avoid breaking HE-ASLR).
++      ldflags = [ "/BASE:0x12000000" ]
++    }
+ 
+     if (is_chrome_for_testing) {
+       deps += [ "//chrome/browser/chrome_for_testing:browser" ]

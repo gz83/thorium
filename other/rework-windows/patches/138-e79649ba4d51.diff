@@ -1,0 +1,50 @@
+diff --git a/third_party/boringssl/src/crypto/rand/windows.cc b/third_party/boringssl/src/crypto/rand/windows.cc
+index 30aac3fc3cba604c42c89d8e9f42a0b81cb7e2e9..b3e81f0414c0f3153aaaf55047a39aedef9d2043 100644
+--- a/third_party/boringssl/src/crypto/rand/windows.cc
++++ b/third_party/boringssl/src/crypto/rand/windows.cc
+@@ -58,20 +58,40 @@
+ 
+ #else
+ 
++// RtlGenRandom is exported by advapi32 under this name on legacy Windows.
++extern "C" BOOLEAN WINAPI SystemFunction036(PVOID buffer, ULONG length);
++OPENSSL_MSVC_PRAGMA(comment(lib, "advapi32.lib"))
++
+ namespace {
+ 
+ // See: https://learn.microsoft.com/en-us/windows/win32/seccng/processprng
+ typedef BOOL(WINAPI *ProcessPrngFunction)(PBYTE pbData, SIZE_T cbData);
+ ProcessPrngFunction g_processprng_fn = nullptr;
+ 
++BOOL WINAPI legacy_processprng(PBYTE output, SIZE_T length) {
++  while (length > 0) {
++    ULONG chunk = ULONG_MAX;
++    if (length < chunk) {
++      chunk = static_cast<ULONG>(length);
++    }
++    if (!::SystemFunction036(output, chunk)) {
++      return FALSE;
++    }
++    output += chunk;
++    length -= chunk;
++  }
++  return TRUE;
++}
++
+ void init_processprng() {
+-  HMODULE hmod = LoadLibraryW(L"bcryptprimitives");
+-  if (hmod == nullptr) {
+-    abort();
++  HMODULE module = LoadLibraryExW(L"bcryptprimitives.dll", nullptr,
++                                  LOAD_LIBRARY_SEARCH_SYSTEM32);
++  if (module != nullptr) {
++    g_processprng_fn = reinterpret_cast<ProcessPrngFunction>(
++        GetProcAddress(module, "ProcessPrng"));
+   }
+-  g_processprng_fn = (ProcessPrngFunction)GetProcAddress(hmod, "ProcessPrng");
+   if (g_processprng_fn == nullptr) {
+-    abort();
++    g_processprng_fn = &legacy_processprng;
+   }
+ }
+ 

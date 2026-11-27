@@ -164,6 +164,10 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         dest="profile",
         help="prepare a ChromiumOS build",
     )
+    parser.add_argument(
+        "--windows-legacy", action="store_true",
+        help="apply the pinned REWORK series for Windows x86/x64 after Thorium's patches",
+    )
     parser.set_defaults(profile="default")
     return parser.parse_args(argv)
 
@@ -573,7 +577,7 @@ def execute_copy_plan(plan: CopyPlan) -> None:
 
 
 def apply_patch_series(
-    thorium_root: Path, chromium_src: Path, profile: str
+    thorium_root: Path, chromium_src: Path, profile: str, windows_legacy: bool = False
 ) -> None:
     script = thorium_root / "patch_scripts" / "series" / "apply_series.py"
     condition = {
@@ -581,6 +585,8 @@ def apply_patch_series(
         "raspi": "raspi",
         "sse2": "sse2",
     }.get(profile)
+    if windows_legacy and profile in SIMD_PROFILES:
+        condition = profile
     command = [
         sys.executable,
         str(script),
@@ -592,23 +598,30 @@ def apply_patch_series(
     ]
     if condition:
         command.extend(("--condition", condition))
+    if windows_legacy:
+        command.extend(("--condition", "windows-legacy"))
     print("\nApplying Thorium patch series")
     run(command, thorium_root)
 
 
-def apply_grd_rebase(thorium_root: Path, chromium_src: Path) -> None:
+def apply_grd_rebase(
+    thorium_root: Path, chromium_src: Path, windows_legacy: bool = False,
+) -> None:
     grd_rebase = thorium_root / "patch_scripts" / "grd_rebase"
     config = grd_rebase / "config"
     sync_script = grd_rebase / "sync_grd_strings.py"
     merge_script = grd_rebase / "merge_thorium_xtb.py"
 
-    command = [sys.executable, str(sync_script), str(chromium_src)]
+    profile_args = ["--windows-legacy"] if windows_legacy else []
+    command = [sys.executable, str(sync_script), str(chromium_src), *profile_args]
     for option, filename in GRD_SYNC_CONFIG_OPTIONS:
         command.extend((option, str(config / filename)))
 
     print("\nApplying Thorium GRD/XTB rebase")
     run(command, thorium_root)
-    run([sys.executable, str(merge_script), str(chromium_src)], thorium_root)
+    merge = [sys.executable, str(merge_script), str(chromium_src), *profile_args]
+    run(merge, thorium_root)
+    run([*merge, "--check"], thorium_root)
 
 
 def execute_profile_plan(plan: ProfilePlan) -> None:
@@ -624,6 +637,7 @@ def validate_inputs(
     chromium_src: Path,
     base_plan: CopyPlan,
     profile_plan: ProfilePlan,
+    windows_legacy: bool = False,
 ) -> None:
     require_checkout(chromium_src, "Chromium")
     require_file(chromium_src / "BUILD.gn", "Chromium root BUILD.gn")
@@ -635,16 +649,23 @@ def validate_inputs(
     for path in (
         thorium_root / "logos" / "thorium_ascii_art.txt",
         thorium_root / "patch_scripts" / "series" / "apply_series.py",
+        thorium_root / "patch_scripts" / "grd_rebase" / "grit_messages.py",
+        thorium_root / "patch_scripts" / "grd_rebase" / "resource_validation.py",
         thorium_root / "patch_scripts" / "grd_rebase" / "sync_grd_strings.py",
         thorium_root / "patch_scripts" / "grd_rebase" / "merge_thorium_xtb.py",
     ):
         require_file(path, "Thorium setup input")
     config = thorium_root / "patch_scripts" / "grd_rebase" / "config"
+    require_file(config / "xtb_additions.tsv", "GRD rebase configuration")
+    if windows_legacy:
+        require_file(config / "windows_legacy_xtb_additions.tsv", "legacy XTB inventory")
     for _, filename in GRD_SYNC_CONFIG_OPTIONS:
         require_file(config / filename, "GRD rebase configuration")
 
 
-def setup(thorium_root: Path, chromium_src: Path, profile: str) -> None:
+def setup(thorium_root: Path, chromium_src: Path, profile: str, windows_legacy: bool = False) -> None:
+    if windows_legacy and profile != "default" and profile not in SIMD_PROFILES:
+        raise SetupError("--windows-legacy requires a Windows x86/x64 desktop target")
     thorium_root = thorium_root.expanduser().resolve()
     chromium_src = chromium_src.expanduser().resolve()
 
@@ -657,6 +678,7 @@ def setup(thorium_root: Path, chromium_src: Path, profile: str) -> None:
         chromium_src,
         base_plan,
         selected_profile_plan,
+        windows_legacy,
     )
 
     try:
@@ -683,8 +705,8 @@ def setup(thorium_root: Path, chromium_src: Path, profile: str) -> None:
     print("\nCopying Thorium source overlays over the Chromium tree")
     execute_copy_plan(base_plan)
 
-    apply_patch_series(thorium_root, chromium_src, profile)
-    apply_grd_rebase(thorium_root, chromium_src)
+    apply_patch_series(thorium_root, chromium_src, profile, windows_legacy)
+    apply_grd_rebase(thorium_root, chromium_src, windows_legacy)
 
     execute_profile_plan(selected_profile_plan)
 
@@ -705,7 +727,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     args = parse_args(sys.argv[1:] if argv is None else argv)
     try:
-        setup(args.thorium_root, args.chromium_src, args.profile)
+        setup(args.thorium_root, args.chromium_src, args.profile, args.windows_legacy)
     except SetupError as error:
         print(f"{Path(sys.argv[0]).name}: {error}", file=sys.stderr)
         return EXIT_FAILURE

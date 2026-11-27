@@ -1,0 +1,85 @@
+diff --git a/services/device/wake_lock/power_save_blocker/power_save_blocker_win.cc b/services/device/wake_lock/power_save_blocker/power_save_blocker_win.cc
+index 82921bdaa33166e128dedb8d230f2375a972aa72..af0c326a4a65ac37758f03fc8e5a578547f3846d 100644
+--- a/services/device/wake_lock/power_save_blocker/power_save_blocker_win.cc
++++ b/services/device/wake_lock/power_save_blocker/power_save_blocker_win.cc
+@@ -18,15 +18,34 @@
+ namespace device {
+ namespace {
+ 
++struct PowerRequestFunctions {
++  decltype(&::PowerCreateRequest) create;
++  decltype(&::PowerSetRequest) set;
++  decltype(&::PowerClearRequest) clear;
++};
++
++const PowerRequestFunctions& GetPowerRequestFunctions() {
++  static const PowerRequestFunctions api = [] {
++    HMODULE kernel = ::GetModuleHandleW(L"kernel32.dll");
++    return PowerRequestFunctions{
++        reinterpret_cast<decltype(&::PowerCreateRequest)>(
++            ::GetProcAddress(kernel, "PowerCreateRequest")),
++        reinterpret_cast<decltype(&::PowerSetRequest)>(
++            ::GetProcAddress(kernel, "PowerSetRequest")),
++        reinterpret_cast<decltype(&::PowerClearRequest)>(
++            ::GetProcAddress(kernel, "PowerClearRequest"))};
++  }();
++  return api;
++}
++
+ int g_blocker_count[2];
+ 
+ HANDLE CreatePowerRequest(POWER_REQUEST_TYPE type,
+                           const std::string& description) {
+-  if (type == PowerRequestExecutionRequired &&
+-      base::win::GetVersion() < base::win::Version::WIN8) {
++  const auto& api = GetPowerRequestFunctions();
++  if (!api.create || !api.set || !api.clear) {
+     return INVALID_HANDLE_VALUE;
+   }
+-
+   std::wstring wide_description = base::ASCIIToWide(description);
+   REASON_CONTEXT context = {0};
+   context.Version = POWER_REQUEST_CONTEXT_VERSION;
+@@ -34,12 +53,12 @@
+   context.Reason.SimpleReasonString =
+       const_cast<wchar_t*>(wide_description.c_str());
+ 
+-  base::win::ScopedHandle handle(::PowerCreateRequest(&context));
++  base::win::ScopedHandle handle(api.create(&context));
+   if (!handle.is_valid()) {
+     return INVALID_HANDLE_VALUE;
+   }
+ 
+-  if (::PowerSetRequest(handle.Get(), type))
++  if (api.set(handle.Get(), type))
+     return handle.release();
+ 
+   // Something went wrong.
+@@ -53,12 +72,7 @@
+     return;
+   }
+ 
+-  if (type == PowerRequestExecutionRequired &&
+-      base::win::GetVersion() < base::win::Version::WIN8) {
+-    return;
+-  }
+-
+-  BOOL success = ::PowerClearRequest(request_handle.Get(), type);
++  BOOL success = GetPowerRequestFunctions().clear(request_handle.Get(), type);
+   DCHECK(success);
+ }
+ 
+@@ -149,10 +163,9 @@
+       type_ == mojom::WakeLockType::kPreventDisplaySleepAllowDimming)
+     return PowerRequestDisplayRequired;
+ 
+-  if (base::win::GetVersion() < base::win::Version::WIN8)
+-    return PowerRequestSystemRequired;
+-
+-  return PowerRequestExecutionRequired;
++  return base::win::GetVersion() < base::win::Version::WIN8
++             ? PowerRequestSystemRequired
++             : PowerRequestExecutionRequired;
+ }
+ 
+ PowerSaveBlocker::PowerSaveBlocker(

@@ -277,6 +277,19 @@ def build_phases(
     return phases
 
 
+def is_windows_installer_target(target: str) -> bool:
+    target = target.replace("\\", "/").lower().removeprefix("//").removeprefix("./")
+    if target in {"setup", "setup.exe", "chrome/installer/setup", "chrome/installer/setup:setup"}:
+        return True
+    name = target.rsplit(":", 1)[-1].rsplit("/", 1)[-1]
+    if name.startswith("thorium_") and name.endswith("_mini_installer.exe"):
+        return True
+    return name in {
+        "thorium_installer", "mini_installer", "mini_installer_uncompressed",
+        "mini_installer.exe", "mini_installer_uncompressed.exe", "thorium_arm64_installer.exe",
+    }
+
+
 def print_logo(thorium_root: Path) -> None:
     logo = thorium_root / "logos" / "thorium_logo_ascii_art.txt"
     try:
@@ -352,6 +365,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         for index, (phase, command) in enumerate(build_steps, start=1):
             print(f"Phase {index}/{phase_count} targets: {', '.join(phase)}")
             print(f"Phase {index}/{phase_count} command: {display_command(command)}")
+        if target_os == "win" and any(
+            is_windows_installer_target(target)
+            for phase, _ in build_steps
+            for target in phase
+        ):
+            check = [
+                sys.executable,
+                str(thorium_root / "patch_scripts/grd_rebase/merge_thorium_xtb.py"),
+                str(chromium_src),
+                "--check",
+            ]
+            print(f"Checking installer translations: {display_command(check)}", flush=True)
+            result = subprocess.run(check, cwd=chromium_src)
+            if result.returncode:
+                return normalize_exit_status(result.returncode)
         if arguments.dry_run:
             return 0
 

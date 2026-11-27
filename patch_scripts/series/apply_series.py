@@ -181,19 +181,22 @@ def main(argv: list[str]) -> int:
         default=None,
         help="Chromium source tree. Defaults to CR_DIR, CR_SRC_DIR, CHROMIUM_SRC, or CHROMIUM_SRC_DIR; then falls back to C:\\src\\chromium\\src on Windows or ~/chromium/src elsewhere.",
     )
-    parser.add_argument("--series", type=Path, default=default_root / "patch_scripts" / "series" / "series")
-    parser.add_argument("--condition", action="append", default=[], help="Enable one conditional entry, e.g. raspi or sse2.")
+    parser.add_argument("--series", type=Path, default=Path("patch_scripts/series/series"))
+    parser.add_argument("--condition", action="append", default=[], help="Enable a build profile or the optional windows-legacy series.")
     parser.add_argument("--apply", action="store_true", help="Apply patches with git apply --reject.")
     args = parser.parse_args(argv)
-    if len(args.condition) > 1:
+    enabled_conditions = {item.lower() for item in args.condition}
+    windows_legacy = "windows-legacy" in enabled_conditions
+    if (not windows_legacy and len(args.condition) > 1) or len(enabled_conditions - {"windows-legacy"}) > 1:
         parser.error("only one --condition value is supported per run")
+    if windows_legacy and enabled_conditions - {"windows-legacy", "sse2", "sse3", "sse4", "avx2", "avx512"}:
+        parser.error("windows-legacy requires a Windows x86/x64 desktop profile")
 
     thorium_root = args.thorium_root.resolve()
     source_tree = (args.source_tree or default_source_tree()).resolve()
     series_path = args.series if args.series.is_absolute() else thorium_root / args.series
 
     entries = parse_series(series_path)
-    enabled_conditions = {item.lower() for item in args.condition}
     entries = [entry for entry in entries if selected(entry, enabled_conditions)]
 
     errors = validate_entries(entries, thorium_root, source_tree)
@@ -201,6 +204,18 @@ def main(argv: list[str]) -> int:
         for error in errors:
             print(f"error: {error}", file=sys.stderr)
         return 2
+
+    if windows_legacy:
+        import rework
+
+        if series_path.resolve() != (thorium_root / "patch_scripts/series/series").resolve():
+            parser.error("windows-legacy uses the pinned Thorium series")
+        try:
+            rework.apply(source_tree, thorium_root, entries, enabled_conditions, args.apply)
+        except (OSError, ValueError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        return 0
 
     if not args.apply:
         with tempfile.TemporaryDirectory(prefix="thorium-series-index-") as temp:
